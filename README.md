@@ -69,6 +69,14 @@ streamlit run app.py
   ideas; they are **not classics**. Taste a small amount before serving — a tiny
   spoon first, before any culinary heroism.
 
+Above the tabs, a **"What do I have right now?"** multiselect (Round 11) filters the
+Ingredient / Component / Plate suggestions against the ingredients on hand, ranking
+each branch's curated fillers into **Available now / Missing but useful / No match**.
+It is not a pantry, inventory, or shopping system — just "what's in the kitchen
+right now?" Empty selection is the current behaviour (show all curated fillers);
+Scout/experimental pairings never leak into Cook via this filter, and unknown items
+are reported honestly rather than silently dropped.
+
 ### Screenshots
 
 Captured headlessly via Playwright (`scripts/capture_screenshots.py`, reproducible).

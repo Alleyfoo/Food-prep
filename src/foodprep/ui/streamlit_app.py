@@ -98,7 +98,40 @@ def tag_class(family: str) -> str:
 # branch card (Tabs 1 + 2 share it)
 # ---------------------------------------------------------------------------
 
-def branch_card_html(d: dict, with_debug: bool = True) -> str:
+def available_partition_html(part: dict) -> str:
+    """Round 11 — render the 'what do I have' partition (Available now /
+    Missing but useful / No match) as card rows. Returns '' if empty."""
+    rows = []
+    if part.get("available_now"):
+        groups = []
+        for g in part["available_now"]:
+            roles = " ".join(chip(r, "missing") for r in g["roles"])
+            groups.append(
+                f'<div class="chip-group"><span class="gl have">{_esc(g["filler"])}</span>{roles}</div>'
+            )
+        rows.append(f'<div class="row"><span class="lbl">Available now</span>'
+                    f'<div>{"".join(groups)}</div></div>')
+    if part.get("missing_but_useful"):
+        groups = []
+        for m in part["missing_but_useful"]:
+            if m["fillers"]:
+                fch = " ".join(chip(f, "filler") for f in m["fillers"])
+            else:
+                fch = '<span class="none">(no curated filler)</span>'
+            groups.append(
+                f'<div class="chip-group"><span class="gl">{_esc(m["role"])}</span>{fch}</div>'
+            )
+        rows.append(f'<div class="row"><span class="lbl">Missing but useful</span>'
+                    f'<div>{"".join(groups)}</div></div>')
+    no_match = list(part.get("unknown_items") or []) + list(part.get("no_match_known") or [])
+    if no_match:
+        rows.append(f'<div class="row"><span class="lbl">No match here</span>'
+                    f'<div class="chips">{"".join(chip(n, "muted") for n in no_match)}</div></div>')
+    return "".join(rows)
+
+
+def branch_card_html(d: dict, with_debug: bool = True,
+                     available: dict | None = None) -> str:
     conf = d.get("confidence") or ""
     card_cls = "scout" if conf == "experimental" else "cook"
     tags = d.get("tags") or []
@@ -118,6 +151,9 @@ def branch_card_html(d: dict, with_debug: bool = True) -> str:
             + " ".join(chip(n, "filler") for n in names) + "</div>"
         )
     try_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
+    # Round 11: when a 'what do I have' partition is supplied, replace the
+    # plain Try row with Available now / Missing but useful / No match.
+    partition_html = available_partition_html(available) if available else ""
     uses = d.get("uses") or []
 
     shift = ""
@@ -136,7 +172,10 @@ def branch_card_html(d: dict, with_debug: bool = True) -> str:
         parts.append(f'<div class="row"><span class="lbl">Risks</span><div class="chips">{risk_chips}</div></div>')
     if missing:
         parts.append(f'<div class="row"><span class="lbl">Missing</span><div class="chips">{miss_chips}</div></div>')
-    parts.append(f'<div class="row"><span class="lbl">Try</span><div>{try_html}</div></div>')
+    if partition_html:
+        parts.append(partition_html)
+    else:
+        parts.append(f'<div class="row"><span class="lbl">Try</span><div>{try_html}</div></div>')
     if uses:
         parts.append(f'<div class="row"><span class="lbl">Use in</span><div class="chips">{chips(uses)}</div></div>')
     if with_debug:
@@ -171,7 +210,7 @@ def topbar() -> None:
 # Tab 1 — Ingredient Explorer
 # ---------------------------------------------------------------------------
 
-def tab_ingredient_explorer() -> None:
+def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Ingredient Explorer</div>')
     trees = query.tree_ingredients(CONN)
     col1, col2 = st.columns([1, 1])
@@ -180,12 +219,15 @@ def tab_ingredient_explorer() -> None:
     with col2:
         mode = st.radio("Mode", ["Best branches", "Choose technique"], horizontal=True)
 
+    avail = available_items or None  # [] -> current Try view (no partition)
     techs = query.techniques_for_ingredient(CONN, ingredient)
     if mode == "Choose technique":
         tech = st.selectbox("Technique", techs)
         card = query.branch_card(CONN, ingredient, tech)
         if card:
-            _md(branch_card_html(card))
+            part = (query.available_filter(CONN, card["transformation_id"], avail)
+                    if avail else None)
+            _md(branch_card_html(card, available=part))
         else:
             st.write(f"No transformation for {ingredient}/{tech}.")
     else:
@@ -195,14 +237,16 @@ def tab_ingredient_explorer() -> None:
             f'<div class="eyebrow">Showing top {len(shown)} of {len(cards)} branches · '
             f'ranked cooking-before-preservation</div>', unsafe_allow_html=True)
         for c in shown:
-            _md(branch_card_html(c))
+            part = (query.available_filter(CONN, c["transformation_id"], avail)
+                    if avail else None)
+            _md(branch_card_html(c, available=part))
 
 
 # ---------------------------------------------------------------------------
 # Tab 2 — Component Explorer
 # ---------------------------------------------------------------------------
 
-def tab_component_explorer() -> None:
+def tab_component_explorer(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Component Explorer</div>')
     comps = query.components_list(CONN)
     default = "roasted_tomato_component" if "roasted_tomato_component" in comps else comps[0]
@@ -217,13 +261,23 @@ def tab_component_explorer() -> None:
     tag_chips = " ".join(chip(t["value"], tag_class(t.get("family", ""))) for t in tags)
     risks = d.get("risks") or []
     missing = [m["role_name"] for m in (d.get("missing") or [])]
-    try_groups = []
-    for role, fillers in (d.get("fillers_by_role") or {}).items():
-        names = [f["filler"] for f in fillers[:3]] or ["(no curated filler)"]
-        try_groups.append(
-            f'<div class="chip-group"><span class="gl">{_esc(role)}</span>'
-            + " ".join(chip(n, "filler") for n in names) + "</div>"
-        )
+    avail = available_items or None
+    # Round 11: the component's next-moves come from its first producing
+    # transformation; partition those against what the user has on hand.
+    part = None
+    if avail and producers:
+        part = query.available_filter(CONN, producers[0]["transformation_id"], avail)
+    if part:
+        moves_html = available_partition_html(part) or '<span class="chip" style="color:var(--ink-5)">—</span>'
+    else:
+        try_groups = []
+        for role, fillers in (d.get("fillers_by_role") or {}).items():
+            names = [f["filler"] for f in fillers[:3]] or ["(no curated filler)"]
+            try_groups.append(
+                f'<div class="chip-group"><span class="gl">{_esc(role)}</span>'
+                + " ".join(chip(n, "filler") for n in names) + "</div>"
+            )
+        moves_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
 
     _md(f"""
     <div class="card info">
@@ -237,7 +291,7 @@ def tab_component_explorer() -> None:
       <div class="row"><span class="lbl">Tags</span><div class="chips">{tag_chips or '<span class="chip" style="color:var(--ink-5)">—</span>'}</div></div>
       {f'<div class="row"><span class="lbl">Risks</span><div class="chips">{"".join(chip(r,"risk") for r in risks)}</div></div>' if risks else ''}
       {f'<div class="row"><span class="lbl">May need</span><div class="chips">{"".join(chip(r,"missing") for r in missing)}</div></div>' if missing else ''}
-      <div class="row"><span class="lbl">Next moves</span><div>{"".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'}</div></div>
+      <div class="row"><span class="lbl">{"Next moves" if not part else "Next moves · what you have"}</span><div>{moves_html}</div></div>
       <div class="row"><span class="lbl">Use in</span><div class="chips">{chips(d.get("uses") or [])}</div></div>
       {debug_block("Show data rows", d)}
     </div>
@@ -252,7 +306,7 @@ def tab_component_explorer() -> None:
 # Tab 3 — Plate Balance
 # ---------------------------------------------------------------------------
 
-def tab_plate_balance() -> None:
+def tab_plate_balance(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Plate Balance <span class="count">Cook mode — no experimental pairings</span></div>')
     profiles = query.profiles_list(CONN)
     picked = st.multiselect("Plate items", profiles,
@@ -262,7 +316,9 @@ def tab_plate_balance() -> None:
                     'has, what it lacks, and what to add.</div>', unsafe_allow_html=True)
         return
     text = "I have " + " and ".join(picked) + ". what is missing?"
-    r = query.plate_balance_detail(CONN, text)
+    avail = available_items or None  # [] -> current behaviour (no partition)
+    r = query.plate_balance_detail(CONN, text, available_items=avail)
+    has_part = "available_now" in r  # partition computed only when avail passed
 
     # ---- summary KPIs ----
     gap_n = len(r["target_gap"])
@@ -282,31 +338,59 @@ def tab_plate_balance() -> None:
     # ---- already provides ----
     _md(f'<div class="balance-section have"><h4>Already provides</h4><div class="chips">{chips(r["provided"])}</div></div>')
 
-    # ---- missing hard gaps + suggested fillers ----
-    if r["target_gap"]:
-        lines = []
-        for role in r["target_gap"]:
-            fillers = r["suggested_fillers"].get(role, [])
-            if fillers:
-                lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span>'
-                             + " ".join(chip(f, "filler") for f in fillers) + "</div>")
-            else:
-                lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span><span class="none">(no curated filler)</span></div>')
-        _md(f'<div class="balance-section gap"><h4>Missing — hard gaps</h4>{"".join(lines)}</div>')
+    # ---- gaps + suggested fillers (or the 'what do I have' partition) ----
+    if has_part:
+        # Round 11: partition on-hand fillers into Available now / Missing but
+        # useful / No match, instead of the plain per-role suggested lists.
+        if r["available_now"]:
+            lines = []
+            for g in r["available_now"]:
+                lines.append(
+                    f'<div class="filler-line"><b>{_esc(g["filler"])}</b> → '
+                    + " ".join(chip(role, "missing") for role in g["roles"]) + "</div>")
+            _md(f'<div class="balance-section have"><h4>Available now</h4>{"".join(lines)}</div>')
+        if r["missing_but_useful"]:
+            lines = []
+            for m in r["missing_but_useful"]:
+                if m["fillers"]:
+                    fch = " ".join(chip(f, "filler") for f in m["fillers"])
+                else:
+                    fch = '<span class="none">(no curated filler)</span>'
+                lines.append(f'<div class="filler-line"><span class="role">{_esc(m["role"])}</span>{fch}</div>')
+            _md(f'<div class="balance-section more"><h4>Missing but useful</h4>{"".join(lines)}</div>')
+        no_match = list(r["unknown_items"]) + list(r["no_match_known"])
+        if no_match:
+            _md(f'<div class="balance-section muted"><h4>No match from selected items</h4>'
+                f'<div class="chips">{"".join(chip(n, "muted") for n in no_match)}</div></div>')
+        if r["target_gap"] and not r["available_now"] and not r["missing_but_useful"]:
+            _md('<div class="balance-section gap"><h4>Hard gaps</h4>'
+                '<div class="filler-line none">none of the on-hand items fill these — see Missing but useful</div></div>')
     else:
-        _md('<div class="balance-section have"><h4>Hard gaps</h4><div class="filler-line">none — all target roles covered</div></div>')
+        # current behaviour: plain per-role suggested fillers
+        if r["target_gap"]:
+            lines = []
+            for role in r["target_gap"]:
+                fillers = r["suggested_fillers"].get(role, [])
+                if fillers:
+                    lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span>'
+                                 + " ".join(chip(f, "filler") for f in fillers) + "</div>")
+                else:
+                    lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span><span class="none">(no curated filler)</span></div>')
+            _md(f'<div class="balance-section gap"><h4>Missing — hard gaps</h4>{"".join(lines)}</div>')
+        else:
+            _md('<div class="balance-section have"><h4>Hard gaps</h4><div class="filler-line">none — all target roles covered</div></div>')
 
-    # ---- may want more ----
-    if r["flagged_more"]:
-        lines = []
-        for role in r["flagged_more"]:
-            fillers = r["suggested_fillers"].get(role, [])
-            if fillers:
-                lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span>'
-                             + " ".join(chip(f, "filler") for f in fillers) + "</div>")
-            else:
-                lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span><span class="none">(no curated filler)</span></div>')
-        _md(f'<div class="balance-section more"><h4>May want more</h4>{"".join(lines)}</div>')
+        # ---- may want more ----
+        if r["flagged_more"]:
+            lines = []
+            for role in r["flagged_more"]:
+                fillers = r["suggested_fillers"].get(role, [])
+                if fillers:
+                    lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span>'
+                                 + " ".join(chip(f, "filler") for f in fillers) + "</div>")
+                else:
+                    lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span><span class="none">(no curated filler)</span></div>')
+            _md(f'<div class="balance-section more"><h4>May want more</h4>{"".join(lines)}</div>')
 
     # ---- risks / avoid ----
     warn_lines = []
@@ -417,20 +501,40 @@ def tab_scout() -> None:
 
 
 # ---------------------------------------------------------------------------
+# 'What do I have right now?' — shared selector (Round 11)
+# ---------------------------------------------------------------------------
+
+def available_selector() -> list[str]:
+    """A single 'available ingredients' multiselect above the tabs. Empty
+    selection = current behaviour; non-empty filters Tab 1/2/3 suggestions into
+    Available now / Missing but useful / No match. Not a pantry system, not
+    inventory, not shopping — just 'what's in the kitchen right now?'."""
+    ings = query.ingredients_list(CONN)
+    st.markdown('<div class="avail-strip"><span class="avail-label">'
+                'What do I have right now?</span>'
+                '<span class="avail-hint">filters Ingredient / Component / Plate '
+                'suggestions into Available now · Missing but useful · No match</span>'
+                '</div>', unsafe_allow_html=True)
+    return st.multiselect("Available ingredients", ings, placeholder="e.g. lemon, yogurt, pickles, bread, eggs, beans",
+                          help="Pick what's in your kitchen. Empty = show all curated fillers (current behaviour).")
+
+
+# ---------------------------------------------------------------------------
 # layout
 # ---------------------------------------------------------------------------
 
 topbar()
+available_items = available_selector()
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Ingredient Explorer", "Component Explorer", "Plate Balance",
     "Filler Profiles", "Scout",
 ])
 with tab1:
-    tab_ingredient_explorer()
+    tab_ingredient_explorer(available_items)
 with tab2:
-    tab_component_explorer()
+    tab_component_explorer(available_items)
 with tab3:
-    tab_plate_balance()
+    tab_plate_balance(available_items)
 with tab4:
     tab_filler_profiles()
 with tab5:

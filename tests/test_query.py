@@ -824,3 +824,135 @@ def test_broccoli_branch_view_renders_with_risks(conn):
     assert "broccoli" in out.lower()
     assert "steam" in out.lower()
     assert "sulfurous_if_overcooked" in out or "sulfurous if overcooked" in out.lower()
+
+
+# ---- round 11 — Available Ingredients Filter ('what do I have?') ----------
+# A Cook-only filter: the user's on-hand ingredients are partitioned against a
+# branch's missing roles into Available now / Missing but useful / No match.
+# Scout/experimental pairings never leak in, unknown items are reported
+# honestly, and empty selection == current behaviour.
+
+STEAM = ("broccoli", "steam")
+STEAM_FILLERS = {  # Cook-only fillers_by_role for broccoli/steam (no Scout)
+    "salt": ["sea_salt"], "fat": ["butter"], "acid": ["lemon"],
+    "protein": ["parmesan", "tofu"], "carb": ["rice"],
+}
+
+
+def _steam_tid(conn):
+    return query.branch_card(conn, *STEAM)["transformation_id"]
+
+
+def test_available_filter_covers_held_fillers(conn):
+    # acceptance 1 — selecting fillers the user has covers their roles and
+    # leaves only the genuinely-unmet roles as missing.
+    tid = _steam_tid(conn)
+    part = query.available_filter(conn, tid,
+                                  ["butter", "lemon", "rice", "parmesan"])
+    held = {g["filler"]: set(g["roles"]) for g in part["available_now"]}
+    assert held == {
+        "butter": {"fat"}, "lemon": {"acid"},
+        "parmesan": {"protein"}, "rice": {"carb"},
+    }
+    assert part["covered_roles"] == ["acid", "carb", "fat", "protein"]
+    # salt is the only unmet role, and its curated filler is sea_salt
+    missing = {m["role"]: m["fillers"] for m in part["missing_but_useful"]}
+    assert missing == {"salt": ["sea_salt"]}
+
+
+def test_unavailable_fillers_move_to_missing_but_useful(conn):
+    # acceptance 2 — fillers the user does NOT have are hidden from
+    # available_now and surface under the roles they would have filled.
+    tid = _steam_tid(conn)
+    part = query.available_filter(conn, tid, ["butter"])  # only fat on hand
+    held = {g["filler"] for g in part["available_now"]}
+    assert held == {"butter"}
+    # every other role is missing, each carrying its full curated fillers
+    missing = {m["role"]: m["fillers"] for m in part["missing_but_useful"]}
+    for role, fillers in STEAM_FILLERS.items():
+        if role == "fat":
+            continue
+        assert missing[role] == fillers, f"{role} lost its curated fillers"
+    # the unavailable fillers must not appear as 'available now'
+    assert not (held & {"lemon", "parmesan", "tofu", "rice", "sea_salt"})
+
+
+def test_plate_balance_can_use_available_items(conn):
+    # acceptance 3 — plate_balance_detail accepts available_items and
+    # partitions the plate's gaps against them.
+    r = query.plate_balance_detail(
+        conn, "mashed_potatoes and a roasted chickpea patty",
+        available_items=["vinegar", "dill", "croutons", "chocolate"])
+    assert "available_now" in r and "missing_but_useful" in r
+    assert "unknown_items" in r and "no_match_known" in r
+    held = {g["filler"]: set(g["roles"]) for g in r["available_now"]}
+    assert held == {
+        "vinegar": {"acid"}, "dill": {"herb"}, "croutons": {"crunch"},
+    }
+    assert r["missing_but_useful"] == []           # every gap covered
+    assert r["unknown_items"] == ["chocolate"]     # reported honestly
+
+
+def test_scout_does_not_leak_into_cook_via_availability(conn):
+    # acceptance 4 — lingonberry_vinegar is an experimental/Scout acid for
+    # broccoli. Selecting it must NOT cover the acid role in Cook mode; it
+    # lands in no_match_known and acid stays missing.
+    tid = _steam_tid(conn)
+    scout = {r["filler"] for r in query.scout_rows(conn, ingredient="broccoli")}
+    assert "lingonberry_vinegar" in scout           # it is genuinely Scout
+    cook_fillers = {f["filler"] for fs in
+                    query.branch_card(conn, *STEAM)["fillers_by_role"].values()
+                    for f in fs}
+    assert "lingonberry_vinegar" not in cook_fillers  # and not a Cook filler
+    part = query.available_filter(conn, tid, ["lingonberry_vinegar"])
+    assert part["available_now"] == []             # did not cover acid
+    assert "acid" in {m["role"] for m in part["missing_but_useful"]}
+    assert part["no_match_known"] == ["lingonberry_vinegar"]
+    assert part["unknown_items"] == []             # it IS a known ingredient
+
+
+def test_unknown_available_item_reported_honestly(conn):
+    # acceptance 5 — an item that is not a known ingredient is reported in
+    # unknown_items, never silently dropped or treated as a filler.
+    tid = _steam_tid(conn)
+    known = set(query.ingredients_list(conn))
+    assert "chocolate" not in known                # genuinely unknown
+    part = query.available_filter(conn, tid, ["chocolate", "lemon"])
+    assert part["unknown_items"] == ["chocolate"]
+    # lemon is known and fills acid, so it is available_now, not no_match
+    assert any(g["filler"] == "lemon" for g in part["available_now"])
+    assert "chocolate" not in part["no_match_known"]
+
+
+def test_empty_available_items_behaves_like_current_system(conn):
+    # acceptance 6 — empty selection reproduces the current Try view exactly:
+    # nothing 'available now', every role missing with its full curated
+    # filler list (identical to fillers_by_role). Plate balance with
+    # available_items=None returns no partition keys at all (current path).
+    tid = _steam_tid(conn)
+    part = query.available_filter(conn, tid, [])
+    assert part["available_now"] == []
+    assert part["covered_roles"] == []
+    missing = {m["role"]: m["fillers"] for m in part["missing_but_useful"]}
+    current = {role: [f["filler"] for f in fs]
+               for role, fs in query.fillers_by_role(conn, tid).items()}
+    assert missing == current                       # byte-for-byte the Try view
+    # and the plate path: None means 'do not partition' (current behaviour)
+    r = query.plate_balance_detail(
+        conn, "mashed_potatoes and a roasted chickpea patty")
+    assert "available_now" not in r
+    assert "missing_but_useful" not in r
+
+
+def test_broccoli_steam_branch_filtered_by_available_fillers(conn):
+    # acceptance 7 — the broccoli steam branch (the new food state from
+    # round 10) filters cleanly: held fillers cover their roles, salt stays
+    # missing with sea_salt, and the full set behaves like the Try view.
+    tid = _steam_tid(conn)
+    part = query.available_filter(conn, tid, ["butter", "lemon", "rice"])
+    assert part["covered_roles"] == ["acid", "carb", "fat"]
+    missing = {m["role"]: m["fillers"] for m in part["missing_but_useful"]}
+    assert missing == {"salt": ["sea_salt"], "protein": ["parmesan", "tofu"]}
+    # the held fillers cover exactly the roles their Cook pairings promise
+    held = {g["filler"]: set(g["roles"]) for g in part["available_now"]}
+    assert held == {"butter": {"fat"}, "lemon": {"acid"}, "rice": {"carb"}}

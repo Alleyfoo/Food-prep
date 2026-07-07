@@ -122,6 +122,77 @@ def fillers_by_role(
     return {r: v for r, v in by_role.items() if r in gaps}
 
 
+def _partition_by_available(by_role_names: dict[str, list[str]],
+                            available: set[str],
+                            known: set[str]) -> dict[str, Any]:
+    """Split a {role: [filler_name]} map (Cook mode — no experimental) against
+    the ingredients the user has on hand.
+
+    Returns:
+      available_now      — [{filler, roles}] fillers the user has that fill
+                            >=1 role, with the roles they cover.
+      missing_but_useful — [{role, fillers}] roles not covered by any available
+                            filler; fillers = the unavailable curated fillers
+                            that WOULD fill it ([] if none curated).
+      unknown_items      — [item] selected items not recognised as ingredients.
+      no_match_known     — [item] recognised selected items that fill no missing
+                            role for this branch/plate (available but useless
+                            here).
+      covered_roles      — [role] roles with >=1 available filler.
+
+    Honest: never invents fillers; unknown selections are reported, not
+    silently dropped. Scout/experimental never leaks in — callers feed it
+    Cook-only filler lists (fillers_by_role / _fillers_for_role).
+    """
+    filler_roles: dict[str, list[str]] = {}
+    for role, names in by_role_names.items():
+        for f in names:
+            if f in available:
+                filler_roles.setdefault(f, []).append(role)
+    available_now = [
+        {"filler": f, "roles": sorted(rs)} for f, rs in sorted(filler_roles.items())
+    ]
+    covered = {r for grp in available_now for r in grp["roles"]}
+    missing_but_useful = [
+        {"role": role, "fillers": [n for n in names if n not in available]}
+        for role, names in by_role_names.items() if role not in covered
+    ]
+    used = {grp["filler"] for grp in available_now}
+    unknown_items = sorted(a for a in available if a not in known)
+    no_match_known = sorted(a for a in available if a in known and a not in used)
+    return {
+        "available_now": available_now,
+        "missing_but_useful": missing_but_useful,
+        "unknown_items": unknown_items,
+        "no_match_known": no_match_known,
+        "covered_roles": sorted(covered),
+    }
+
+
+def available_filter(conn: sqlite3.Connection, transformation_id: int,
+                      available_items: list[str] | None) -> dict[str, Any]:
+    """Round 11 — 'What do I have right now?' for a single transformation branch.
+
+    Partitions the branch's Cook fillers against the ingredients on hand into
+    Available now / Missing but useful / No match. None or [] available_items
+    behaves like the current system: available_now empty, missing_but_useful
+    = every role with all its curated fillers (the existing Try view), and the
+    UI falls back to the plain role->fillers render.
+
+    Cook-only — Scout/experimental pairings (lingonberry_vinegar, walnut, ...)
+    never appear here even if selected; they stay in scout_rows.
+    """
+    available = {a.strip() for a in (available_items or []) if a and a.strip()}
+    missing = missing_roles(conn, transformation_id)            # priority-ordered
+    by_role = fillers_by_role(conn, transformation_id)        # Cook, no experimental
+    by_role_names = {
+        m["role_name"]: [f["filler"] for f in by_role.get(m["role_name"], [])]
+        for m in missing
+    }
+    known = set(ingredients_list(conn))
+    return _partition_by_available(by_role_names, available, known)
+
+
 def component_uses(conn: sqlite3.Connection, component_id: int) -> list[str]:
     rows = conn.execute(
         """
@@ -684,7 +755,8 @@ def _dryness_label(avg: float) -> str:
     return "moist"
 
 
-def plate_balance_detail(conn: sqlite3.Connection, text: str) -> dict[str, Any]:
+def plate_balance_detail(conn: sqlite3.Connection, text: str,
+                           available_items: list[str] | None = None) -> dict[str, Any]:
     """Plate Balance Engine (Cook mode) — structured result for the UI.
 
     Returns:
@@ -702,6 +774,13 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str) -> dict[str, Any]:
       no_profile       — items with no balance profile (ingredient or unknown)
       unknown          — items that matched nothing at all
       balanced         — True if no target_gap and no flagged_more
+    Round 11 — when available_items is provided, ALSO returns:
+      available_now      — [{filler, roles}] on-hand fillers covering a gap
+      missing_but_useful — [{role, fillers}] uncovered gaps + the unavailable
+                           curated fillers that would help
+      unknown_items      — [item] selected items not recognised as ingredients
+      no_match_known     — [item] recognised on-hand items that fill no gap here
+    Cook-only; Scout never leaks in. None/[] available_items = current behaviour.
     Honest about its limits — it never invents roles or fillers it doesn't have.
     """
     phrases = _plate_phrases(text)
@@ -735,7 +814,7 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str) -> dict[str, Any]:
     for role in target_gap + flagged_more:
         suggested[role] = _fillers_for_role(conn, role)
 
-    return {
+    result = {
         "items": items,
         "provided": sorted(provided),
         "target_gap": target_gap,
@@ -751,6 +830,20 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str) -> dict[str, Any]:
         "unknown": unknown,
         "balanced": not target_gap and not flagged_more,
     }
+
+    if available_items is not None:
+        available = {a.strip() for a in available_items if a and a.strip()}
+        # Cook-only filler names per gap role, in gap order (target then flagged)
+        by_role_names = {role: suggested.get(role, [])
+                         for role in target_gap + flagged_more}
+        part = _partition_by_available(by_role_names, available,
+                                        set(ingredients_list(conn)))
+        result["available_now"] = part["available_now"]
+        result["missing_but_useful"] = part["missing_but_useful"]
+        result["unknown_items"] = part["unknown_items"]
+        result["no_match_known"] = part["no_match_known"]
+        result["covered_roles"] = part["covered_roles"]
+    return result
 
 
 def plate_balance(conn: sqlite3.Connection, text: str) -> str:

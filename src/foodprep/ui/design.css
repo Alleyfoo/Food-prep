@@ -190,6 +190,7 @@ code, .mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
 .chip.missing { color: var(--amber); background: var(--amber-tint); border-color: var(--amber-soft); }
 .chip.filler  { color: var(--green-deep); background: var(--surface); border-color: var(--green-soft); }
 .chip.role    { color: var(--ink-2); background: var(--bg-2); border-color: var(--line-2); font-weight: 500; }
+.chip.muted   { color: var(--ink-5); background: var(--bg-2); border-color: var(--line-2); font-style: italic; }
 
 /* group label for chips (e.g. "Try:") */
 .chip-group { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin: 2px 0; }
@@ -197,6 +198,19 @@ code, .mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
   font-family: var(--mono); font-size: 10px; color: var(--ink-4);
   text-transform: uppercase; letter-spacing: .08em; margin-right: 2px;
 }
+/* Round 11: 'Available now' group label — the filler you have, emphasised */
+.chip-group > .gl.have {
+  color: var(--green-deep); font-weight: 700; text-transform: none;
+  letter-spacing: 0; font-size: 11px;
+}
+
+/* ============= AVAILABLE-INGREDIENTS STRIP ('what do I have right now?') ============= */
+.avail-strip {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 6px 0 2px; margin: 2px 0 8px;
+}
+.avail-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+.avail-hint { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); }
 
 /* ============= KPI / SUMMARY STRIP ============= */
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0 4px; }
