@@ -70,6 +70,23 @@ streamlit run app.py
   Cook-or-Scout.
 - **Scout** — experimental pairings only, with a "taste before serving" disclaimer.
 
+### Screenshots
+
+Captured headlessly via Playwright (`scripts/capture_screenshots.py`, reproducible).
+Re-run after any UI change so the README stays in sync:
+
+```bash
+python scripts/capture_screenshots.py   # writes docs/screenshots/*.png
+```
+
+| Tab | Screenshot |
+| --- | --- |
+| Ingredient Explorer | ![Ingredient Explorer](docs/screenshots/tab1_ingredient_explorer.png) |
+| Component Explorer | ![Component Explorer](docs/screenshots/tab2_component_explorer.png) |
+| Plate Balance | ![Plate Balance](docs/screenshots/tab3_plate_balance.png) |
+| Filler Profiles | ![Filler Profiles](docs/screenshots/tab4_filler_profiles.png) |
+| Scout | ![Scout](docs/screenshots/tab5_scout.png) |
+
 ## Layout
 
 ```
