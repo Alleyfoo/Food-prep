@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .db import DEFAULT_DB_PATH, connect
 from .loader import DATA_PATH, build
-from . import query
+from . import corpus, query
 
 
 def cmd_build(args: argparse.Namespace) -> int:
@@ -50,6 +50,21 @@ def cmd_scout(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_backfill(args: argparse.Namespace) -> int:
+    conn = connect(args.db)
+    if conn.execute("SELECT count(*) FROM pairings").fetchone()[0] == 0:
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    summary = corpus.backfill(conn, args.dir, verbose=args.verbose)
+    print(f"Backfill from {args.dir}: "
+          f"{summary['updated']} pairings gained corpus evidence, "
+          f"{summary['zero']} resolved to no co-occurrence, "
+          f"{summary['skipped']} skipped (no target transformation).")
+    print("Curated confidence and curated_role_fit are untouched "
+          "(corpus is evidence, not truth).")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="foodprep", description=__doc__ or "food-prep CLI")
     p.add_argument("--db", default=str(DEFAULT_DB_PATH), help="SQLite path")
@@ -75,6 +90,12 @@ def build_parser() -> argparse.ArgumentParser:
     psc.add_argument("technique", nargs="?", default=None,
                      help="limit to a technique, e.g. roast")
     psc.set_defaults(func=cmd_scout)
+
+    pbf = sub.add_parser("backfill",
+                         help="Attach CulinaryDB co-occurrence evidence to pairings")
+    pbf.add_argument("dir", help="CulinaryDB directory with the 4 CSVs")
+    pbf.add_argument("--verbose", action="store_true", help="print each pairing")
+    pbf.set_defaults(func=cmd_backfill)
     return p
 
 

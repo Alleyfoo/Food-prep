@@ -1,0 +1,219 @@
+# Component profiles — plate items for meal-repair logic.
+# Separate from ingredient trees: a profile says what an item BRINGS to a plate
+# and what it tends to LACK, so the meal-repair engine can balance a whole plate
+# without needing a full technique tree for every food.
+#
+# Schema:
+#   provides        roles this item brings (newline-separated)
+#   flavour / texture tags
+#   missing_risks   roles this plate item tends to lack (newline-separated)
+#   heaviness_score 0-5 subjective richness
+#   dryness_score   0-5 subjective dryness
+# cream counts as fat; mild_base counts as body in the meal-repair canon.
+
+component_profiles:
+  - name: mashed_potatoes
+    aliases: "mash\nmashed potato"
+    provides: "carb\ncream\nbody\nsalt\nmild_base"
+    flavour: "mild\ncreamy\nbuttery"
+    texture: "soft\nsmooth"
+    missing_risks: "acid\nherb\ncrunch"
+    heaviness_score: 4
+    dryness_score: 1
+    notes: "rich + soft + mild — needs acid, crunch, freshness"
+
+  - name: boiled_potatoes
+    aliases: "boiled potato\nnew potato"
+    provides: "carb\nmild_base"
+    flavour: "neutral\nearthy"
+    texture: "soft\ntender"
+    missing_risks: "fat\nsalt\nacid\nherb"
+    heaviness_score: 2
+    dryness_score: 2
+    notes: "neutral carrier — takes on fat/salt/acid/herb"
+
+  - name: roasted_potato
+    aliases: "roasted potatoes\nroast potato"
+    provides: "carb\numami"
+    flavour: "savory\nbrowned"
+    texture: "crisp_outside\nfluffy"
+    missing_risks: "salt\nacid\nherb\nprotein\nsauce"
+    heaviness_score: 3
+    dryness_score: 3
+    notes: "crisp + starchy — needs sauce/acid + protein"
+
+  - name: potato_gratin
+    aliases: "gratin\npotatoes dauphinois"
+    provides: "carb\nfat\nprotein\ncream"
+    flavour: "rich\ncheesy\ncreamy"
+    texture: "creamy\ncrisp_top"
+    missing_risks: "acid\nherb\nfresh_side"
+    heaviness_score: 5
+    dryness_score: 1
+    notes: "very rich — needs acid/fresh side to cut"
+
+  - name: potato_salad
+    aliases: "potato salad"
+    provides: "carb\nfat\nacid\nbody"
+    flavour: "tangy\ncreamy"
+    texture: "soft\ncreamy"
+    missing_risks: "herb\ncrunch\nprotein"
+    heaviness_score: 3
+    dryness_score: 1
+    notes: "dressed starch — needs herb/crunch/protein"
+
+  - name: pasta
+    provides: "carb\nbody"
+    flavour: "wheat\nneutral"
+    texture: "tender\nchewy"
+    missing_risks: "salt\nfat\nherb\nprotein"
+    heaviness_score: 2
+    dryness_score: 1
+    notes: "carb anchor; absorbs sauce"
+
+  - name: rice
+    provides: "carb\nbody\nmild_base"
+    flavour: "neutral"
+    texture: "tender"
+    missing_risks: "salt\nfat\nherb\nprotein"
+    heaviness_score: 2
+    dryness_score: 2
+    notes: "mild carb base"
+
+  - name: bread
+    provides: "carb\ncarrier\ncrunch"
+    flavour: "toasted\nwheat"
+    texture: "crust\ncrunch"
+    missing_risks: "salt\nfat\nherb\nprotein"
+    heaviness_score: 2
+    dryness_score: 3
+    notes: "carrier; crunch if toasted"
+
+  - name: toast
+    provides: "carb\ncrunch"
+    flavour: "toasted\nbrown"
+    texture: "crisp\ncrunch"
+    missing_risks: "fat\nsalt\nprotein\nherb"
+    heaviness_score: 2
+    dryness_score: 4
+    notes: "dry carrier — wants fat/protein/acid on top"
+
+  - name: beans
+    aliases: "white beans\ncannellini"
+    provides: "protein\ncarb\nbody"
+    flavour: "earthy\nmild"
+    texture: "creamy\nsoft"
+    missing_risks: "salt\nacid\nherb\ncrunch"
+    heaviness_score: 2
+    dryness_score: 1
+    notes: "soft protein + body"
+
+  - name: chickpea_patty
+    aliases: "chickpea patty\nchickpea patties\nlegume patty\nroasted chickpea patty"
+    provides: "protein\ncarb\numami"
+    flavour: "nutty\nsavory"
+    texture: "dry\ndense\ncrisp"
+    missing_risks: "acid\nherb\ncrunch"
+    heaviness_score: 3
+    dryness_score: 4
+    notes: "dry/dense protein — needs moisture + acid + freshness + crunch"
+
+  - name: fried_egg
+    aliases: "fried egg\negg"
+    provides: "protein\nfat"
+    flavour: "rich\nsavory"
+    texture: "crisp_edge\nsoft_yolk"
+    missing_risks: "salt\nherb\ncarb"
+    heaviness_score: 3
+    dryness_score: 2
+    notes: "rich protein — needs carb + herb + acid"
+
+  - name: boiled_egg
+    aliases: "boiled egg\nhard-boiled egg"
+    provides: "protein"
+    flavour: "neutral\nsavory"
+    texture: "firm"
+    missing_risks: "salt\nfat\nherb"
+    heaviness_score: 1
+    dryness_score: 3
+    notes: "lean protein — needs fat/salt/herb"
+
+  - name: soft_cheese
+    aliases: "ricotta\nfeta\nmozzarella"
+    provides: "fat\nprotein\ncream"
+    flavour: "milky\nmild"
+    texture: "soft\ncreamy"
+    missing_risks: "salt\nherb\ncrunch"
+    heaviness_score: 3
+    dryness_score: 1
+    notes: "cooling fat/protein — needs salt/herb/crunch"
+
+  - name: hard_cheese
+    aliases: "parmesan\ngruyere\ncheese"
+    provides: "fat\nprotein\numami"
+    flavour: "salty\numami\nnutty"
+    texture: "firm\ngrating"
+    missing_risks: "acid\nherb\ncarb"
+    heaviness_score: 4
+    dryness_score: 3
+    notes: "salty umami — needs acid/herb/carb to balance"
+
+  - name: yogurt_sauce
+    aliases: "yogurt\ntzatziki\nraita"
+    provides: "acid\ncream"
+    flavour: "tangy\ncool"
+    texture: "smooth\nsauce"
+    missing_risks: "salt\nherb\ncrunch"
+    heaviness_score: 2
+    dryness_score: 1
+    notes: "cooling acid — cuts heat and richness"
+
+  - name: pickled_cucumber
+    aliases: "pickles\npickle\npickled cucumber"
+    provides: "acid\ncrunch"
+    flavour: "tangy\nsour"
+    texture: "crisp\nsnap"
+    missing_risks: "fat\nsalt\nmild_base"
+    heaviness_score: 0
+    dryness_score: 2
+    notes: "bright acid + crunch — condiment, needs a host"
+
+  - name: green_salad
+    aliases: "salad\nlettuce\ngreens"
+    provides: "herb\ncrunch"
+    flavour: "fresh\ngreen"
+    texture: "crisp\nfresh"
+    missing_risks: "salt\nfat\nprotein\ncarb"
+    heaviness_score: 0
+    dryness_score: 2
+    notes: "fresh + crunch — needs fat/salt/protein/carb to be a meal"
+
+  - name: raw_tomato
+    aliases: "fresh tomato\ntomatoes\nraw tomatoes"
+    provides: "acid\nhydration"
+    flavour: "fresh\nacidic\nsweet"
+    texture: "juicy\nsoft"
+    missing_risks: "salt\nfat\nherb\ncrunch"
+    heaviness_score: 1
+    dryness_score: 1
+    notes: "fresh acid + juice"
+
+  - name: roasted_tomato
+    aliases: "roasted tomatoes"
+    provides: "acid\numami"
+    flavour: "sweet\njammy\nsavory"
+    texture: "jammy\nsoft"
+    missing_risks: "salt\nherb\nacid\ncarb\nprotein"
+    heaviness_score: 2
+    dryness_score: 1
+    notes: "concentrated sweet-savory"
+
+  - name: tomato_sauce
+    aliases: "tomato sauce\nsauce"
+    provides: "acid\numami\nbody\nhydration"
+    flavour: "savory\naromatic"
+    texture: "saucy"
+    missing_risks: "salt\nfat\nherb\nprotein"
+    heaviness_score: 2
+    dryness_score: 1
+    notes: "cooked acid + umami body"

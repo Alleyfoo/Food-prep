@@ -15,6 +15,7 @@ import yaml
 from .db import rebuild
 
 DATA_PATH = Path(__file__).with_name("data") / "tomato.yaml"
+PROFILES_PATH = Path(__file__).with_name("data") / "component_profiles.yaml"
 
 CONFIDENCE_OK = {"high", "medium_high", "medium", "low", "experimental"}
 
@@ -97,6 +98,17 @@ def load_yaml(path: Path | str = DATA_PATH) -> dict:
         return yaml.safe_load(fh)
 
 
+def _deep_merge(base: dict, extra: dict) -> dict:
+    """Merge two ontology dicts: list-valued keys are extended, scalars overwritten.
+    component_profiles from the profiles file join tomato.yaml's (if any)."""
+    for key, val in (extra or {}).items():
+        if key in base and isinstance(base[key], list) and isinstance(val, list):
+            base[key] = base[key] + val
+        else:
+            base[key] = val
+    return base
+
+
 def populate(conn: sqlite3.Connection, data: dict) -> None:
     """Insert a parsed ontology dict into a freshly-schemed database."""
     # ---- vocabulary ----
@@ -136,12 +148,13 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
     for ing in data.get("ingredients", []):
         conn.execute(
             "INSERT INTO ingredients(canonical_name, aliases, base_roles, "
-            "default_availability_class, notes) VALUES (?,?,?,?,?)",
+            "default_availability_class, kind, notes) VALUES (?,?,?,?,?,?)",
             (
                 ing["canonical_name"],
                 ing.get("aliases"),
                 ing.get("base_roles"),
                 ing.get("default_availability_class"),
+                ing.get("kind", "filler"),
                 ing.get("notes"),
             ),
         )
@@ -182,9 +195,13 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
     for cp in data.get("component_profiles", []):
         conn.execute(
             "INSERT INTO component_profiles(name, aliases, provides_roles, "
-            "flavour_tags, texture_tags, notes) VALUES (?,?,?,?,?,?)",
-            (cp["name"], cp.get("aliases"), cp.get("provides_roles"),
-             cp.get("flavour_tags"), cp.get("texture_tags"), cp.get("notes")),
+            "flavour_tags, texture_tags, missing_risks, heaviness_score, "
+            "dryness_score, notes) VALUES (?,?,?,?,?,?,?,?,?)",
+            (cp["name"], cp.get("aliases"), cp.get("provides", cp.get("provides_roles")),
+             cp.get("flavour", cp.get("flavour_tags")),
+             cp.get("texture", cp.get("texture_tags")),
+             cp.get("missing_risks"),
+             cp.get("heaviness_score"), cp.get("dryness_score"), cp.get("notes")),
         )
 
     default_ing = data.get("default_ingredient", "tomato")
@@ -258,9 +275,11 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
         conn.execute(
             "INSERT INTO pairings(ingredient_id, role_id, "
             "works_best_with_transformation_id, common_context, "
-            "availability_class, confidence, notes) VALUES (?,?,?,?,?,?,?)",
+            "availability_class, confidence, curated_role_fit, notes) "
+            "VALUES (?,?,?,?,?,?,?,?)",
             (filler_id, role_id, wbtr_id, p.get("context"),
-             p.get("availability"), p.get("confidence"), p.get("notes")),
+             p.get("availability"), p.get("confidence"),
+             p.get("curated_role_fit"), p.get("notes")),
         )
         pair_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
         for sid in p.get("evidence", []):
@@ -271,9 +290,16 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
             )
 
 
-def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH) -> None:
-    """Rebuild schema and load the YAML ontology from scratch."""
+def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
+          profiles_path: Path | str | None = PROFILES_PATH) -> None:
+    """Rebuild schema and load the YAML ontology from scratch.
+
+    The ingredient ontology (tomato/onion/potato, techniques, transformations,
+    pairings) comes from data_path. Plate-item component profiles come from a
+    separate profiles_path so they can grow independently of ingredient trees."""
     rebuild(conn)
-    data = load_yaml(data_path)
+    data = load_yaml(data_path) or {}
+    if profiles_path and Path(profiles_path).exists():
+        data = _deep_merge(data, load_yaml(profiles_path) or {})
     populate(conn, data)
     conn.commit()

@@ -21,6 +21,7 @@ CREATE TABLE ingredients (
     aliases                  TEXT,            -- newline-separated
     base_roles               TEXT,            -- newline-separated role names
     default_availability_class TEXT,          -- very_common | common | ...
+    kind                     TEXT NOT NULL DEFAULT 'filler',  -- full | filler | both
     notes                    TEXT
 );
 
@@ -118,8 +119,14 @@ CREATE TABLE pairings (
     works_best_with_transformation_id INTEGER REFERENCES transformations(transformation_id),
     common_context                   TEXT,
     availability_class               TEXT,
-    confidence                       TEXT,
-    notes                            TEXT
+    confidence                       TEXT,        -- curated final truth (high/medium/...) — the engine's truth
+    curated_role_fit                 TEXT,        -- hand judgement of whether corpus co-occurrence actually supports
+                                                   -- THIS role (e.g. "garlic+onion co-occur hugely but garlic fills
+                                                   -- aromatic, not acid"). Guardrail against seen_together = good.
+    notes                            TEXT,
+    -- corpus evidence (populated by `foodprep backfill`); evidence, NOT role-invention
+    corpus_cooccurrence_count        INTEGER NOT NULL DEFAULT 0,
+    corpus_contexts                  TEXT
 );
 
 CREATE TABLE component_uses (
@@ -167,13 +174,16 @@ CREATE TABLE user_preferences (
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE component_profiles (
-    profile_id     INTEGER PRIMARY KEY AUTOINCREMENT,
-    name           TEXT NOT NULL UNIQUE,   -- e.g. mashed_potatoes, chickpea_patty
-    aliases        TEXT,                   -- newline-separated
-    provides_roles TEXT,                   -- newline-separated role names present
-    flavour_tags   TEXT,                    -- newline-separated
-    texture_tags   TEXT,                    -- newline-separated
-    notes          TEXT
+    profile_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    name              TEXT NOT NULL UNIQUE,   -- e.g. mashed_potatoes, chickpea_patty
+    aliases           TEXT,                   -- newline-separated
+    provides_roles    TEXT,                   -- newline-separated role names present
+    flavour_tags      TEXT,                    -- newline-separated
+    texture_tags      TEXT,                    -- newline-separated
+    missing_risks     TEXT,                    -- newline-separated roles this plate item tends to lack
+    heaviness_score   INTEGER,                -- 0-5 subjective richness
+    dryness_score     INTEGER,                -- 0-5 subjective dryness
+    notes             TEXT
 );
 
 -- ---------------------------------------------------------------------------
