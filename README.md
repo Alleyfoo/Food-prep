@@ -52,15 +52,38 @@ foodprep batch
 foodprep hub
 ```
 
+## Web UI (Streamlit)
+
+A five-tab dashboard over the same engine — cards and chips, not tables:
+
+```bash
+pip install -e ".[gui]"
+streamlit run app.py
+```
+
+- **Ingredient Explorer** — transformation branches per ingredient (Tags / Risks /
+  Missing / Try / Use in).
+- **Component Explorer** — start from an after-state, not raw ingredient.
+- **Plate Balance** — what a set of plate items has, lacks, and what to add
+  (Cook mode; experimental pairings never shown).
+- **Filler Profiles** — the PIM tab: roles / repairs / avoid_when / availability /
+  Cook-or-Scout.
+- **Scout** — experimental pairings only, with a "taste before serving" disclaimer.
+
 ## Layout
 
 ```
 src/foodprep/
   schema.sql        SQLite schema (centre of gravity: transformations + missing roles)
-  data/tomato.yaml  curated tomato ontology
+  data/tomato.yaml  curated tomato ontology (tomato/onion/potato/cabbage + filler pack)
+  data/component_profiles.yaml  plate-item balance profiles
   db.py             connection + schema bootstrap
   loader.py         YAML -> SQLite
-  query.py          query engine (the brief's prompts)
+  query.py          query engine (the brief's prompts + UI handles)
   cli.py            command line
-tests/              pytest suite
+  ui/streamlit_app.py  the 5-tab dashboard
+  ui/design.css     card/chip design system
+app.py             root launcher for `streamlit run app.py`
+.streamlit/config.toml  headless + theme
+tests/             pytest suite
 ```

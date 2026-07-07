@@ -1,0 +1,13 @@
+[server]
+headless = true
+port = 8501
+
+[theme]
+primaryColor = "#0E7C5A"
+backgroundColor = "#F4F2EC"
+secondaryBackgroundColor = "#ECE8DE"
+textColor = "#1A1B16"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false

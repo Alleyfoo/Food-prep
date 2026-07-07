@@ -652,3 +652,76 @@ tags+risks; Cook/Scout pairings split correctly (via the
 works_best_with_transformation_id FK, since `pairings.ingredient_id` is the
 filler not the target); branch view renders the risks line. `test_schema_populated`
 and `test_no_ontology_rot` updated to 33 transformations (12+4+9+8).
+
+
+## Round 7 — Streamlit slice (handles on the engine, no new ontology)
+
+MVP-2 is now presentable. Round 7 added no ingredient, no corpus work, no new
+roles — just handles on the engine so a human can walk the graph. The UI is 5
+tabs that map 1:1 to the existing query API, rendered as cards + chips (not
+tables), with a debug expander per card.
+
+### Files
+- `src/foodprep/ui/streamlit_app.py` — the app (5 tabs).
+- `src/foodprep/ui/design.css` — card/chip design system (adapted from the
+  parcel-ops Control Tower language: eyebrows, mono labels, accent-bordered
+  cards, tabular nums, Streamlit chrome overrides).
+- `app.py` — root launcher so `streamlit run app.py` works from the repo root.
+- `.streamlit/config.toml` — headless + warm-paper theme + port 8501.
+
+### The five tabs
+1. **Ingredient Explorer** — selectbox of the 4 tree ingredients
+   (tomato/onion/potato/cabbage); mode = best branches | choose technique;
+   each branch is a card with Tags / Risks / Missing / Try (fillers grouped by
+   the role they fill) / Use in. Risks show visibly, **never** as missing roles.
+2. **Component Explorer** — pick an after-state component; shows what produced
+   it (`cabbage + roast`), storage, tags, risks, may-need, next-move fillers,
+   uses. Proves the stateful entry point (you don't always start from raw).
+3. **Plate Balance** — multiselect plate items; KPIs (items / hard gaps /
+   may-want-more / heaviness) then sections: Already provides / Missing hard
+   gaps + suggested fillers / May want more / Risks / Avoid adding more of /
+   No balance profile for. The best demo tab.
+4. **Filler Profiles** — the PIM tab: roles / repairs / avoid_when / FI
+   availability / Cook-or-Scout mode / pairings for any ingredient.
+5. **Scout** — experimental pairings only, filtered by ingredient, each a
+   purple-bordered card with the disclaimer: "These are role-compatible but
+   uncommon or experimental. Taste a small amount before serving."
+
+### Engine handles added to `query.py` (read-only, no ontology change)
+`tree_ingredients`, `techniques_for_ingredient`, `branch_card`,
+`all_branch_cards`, `component_card`, `components_list`, `profiles_list`,
+`ingredients_list`, `plate_balance_detail`, `filler_profile_detail`,
+`scout_rows`, `_transformation_tags`. The three big string renders
+(`plate_balance`, `filler_profile`, `scout`) were refactored to compute a
+structured dict first, then render — so the UI and the string CLI share one
+truth and the acceptance tests target the dicts.
+
+### Guardrail improvement that fell out of the UI work
+`fillers_for_transformation` / `fillers_by_role` now default to **Cook mode**
+(exclude `experimental`), with `include_experimental=False`. Previously the
+branch view's "Try" line listed *all* pairings for a transformation, which
+let a Scout-only filler (`lingonberry_vinegar` for raw_slaw acid) leak into
+the Cook branch view. Now the branch/component Cook views are clean of
+Scout-only suggestions; experimental pairings live only in the Scout tab
+(via `scout_rows`). This tightens the Cook/Scout separation the round-4
+checkpoint demands. The existing `plate_balance` Cook path already excluded
+experimental (`_fillers_for_role`), so behaviour there is unchanged.
+
+### Smoke verification
+`streamlit run app.py` boots headless, serves HTTP 200, and the
+`/_stcore/health` endpoint reports `ok`. Importing the module executes all 5
+tab bodies against a freshly-built in-memory DB without error (benign
+"missing ScriptRunContext" warnings only).
+
+### Tests
+76 passing (was 68). +8 round-7 acceptance tests (`tests/test_ui_handles.py`),
+all query-level (no Selenium/browser): ingredient list includes the 4 trees;
+cabbage techniques = the 8; cabbage branch cards carry risks (raw_slaw →
+harsh_when_raw, roast → sulfurous_if_overcooked); component_card resolves
+roasted_tomato_component (and braised_cabbage_component risks); plate balance
+returns missing roles for mashed_potatoes + roasted_chickpea_patty
+(acid/herb/crunch hard gaps with Cook fillers); filler_profile_detail
+resolves sauerkraut as `kind: filler` (not cabbage ferment) while cabbage is
+`full`; scout cabbage returns exactly the 3 experimental pairings; Cook mode
+excludes Scout-only pairings from both plate_balance and the cabbage branch
+Cook view.

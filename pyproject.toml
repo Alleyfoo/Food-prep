@@ -18,6 +18,9 @@ dependencies = [
 dev = [
     "pytest>=7.0",
 ]
+gui = [
+    "streamlit>=1.30",
+]
 
 [project.scripts]
 foodprep = "foodprep.cli:main"
@@ -26,7 +29,7 @@ foodprep = "foodprep.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-foodprep = ["data/*.yaml", "schema.sql"]
+foodprep = ["data/*.yaml", "schema.sql", "ui/*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
