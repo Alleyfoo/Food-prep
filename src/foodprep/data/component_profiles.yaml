@@ -217,3 +217,87 @@ component_profiles:
     heaviness_score: 2
     dryness_score: 1
     notes: "cooked acid + umami body"
+
+  # ---- cabbage component profiles (Round 6) ----
+  # Cabbage stress-tests "cheap everyday ingredient -> many food states".
+  # Sulfur/harshness lives in flavour/missing_risks tags here too — it is NOT a
+  # role. crunch is the only role raw/salted cabbage really provides.
+  - name: cabbage_slaw
+    aliases: "raw cabbage\ncoleslaw\ncabbage slaw\nslaw"
+    provides: "crunch"
+    flavour: "sharp\nvegetal\nfresh"
+    texture: "firm\ncrisp"
+    missing_risks: "fat\nacid\nsalt\nherb\nprotein"
+    heaviness_score: 1
+    dryness_score: 2
+    notes: "crisp + sharp — needs dressing (fat/acid/salt) and a freshness lift"
+
+  - name: salted_cabbage
+    aliases: "salted cabbage\nsalt-cured cabbage"
+    provides: "crunch\nsalt"
+    flavour: "concentrated\nvegetal\nsweet"
+    texture: "firm\nless_watery"
+    missing_risks: "acid\nfat\nherb\nprotein\ncarb"
+    heaviness_score: 1
+    dryness_score: 2
+    notes: "collapsed water, mellowed harshness — still needs lift + host"
+
+  - name: fried_cabbage
+    aliases: "stir-fried cabbage\nsauteed cabbage"
+    provides: "crunch\numami"
+    flavour: "savory\nsweet\nvegetal"
+    texture: "firm\ncharred"
+    missing_risks: "salt\nacid\nprotein\nherb\ncarb"
+    heaviness_score: 2
+    dryness_score: 2
+    notes: "savory + sweet, crisp-tender — needs salt, protein, a carb host"
+
+  - name: braised_cabbage
+    aliases: "braised cabbage\nstewed cabbage"
+    provides: "body\numami"
+    flavour: "sweet\nsavory\numami"
+    texture: "soft\nspoonable"
+    missing_risks: "acid\nherb\nprotein\ncarb"
+    heaviness_score: 3
+    dryness_score: 1
+    notes: "sweet + soft — needs acid to cut sweetness, freshness, protein + carb host"
+
+  - name: roasted_cabbage
+    aliases: "roasted cabbage\nroast cabbage"
+    provides: "crunch\numami"
+    flavour: "sweet\nsavory\nconcentrated"
+    texture: "firm\ncharred"
+    missing_risks: "acid\nfat\nsalt\nherb\nprotein"
+    heaviness_score: 2
+    dryness_score: 3
+    notes: "charred sweet edges — needs acid, fat, salt, a protein + carb host"
+
+  - name: cabbage_soup
+    aliases: "cabbage soup\ncabbage broth"
+    provides: "body\nhydration\numami"
+    flavour: "savory\nvegetal"
+    texture: "liquid\nsoft"
+    missing_risks: "cream\nherb\ncrunch\nprotein"
+    heaviness_score: 2
+    dryness_score: 1
+    notes: "savory vegetal liquid — needs silkiness (cream), freshness, crunch, protein"
+
+  - name: fermented_cabbage
+    aliases: "sauerkraut\nkimchi\nfermented cabbage"
+    provides: "acid\ncrunch\nsalt"
+    flavour: "acidic\numami\ntangy"
+    texture: "firm\ncrisp"
+    missing_risks: "mild_base\nfat\nprotein"
+    heaviness_score: 1
+    dryness_score: 2
+    notes: "tangy condiment/side — needs a mild starchy/fatty host to carry it"
+
+  - name: pickled_cabbage
+    aliases: "pickled cabbage\ncurtido\npickled slaw"
+    provides: "acid\ncrunch"
+    flavour: "sweet_sour\nacidic\nsharp"
+    texture: "firm\ncrisp"
+    missing_risks: "mild_base\nfat\nprotein"
+    heaviness_score: 1
+    dryness_score: 2
+    notes: "sharp sweet-sour condiment — needs a mild host + fat/protein"

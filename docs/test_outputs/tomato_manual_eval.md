@@ -583,3 +583,72 @@ five questions; alias input resolves; Scout-only filler labelled; filler
 subject routes to profile not tomato branches; full ingredient keeps branches;
 new fillers are Cook-suggestable (in the pool); round-5 ontology-rot guard
 (pairings still have roles, transformations still 25).
+
+
+## Round 6 — cabbage (fourth full ingredient) + risks guardrail
+
+Cabbage is the stress-test ingredient the user picked: cheap, everyday, and
+capable of many food states (raw / salted / fried / roasted / braised / soup /
+pickled / fermented). It is `kind: full` with its own technique tree, the
+fourth full ingredient after tomato / onion / potato. The point is that one
+boring ingredient yields eight different *after-states* with eight different
+missing-role sets — exactly what the transformation record is for.
+
+### What was added
+- **Schema**: `transformations.risks TEXT` — newline-separated caveats
+  (`harsh_when_raw`, `sulfurous_if_overcooked`, …). Loader reads it;
+  `branch_detail` / `render_branch` / `component_first` surface a `→ risks:`
+  line. This is the home for the cabbage sulfur/harshness concept.
+- **Data** (`tomato.yaml`): `cabbage` ingredient (`kind: full`, FI
+  very_common); 8 components (raw/salted/stir-fried/roasted/braised/soup/
+  pickled/fermented); 8 transformations each carrying `flavour_shift`,
+  `texture_shift`, `tags_after`, `risks`, `missing_roles`, `uses`, `evidence`,
+  `confidence`; `sulfurous` + `vegetal` flavour tags and a `slaw` dish context.
+- **Pairings**: ~45 Cook pairings across all 8 cabbage transformations
+  (every declared missing role has at least one Cook filler — verified no
+  "(no curated filler)" gaps) + 3 experimental/Scout pairings
+  (lingonberry_vinegar+raw_slaw, rye_crumbs+roast, smoked_yogurt+soup) so
+  `scout cabbage` returns something.
+- **Component profiles** (`component_profiles.yaml`): 8 cabbage plate items
+  (cabbage_slaw / salted_cabbage / fried_cabbage / braised_cabbage /
+  roasted_cabbage / cabbage_soup / fermented_cabbage / pickled_cabbage) with
+  provides / flavour / texture / missing_risks / heaviness / dryness.
+- **Query**: cabbage technique detection patterns (`slaw`, `stir[- ]?fr…`,
+  `brais…`, `ferment…`) added — `ferment` deliberately does *not* match
+  "sauerkraut" so "what is missing from sauerkraut" still routes to the
+  sauerkraut *filler profile*, not the cabbage tree. `scout()` gained an
+  optional `ingredient` filter and is routed for `scout <ingredient>`.
+
+### The guardrail (the whole point of the round)
+Sulfur/harshness is modelled as **flavour tags + transformation risks**,
+never as a role:
+
+- `tags_after: flavour: [sulfurous, sweet, vegetal]`
+- `risks: [harsh_when_raw, sulfurous_if_overcooked]`
+- `missing_roles` stays clean: `acid / fat / salt / herb / protein / carb /
+  body / mild_base / cream / crunch`. No `freshness` role (per the round-4
+  checkpoint — freshness is delivered by herb/acid in context, not a bucket).
+
+Two tests defend this: `test_cabbage_sulfur_is_not_a_role` asserts no role
+name encodes sulfur/harsh/freshness/pungent; `test_cabbage_sulfur_lives_in_tags_and_risks`
+asserts the `sulfurous` tag exists, raw_slaw carries `harsh_when_raw`, and a
+heat transformation carries `sulfurous_if_overcooked`. This stops a future
+contributor from "fixing" cabbage by inventing a `sulfur` role — exactly the
+hedgerow the checkpoint warns against.
+
+### Cook vs Scout separation
+- Cook: all ~45 non-experimental cabbage pairings — suggested by `branch` /
+  `plate_balance` in Cook mode.
+- Scout: the 3 experimental pairings — surfaced by `scout cabbage` (and the
+  routed `scout cabbage` answer), labelled "plausible but uncommon — NOT
+  classic".
+- sauerkraut (round-5 filler) stays `kind: filler`; cabbage-the-ingredient
+  owns the `ferment` tree. The two coexist cleanly.
+
+### Tests
+68 passing (was 61). +7 round-6: cabbage is `full`; all 8 techniques load; every
+transformation has ≥1 missing role; sulfur is not a role; sulfur lives in
+tags+risks; Cook/Scout pairings split correctly (via the
+works_best_with_transformation_id FK, since `pairings.ingredient_id` is the
+filler not the target); branch view renders the risks line. `test_schema_populated`
+and `test_no_ontology_rot` updated to 33 transformations (12+4+9+8).

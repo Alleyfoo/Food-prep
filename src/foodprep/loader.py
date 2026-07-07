@@ -221,10 +221,10 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
             raise LoadError(f"bad confidence {conf!r} in {tr['technique']}")
         conn.execute(
             "INSERT INTO transformations(ingredient_id, technique_id, "
-            "output_component_id, flavour_shift, texture_shift, confidence, notes) "
-            "VALUES (?,?,?,?,?,?,?)",
+            "output_component_id, flavour_shift, texture_shift, confidence, "
+            "risks, notes) VALUES (?,?,?,?,?,?,?,?)",
             (ing_id, tech_id, comp_id, tr.get("flavour_shift"),
-             tr.get("texture_shift"), conf, tr.get("notes")),
+             tr.get("texture_shift"), conf, tr.get("risks"), tr.get("notes")),
         )
         tr_id = conn.execute(
             "SELECT transformation_id FROM transformations "

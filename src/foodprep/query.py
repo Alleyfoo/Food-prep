@@ -195,6 +195,11 @@ _TECHNIQUE_PATTERNS = [
     (r"\bpickle(?:d)?\b|\bchutney\b", "pickle"),
     (r"\bfrozen\b|\bfreeze\b", "freeze"),
     (r"\bcanned\b|\bcanning\b|\bcan\b(?!\s+(?:i|you|we|do))|\bpreserv(?:e|ed)\b", "can"),
+    # ---- cabbage techniques (stir_fry must precede fry; slaw precedes salad) ----
+    (r"\bslaw\b|\bcoleslaw\b", "raw_slaw"),
+    (r"\bstir[- ]?fr(?:y|ied|ying)\b", "stir_fry"),
+    (r"\bbrais(?:e|ed|ing)\b", "braise"),
+    (r"\bferment(?:ed|ing|ation)?\b", "ferment"),
     # ---- potato techniques ----
     (r"\bboil(?:ed|ing)?\b", "boil"),
     (r"\bmash(?:ed|ing|ed potato(?:es)?)?\b|\bmashed potato\b", "mash"),
@@ -362,7 +367,7 @@ def branch_detail(conn: sqlite3.Connection, transformation_id: int) -> dict[str,
         """
         SELECT t.transformation_id, tech.name AS technique, c.name AS component,
                c.component_id, t.flavour_shift, t.texture_shift, t.confidence,
-               c.batch_prep_value, c.freezes_well, c.keeps_well
+               t.risks, c.batch_prep_value, c.freezes_well, c.keeps_well
         FROM transformations t
         JOIN techniques tech ON tech.technique_id = t.technique_id
         JOIN components c     ON c.component_id = t.output_component_id
@@ -371,6 +376,7 @@ def branch_detail(conn: sqlite3.Connection, transformation_id: int) -> dict[str,
         (transformation_id,),
     ).fetchone()
     d = dict(row)
+    d["risks"] = _split_list(d.get("risks"))
     d["missing"] = missing_roles(conn, transformation_id)
     d["fillers_by_role"] = fillers_by_role(conn, transformation_id)
     d["uses"] = component_uses(conn, d["component_id"])
@@ -382,6 +388,8 @@ def render_branch(d: dict[str, Any]) -> str:
     lines = [f"{d['technique']}", f"  → {d['component']}"]
     if d.get("flavour_shift") or d.get("texture_shift"):
         lines.append(f"  → {d['flavour_shift']} · {d['texture_shift']}")
+    if d.get("risks"):
+        lines.append("  → risks: " + ", ".join(d["risks"]))
     gaps = [m["role_name"] for m in d["missing"]]
     if gaps:
         lines.append("  → missing: " + ", ".join(gaps))
@@ -448,6 +456,8 @@ def component_first(conn: sqlite3.Connection, component_name: str) -> str:
         gaps = [m["role_name"] for m in d["missing"]]
         if gaps:
             lines.append("  if building a meal on it, still missing: " + ", ".join(gaps))
+        if d.get("risks"):
+            lines.append("  risks: " + ", ".join(d["risks"]))
         add_parts = []
         for role, fillers in d["fillers_by_role"].items():
             names = ", ".join(f["filler"] for f in fillers[:3]) or "(no curated filler)"
@@ -509,40 +519,45 @@ def hub_explained(conn: sqlite3.Connection, ingredient: str = "tomato") -> str:
     return "\n".join(lines)
 
 
-def scout(conn: sqlite3.Connection, technique: str | None = None) -> str:
-    """Scout mode — experimental pairings, explicitly labelled, never as classic."""
+def scout(conn: sqlite3.Connection, technique: str | None = None,
+          ingredient: str | None = None) -> str:
+    """Scout mode — experimental pairings, explicitly labelled, never as classic.
+
+    If `ingredient` is given, restrict to that ingredient's transformations
+    (e.g. scout(conn, ingredient='cabbage') -> cabbage's experimental pairings),
+    so 'scout cabbage' surfaces cabbage-specific ideas rather than every
+    experimental pairing in the ontology. Cook mode (plate_balance) never
+    surfaces these — the two paths are separate."""
+    where = ["p.confidence = 'experimental'"]
+    params: list[Any] = []
     if technique:
-        row = conn.execute(
-            """
-            SELECT p.pairing_id, ing.canonical_name AS filler, r.role_name AS role,
-                   p.notes, p.availability_class
-            FROM pairings p
-            JOIN ingredients ing ON ing.ingredient_id = p.ingredient_id
-            JOIN roles r         ON r.role_id = p.role_id
-            JOIN transformations t ON t.transformation_id = p.works_best_with_transformation_id
-            JOIN techniques tech ON tech.technique_id = t.technique_id
-            WHERE p.confidence = 'experimental' AND tech.name = ?
-            """,
-            (technique,),
-        ).fetchall()
-    else:
-        row = conn.execute(
-            """
-            SELECT p.pairing_id, ing.canonical_name AS filler, r.role_name AS role,
-                   p.notes, p.availability_class
-            FROM pairings p
-            JOIN ingredients ing ON ing.ingredient_id = p.ingredient_id
-            JOIN roles r         ON r.role_id = p.role_id
-            WHERE p.confidence = 'experimental'
-            """
-        ).fetchall()
+        where.append("tech.name = ?")
+        params.append(technique)
+    if ingredient:
+        where.append("ti.canonical_name = ?")
+        params.append(ingredient)
+    row = conn.execute(
+        """
+        SELECT ing.canonical_name AS filler, r.role_name AS role,
+               p.notes, p.availability_class,
+               ti.canonical_name AS target, tech.name AS technique
+        FROM pairings p
+        JOIN ingredients ing ON ing.ingredient_id = p.ingredient_id
+        JOIN roles r         ON r.role_id = p.role_id
+        LEFT JOIN transformations t ON t.transformation_id = p.works_best_with_transformation_id
+        LEFT JOIN ingredients ti ON ti.ingredient_id = t.ingredient_id
+        LEFT JOIN techniques tech ON tech.technique_id = t.technique_id
+        WHERE """ + " AND ".join(where),
+        params,
+    ).fetchall()
+    subject = ingredient or technique or "all"
     if not row:
-        return ("Scout / experimental: none curated yet"
-                + (f" for {technique!r}." if technique else "."))
+        return f"Scout / experimental: none curated yet for {subject!r}."
     lines = ["Scout / experimental (plausible but uncommon — NOT classic):"]
     for r in row:
         note = r["notes"] or f"{r['filler']} ({r['role']})"
-        lines.append(f"  - {r['filler']} + {technique or 'tomato'}: {note}")
+        subj = r["technique"] or r["target"] or technique or "tomato"
+        lines.append(f"  - {r['filler']} + {subj}: {note}")
     lines.append("  (These are speculative — labelled so no one pretends they're tradition.)")
     return "\n".join(lines)
 
@@ -888,7 +903,7 @@ def answer(conn: sqlite3.Connection, prompt: str) -> str:
 
     # ---- scout (checked early: "unusual / plausible but uncommon") ----
     if intent == "scout":
-        return scout(conn, tech)
+        return scout(conn, tech, _detect_subject(prompt, conn))
 
     # ---- plate balance (Cook mode): "balance / plate of / what is missing" + items ----
     phrases = _plate_phrases(prompt)

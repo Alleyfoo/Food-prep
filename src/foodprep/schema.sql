@@ -90,6 +90,7 @@ CREATE TABLE transformations (
     flavour_shift         TEXT,
     texture_shift         TEXT,
     confidence            TEXT NOT NULL,    -- high | medium_high | medium | low | experimental
+    risks                 TEXT,             -- newline-separated caveats (harsh_when_raw, sulfurous_if_overcooked, ...) — a RISK, not a missing role
     notes                 TEXT,
     UNIQUE (ingredient_id, technique_id)
 );

@@ -7,8 +7,8 @@ from foodprep import query
 
 def test_schema_populated(conn):
     assert conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] >= 30
-    # 12 tomato + 4 onion + 9 potato
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 25
+    # 12 tomato + 4 onion + 9 potato + 8 cabbage = 33 transformations
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 33
     assert conn.execute("SELECT count(*) FROM roles").fetchone()[0] >= 12
     assert conn.execute("SELECT count(*) FROM pairings").fetchone()[0] >= 30
     assert conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] >= 5
@@ -579,10 +579,126 @@ def test_new_fillers_are_cook_suggestable(conn):
     assert "rye_crumbs" in crunch_pool
 
 
-def test_no_ontology_rot_round5(conn):
-    # the round-5 additions keep the guardrails intact: every pairing still
-    # has a role, and no transformation was added (fillers don't get trees).
+def test_no_ontology_rot_round6(conn):
+    # the round-6 additions keep the guardrails intact: every pairing still
+    # has a role; every transformation's missing_roles reference real roles;
+    # and the cabbage count is the expected 33 (12+4+9+8).
     assert conn.execute(
         "SELECT count(*) FROM pairings WHERE role_id IS NULL").fetchone()[0] == 0
     assert conn.execute(
-        "SELECT count(*) FROM transformations").fetchone()[0] == 25
+        "SELECT count(*) FROM transformations").fetchone()[0] == 33
+    # every missing-role row points at a real role id
+    assert conn.execute(
+        "SELECT count(*) FROM transformation_missing_roles mr "
+        "LEFT JOIN roles r ON r.role_id = mr.role_id "
+        "WHERE r.role_id IS NULL").fetchone()[0] == 0
+
+
+# ---- cabbage (fourth ingredient — Round 6) ---------------------------------
+# Cabbage is the stress-test ingredient: cheap, everyday, many food states,
+# and the sulfur/harshness concept must live in tags + risks, NOT in roles.
+
+CABBAGE_TECHS = {
+    "raw_slaw", "salt_and_drain", "stir_fry", "roast",
+    "braise", "soup", "pickle", "ferment",
+}
+
+
+def test_cabbage_loaded_as_full(conn):
+    ing = conn.execute(
+        "SELECT kind FROM ingredients WHERE canonical_name = 'cabbage'"
+    ).fetchone()
+    assert ing is not None
+    assert ing[0] == "full"
+
+
+def test_cabbage_has_all_eight_transformations(conn):
+    rows = query.transformations_for_ingredient(conn, "cabbage")
+    techs = {r["technique"] for r in rows}
+    assert CABBAGE_TECHS == techs
+
+
+def test_cabbage_each_transformation_has_missing_roles(conn):
+    # every one of the 8 cabbage transformations must carry at least one
+    # curated missing role — that is the point of the transformation record.
+    rows = conn.execute(
+        "SELECT tech.name, (SELECT count(*) FROM transformation_missing_roles mr "
+        "JOIN transformations t ON t.transformation_id = mr.transformation_id "
+        "JOIN ingredients i ON i.ingredient_id = t.ingredient_id "
+        "WHERE i.canonical_name = 'cabbage' AND tech.technique_id = t.technique_id) "
+        "FROM techniques tech WHERE tech.name IN "
+        "('raw_slaw','salt_and_drain','stir_fry','roast','braise','soup','pickle','ferment')"
+    ).fetchall()
+    by_tech = {r[0]: r[1] for r in rows}
+    for tech in CABBAGE_TECHS:
+        assert by_tech.get(tech, 0) >= 1, f"{tech} has no missing_roles"
+
+
+def test_cabbage_sulfur_is_not_a_role(conn):
+    # THE ROUND-6 GUARDRAIL: sulfur/harshness is modelled as flavour tags +
+    # transformation risks, never as a role. No role name may encode it.
+    role_names = {r[0].lower() for r in conn.execute(
+        "SELECT role_name FROM roles").fetchall()}
+    for banned in ("sulfur", "sulfurous", "harsh", "harshness", "freshness", "pungent"):
+        assert not any(banned in rn for rn in role_names), (
+            f"role name leaks {banned!r}: {role_names}")
+
+
+def test_cabbage_sulfur_lives_in_tags_and_risks(conn):
+    # sulfurous is a flavour tag; harsh_when_raw / sulfurous_if_overcooked are
+    # transformation risks on the raw/heat cabbage transformations.
+    sulf_tag = conn.execute(
+        "SELECT tag_id FROM tags WHERE family = 'flavour' AND tag_value = 'sulfurous'"
+    ).fetchone()
+    assert sulf_tag is not None, "sulfurous flavour tag missing"
+    # at least one cabbage transformation carries a non-empty risks column
+    risk_count = conn.execute(
+        "SELECT count(*) FROM transformations t "
+        "JOIN ingredients i ON i.ingredient_id = t.ingredient_id "
+        "WHERE i.canonical_name = 'cabbage' AND t.risks IS NOT NULL AND t.risks != ''"
+    ).fetchone()[0]
+    assert risk_count >= 1, "no cabbage transformation carries a risk"
+    # raw_slaw must flag harsh_when_raw; a heat transformation must flag
+    # sulfurous_if_overcooked
+    raw_risk = conn.execute(
+        "SELECT t.risks FROM transformations t "
+        "JOIN ingredients i ON i.ingredient_id = t.ingredient_id "
+        "JOIN techniques tech ON tech.technique_id = t.technique_id "
+        "WHERE i.canonical_name = 'cabbage' AND tech.name = 'raw_slaw'"
+    ).fetchone()[0]
+    assert raw_risk and "harsh_when_raw" in raw_risk
+    heat_risks = conn.execute(
+        "SELECT t.risks FROM transformations t "
+        "JOIN ingredients i ON i.ingredient_id = t.ingredient_id "
+        "JOIN techniques tech ON tech.technique_id = t.technique_id "
+        "WHERE i.canonical_name = 'cabbage' AND t.risks LIKE '%sulfurous_if_overcooked%'"
+    ).fetchall()
+    assert len(heat_risks) >= 1
+
+
+def test_cabbage_pairings_split_cook_and_scout(conn):
+    # Cook pairings (non-experimental) exist for cabbage so the plate engine
+    # can suggest fillers; at least one experimental pairing exists so
+    # "scout cabbage" returns something.
+    # NB pairings.ingredient_id is the FILLER; cabbage is reached via the
+    # works_best_with_transformation_id FK (how scout() resolves it too).
+    base = (
+        "FROM pairings p "
+        "JOIN transformations t ON t.transformation_id = p.works_best_with_transformation_id "
+        "JOIN ingredients ti ON ti.ingredient_id = t.ingredient_id "
+        "WHERE ti.canonical_name = 'cabbage'")
+    cook = conn.execute(f"SELECT count(*) {base} AND p.confidence != 'experimental'").fetchone()[0]
+    scout = conn.execute(f"SELECT count(*) {base} AND p.confidence = 'experimental'").fetchone()[0]
+    assert cook >= 8, f"expected >=8 cook pairings for cabbage, got {cook}"
+    assert scout >= 1, f"expected >=1 scout pairing for cabbage, got {scout}"
+
+
+def test_cabbage_branch_view_renders_with_risks(conn):
+    # the branch view for "cabbage" must surface the risks line for the
+    # raw_slaw transformation (the guardrail is visible in the UI text).
+    out = query.answer(conn, "what can I do with cabbage?")
+    assert "cabbage" in out.lower()
+    # raw_slaw technique should appear, and its harsh_when_raw risk should be
+    # surfaced in the rendered branch detail.
+    assert "raw_slaw" in out or "raw slaw" in out.lower()
+    assert "harsh_when_raw" in out or "harsh when raw" in out.lower()

@@ -88,6 +88,8 @@ tags:
   - { family: flavour, value: sweet_sour }
   - { family: flavour, value: spicy }
   - { family: flavour, value: sharp }
+  - { family: flavour, value: sulfurous }
+  - { family: flavour, value: vegetal }
   - { family: texture, value: soft }
   - { family: texture, value: jammy }
   - { family: texture, value: chewy }
@@ -142,6 +144,8 @@ dish_contexts:
   - potato_salad
   - mash_plate
   - boiled_potato
+  # ---- cabbage dish contexts ----
+  - slaw
 
 techniques:
   - { name: slice,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
@@ -172,6 +176,11 @@ techniques:
   - { name: bake,         is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
   - { name: salad,        is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
   - { name: hash,         is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  # ---- cabbage techniques (fourth ingredient) ----
+  - { name: raw_slaw,     is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: stir_fry,     is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: braise,       is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
+  - { name: ferment,      is_modifier: 0, heat_type: none,    moisture_change: gain,  preservation_flag: 1 }
 
 # ---- Ingredients -----------------------------------------------------------
 # `kind` guards the ontology hedgerow:
@@ -231,6 +240,13 @@ ingredients:
   - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
   - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
   - { canonical_name: potato,     base_roles: "carb\nmild_base", default_availability_class: very_common, kind: both, aliases: "potatoes\nperuna" }
+  - canonical_name: cabbage
+    aliases: "cabbage\nkaali\nsavoy\nred cabbage\ngreen cabbage"
+    base_roles: "crunch"
+    default_availability_class: very_common
+    kind: full
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer-autumn; stored winter; imported year-round" }
   - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: occasional }
   - { canonical_name: greens,     aliases: "lettuce\nspinach", base_roles: "herb\nmild_base", default_availability_class: very_common }
   - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
@@ -333,6 +349,15 @@ components:
   - { name: potato_soup_base,                   kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
   - { name: potato_salad_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
   - { name: potato_hash_component,              kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  # ---- cabbage components (fourth ingredient) ----
+  - { name: raw_cabbage_slaw_component,         kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: salted_cabbage_component,           kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: stir_fried_cabbage_component,       kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: roasted_cabbage_component,          kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: high }
+  - { name: braised_cabbage_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: cabbage_soup_base,                  kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: pickled_cabbage_component,          kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
+  - { name: fermented_cabbage_component,        kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: high }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -817,6 +842,187 @@ transformations:
     evidence:
       - { source: recipedb, scope: "hash browns / potato hash — fat + egg + herb" }
 
+  # ---- cabbage transformations (fourth ingredient) ----
+  # Cabbage stress-tests "cheap everyday ingredient -> many food states".
+  # Sulfur/harshness is modelled as a RISK (harsh_when_raw, sulfurous_if_overcooked)
+  # and as flavour TAGS (sulfurous, vegetal) — NEVER as a missing role. Freshness
+  # stays a filler quality delivered by herb/acid, not a role bucket (checkpoint).
+  - ingredient: cabbage
+    technique: raw_slaw
+    output_component: raw_cabbage_slaw_component
+    flavour_shift: "Sharp, vegetal, crisp; mellowed by dressing"
+    texture_shift: "Crisp, crunchy"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,    polarity: gain }
+      - { family: flavour, value: sharp,    polarity: gain }
+      - { family: flavour, value: vegetal,   polarity: gain }
+      - { family: texture, value: firm,      polarity: gain }
+    risks: "harsh_when_raw"
+    missing_roles:
+      - { role: fat,    priority: high,   note: "dressing — oil/mayo" }
+      - { role: acid,   priority: high,   note: "vinegar/lemon to mellow pungency" }
+      - { role: salt,   priority: high,   note: "seasoning" }
+      - { role: herb,   priority: medium, note: "freshness — dill/parsley" }
+      - { role: protein, priority: low,   note: "egg/cheese/nuts to make a meal" }
+    uses: [slaw, sandwich, taco, bowl, relish]
+    evidence:
+      - { source: recipedb, scope: "shredded raw cabbage slaw with acidic dressing" }
+
+  - ingredient: cabbage
+    technique: salt_and_drain
+    output_component: salted_cabbage_component
+    flavour_shift: "Concentrated, sweeter, less harsh"
+    texture_shift: "Less watery, pliable"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: vegetal,      polarity: gain }
+      - { family: texture, value: less_watery,  polarity: gain }
+      - { family: texture, value: firm,         polarity: gain }
+    risks: "harsh_when_raw"
+    missing_roles:
+      - { role: acid,     priority: high,   note: "vinegar/lemon lift" }
+      - { role: fat,      priority: medium, note: "oil" }
+      - { role: herb,     priority: medium, note: "freshness — dill/parsley" }
+      - { role: carb,     priority: medium, note: "potato/bread host" }
+      - { role: protein,  priority: low,    note: "egg/cheese/beans" }
+    uses: [salad, sandwich, bowl, taco]
+    evidence:
+      - { source: nchfp, scope: "salt-curing collapses water and mellows harshness" }
+      - { source: recipedb, scope: "salted cabbage as slaw/sandwich base" }
+
+  - ingredient: cabbage
+    technique: stir_fry
+    output_component: stir_fried_cabbage_component
+    flavour_shift: "Savory, sweet, vegetal; crisp-tender"
+    texture_shift: "Crisp-tender with char spots"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: flavour, value: sweet,   polarity: gain }
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: texture, value: firm,    polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: salt,    priority: high,   note: "soy sauce/sea salt" }
+      - { role: acid,    priority: medium, note: "vinegar/lemon lift" }
+      - { role: protein, priority: medium, note: "egg/tofu/pork" }
+      - { role: herb,    priority: low,    note: "scallion/garlic green" }
+      - { role: carb,    priority: medium, note: "rice/noodles" }
+    uses: [bowl, rice, sandwich, eggs, hash]
+    evidence:
+      - { source: recipedb, scope: "quick stir-fried cabbage — savory + sweet, stays crisp" }
+
+  - ingredient: cabbage
+    technique: roast
+    output_component: roasted_cabbage_component
+    flavour_shift: "Sweet, nutty, concentrated; charred edges"
+    texture_shift: "Crisp-charred edges, tender centre"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: flavour, value: savory,        polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: firm,         polarity: gain }
+      - { family: state,   value: roasted,      polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: acid,    priority: high,   note: "vinegar/lemon to sharpen" }
+      - { role: fat,     priority: high,   note: "oil/butter" }
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: herb,    priority: medium, note: "freshness — dill/parsley" }
+      - { role: protein, priority: medium, note: "egg/cheese/fish" }
+      - { role: carb,    priority: low,    note: "potato/bread" }
+    uses: [bowl, sandwich, hash, eggs]
+    evidence:
+      - { source: roast_culinary, scope: "roasting sweetens + chars cabbage" }
+
+  - ingredient: cabbage
+    technique: braise
+    output_component: braised_cabbage_component
+    flavour_shift: "Sweet, savory, deep; silky"
+    texture_shift: "Soft, spoonable, collapsing"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,   polarity: gain }
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: flavour, value: umami,   polarity: gain }
+      - { family: texture, value: soft,    polarity: gain }
+      - { family: texture, value: spoonable, polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: acid,    priority: high,   note: "vinegar — cut the sweetness" }
+      - { role: herb,    priority: high,   note: "freshness — dill/parsley/celery" }
+      - { role: protein, priority: medium, note: "pork/sausage/beans to make a meal" }
+      - { role: carb,    priority: medium, note: "potato/bread host" }
+    uses: [stew, braise, bowl, sandwich]
+    evidence:
+      - { source: recipedb, scope: "braised cabbage — sweet + savory + soft" }
+
+  - ingredient: cabbage
+    technique: soup
+    output_component: cabbage_soup_base
+    flavour_shift: "Soft, savory, vegetal"
+    texture_shift: "Liquid to creamy depending on blend"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: texture, value: liquid,  polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
+      - { role: herb,    priority: high,   note: "dill/parsley freshness" }
+      - { role: crunch,  priority: medium, note: "croutons/crisp bacon" }
+      - { role: protein, priority: low,    note: "bacon/sausage/beans" }
+      - { role: body,    priority: medium, note: "potato to thicken" }
+    uses: [soup, chilled_soup, stew]
+    evidence:
+      - { source: recipedb, scope: "cabbage soup — savory + vegetal, often with cream/dill" }
+
+  - ingredient: cabbage
+    technique: pickle
+    output_component: pickled_cabbage_component
+    flavour_shift: "Sharp, sweet-sour, spiced"
+    texture_shift: "Crisp-pickled"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: flavour, value: acidic,     polarity: gain }
+      - { family: flavour, value: sharp,      polarity: gain }
+      - { family: state,   value: preserved,  polarity: gain }
+    missing_roles:
+      - { role: mild_base, priority: high,   note: "potato/bread/sausage host" }
+      - { role: fat,      priority: medium, note: "cheese/oil" }
+      - { role: protein,  priority: medium, note: "fish/beans/cheese" }
+    uses: [condiment, sandwich, cheese_board, relish, taco]
+    evidence:
+      - { source: nchfp, scope: "pickled cabbage / curtido as condiment" }
+
+  - ingredient: cabbage
+    technique: ferment
+    output_component: fermented_cabbage_component
+    flavour_shift: "Sour, tangy, umami; mellowed harshness"
+    texture_shift: "Crisp-fermented"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: acidic,  polarity: gain }
+      - { family: flavour, value: umami,   polarity: gain }
+      - { family: texture, value: firm,    polarity: gain }
+      - { family: state,   value: preserved, polarity: gain }
+    missing_roles:
+      - { role: mild_base, priority: high,   note: "potato/sausage/pork host" }
+      - { role: fat,      priority: medium, note: "butter/oil" }
+      - { role: protein,  priority: medium, note: "pork/sausage/beans" }
+    uses: [condiment, sandwich, bowl, relish]
+    evidence:
+      - { source: nchfp, scope: "lactic fermentation of cabbage (sauerkraut/kimchi family)" }
+      - { source: recipedb, scope: "fermented cabbage as tangy condiment/side" }
+
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
 pairings:
@@ -994,6 +1200,59 @@ pairings:
   - { for_ingredient: potato, filler: pickles,    role: acid,    works_best_with: salad,      context: "potato salad pickle",  availability: very_common, confidence: high,    evidence: [recipedb] }
   - { for_ingredient: potato, filler: pickles,    role: crunch,  works_best_with: salad,      context: "potato salad crunch",   availability: very_common, confidence: medium,  evidence: [recipedb] }
   - { for_ingredient: potato, filler: pickles,    role: acid,    works_best_with: fry,        context: "pickles with fries",   availability: very_common, confidence: medium,  evidence: [recipedb] }
+  # ---- cabbage pairings (for_ingredient: cabbage; CulinaryDB co-occurrence) ----
+  # raw_slaw — crisp, needs dressing + lift
+  - { for_ingredient: cabbage, filler: vinegar,    role: acid,    works_best_with: raw_slaw,   context: "slaw dressing",        availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: olive_oil, role: fat,     works_best_with: raw_slaw,   context: "slaw oil",             availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: sea_salt,   role: salt,    works_best_with: raw_slaw,   context: "seasoning",           availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: dill,       role: herb,    works_best_with: raw_slaw,   context: "freshness",           availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: eggs,        role: protein, works_best_with: raw_slaw,   context: "egg salad / coleslaw",  availability: very_common, confidence: medium,  evidence: [recipedb] }
+  # salt_and_drain — concentrated, less watery
+  - { for_ingredient: cabbage, filler: vinegar,    role: acid,    works_best_with: salt_and_drain, context: "lift",            availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: olive_oil,  role: fat,     works_best_with: salt_and_drain, context: "oil",             availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: dill,        role: herb,    works_best_with: salt_and_drain, context: "freshness",      availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: potato,      role: mild_base, works_best_with: salt_and_drain, context: "potato host", availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: eggs,       role: protein, works_best_with: salt_and_drain, context: "make a meal",   availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: bread,      role: carb,    works_best_with: salt_and_drain, context: "sandwich host",   availability: very_common, confidence: medium,  evidence: [recipedb] }
+  # stir_fry — savory sweet, crisp-tender
+  - { for_ingredient: cabbage, filler: soy_sauce,  role: salt,    works_best_with: stir_fry,   context: "season + umami",      availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: vinegar,    role: acid,    works_best_with: stir_fry,   context: "lift",                availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: eggs,       role: protein, works_best_with: stir_fry,   context: "egg + cabbage",       availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: tofu,       role: protein, works_best_with: stir_fry,   context: "tofu stir-fry",       availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: rice,       role: carb,    works_best_with: stir_fry,   context: "rice host",           availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: fresh_herbs, role: herb,  works_best_with: stir_fry,   context: "scallion/green finish", availability: common,    confidence: low,     evidence: [recipedb] }
+  # roast — sweet charred edges
+  - { for_ingredient: cabbage, filler: lemon,      role: acid,    works_best_with: roast,      context: "sharpen",             availability: very_common, confidence: medium,  evidence: [roast_culinary] }
+  - { for_ingredient: cabbage, filler: olive_oil,  role: fat,     works_best_with: roast,      context: "roast in oil",        availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: cabbage, filler: sea_salt,   role: salt,    works_best_with: roast,      context: "seasoning",           availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: dill,        role: herb,    works_best_with: roast,      context: "freshness",           availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: eggs,        role: protein, works_best_with: roast,     context: "roast + egg",          availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: potato,      role: mild_base, works_best_with: roast,  context: "potato host",         availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: bread,        role: carb,         works_best_with: roast,  context: "roast cabbage sandwich", availability: very_common, confidence: low,     evidence: [recipedb] }
+  # braise — sweet savory soft
+  - { for_ingredient: cabbage, filler: vinegar,    role: acid,    works_best_with: braise,     context: "cut sweetness",       availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: dill,        role: herb,    works_best_with: braise,     context: "freshness",           availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: bacon,       role: protein, works_best_with: braise,    context: "pork braise",          availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: potato,      role: mild_base, works_best_with: braise,  context: "potato host",         availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: bread,        role: carb,         works_best_with: braise,  context: "braised cabbage sandwich", availability: very_common, confidence: low, evidence: [recipedb] }
+  # soup — savory vegetal
+  - { for_ingredient: cabbage, filler: cream,      role: cream,   works_best_with: soup,       context: "silky soup",          availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: dill,        role: herb,    works_best_with: soup,       context: "freshness",           availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: croutons,   role: crunch,  works_best_with: soup,       context: "crisp contrast",      availability: common,      confidence: medium,  evidence: [pappa] }
+  - { for_ingredient: cabbage, filler: bacon,      role: protein, works_best_with: soup,       context: "garnish",             availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: potato,    role: body,     works_best_with: soup,       context: "thicken",             availability: very_common, confidence: medium,  evidence: [recipedb] }
+  # pickle — sweet-sour condiment
+  - { for_ingredient: cabbage, filler: potato,    role: mild_base, works_best_with: pickle,  context: "potato host",         availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: soft_cheese, role: fat,   works_best_with: pickle,    context: "cheese board",         availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: grilled_fish, role: protein, works_best_with: pickle, context: "fish + pickle",      availability: occasional,  confidence: low,     evidence: [recipedb] }
+  # ferment — tangy condiment/side
+  - { for_ingredient: cabbage, filler: potato,    role: mild_base, works_best_with: ferment, context: "potato/sausage host", availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: butter,    role: fat,     works_best_with: ferment,   context: "butter + sauerkraut",   availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: cabbage, filler: bacon,     role: protein, works_best_with: ferment,   context: "pork + kraut",          availability: common,      confidence: high,   evidence: [recipedb] }
+  # ---- experimental / scout pairings for cabbage (Nordic-plausible, not classic) ----
+  - { for_ingredient: cabbage, filler: lingonberry_vinegar, role: acid, works_best_with: raw_slaw, context: "Nordic berry-bright slaw", availability: common, confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry; experimental with raw cabbage" }
+  - { for_ingredient: cabbage, filler: rye_crumbs,          role: crunch, works_best_with: roast, context: "rye-crumb crust on roasted cabbage", availability: very_common, confidence: experimental, evidence: [], notes: "rye crumbs: Nordic carrier + crunch; experimental with roasted cabbage" }
+  - { for_ingredient: cabbage, filler: smoked_yogurt,       role: cream, works_best_with: soup, context: "smoky cabbage soup", availability: occasional, confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; experimental with cabbage soup" }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).
