@@ -153,10 +153,10 @@ def topbar() -> None:
     _md(f"""
     <div class="topbar">
       <div class="brand">
-        <div class="brand-mark">fp</div>
+        <div class="brand-mark">if</div>
         <div>
-          <div class="brand-title">food-prep</div>
-          <div class="brand-sub">local transformation graph · cook mode</div>
+          <div class="brand-title">Ingredient Foundry</div>
+          <div class="brand-sub">a local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move</div>
         </div>
       </div>
       <div class="topbar-spacer"></div>
@@ -390,10 +390,10 @@ def tab_scout() -> None:
     rows = query.scout_rows(CONN, ingredient=ingredient)
     _md("""
     <div class="disclaimer">
-      <span class="eyebrow">Before culinary heroism</span>
-      These are role-compatible but uncommon or experimental. <b>Taste a small amount
-      before serving.</b> A tiny spoon first — these are speculative, labelled so no
-      one pretends they are tradition.
+      <span class="eyebrow">Scout mode</span>
+      Scout shows role-compatible but uncommon ideas. They are <b>not classics</b>.
+      Taste a small amount before serving — a tiny spoon first, before any culinary
+      heroism. These are speculative, labelled so no one pretends they are tradition.
     </div>
     """)
     if not rows:

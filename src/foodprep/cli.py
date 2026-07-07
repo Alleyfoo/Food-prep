@@ -85,6 +85,17 @@ def cmd_backfill(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_demo(args: argparse.Namespace) -> int:
+    """Print the five-flow demo (tomato / component / plate / cabbage / scout)."""
+    from .demo import run_demo
+    conn = connect(args.db)
+    if conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 0:
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    run_demo(conn)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="foodprep", description=__doc__ or "food-prep CLI")
     p.add_argument("--db", default=str(DEFAULT_DB_PATH), help="SQLite path")
@@ -127,6 +138,10 @@ def build_parser() -> argparse.ArgumentParser:
     pbf.add_argument("dir", help="CulinaryDB directory with the 4 CSVs")
     pbf.add_argument("--verbose", action="store_true", help="print each pairing")
     pbf.set_defaults(func=cmd_backfill)
+
+    pdm = sub.add_parser("demo",
+                         help="Print the five-flow demo (the concept in ~60 seconds)")
+    pdm.set_defaults(func=cmd_demo)
     return p
 
 
