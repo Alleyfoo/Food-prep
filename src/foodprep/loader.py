@@ -148,13 +148,16 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
     for ing in data.get("ingredients", []):
         conn.execute(
             "INSERT INTO ingredients(canonical_name, aliases, base_roles, "
-            "default_availability_class, kind, notes) VALUES (?,?,?,?,?,?)",
+            "default_availability_class, kind, repairs, avoid_when, notes) "
+            "VALUES (?,?,?,?,?,?,?,?)",
             (
                 ing["canonical_name"],
                 ing.get("aliases"),
                 ing.get("base_roles"),
                 ing.get("default_availability_class"),
                 ing.get("kind", "filler"),
+                ing.get("repairs"),
+                ing.get("avoid_when"),
                 ing.get("notes"),
             ),
         )

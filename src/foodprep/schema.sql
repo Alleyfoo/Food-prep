@@ -22,6 +22,8 @@ CREATE TABLE ingredients (
     base_roles               TEXT,            -- newline-separated role names
     default_availability_class TEXT,          -- very_common | common | ...
     kind                     TEXT NOT NULL DEFAULT 'filler',  -- full | filler | both
+    repairs                  TEXT,            -- newline-separated plate conditions this filler repairs (heavy, fatty, roasted, ...)
+    avoid_when               TEXT,            -- newline-separated plate conditions where this filler is wrong (already_high_acid, delicate, ...)
     notes                    TEXT
 );
 

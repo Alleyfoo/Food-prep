@@ -515,3 +515,71 @@ experimental, Cook/Scout separation, empty-input prompt.
   backward-compat wrapper to `plate_balance`.
 - No new ingredient tree added (round-4 constraint honoured). The engine reuses
   existing profiles and ingredient base_roles.
+
+---
+
+# Round 5 — Filler pack + architecture checkpoint
+
+## Checkpoint
+`docs/ARCHITECTURE_CHECKPOINT_ROUND_4.md` freezes the mental model before the
+filler pack: full / filler / both ingredient, component profile, transformation,
+missing role, target_gap, flagged_more, Cook / Scout mode, plate balance, corpus
+evidence, curated_role_fit. The one line it exists to protect:
+
+> Co-occurrence can support evidence, but `curated_role_fit` owns the culinary
+> role.
+
+## Goal
+Strengthen the plate engine with a rich filler pack rather than a new ingredient
+tree. Each filler answers five questions: roles / repairs / avoid_when / Finnish
+supermarket availability / Cook-or-Scout.
+
+## What was done
+- **Two new filler fields** — `repairs` and `avoid_when` — added to the
+  `ingredients` table (nullable TEXT, newline-joined plate-condition tags) and
+  the loader. These are **per-filler profile data**, surfaced via
+  `filler_profile`. They are deliberately NOT wired into `plate_balance` as a
+  plate-condition matcher — that would be exactly the half-built condition
+  layer the checkpoint warns against. The plate engine still reasons from
+  roles + pairings; the pack helps by adding `base_roles` + Cook pairings for
+  the new fillers so they enter the suggestion pool.
+- **12 fillers enriched**: lemon, vinegar, mustard, yogurt, cream, butter,
+  pickles, soy_sauce, rye_crumbs (all existed) + sauerkraut, fresh_herbs, chili
+  (genuinely new). Each carries `repairs` + `avoid_when` + Finnish availability.
+- **Alias reconciliation (anti-hedgerow)**: `pickled_cucumber` and
+  `rye_breadcrumbs` are name variants of existing fillers — added as aliases to
+  `pickles` and `rye_crumbs` rather than duplicate canonicals. `sauerkraut` gets
+  the alias `hapankaali`.
+- **Cook pairings added** for sauerkraut / fresh_herbs / chili / pickles /
+  rye_crumbs so the plate engine can suggest them. rye_crumbs is now Cook for
+  potato (gratin/soup crunch) AND Scout for roasted tomato (experimental) — the
+  nuance its profile surfaces.
+- **`query.filler_profile(conn, name)`** — renders the five-question profile.
+  Cook/Scout is *derived* from the filler's pairings: any non-experimental →
+  Cook; experimental-only → Scout; both → "Cook (also has N Scout pairings)".
+- **Routing**: `answer()` now routes filler-subject prompts ("what can I do
+  with lemon", "what does mustard repair", "tell me about sauerkraut") to
+  `filler_profile` instead of falling through to tomato branches. Full/both
+  ingredients (tomato/onion/potato) keep their branch view — gated by
+  `_has_transformations`.
+- **CLI**: `foodprep filler <name>` (+ `cmd_filler`).
+
+## Honesty / guardrail alignment
+- No role was invented for "freshness" (the user's example used it loosely) —
+  freshness is delivered by acid or herb in context; `MISSING_TERM_TO_ROLE`
+  already maps the cook-term. No new role = no hedgerow.
+- `repairs` / `avoid_when` are free-form plate-condition tags (heavy, fatty,
+  already_high_acid, dairy_long_cook, …) — a distinct vocabulary from roles,
+  kept out of the role engine.
+- The two round-4 Cook/Scout tests were updated: rye_crumbs is no longer
+  experimental-only (it's Cook for potato now), so the demonstration of
+  "Cook excludes experimental" moved to `lingonberry_vinegar` (experimental-only
+  acid filler — in Scout, never in Cook).
+
+## Tests
+61 passing (was 52). +9 round-5: filler pack loads with repairs/avoid_when;
+alias reconciliation (no duplicate canonicals); filler_profile answers the
+five questions; alias input resolves; Scout-only filler labelled; filler
+subject routes to profile not tomato branches; full ingredient keeps branches;
+new fillers are Cook-suggestable (in the pool); round-5 ontology-rot guard
+(pairings still have roles, transformations still 25).

@@ -445,10 +445,15 @@ def test_plate_balance_heaviness_and_dryness_reads(conn):
 
 
 def test_plate_balance_cook_excludes_experimental(conn):
-    # Cook mode must not surface Scout/experimental pairings (rye_crumbs is
-    # experimental). It appears in Scout output, not in plate-balance output.
+    # Cook mode must not surface Scout/experimental pairings. lingonberry_vinegar
+    # is an experimental-only acid filler (its only pairing is experimental), so
+    # even though this plate needs acid, Cook must not surface it. (rye_crumbs is
+    # now Cook-viable for potato gratin/soup — Round 5 — so it is no longer the
+    # right demonstration; it stays Scout only for roasted tomato.)
     out = query.plate_balance(conn, "mashed potatoes and roasted chickpea patties")
-    assert "rye_crumbs" not in out
+    assert "lingonberry_vinegar" not in out
+    # and lingonberry_vinegar does exist in Scout, so the exclusion is meaningful
+    assert "lingonberry_vinegar" in query.scout(conn, "roast")
 
 
 def test_cook_and_scout_are_separate(conn):
@@ -456,12 +461,128 @@ def test_cook_and_scout_are_separate(conn):
     scout = query.scout(conn, "roast")
     assert "Cook mode" in cook
     assert "Scout / experimental" in scout
-    # Scout surfaces the experimental pairing; Cook does not
+    # rye_crumbs is Scout for roasted tomato (experimental) but Cook for potato
+    # (gratin/soup) — so it appears in Scout and is now ALSO a Cook filler.
+    # The clean Cook/Scout separation is shown by lingonberry_vinegar: Scout-only.
     assert "rye_crumbs" in scout
-    assert "rye_crumbs" not in cook
+    assert "lingonberry_vinegar" in scout
+    assert "lingonberry_vinegar" not in cook
 
 
 def test_plate_balance_empty_input_prompts_for_items(conn):
     # a balance request with no plate items named -> ask for items, don't guess
     out = query.plate_balance(conn, "what is missing?")
     assert "Name the plate items" in out
+
+
+# ---- Round 5: filler pack (repairs / avoid_when / filler_profile) ----------
+# Each filler answers five questions: roles / repairs / avoid_when / Finnish
+# availability / Cook-or-Scout. repairs + avoid_when are per-filler profile
+# data surfaced via filler_profile; they are NOT wired into plate_balance
+# (see docs/ARCHITECTURE_CHECKPOINT_ROUND_4.md — that would flatten the model).
+
+def test_filler_pack_loaded_with_repairs_and_avoid(conn):
+    # the 12 fillers in the round-5 pack all carry repairs + avoid_when
+    pack = ["lemon", "vinegar", "mustard", "yogurt", "cream", "butter",
+            "pickles", "soy_sauce", "sauerkraut", "fresh_herbs", "chili",
+            "rye_crumbs"]
+    rows = {r[0]: (r[1], r[2]) for r in conn.execute(
+        "SELECT canonical_name, repairs, avoid_when FROM ingredients "
+        "WHERE canonical_name IN ({})".format(",".join("?" * len(pack))),
+        pack,
+    )}
+    assert set(rows) == set(pack)
+    for name, (repairs, avoid) in rows.items():
+        assert repairs, f"{name} has no repairs"
+        assert avoid, f"{name} has no avoid_when"
+    # the three genuinely new fillers exist and are kind filler
+    for name in ("sauerkraut", "fresh_herbs", "chili"):
+        row = conn.execute(
+            "SELECT kind, base_roles FROM ingredients WHERE canonical_name = ?",
+            (name,),
+        ).fetchone()
+        assert row["kind"] == "filler"
+        assert row["base_roles"]
+
+
+def test_filler_pack_alias_reconciliation(conn):
+    # pickled_cucumber and rye_breadcrumbs are name variants of existing
+    # fillers — reconciled by alias, NOT duplicated (anti-hedgerow).
+    assert query._match_ingredient(conn, "pickled cucumber") == "pickles"
+    assert query._match_ingredient(conn, "rye breadcrumbs") == "rye_crumbs"
+    assert query._match_ingredient(conn, "hapankaali") == "sauerkraut"
+    # no duplicate canonicals were created for the variants
+    names = {r[0] for r in conn.execute(
+        "SELECT canonical_name FROM ingredients").fetchall()}
+    assert "pickled_cucumber" not in names
+    assert "rye_breadcrumbs" not in names
+
+
+def test_filler_profile_answers_five_questions(conn):
+    out = query.filler_profile(conn, "lemon")
+    assert "lemon — filler profile" in out
+    # 1. roles
+    assert "roles filled:" in out and "acid" in out
+    # 2. repairs
+    assert "repairs plates that are:" in out
+    assert "heavy" in out and "fatty" in out
+    # 3. avoid_when
+    assert "avoid when:" in out and "already_high_acid" in out
+    # 4. Finnish availability
+    assert "Finnish supermarket:" in out
+    # 5. Cook or Scout (lemon has classic pairings -> Cook)
+    assert "mode:" in out and "Cook" in out
+
+
+def test_filler_profile_alias_input(conn):
+    # alias input resolves to the canonical filler profile
+    out = query.filler_profile(conn, "pickled cucumber")
+    assert "pickles — filler profile" in out
+
+
+def test_filler_profile_scout_only(conn):
+    # an experimental-only filler (lingonberry_vinegar) is labelled Scout
+    out = query.filler_profile(conn, "lingonberry_vinegar")
+    assert "Scout / experimental" in out
+    assert "Cook" not in out  # no classic pairings
+
+
+def test_filler_subject_routes_to_profile_not_tomato_branches(conn):
+    # "what can I do with lemon" — lemon is a filler (no tree) -> filler profile,
+    # NOT the tomato branch dump (the old fallback behaviour).
+    out = query.answer(conn, "what can I do with lemon")
+    assert "lemon — filler profile" in out
+    assert "What you can do with tomato" not in out
+
+
+def test_filler_subject_does_not_steal_full_ingredient_branches(conn):
+    # a full ingredient (potato) still gets its branch view, not a filler profile
+    out = query.answer(conn, "what can I do with potatoes")
+    assert "What you can do with potato" in out
+    assert "filler profile" not in out
+
+
+def test_new_fillers_are_cook_suggestable(conn):
+    # the new fillers now have Cook (non-experimental) pairings, so the plate
+    # engine's suggestion pool includes them — they were invisible before round
+    # 5 (no pairings). They are medium-confidence, so they may not always be in
+    # the top-4 shown on a given plate, but they ARE in the Cook pool.
+    acid_pool = query._fillers_for_role(conn, "acid", limit=20)
+    herb_pool = query._fillers_for_role(conn, "herb", limit=20)
+    crunch_pool = query._fillers_for_role(conn, "crunch", limit=20)
+    heat_pool = query._fillers_for_role(conn, "heat", limit=20)
+    assert "sauerkraut" in acid_pool or "sauerkraut" in crunch_pool
+    assert "fresh_herbs" in herb_pool
+    assert "chili" in heat_pool
+    # rye_crumbs is now Cook-viable for crunch (was experimental-only before
+    # round 5; still Scout for roasted tomato).
+    assert "rye_crumbs" in crunch_pool
+
+
+def test_no_ontology_rot_round5(conn):
+    # the round-5 additions keep the guardrails intact: every pairing still
+    # has a role, and no transformation was added (fillers don't get trees).
+    assert conn.execute(
+        "SELECT count(*) FROM pairings WHERE role_id IS NULL").fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT count(*) FROM transformations").fetchone()[0] == 25

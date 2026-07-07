@@ -60,6 +60,16 @@ def cmd_plate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_filler(args: argparse.Namespace) -> int:
+    """Filler profile — the five questions (roles / repairs / avoid / availability / Cook-or-Scout)."""
+    conn = connect(args.db)
+    if conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] == 0:
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    print(query.filler_profile(conn, args.name))
+    return 0
+
+
 def cmd_backfill(args: argparse.Namespace) -> int:
     conn = connect(args.db)
     if conn.execute("SELECT count(*) FROM pairings").fetchone()[0] == 0:
@@ -106,6 +116,11 @@ def build_parser() -> argparse.ArgumentParser:
     ppl.add_argument("prompt", nargs="+",
                      help="plate items, e.g. 'mashed potatoes and chickpea patties'")
     ppl.set_defaults(func=cmd_plate)
+
+    pfl = sub.add_parser("filler",
+                         help="Filler profile — roles / repairs / avoid / availability / Cook-or-Scout")
+    pfl.add_argument("name", help="filler name or alias, e.g. lemon, pickled cucumber, rye breadcrumbs")
+    pfl.set_defaults(func=cmd_filler)
 
     pbf = sub.add_parser("backfill",
                          help="Attach CulinaryDB co-occurrence evidence to pairings")

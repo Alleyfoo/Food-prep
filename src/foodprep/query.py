@@ -754,6 +754,110 @@ def lighten(conn: sqlite3.Connection, text: str) -> str:
     return "\n".join(lines)
 
 
+def _has_transformations(conn: sqlite3.Connection, ingredient: str) -> bool:
+    """True if this ingredient has a technique tree (full or both)."""
+    row = conn.execute(
+        """SELECT COUNT(*) FROM transformations t
+           JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+           WHERE i.canonical_name = ?""",
+        (ingredient,),
+    ).fetchone()
+    return row[0] > 0
+
+
+def _detect_subject(text: str, conn: sqlite3.Connection) -> str | None:
+    """Detect ANY ingredient named in the prompt (including fillers), longest
+    name wins. Unlike _detect_ingredient, this also matches fillers that have no
+    transformation tree — so 'what can I do with lemon' can route to a filler
+    profile instead of falling through to tomato branches."""
+    low = text.lower()
+    best, best_len = None, 0
+    for r in conn.execute("SELECT canonical_name, aliases FROM ingredients").fetchall():
+        for n in [r["canonical_name"]] + _split_list(r["aliases"]):
+            nl = n.lower()
+            if nl and nl in low and len(nl) > best_len:
+                best, best_len = r["canonical_name"], len(nl)
+    return best
+
+
+def filler_profile(conn: sqlite3.Connection, name: str) -> str:
+    """Answer the five filler questions for one ingredient:
+      1. what roles does this fill?      (base_roles)
+      2. what kinds of plates does it repair?  (repairs)
+      3. what should it not be used for? (avoid_when)
+      4. is it common in Finnish supermarket reality? (availability)
+      5. is it Cook or Scout?             (derived from its pairings:
+         any non-experimental -> Cook; experimental-only -> Scout)
+
+    repairs / avoid_when are per-filler profile data — they are NOT a
+    plate-condition matcher inside plate_balance (that would flatten the model;
+    see docs/ARCHITECTURE_CHECKPOINT_ROUND_4.md). They are surfaced here so a
+    human (or agent) can read a filler's culinary contract at a glance.
+    """
+    row = conn.execute(
+        "SELECT canonical_name, aliases, base_roles, default_availability_class, "
+        "kind, repairs, avoid_when FROM ingredients WHERE canonical_name = ?",
+        (name,),
+    ).fetchone()
+    if row is None:
+        canon = _match_ingredient(conn, name)
+        if canon:
+            return filler_profile(conn, canon)
+        return f"No ingredient named {name!r}."
+    roles = _split_list(row["base_roles"])
+    repairs = _split_list(row["repairs"])
+    avoid = _split_list(row["avoid_when"])
+    avail = row["default_availability_class"] or "(unspecified)"
+
+    prs = conn.execute(
+        """SELECT r.role_name AS role, p.confidence AS conf,
+                  ti.canonical_name AS target, tech.name AS technique
+           FROM pairings p
+           JOIN roles r ON r.role_id = p.role_id
+           JOIN ingredients i ON i.ingredient_id = p.ingredient_id
+           LEFT JOIN transformations t ON t.transformation_id = p.works_best_with_transformation_id
+           LEFT JOIN ingredients ti ON ti.ingredient_id = t.ingredient_id
+           LEFT JOIN techniques tech ON tech.technique_id = t.technique_id
+           WHERE i.canonical_name = ?
+           ORDER BY CASE p.confidence WHEN 'high' THEN 4 WHEN 'medium_high' THEN 3
+                     WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END DESC""",
+        (name,),
+    ).fetchall()
+    n_cook = sum(1 for p in prs if p["conf"] != "experimental")
+    n_exp = sum(1 for p in prs if p["conf"] == "experimental")
+    if n_cook and n_exp:
+        mode = f"Cook (also has {n_exp} Scout/experimental pairing{'s' if n_exp != 1 else ''})"
+    elif n_cook:
+        mode = f"Cook ({n_cook} non-experimental pairing{'s' if n_cook != 1 else ''})"
+    elif n_exp:
+        mode = (f"Scout / experimental ({n_exp} experimental pairing"
+                f"{'s' if n_exp != 1 else ''}; no classic pairings yet)")
+    else:
+        mode = "no pairings yet — not suggested by the plate engine"
+
+    kind = row["kind"]
+    if kind == "full":
+        header = (f"{row['canonical_name']} — full ingredient (has a technique tree; "
+                  f"ask 'what can I do with {row['canonical_name']}')")
+    elif kind == "both":
+        header = f"{row['canonical_name']} — both (technique tree + filler) profile"
+    else:
+        header = f"{row['canonical_name']} — filler profile"
+    lines = [header]
+    lines.append("  roles filled: " + (", ".join(roles) if roles else "(none)"))
+    lines.append("  repairs plates that are: " + (", ".join(repairs) if repairs else "(unspecified)"))
+    lines.append("  avoid when: " + (", ".join(avoid) if avoid else "(unspecified)"))
+    lines.append(f"  Finnish supermarket: {avail}")
+    lines.append(f"  mode: {mode}")
+    seen = []
+    for p in prs[:6]:
+        tgt = f"{p['target']} {p['technique']}" if p["target"] else "(general)"
+        seen.append(f"{p['role']} for {tgt}")
+    if seen:
+        lines.append("  paired with: " + "; ".join(seen))
+    return "\n".join(lines)
+
+
 def parse_prompt(text: str) -> dict[str, Any]:
     """Loosely parse a free-text prompt into an intent + optional technique."""
     low = text.lower()
@@ -844,6 +948,16 @@ def answer(conn: sqlite3.Connection, prompt: str) -> str:
         tr = transformation_by_technique(conn, tech, ingredient)
         if tr:
             return render_branch(branch_detail(conn, tr["transformation_id"]))
+
+    # ---- filler profile: subject is a filler (no technique tree) ----
+    # "what can I do with lemon", "what does mustard repair", "tell me about
+    # sauerkraut" — a filler has no branches, so it routes to its profile
+    # (roles / repairs / avoid_when / availability / Cook-or-Scout) instead of
+    # falling through to tomato branches. Full/both ingredients (tomato, onion,
+    # potato) have transformations, so they skip this and keep their branch view.
+    subject = _detect_subject(prompt, conn)
+    if subject and not _has_transformations(conn, subject):
+        return filler_profile(conn, subject)
 
     # ---- branches: "what can I do with tomatoes" (the product shape) ----
     branches = top_branches(conn, ingredient, limit=5)

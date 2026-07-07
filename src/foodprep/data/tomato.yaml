@@ -203,12 +203,28 @@ ingredients:
   - { canonical_name: rice,       base_roles: "carb",       default_availability_class: very_common }
   - { canonical_name: tortilla,   base_roles: "carb\ncarrier", default_availability_class: occasional }
   - { canonical_name: lime,       base_roles: "acid",       default_availability_class: common }
-  - { canonical_name: lemon,      base_roles: "acid",       default_availability_class: very_common }
-  - { canonical_name: vinegar,    base_roles: "acid",       default_availability_class: very_common }
+  - canonical_name: lemon
+    base_roles: "acid"
+    default_availability_class: very_common
+    repairs: "heavy\nfatty\nroasted\nfried\ngrilled\nfish\nlegume\npotato\nsweet\nbland"
+    avoid_when: "already_high_acid\ndairy_long_cook\ndelicate_raw"
+  - canonical_name: vinegar
+    base_roles: "acid"
+    default_availability_class: very_common
+    repairs: "heavy\nfatty\nroasted\nfried\nsweet\nlegume\npotato\nbland"
+    avoid_when: "already_high_acid\ndelicate\ndairy_long_cook\nraw_fish_overpower"
   - { canonical_name: jalapeno,   base_roles: "heat",       default_availability_class: occasional }
   - { canonical_name: chile_flakes, aliases: "chilli flakes\nred pepper flakes", base_roles: "heat", default_availability_class: very_common }
-  - { canonical_name: cream,      base_roles: "cream\nfat", default_availability_class: common }
-  - { canonical_name: yogurt,     base_roles: "cream\nprotein", default_availability_class: very_common }
+  - canonical_name: cream
+    base_roles: "cream\nfat"
+    default_availability_class: common
+    repairs: "spicy\ndry\nroasted\nsharp_acid\nsoup\nbland"
+    avoid_when: "already_heavy\nalready_rich\ndairy_long_cook_high_acid\nfried"
+  - canonical_name: yogurt
+    base_roles: "cream\nprotein"
+    default_availability_class: very_common
+    repairs: "spicy\nfried\nroasted\nheavy\nbland\nsoup"
+    avoid_when: "high_heat_boil\nalready_high_acid\ndairy_free"
   - { canonical_name: eggs,       base_roles: "protein",    default_availability_class: very_common }
   - { canonical_name: cucumber,   base_roles: "crunch\nhydration", default_availability_class: very_common }
   - { canonical_name: capers,     base_roles: "acid\numami", default_availability_class: occasional }
@@ -218,14 +234,23 @@ ingredients:
   - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: occasional }
   - { canonical_name: greens,     aliases: "lettuce\nspinach", base_roles: "herb\nmild_base", default_availability_class: very_common }
   - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
-  - { canonical_name: butter,     base_roles: "fat",        default_availability_class: very_common }
+  - canonical_name: butter
+    base_roles: "fat"
+    default_availability_class: very_common
+    repairs: "dry\nbland\nroasted\nsaute_base\nsauce_body"
+    avoid_when: "already_heavy\nhigh_heat_frying\ndairy_free"
   - { canonical_name: black_pepper, aliases: "pepper", base_roles: "aromatic", default_availability_class: very_common }
   - { canonical_name: sea_salt,   aliases: "salt\nflaky salt", base_roles: "salt", default_availability_class: very_common }
   - { canonical_name: grilled_fish, base_roles: "protein",  default_availability_class: occasional }
   - { canonical_name: tofu,       base_roles: "protein",    default_availability_class: common }
   - { canonical_name: pasta_water, base_roles: "body\nhydration", default_availability_class: very_common }
   # ---- experimental / scout fillers (plausible but uncommon; Nordic-aware) ----
-  - { canonical_name: rye_crumbs,        base_roles: "crunch\ncarrier",  default_availability_class: very_common }
+  - canonical_name: rye_crumbs
+    aliases: "rye breadcrumbs\nrye crumb"
+    base_roles: "crunch\ncarb\ncarrier"
+    default_availability_class: very_common
+    repairs: "soft\nmushy\nsoup\nsoft_veg\ndry_needs_texture"
+    avoid_when: "already_crunchy\nsweet_dessert"
   - { canonical_name: smoked_yogurt,     base_roles: "cream\nfat",       default_availability_class: occasional }
   - { canonical_name: lingonberry_vinegar, base_roles: "acid",           default_availability_class: common }
   - { canonical_name: sumac,            base_roles: "acid\numami",        default_availability_class: occasional }
@@ -235,13 +260,50 @@ ingredients:
   - { canonical_name: miso,            base_roles: "umami",              default_availability_class: occasional }
   - { canonical_name: fennel_pollen,    base_roles: "herb\naromatic",     default_availability_class: rare }
   # ---- role-only fillers (no tree; pure role providers) ----
-  - { canonical_name: mustard,   aliases: "dijon\nwhole-grain mustard", base_roles: "acid\numami\nheat", default_availability_class: very_common }
-  - { canonical_name: pickles,    aliases: "pickled cucumber\ngerkens", base_roles: "acid\ncrunch",     default_availability_class: very_common }
+  - canonical_name: mustard
+    aliases: "dijon\nwhole-grain mustard"
+    base_roles: "acid\numami\nheat"
+    default_availability_class: very_common
+    repairs: "heavy\nfatty\nfried\nbland\npotato\nmeat\nsausage\nlegume"
+    avoid_when: "delicate\nsweet_dessert\nhigh_heat_long\nalready_spicy"
+  - canonical_name: pickles
+    aliases: "pickled cucumber\ngerkens\npickle"
+    base_roles: "acid\ncrunch"
+    default_availability_class: very_common
+    repairs: "heavy\nfatty\nfried\nbland\nrich_meat\npotato\nsausage"
+    avoid_when: "already_high_acid\ndelicate\nraw_fish\nsweet"
   - { canonical_name: rosemary,   base_roles: "herb\naromatic",         default_availability_class: common }
   - { canonical_name: dill,        base_roles: "herb",                    default_availability_class: common }
   - { canonical_name: bacon,       base_roles: "fat\nsalt\numami\nprotein", default_availability_class: common }
   - { canonical_name: gruyere,    aliases: "gruyère", base_roles: "fat\nprotein\numami", default_availability_class: occasional }
-  - { canonical_name: soy_sauce,  aliases: "soy sauce", base_roles: "salt\numami",       default_availability_class: very_common }
+  - canonical_name: soy_sauce
+    aliases: "soy sauce"
+    base_roles: "salt\numami"
+    default_availability_class: very_common
+    repairs: "bland\nroasted\nfried\nrice\ngrain\nlegume\nmushroom\nmeat"
+    avoid_when: "already_salty\ndelicate\ndairy\nsweet_dessert\nraw_fish_delicate"
+  # ---- Round 5 filler pack additions (kind: filler; rich profile) ----
+  # sauerkraut is the fermented-cabbage filler (cabbage itself becomes a full
+  # ingredient in Round 6). Fresh herbs / chili are generic convenience fillers
+  # alongside the named herbs (basil/dill/parsley) and chile_flakes/jalapeno.
+  - canonical_name: sauerkraut
+    aliases: "fermented cabbage\nhapankaali"
+    base_roles: "acid\ncrunch\nsalt"
+    default_availability_class: common
+    repairs: "heavy\nfatty\nfried\nrich_meat\nsausage\npork\npotato\nbland"
+    avoid_when: "already_high_acid\ndelicate\ndairy_clash\nlong_cook\nsweet"
+  - canonical_name: fresh_herbs
+    aliases: "fresh herb\nherbs\ngarnish"
+    base_roles: "herb"
+    default_availability_class: common
+    repairs: "heavy\nroasted\nfried\nbland\nrich\nstew\nsoup"
+    avoid_when: "long_cook\nalready_delicate\nhigh_heat_dry"
+  - canonical_name: chili
+    aliases: "fresh chili\nchilli\nchili pepper"
+    base_roles: "heat"
+    default_availability_class: common
+    repairs: "bland\nrich\nfatty\nsweet_bland"
+    avoid_when: "already_spicy\ndelicate\ndairy_cream\nhigh_acid_raw"
 
 components:
   - { name: fresh_tomato_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
@@ -915,6 +977,23 @@ pairings:
   - { for_ingredient: potato, filler: eggs,      role: protein, works_best_with: hash,    context: "egg on top",           availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: sea_salt,  role: salt,    works_best_with: hash,    context: "seasoning",            availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: parsley,  role: herb,    works_best_with: hash,    context: "finish",               availability: common,      confidence: medium, evidence: [recipedb] }
+  # ---- Round 5 filler pairings (so the plate engine can suggest the new/  ----
+  # ---- enriched fillers; Cook confidence, not experimental)              ----
+  - { for_ingredient: potato, filler: sauerkraut,  role: acid,    works_best_with: fry,    context: "bratwurst plate",      availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: potato, filler: sauerkraut,  role: crunch,  works_best_with: boil,    context: "boiled potato + sauerkraut", availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: sauerkraut,  role: acid,    works_best_with: hash,    context: "hash plate",           availability: common,      confidence: low,     evidence: [recipedb] }
+  - { for_ingredient: potato, filler: fresh_herbs, role: herb,    works_best_with: roast,   context: "roast lift",           availability: common,      confidence: medium,  evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: fresh_herbs, role: herb,    works_best_with: soup,    context: "soup finish",          availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { filler: fresh_herbs,                       role: herb,    works_best_with: roast,      context: "roasted tomato lift",  availability: common,      confidence: medium,  evidence: [roast_culinary] }
+  - { for_ingredient: onion, filler: fresh_herbs, role: herb,    works_best_with: saute,      context: "onion saute finish",   availability: common,      confidence: medium,  evidence: [recipedb] }
+  - { filler: chili,                              role: heat,   works_best_with: salsa,      context: "fresh chili salsa",    availability: common,      confidence: high,    evidence: [pico] }
+  - { filler: chili,                              role: heat,   works_best_with: char,       context: "charred chili",        availability: common,      confidence: medium,  evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: chili,      role: heat,   works_best_with: fry,        context: "chili fries",          availability: common,      confidence: low,     evidence: [recipedb] }
+  - { for_ingredient: potato, filler: rye_crumbs, role: crunch, works_best_with: gratin,    context: "rye-crumb crust",      availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: potato, filler: rye_crumbs, role: crunch, works_best_with: soup,      context: "rye croutons",         availability: very_common, confidence: medium,  evidence: [pappa] }
+  - { for_ingredient: potato, filler: pickles,    role: acid,    works_best_with: salad,      context: "potato salad pickle",  availability: very_common, confidence: high,    evidence: [recipedb] }
+  - { for_ingredient: potato, filler: pickles,    role: crunch,  works_best_with: salad,      context: "potato salad crunch",   availability: very_common, confidence: medium,  evidence: [recipedb] }
+  - { for_ingredient: potato, filler: pickles,    role: acid,    works_best_with: fry,        context: "pickles with fries",   availability: very_common, confidence: medium,  evidence: [recipedb] }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).
