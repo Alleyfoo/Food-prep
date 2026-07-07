@@ -29,8 +29,8 @@ def cmd_ask(args: argparse.Namespace) -> int:
 
 def cmd_batch(args: argparse.Namespace) -> int:
     conn = connect(args.db)
-    rows = query.batch_prep(conn)
-    print("Batch-prep from tomatoes (high/very-high reuse):")
+    rows = query.batch_prep(conn, args.ingredient)
+    print(f"Batch-prep from {args.ingredient} (high/very-high reuse):")
     for r in rows:
         print(f"  - {r['technique']} -> {r['component']}  "
               f"(batch={r['batch_prep_value']}, freezes={bool(r['freezes_well'])}, "
@@ -40,11 +40,13 @@ def cmd_batch(args: argparse.Namespace) -> int:
 
 def cmd_hub(args: argparse.Namespace) -> int:
     conn = connect(args.db)
-    rows = query.hub_ingredients(conn)
-    print("Ingredients that unlock the most tomato transformations:")
-    for r in rows[:10]:
-        print(f"  - {r['filler']}: {r['transformations_covered']} transformations, "
-              f"{r['roles_filled']} roles")
+    print(query.hub_explained(conn, args.ingredient))
+    return 0
+
+
+def cmd_scout(args: argparse.Namespace) -> int:
+    conn = connect(args.db)
+    print(query.scout(conn, args.technique))
     return 0
 
 
@@ -61,15 +63,27 @@ def build_parser() -> argparse.ArgumentParser:
     pa.add_argument("prompt", nargs="+", help="the question")
     pa.set_defaults(func=cmd_ask)
 
-    pbat = sub.add_parser("batch", help="What can I batch-prep from tomatoes?")
+    pbat = sub.add_parser("batch", help="What can I batch-prep from an ingredient?")
+    pbat.add_argument("ingredient", nargs="?", default="tomato")
     pbat.set_defaults(func=cmd_batch)
 
     ph = sub.add_parser("hub", help="Which ingredient unlocks the most transformations?")
+    ph.add_argument("ingredient", nargs="?", default="tomato")
     ph.set_defaults(func=cmd_hub)
+
+    psc = sub.add_parser("scout", help="Experimental / uncommon pairings")
+    psc.add_argument("technique", nargs="?", default=None,
+                     help="limit to a technique, e.g. roast")
+    psc.set_defaults(func=cmd_scout)
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows console defaults to cp1252; force UTF-8 so the arrow/em-dash render.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
     parser = build_parser()
     args = parser.parse_args(argv)
     # join multi-word prompt

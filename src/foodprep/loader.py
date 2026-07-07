@@ -178,9 +178,22 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
             ),
         )
 
+    # ---- component profiles (meal-repair plate items) ----
+    for cp in data.get("component_profiles", []):
+        conn.execute(
+            "INSERT INTO component_profiles(name, aliases, provides_roles, "
+            "flavour_tags, texture_tags, notes) VALUES (?,?,?,?,?,?)",
+            (cp["name"], cp.get("aliases"), cp.get("provides_roles"),
+             cp.get("flavour_tags"), cp.get("texture_tags"), cp.get("notes")),
+        )
+
+    default_ing = data.get("default_ingredient", "tomato")
+
     # ---- transformations (the core record) ----
-    tomato_id = _ingredient_id(conn, "tomato")
+    # Each entry may name its own ingredient; default is default_ing.
     for tr in data.get("transformations", []):
+        ing_name = tr.get("ingredient", default_ing)
+        ing_id = _ingredient_id(conn, ing_name)
         tech_id = _technique_id(conn, tr["technique"])
         comp_id = _component_id(conn, tr["output_component"])
         conf = tr["confidence"]
@@ -190,13 +203,13 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
             "INSERT INTO transformations(ingredient_id, technique_id, "
             "output_component_id, flavour_shift, texture_shift, confidence, notes) "
             "VALUES (?,?,?,?,?,?,?)",
-            (tomato_id, tech_id, comp_id, tr.get("flavour_shift"),
+            (ing_id, tech_id, comp_id, tr.get("flavour_shift"),
              tr.get("texture_shift"), conf, tr.get("notes")),
         )
         tr_id = conn.execute(
             "SELECT transformation_id FROM transformations "
             "WHERE ingredient_id = ? AND technique_id = ?",
-            (tomato_id, tech_id),
+            (ing_id, tech_id),
         ).fetchone()[0]
 
         for tg in tr.get("tags_after", []):
@@ -227,16 +240,21 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
             )
 
     # ---- pairings ----
+    # for_ingredient names which ingredient's transformation the pairing targets;
+    # default is default_ing. works_best_with is a technique name on that ingredient.
     for p in data.get("pairings", []):
         filler_id = _ingredient_id(conn, p["filler"])
         role_id = _role_id(conn, p["role"])
         wbtr_id = None
         if p.get("works_best_with"):
-            wbtr_id = conn.execute(
+            target_ing = _ingredient_id(conn, p.get("for_ingredient", default_ing))
+            row = conn.execute(
                 "SELECT transformation_id FROM transformations "
                 "WHERE ingredient_id = ? AND technique_id = ?",
-                (tomato_id, _technique_id(conn, p["works_best_with"])),
-            ).fetchone()[0]
+                (target_ing, _technique_id(conn, p["works_best_with"])),
+            ).fetchone()
+            if row is not None:
+                wbtr_id = row[0]
         conn.execute(
             "INSERT INTO pairings(ingredient_id, role_id, "
             "works_best_with_transformation_id, common_context, "

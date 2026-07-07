@@ -2,6 +2,10 @@
 # Encodes: ingredient -> technique -> component -> missing roles -> next ingredient.
 # Availability classes approximate a Finnish / Lidl-style supermarket, not live stock.
 
+# The pilot ingredient. Transformations/pairings inherit this unless they set
+# their own `ingredient` / `for_ingredient` field.
+default_ingredient: tomato
+
 evidence_sources:
   - id: nchfp
     source_type: official
@@ -108,6 +112,7 @@ dish_contexts:
   - bowl
   - caprese
   - panzanella
+  - salsa
   - taco
   - wrap
   - dip
@@ -148,6 +153,8 @@ techniques:
   - { name: pickle,       is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 1 }
   - { name: freeze,       is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 1 }
   - { name: can,          is_modifier: 0, heat_type: wet,     moisture_change: none,  preservation_flag: 1 }
+  - { name: saute,        is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: caramelize,   is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
 
 # ---- Ingredients -----------------------------------------------------------
 # tomato is the pilot ingredient. The rest are fillers (pairing ingredients).
@@ -163,6 +170,7 @@ ingredients:
   - { canonical_name: basil,      base_roles: "herb",       default_availability_class: common }
   - { canonical_name: parsley,    base_roles: "herb",       default_availability_class: common }
   - { canonical_name: cilantro,   base_roles: "herb",       default_availability_class: occasional }
+  - { canonical_name: thyme,      base_roles: "herb",       default_availability_class: common }
   - { canonical_name: garlic,     base_roles: "aromatic",   default_availability_class: very_common }
   - { canonical_name: onion,      base_roles: "aromatic",   default_availability_class: very_common }
   - { canonical_name: mozzarella, base_roles: "fat\nprotein", default_availability_class: common }
@@ -195,6 +203,16 @@ ingredients:
   - { canonical_name: grilled_fish, base_roles: "protein",  default_availability_class: occasional }
   - { canonical_name: tofu,       base_roles: "protein",    default_availability_class: common }
   - { canonical_name: pasta_water, base_roles: "body\nhydration", default_availability_class: very_common }
+  # ---- experimental / scout fillers (plausible but uncommon; Nordic-aware) ----
+  - { canonical_name: rye_crumbs,        base_roles: "crunch\ncarrier",  default_availability_class: very_common }
+  - { canonical_name: smoked_yogurt,     base_roles: "cream\nfat",       default_availability_class: occasional }
+  - { canonical_name: lingonberry_vinegar, base_roles: "acid",           default_availability_class: common }
+  - { canonical_name: sumac,            base_roles: "acid\numami",        default_availability_class: occasional }
+  - { canonical_name: brown_butter,      base_roles: "fat",               default_availability_class: very_common }
+  - { canonical_name: walnut,          base_roles: "crunch\nfat",        default_availability_class: common }
+  - { canonical_name: orange_zest,      base_roles: "aromatic\nacid",     default_availability_class: common }
+  - { canonical_name: miso,            base_roles: "umami",              default_availability_class: occasional }
+  - { canonical_name: fennel_pollen,    base_roles: "herb\naromatic",     default_availability_class: rare }
 
 components:
   - { name: fresh_tomato_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
@@ -209,6 +227,11 @@ components:
   - { name: pickled_tomato_component,          kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
   - { name: frozen_tomato_base,                kind: storage,      keeps_well: long,   freezes_well: 1, batch_prep_value: very_high }
   - { name: canned_tomato_base,                kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: very_high }
+  # ---- onion components (second ingredient) ----
+  - { name: raw_onion_component,               kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: sauteed_onion_component,           kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: caramelized_onion_component,       kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: pickled_onion_component,           kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -429,6 +452,91 @@ transformations:
       - { source: usda_tomato, scope: "juice/crushed/sauce/salsa as formal preserve states" }
       - { source: nchfp, scope: "canned tomato products" }
 
+  # ---- onion transformations (second ingredient) ----
+  # Co-occurrence evidence from CulinaryDB (17k onion recipes): garlic, tomato,
+  # butter, parsley, cilantro, vinegar, thyme, beef, potato, beans, bread, cheese.
+  - ingredient: onion
+    technique: raw_assemble
+    output_component: raw_onion_component
+    flavour_shift: "Sharp, pungent, crisp"
+    texture_shift: "Crisp, crunchy"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sharp,  polarity: gain }
+      - { family: flavour, value: fresh,  polarity: gain }
+      - { family: texture, value: firm,   polarity: gain }
+    missing_roles:
+      - { role: acid,    priority: high,   note: "vinegar/lemon mellows pungency" }
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: fat,     priority: medium, note: "olive oil" }
+      - { role: herb,    priority: medium, note: "parsley/cilantro" }
+      - { role: crunch,  priority: low,    note: "already crisp" }
+    uses: [salad, salsa, sandwich, taco, dip]
+    evidence:
+      - { source: recipedb, scope: "raw onion in salads/salsas/sandwiches" }
+
+  - ingredient: onion
+    technique: saute
+    output_component: sauteed_onion_component
+    flavour_shift: "Sweetened, softened, aromatic"
+    texture_shift: "Soft, translucent"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,  polarity: gain }
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: soft,   polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    missing_roles:
+      - { role: fat,      priority: high,   note: "oil/butter to sweat in" }
+      - { role: aromatic, priority: medium, note: "garlic builds the base" }
+      - { role: salt,     priority: medium, note: "seasoning" }
+      - { role: herb,     priority: low,    note: "thyme/parsley finish" }
+      - { role: carb,     priority: low,    note: "build into sauce/soup" }
+    uses: [soup, stew, braise, beans, rice, smoky_sauce]
+    evidence:
+      - { source: recipedb, scope: "sauteed onion as aromatic base" }
+      - { source: pomodoro,  scope: "onion + garlic + tomato sauce base" }
+
+  - ingredient: onion
+    technique: caramelize
+    output_component: caramelized_onion_component
+    flavour_shift: "Deeply sweet, jammy, browned"
+    texture_shift: "Jammy, soft, collapsed"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: jammy,        polarity: gain }
+      - { family: state,   value: cooked,       polarity: gain }
+    missing_roles:
+      - { role: acid,       priority: high,   note: "vinegar balance sweetness" }
+      - { role: salt,       priority: high,   note: "seasoning" }
+      - { role: herb,       priority: medium, note: "thyme" }
+      - { role: carb,       priority: medium, note: "bread/tart base" }
+      - { role: protein,    priority: low,    note: "beef/cheese" }
+      - { role: hydration,  priority: low,    note: "stock to deglaze" }
+    uses: [sandwich, pizza, soup, stew, braise, toast]
+    evidence:
+      - { source: recipedb, scope: "caramelized onion in tarts/soups/stews" }
+
+  - ingredient: onion
+    technique: pickle
+    output_component: pickled_onion_component
+    flavour_shift: "Sharp, sweet-sour, bright"
+    texture_shift: "Crisp-pickled"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: flavour, value: sharp,     polarity: gain }
+      - { family: state,   value: preserved,  polarity: gain }
+    missing_roles:
+      - { role: mild_base, priority: high,   note: "taco/beans/potato host" }
+      - { role: fat,      priority: medium, note: "cheese/avocado" }
+      - { role: protein,  priority: medium, note: "beans/cheese/fish" }
+    uses: [taco, sandwich, salad, cheese_board]
+    evidence:
+      - { source: nchfp, scope: "pickled onions as condiment" }
+
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
 pairings:
@@ -445,6 +553,9 @@ pairings:
   - { filler: basil,        role: herb,      works_best_with: roast,        context: roasted tomato lift,       availability: common, confidence: high, evidence: [roast_culinary] }
   - { filler: parsley,      role: herb,      works_best_with: roast,        context: roasted component lift,    availability: common, confidence: medium, evidence: [roast_culinary] }
   - { filler: cilantro,     role: herb,      works_best_with: salsa,        context: pico de gallo,             availability: occasional, confidence: high, evidence: [pico] }
+  - { filler: cilantro,     role: herb,      works_best_with: char,         context: charred salsa lift,        availability: occasional, confidence: medium, evidence: [roast_culinary] }
+  - { filler: parsley,      role: herb,      works_best_with: char,         context: smoky fresh finish,        availability: common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: white_beans,  role: protein,   works_best_with: salsa,        context: salsa + beans bowl,        availability: common, confidence: low, evidence: [pico] }
   - { filler: garlic,       role: aromatic,  works_best_with: simmer,       context: pasta sauce,               availability: very_common, confidence: high, evidence: [pomodoro] }
   - { filler: garlic,       role: aromatic,  works_best_with: soup,         context: pappa,                     availability: very_common, confidence: high, evidence: [pappa] }
   - { filler: garlic,       role: aromatic,  works_best_with: char,         context: charred salsa,             availability: very_common, confidence: medium, evidence: [roast_culinary] }
@@ -491,3 +602,98 @@ pairings:
   - { filler: pasta_water,  role: hydration, works_best_with: reduce,       context: emulsify concentrated,     availability: very_common, confidence: medium, evidence: [pomodoro] }
   - { filler: grilled_fish, role: protein,   works_best_with: pickle,       context: pickled tomato condiment,  availability: occasional, confidence: low, evidence: [nchfp] }
   - { filler: tofu,         role: protein,   works_best_with: pickle,       context: pickled tomato + tofu,     availability: common, confidence: low, evidence: [nchfp] }
+  # ---- roast protein gap (was unfilled) ----
+  - { filler: eggs,         role: protein,   works_best_with: roast,        context: roasted tomato + eggs,     availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: soft_cheese,   role: protein,   works_best_with: roast,        context: roasted tomato + soft cheese, availability: common, confidence: medium, evidence: [roast_culinary] }
+  # ---- experimental / scout pairings (labelled; not classic) ----
+  - { filler: rye_crumbs,        role: crunch,  works_best_with: roast,  context: "Nordic carrier+crust",  availability: very_common, confidence: experimental, evidence: [], notes: "rye crumbs: carrier + crunch; Nordic-available; plausible with roasted tomato" }
+  - { filler: smoked_yogurt,     role: cream,   works_best_with: char,   context: "smoky cooled sauce",   availability: occasional, confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; plausible with charred tomato" }
+  - { filler: lingonberry_vinegar, role: acid,  works_best_with: roast,  context: "berry-bright finish", availability: common, confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry brightness; experimental" }
+  - { filler: sumac,            role: acid,    works_best_with: char,   context: "Middle-Eastern lift",  availability: occasional, confidence: experimental, evidence: [], notes: "sumac: tangy acid + umami; plausible with charred tomato" }
+  - { filler: brown_butter,      role: fat,     works_best_with: reduce,  context: "nutty concentrate",    availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; plausible cutting concentrated tomato" }
+  - { filler: walnut,          role: crunch,  works_best_with: dry,    context: "dried tomato + nut",   availability: common, confidence: experimental, evidence: [], notes: "walnut: crunch + fat; plausible with dried tomato" }
+  - { filler: orange_zest,      role: aromatic, works_best_with: roast,  context: "citrus lift",          availability: common, confidence: experimental, evidence: [], notes: "orange zest: aromatic acid; experimental with roasted tomato" }
+  - { filler: miso,            role: umami,   works_best_with: simmer,  context: "cross-cuisine depth",  availability: occasional, confidence: experimental, evidence: [], notes: "miso: umami; plausible enriching tomato sauce" }
+  - { filler: fennel_pollen,    role: herb,    works_best_with: roast,  context: "sweet anise lift",     availability: rare, confidence: experimental, evidence: [], notes: "fennel pollen: herbal aromatic; rare, experimental with roasted tomato" }
+  # ---- onion pairings (for_ingredient: onion; CulinaryDB co-occurrence) ----
+  - { for_ingredient: onion, filler: vinegar,    role: acid,    works_best_with: raw_assemble, context: "mellow pungency",      availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: sea_salt,   role: salt,    works_best_with: raw_assemble, context: "seasoning",            availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: olive_oil,  role: fat,     works_best_with: raw_assemble, context: "salad/salsa",         availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: parsley,    role: herb,    works_best_with: raw_assemble, context: "fresh finish",        availability: common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: cilantro,   role: herb,    works_best_with: raw_assemble, context: "pico/salsa",          availability: occasional, confidence: medium, evidence: [pico] }
+  - { for_ingredient: onion, filler: cucumber,   role: crunch,  works_best_with: raw_assemble, context: "salad crunch",        availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: olive_oil,  role: fat,     works_best_with: saute,        context: "sweat onion",         availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: butter,     role: fat,     works_best_with: saute,        context: "rich base",           availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: garlic,     role: aromatic, works_best_with: saute,      context: "aromatic base",        availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: thyme,      role: herb,    works_best_with: saute,        context: "savory herb",         availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: tomato,     role: acid,    works_best_with: saute,        context: "build sauce",         availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { for_ingredient: onion, filler: stock,      role: hydration, works_best_with: saute,     context: "soup base",           availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: sea_salt,   role: salt,    works_best_with: saute,        context: "seasoning",           availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: rice,       role: carb,    works_best_with: saute,        context: "build into rice dish", availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: vinegar,    role: acid,    works_best_with: caramelize,  context: "balance sweetness",   availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: sea_salt,   role: salt,    works_best_with: caramelize,  context: "seasoning",           availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: thyme,      role: herb,    works_best_with: caramelize,  context: "deep herb",           availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: stock,      role: hydration, works_best_with: caramelize, context: "deglaze",          availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: bread,      role: carb,    works_best_with: caramelize,  context: "tart/sandwich base",   availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: parmesan,  role: protein, works_best_with: caramelize,  context: "tart finishing",      availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: grilled_fish, role: protein, works_best_with: caramelize, context: "onion + fish",     availability: occasional, confidence: low, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: tortilla,   role: carrier, works_best_with: pickle,      context: "taco",                availability: occasional, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: white_beans, role: mild_base, works_best_with: pickle,   context: "beans host",          availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: soft_cheese, role: fat,    works_best_with: pickle,      context: "cheese board",        availability: common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: potato,     role: mild_base, works_best_with: pickle,    context: "potato host",         availability: very_common, confidence: medium, evidence: [recipedb] }
+
+# ---- Component profiles: non-tomato plate items for meal-repair logic ------
+# provides_roles is what this item brings to a plate; the meal-repair engine
+# unions these across items and subtracts from a balanced target.
+component_profiles:
+  - name: mashed_potatoes
+    aliases: "mash\nmashed potato"
+    provides_roles: "carb\ncream\nbody\nsalt\nmild_base"
+    flavour_tags: "mild\ncreamy\nbuttery"
+    texture_tags: "soft\nsmooth"
+    notes: "rich, soft, mild — cuts need acid + crunch + freshness"
+  - name: roasted_chickpea_patty
+    aliases: "chickpea patty\nchickpea patties\nlegume patty"
+    provides_roles: "protein\ncarb\numami"
+    flavour_tags: "nutty\nsavory"
+    texture_tags: "dry\ndense\ncrisp"
+    notes: "dry/dense protein — cuts need freshness + acid + crunch"
+  - name: bread
+    provides_roles: "carb\ncarrier\ncrunch"
+    flavour_tags: "toasted\nwheat"
+    texture_tags: "crust\ncrunch"
+    notes: "carrier; crunch if toasted"
+  - name: beans
+    aliases: "white beans\ncannellini"
+    provides_roles: "protein\ncarb\nbody"
+    flavour_tags: "earthy\nmild"
+    texture_tags: "creamy\nsoft"
+    notes: "soft protein + body"
+  - name: pasta
+    provides_roles: "carb\nbody"
+    flavour_tags: "wheat\nneutral"
+    texture_tags: "tender\nchewy"
+    notes: "carb anchor; absorbs sauce"
+  - name: rice
+    provides_roles: "carb\nbody\nmild_base"
+    flavour_tags: "neutral"
+    texture_tags: "tender"
+    notes: "mild carb base"
+  - name: raw_tomato
+    aliases: "fresh tomato\ntomatoes"
+    provides_roles: "acid\nhydration"
+    flavour_tags: "fresh\nacidic\nsweet"
+    texture_tags: "juicy\nsoft"
+    notes: "fresh acid + juice"
+  - name: roasted_tomato
+    aliases: "roasted tomatoes"
+    provides_roles: "acid\numami"
+    flavour_tags: "sweet\njammy\nsavory"
+    texture_tags: "jammy\nsoft"
+    notes: "concentrated sweet-savory"
+  - name: tomato_sauce
+    aliases: "tomato sauce\nsauce"
+    provides_roles: "acid\numami\nbody\nhydration"
+    flavour_tags: "savory\naromatic"
+    texture_tags: "saucy"
+    notes: "cooked acid + umami body"

@@ -161,6 +161,22 @@ CREATE TABLE user_preferences (
 );
 
 -- ---------------------------------------------------------------------------
+-- Component profiles: non-transformation plate items (mash, beans, bread, ...)
+-- Used by meal-repair logic: union of provides_roles vs a balanced target.
+-- This is the table that lets the engine reason about meals, not just tomato.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE component_profiles (
+    profile_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    name           TEXT NOT NULL UNIQUE,   -- e.g. mashed_potatoes, chickpea_patty
+    aliases        TEXT,                   -- newline-separated
+    provides_roles TEXT,                   -- newline-separated role names present
+    flavour_tags   TEXT,                    -- newline-separated
+    texture_tags   TEXT,                    -- newline-separated
+    notes          TEXT
+);
+
+-- ---------------------------------------------------------------------------
 -- Query helpers
 -- ---------------------------------------------------------------------------
 
