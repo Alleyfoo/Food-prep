@@ -195,6 +195,13 @@ _TECHNIQUE_PATTERNS = [
     (r"\bpickle(?:d)?\b|\bchutney\b", "pickle"),
     (r"\bfrozen\b|\bfreeze\b", "freeze"),
     (r"\bcanned\b|\bcanning\b|\bcan\b(?!\s+(?:i|you|we|do))|\bpreserv(?:e|ed)\b", "can"),
+    # ---- potato techniques ----
+    (r"\bboil(?:ed|ing)?\b", "boil"),
+    (r"\bmash(?:ed|ing|ed potato(?:es)?)?\b|\bmashed potato\b", "mash"),
+    (r"\bfri(?:ed|es|ing)\b|\bfry\b|\bhash brown\b", "fry"),
+    (r"\bgratin\b|\bdauphinois\b", "gratin"),
+    (r"\bbak(?:ed|ing|e)\b", "bake"),
+    (r"\bhash(?:ed|ing)?\b", "hash"),
     (r"\bsalt(?:ed)?\b", "salt_and_drain"),
     (r"\braw\b|\bfresh\b|\bsalad\b", "raw_assemble"),
     (r"\bsaute(?:ed)?\b|\bsweat(?:ed)?\b", "saute"),
@@ -266,6 +273,42 @@ def _find_profiles(text: str, conn: sqlite3.Connection) -> list[str]:
         if any(t.lower() in low for t in terms):
             found.append(r["name"])
     return found
+
+
+def _plate_phrases(text: str) -> list[str]:
+    """Best-effort: pull the plate-item noun phrases the user says they have.
+    'I have mashed potatoes and roasted chickpea patties. What is missing?'
+    -> ['mashed potatoes', 'roasted chickpea patties']"""
+    low = text.lower()
+    m = re.search(
+        r"(?:i have|i've got|i got)\b\s*(.*?)(?:\.|\?|!|what|how|which|$)",
+        low,
+    )
+    if not m:
+        return []
+    clause = m.group(1)
+    parts = re.split(r"\band\b|\balso\b|,", clause)
+    out = []
+    for p in parts:
+        p = p.strip(" .,;:'\"")
+        if 2 < len(p) <= 40 and not p.isdigit():
+            out.append(p)
+    return out
+
+
+def _match_profile(conn: sqlite3.Connection, phrase: str) -> str | None:
+    """Return the most specific component_profile name matching a phrase
+    (via name or alias, longest match wins), or None if no profile fits."""
+    p = phrase.lower()
+    best, best_len = None, 0
+    for r in conn.execute("SELECT name, aliases FROM component_profiles").fetchall():
+        terms = [r["name"].replace("_", " ")] + _split_list(r["aliases"])
+        for t in terms:
+            t = t.lower()
+            if t and (t == p or t in p or p in t):
+                if len(t) > best_len:
+                    best, best_len = r["name"], len(t)
+    return best
 
 
 def branch_detail(conn: sqlite3.Connection, transformation_id: int) -> dict[str, Any]:
@@ -483,24 +526,37 @@ def _fillers_for_role(conn: sqlite3.Connection, role: str,
     return [r["filler"] for r in rows]
 
 
-def meal_repair(conn: sqlite3.Connection, profiles: list[str], text: str) -> str:
-    """Given plate items, union their provided roles and report what's missing
-    for a balanced plate, with fillers. Honest about unrecognised items."""
-    provided: set[str] = set()
+def meal_repair(conn: sqlite3.Connection, text: str) -> str:
+    """Given a meal-repair prompt, extract the plate-item phrases the user names,
+    match each to a component_profile, union provided roles, and report what's
+    missing for a balanced plate — honestly listing any item with no profile."""
+    phrases = _plate_phrases(text)
     recognized: list[str] = []
-    for pname in profiles:
-        row = conn.execute("SELECT * FROM component_profiles WHERE name = ?",
-                           (pname,)).fetchone()
-        if row is None:
-            continue
-        recognized.append(pname)
+    unknown: list[str] = []
+    for ph in phrases:
+        m = _match_profile(conn, ph)
+        if m and m not in recognized:
+            recognized.append(m)
+        elif not m:
+            unknown.append(ph)
+
+    provided: set[str] = set()
+    for pname in recognized:
+        row = conn.execute(
+            "SELECT provides_roles FROM component_profiles WHERE name = ?", (pname,)
+        ).fetchone()
         for role in _split_list(row["provides_roles"]):
             provided.add(ROLE_CANON.get(role, role))
-    # detect unrecognised items the user mentioned (best-effort, noun-ish words)
+
+    lines = [f"You have: {', '.join(recognized) if recognized else '(no recognised plate items)'}"]
+    if unknown:
+        lines.append(
+            "  no profile for: " + ", ".join(unknown)
+            + " — add a component_profiles entry so I can reason about these."
+        )
+    prov_disp = sorted(provided)
+    lines.append("  provided roles: " + (", ".join(prov_disp) if prov_disp else "(none)"))
     missing_target = [r for r in TARGET_ROLES if r not in provided]
-    lines = [f"You have: {', '.join(recognized)}"]
-    prov_disp = sorted({ROLE_CANON.get(r, r) for r in provided})
-    lines.append("  provided roles: " + ", ".join(prov_disp))
     if not missing_target:
         lines.append("  balanced — nothing essential missing.")
         return "\n".join(lines)
@@ -508,7 +564,7 @@ def meal_repair(conn: sqlite3.Connection, profiles: list[str], text: str) -> str
     lines.append("  add:")
     for role in missing_target:
         fillers = _fillers_for_role(conn, role)
-        lines.append(f"    - {role}: " + (", ".join(fillers) or "(no curated filler)"))
+        lines.append(f"    - {role}: " + (", ".join(fillers) if fillers else "(no curated filler)"))
     return "\n".join(lines)
 
 
@@ -558,13 +614,13 @@ def answer(conn: sqlite3.Connection, prompt: str) -> str:
         return scout(conn, tech)
 
     # ---- meal repair: "what is missing / what should I add" + plate items ----
-    profiles = _find_profiles(prompt, conn)
+    phrases = _plate_phrases(prompt)
     wants_repair = (
         ("missing" in low or "what should i add" in low or "what taste" in low)
-        and (len(profiles) >= 2 or (" and " in low and profiles))
+        and len(phrases) >= 2
     )
-    if wants_repair and profiles:
-        return meal_repair(conn, profiles, prompt)
+    if wants_repair:
+        return meal_repair(conn, prompt)
 
     # ---- lighten: "less heavy / too rich" ----
     if ("less heavy" in low or "lighter" in low or "too rich" in low

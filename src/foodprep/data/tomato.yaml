@@ -133,6 +133,15 @@ dish_contexts:
   - future_sauce
   - future_soup
   - pantry_base
+  # ---- potato dish contexts ----
+  - gratin
+  - hash
+  - fries
+  - baked_potato
+  - potato_soup
+  - potato_salad
+  - mash_plate
+  - boiled_potato
 
 techniques:
   - { name: slice,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
@@ -155,14 +164,26 @@ techniques:
   - { name: can,          is_modifier: 0, heat_type: wet,     moisture_change: none,  preservation_flag: 1 }
   - { name: saute,        is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
   - { name: caramelize,   is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  # ---- potato techniques (third ingredient) ----
+  - { name: boil,         is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
+  - { name: mash,         is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: fry,          is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: gratin,       is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: bake,         is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: salad,        is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: hash,         is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
 
 # ---- Ingredients -----------------------------------------------------------
-# tomato is the pilot ingredient. The rest are fillers (pairing ingredients).
+# `kind` guards the ontology hedgerow:
+#   full   = deserves a technique tree (tomato, onion, potato, ...)
+#   filler = fills a role, no tree needed (most pantry items)
+#   both   = has a tree AND appears as a filler (potato: tree + mild_base filler)
 ingredients:
   - canonical_name: tomato
     aliases: "tomatoes\ntomaatti"
     base_roles: "acid\njuicy_component"
     default_availability_class: very_common
+    kind: full
     availability:
       - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish greenhouse July-Sep; imported year-round" }
 
@@ -172,7 +193,7 @@ ingredients:
   - { canonical_name: cilantro,   base_roles: "herb",       default_availability_class: occasional }
   - { canonical_name: thyme,      base_roles: "herb",       default_availability_class: common }
   - { canonical_name: garlic,     base_roles: "aromatic",   default_availability_class: very_common }
-  - { canonical_name: onion,      base_roles: "aromatic",   default_availability_class: very_common }
+  - { canonical_name: onion,      base_roles: "aromatic",   default_availability_class: very_common, kind: full }
   - { canonical_name: mozzarella, base_roles: "fat\nprotein", default_availability_class: common }
   - { canonical_name: parmesan,   base_roles: "umami\nfat", default_availability_class: common }
   - { canonical_name: soft_cheese, aliases: "ricotta\nfeta", base_roles: "fat\nprotein", default_availability_class: common }
@@ -193,7 +214,7 @@ ingredients:
   - { canonical_name: capers,     base_roles: "acid\numami", default_availability_class: occasional }
   - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
   - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
-  - { canonical_name: potato,     base_roles: "carb\nmild_base", default_availability_class: very_common }
+  - { canonical_name: potato,     base_roles: "carb\nmild_base", default_availability_class: very_common, kind: both, aliases: "potatoes\nperuna" }
   - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: occasional }
   - { canonical_name: greens,     aliases: "lettuce\nspinach", base_roles: "herb\nmild_base", default_availability_class: very_common }
   - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
@@ -213,6 +234,14 @@ ingredients:
   - { canonical_name: orange_zest,      base_roles: "aromatic\nacid",     default_availability_class: common }
   - { canonical_name: miso,            base_roles: "umami",              default_availability_class: occasional }
   - { canonical_name: fennel_pollen,    base_roles: "herb\naromatic",     default_availability_class: rare }
+  # ---- role-only fillers (no tree; pure role providers) ----
+  - { canonical_name: mustard,   aliases: "dijon\nwhole-grain mustard", base_roles: "acid\numami\nheat", default_availability_class: very_common }
+  - { canonical_name: pickles,    aliases: "pickled cucumber\ngerkens", base_roles: "acid\ncrunch",     default_availability_class: very_common }
+  - { canonical_name: rosemary,   base_roles: "herb\naromatic",         default_availability_class: common }
+  - { canonical_name: dill,        base_roles: "herb",                    default_availability_class: common }
+  - { canonical_name: bacon,       base_roles: "fat\nsalt\numami\nprotein", default_availability_class: common }
+  - { canonical_name: gruyere,    aliases: "gruyère", base_roles: "fat\nprotein\numami", default_availability_class: occasional }
+  - { canonical_name: soy_sauce,  aliases: "soy sauce", base_roles: "salt\numami",       default_availability_class: very_common }
 
 components:
   - { name: fresh_tomato_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
@@ -232,6 +261,16 @@ components:
   - { name: sauteed_onion_component,           kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
   - { name: caramelized_onion_component,       kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
   - { name: pickled_onion_component,           kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
+  # ---- potato components (third ingredient) ----
+  - { name: boiled_potato_component,            kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: mashed_potato_component,            kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: roasted_potato_component,           kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: high }
+  - { name: fried_potato_component,             kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: potato_gratin_component,            kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: baked_potato_component,             kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: potato_soup_base,                   kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: potato_salad_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: potato_hash_component,              kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -537,6 +576,185 @@ transformations:
     evidence:
       - { source: nchfp, scope: "pickled onions as condiment" }
 
+  # ---- potato transformations (third ingredient) ----
+  # Potato is `kind: both`: it has its own technique tree AND remains a filler
+  # (mild_base) for tomato/onion pairings. Missing roles per the curated spec:
+  #   boil → fat/salt/herb/acid ; mash → acid/crunch/freshness(herb)/protein
+  #   roast → sauce(hydration)/acid/protein/freshness(herb)
+  #   salad → acid-fat balance/ herb/crunch ; gratin → acid/fresh side(herb)/protein if main
+  # fry/bake/soup/hash are curated (user did not specify).
+  - ingredient: potato
+    technique: boil
+    output_component: boiled_potato_component
+    flavour_shift: "Neutral, earthy, starchy"
+    texture_shift: "Soft, tender, waterlogged surface"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: soft,   polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    missing_roles:
+      - { role: fat,  priority: high,   note: "butter/oil" }
+      - { role: salt, priority: high,   note: "seasoning" }
+      - { role: herb, priority: medium, note: "dill/parsley" }
+      - { role: acid, priority: medium, note: "vinegar/lemon" }
+    uses: [boiled_potato, mash_plate, salad, bowl]
+    evidence:
+      - { source: roast_culinary, scope: "boiling is the base state for mash/salad" }
+
+  - ingredient: potato
+    technique: mash
+    output_component: mashed_potato_component
+    flavour_shift: "Mild, creamy, buttery"
+    texture_shift: "Soft, smooth"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,   polarity: gain }
+      - { family: texture, value: soft,     polarity: gain }
+      - { family: texture, value: spoonable, polarity: gain }
+    missing_roles:
+      - { role: acid,    priority: high,   note: "lemon/vinegar cuts richness" }
+      - { role: crunch,  priority: high,   note: "croutons/crisp skin" }
+      - { role: herb,    priority: medium, note: "freshness — dill/parsley/greens" }
+      - { role: protein, priority: medium, note: "eggs/beans/cheese to make a meal" }
+    uses: [mash_plate, braise, bowl]
+    evidence:
+      - { source: roast_culinary, scope: "mash is rich + soft; needs acid/crunch/freshness" }
+
+  - ingredient: potato
+    technique: roast
+    output_component: roasted_potato_component
+    flavour_shift: "Savory, browned, concentrated"
+    texture_shift: "Crisp outside, fluffy inside"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,       polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: firm,        polarity: gain }
+      - { family: state,   value: roasted,     polarity: gain }
+    missing_roles:
+      - { role: hydration, priority: high,   note: "sauce/aioli/stock — roast is dry" }
+      - { role: acid,      priority: high,   note: "lemon to sharpen" }
+      - { role: protein,   priority: medium, note: "eggs/cheese/fish to make a meal" }
+      - { role: herb,      priority: medium, note: "freshness — rosemary/parsley" }
+    uses: [bowl, hash, salad, eggs]
+    evidence:
+      - { source: roast_culinary, scope: "roasting crisps + concentrates; needs sauce/acid" }
+
+  - ingredient: potato
+    technique: fry
+    output_component: fried_potato_component
+    flavour_shift: "Savory, browned, salty-craving"
+    texture_shift: "Crisp, golden"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: firm,  polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    missing_roles:
+      - { role: salt,    priority: high,   note: "seasoning while hot" }
+      - { role: acid,    priority: high,   note: "vinegar/mustard/ketchup cut fat" }
+      - { role: protein, priority: medium, note: "eggs/fish to make a meal" }
+      - { role: herb,    priority: low,    note: "parsley finish" }
+    uses: [fries, sandwich, eggs]
+    evidence:
+      - { source: roast_culinary, scope: "frying crisps; salt + acid balance fat" }
+
+  - ingredient: potato
+    technique: gratin
+    output_component: potato_gratin_component
+    flavour_shift: "Rich, cheesy, creamy"
+    texture_shift: "Creamy with crisp top"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,   polarity: gain }
+      - { family: flavour, value: umami,    polarity: gain }
+      - { family: texture, value: soft,     polarity: gain }
+      - { family: texture, value: dense,    polarity: gain }
+    missing_roles:
+      - { role: acid, priority: high,   note: "acid to cut the richness" }
+      - { role: herb, priority: medium, note: "fresh side — salad/greens" }
+      - { role: protein, priority: low, note: "only if it is the main; gratin is already rich" }
+    uses: [gratin, cheese_board, braise]
+    evidence:
+      - { source: roast_culinary, scope: "gratin is very rich; needs acid + fresh side" }
+
+  - ingredient: potato
+    technique: bake
+    output_component: baked_potato_component
+    flavour_shift: "Earthy, fluffy, mild"
+    texture_shift: "Crisp skin, fluffy interior"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: soft,   polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    missing_roles:
+      - { role: fat,     priority: high,   note: "butter/cream/sour cream" }
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: protein, priority: medium, note: "cheese/beans/bacon to make a meal" }
+      - { role: acid,    priority: low,    note: "lemon/chive lift" }
+    uses: [baked_potato, bowl, eggs]
+    evidence:
+      - { source: roast_culinary, scope: "baked potato is a mild carrier; loaded with fat/protein" }
+
+  - ingredient: potato
+    technique: soup
+    output_component: potato_soup_base
+    flavour_shift: "Soft, rounded, starchy-creamy"
+    texture_shift: "Liquid to creamy depending on blend"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: liquid, polarity: gain }
+    missing_roles:
+      - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
+      - { role: herb,    priority: high,   note: "dill/parsley/leek-green freshness" }
+      - { role: crunch,  priority: medium, note: "croutons/crisp bacon" }
+      - { role: protein, priority: low,    note: "bacon/eggs/beans" }
+    uses: [potato_soup, soup, chilled_soup]
+    evidence:
+      - { source: pappa, scope: "leek & potato — cream + herb + croutons" }
+
+  - ingredient: potato
+    technique: salad
+    output_component: potato_salad_component
+    flavour_shift: "Tangy, creamy, savory"
+    texture_shift: "Soft, dressed"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,     polarity: gain }
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: texture, value: soft,       polarity: gain }
+    missing_roles:
+      - { role: acid,   priority: high,   note: "sharpen the acid-fat balance (vinegar/mustard)" }
+      - { role: herb,   priority: medium, note: "dill/parsley/celery" }
+      - { role: crunch, priority: medium, note: "cucumber/capers/celery" }
+      - { role: protein, priority: low,   note: "eggs/bacon to make a meal" }
+    uses: [potato_salad, salad, sandwich]
+    evidence:
+      - { source: recipedb, scope: "potato salad = boiled potato + acidic emulsion + herb + crunch" }
+
+  - ingredient: potato
+    technique: hash
+    output_component: potato_hash_component
+    flavour_shift: "Savory, browned, integrated"
+    texture_shift: "Crisp edges, soft centre"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: firm,  polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    missing_roles:
+      - { role: fat,     priority: high,   note: "butter/oil to crisp" }
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: protein, priority: medium, note: "egg on top / bacon" }
+      - { role: herb,    priority: low,    note: "parsley finish" }
+      - { role: acid,    priority: low,    note: "vinegar lift" }
+    uses: [hash, eggs, bowl]
+    evidence:
+      - { source: recipedb, scope: "hash browns / potato hash — fat + egg + herb" }
+
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
 pairings:
@@ -624,9 +842,9 @@ pairings:
   - { for_ingredient: onion, filler: cucumber,   role: crunch,  works_best_with: raw_assemble, context: "salad crunch",        availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: onion, filler: olive_oil,  role: fat,     works_best_with: saute,        context: "sweat onion",         availability: very_common, confidence: high, evidence: [recipedb] }
   - { for_ingredient: onion, filler: butter,     role: fat,     works_best_with: saute,        context: "rich base",           availability: very_common, confidence: high, evidence: [recipedb] }
-  - { for_ingredient: onion, filler: garlic,     role: aromatic, works_best_with: saute,      context: "aromatic base",        availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: garlic,     role: aromatic, works_best_with: saute,      context: "aromatic base",        availability: very_common, confidence: high, evidence: [recipedb], curated_role_fit: "strong — garlic is genuinely the aromatic base, so the huge co-occurrence is real fit" }
   - { for_ingredient: onion, filler: thyme,      role: herb,    works_best_with: saute,        context: "savory herb",         availability: common, confidence: medium, evidence: [recipedb] }
-  - { for_ingredient: onion, filler: tomato,     role: acid,    works_best_with: saute,        context: "build sauce",         availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { for_ingredient: onion, filler: tomato,     role: acid,    works_best_with: saute,        context: "build sauce",         availability: very_common, confidence: high, evidence: [pomodoro], curated_role_fit: "strong — tomato + onion co-occur massively and tomato does supply acid once a sauce forms" }
   - { for_ingredient: onion, filler: stock,      role: hydration, works_best_with: saute,     context: "soup base",           availability: common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: onion, filler: sea_salt,   role: salt,    works_best_with: saute,        context: "seasoning",           availability: very_common, confidence: high, evidence: [recipedb] }
   - { for_ingredient: onion, filler: rice,       role: carb,    works_best_with: saute,        context: "build into rice dish", availability: very_common, confidence: medium, evidence: [recipedb] }
@@ -641,59 +859,62 @@ pairings:
   - { for_ingredient: onion, filler: white_beans, role: mild_base, works_best_with: pickle,   context: "beans host",          availability: common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: onion, filler: soft_cheese, role: fat,    works_best_with: pickle,      context: "cheese board",        availability: common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: onion, filler: potato,     role: mild_base, works_best_with: pickle,    context: "potato host",         availability: very_common, confidence: medium, evidence: [recipedb] }
+  # ---- potato pairings (for_ingredient: potato; CulinaryDB co-occurrence) ----
+  # boil
+  - { for_ingredient: potato, filler: butter,    role: fat,     works_best_with: boil,    context: "buttered boiled potato", availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: sea_salt,  role: salt,    works_best_with: boil,    context: "seasoning",             availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: dill,      role: herb,    works_best_with: boil,    context: "Nordic dill potato",    availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: vinegar,   role: acid,    works_best_with: boil,    context: "German potato",        availability: very_common, confidence: medium, evidence: [recipedb] }
+  # mash
+  - { for_ingredient: potato, filler: lemon,      role: acid,    works_best_with: mash,    context: "cuts richness",         availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: mustard,   role: acid,    works_best_with: mash,    context: "mustard mash",          availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: croutons,  role: crunch,  works_best_with: mash,    context: "crisp contrast",        availability: common,      confidence: medium, evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: dill,       role: herb,    works_best_with: mash,    context: "freshness",            availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: eggs,       role: protein, works_best_with: mash,    context: "mash + egg",            availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: soft_cheese, role: protein, works_best_with: mash,  context: "mash + cheese",        availability: common,      confidence: medium, evidence: [recipedb] }
+  # roast
+  - { for_ingredient: potato, filler: olive_oil, role: fat,      works_best_with: roast,   context: "crisp roast",          availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: rosemary,   role: herb,     works_best_with: roast,   context: "roast herb",           availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: garlic,     role: aromatic, works_best_with: roast,   context: "roast aromatics",      availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: lemon,      role: acid,     works_best_with: roast,   context: "sharpen",              availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: stock,      role: hydration, works_best_with: roast,  context: "sauce/pan moisture",    availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: eggs,      role: protein,  works_best_with: roast,   context: "roast + egg",          availability: very_common, confidence: medium, evidence: [recipedb] }
+  # fry
+  - { for_ingredient: potato, filler: sea_salt,  role: salt,     works_best_with: fry,     context: "salt while hot",        availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: vinegar,   role: acid,     works_best_with: fry,     context: "UK chips vinegar",      availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: mustard,   role: acid,     works_best_with: fry,     context: "mustard dip",          availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: eggs,      role: protein,  works_best_with: fry,     context: "fries + egg",          availability: very_common, confidence: medium, evidence: [recipedb] }
+  # gratin
+  - { for_ingredient: potato, filler: lemon,      role: acid,    works_best_with: gratin,  context: "cut richness",         availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: thyme,      role: herb,    works_best_with: gratin,  context: "gratin herb",          availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: greens,     role: herb,    works_best_with: gratin,  context: "fresh side",           availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: bacon,      role: protein, works_best_with: gratin,  context: "if main",              availability: common,      confidence: low,    evidence: [recipedb] }
+  # bake
+  - { for_ingredient: potato, filler: butter,    role: fat,      works_best_with: bake,    context: "buttered baked potato", availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: cream,      role: cream,   works_best_with: bake,    context: "sour cream",           availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: gruyere,    role: protein, works_best_with: bake,    context: "loaded baked potato",  availability: occasional,  confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: bacon,      role: protein, works_best_with: bake,    context: "loaded baked potato",  availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: sea_salt,  role: salt,     works_best_with: bake,    context: "seasoning",           availability: very_common, confidence: high,   evidence: [recipedb] }
+  # soup
+  - { for_ingredient: potato, filler: cream,      role: cream,   works_best_with: soup,    context: "silky soup",           availability: common,      confidence: high,   evidence: [pappa] }
+  - { for_ingredient: potato, filler: stock,      role: hydration, works_best_with: soup,  context: "soup base",            availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: dill,        role: herb,    works_best_with: soup,    context: "freshness",           availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: onion,      role: aromatic, works_best_with: soup,   context: "leek & potato base",   availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: croutons,   role: crunch,  works_best_with: soup,    context: "croutons",             availability: common,      confidence: medium, evidence: [pappa] }
+  - { for_ingredient: potato, filler: bacon,      role: protein, works_best_with: soup,    context: "garnish",             availability: common,      confidence: medium, evidence: [recipedb] }
+  # salad
+  - { for_ingredient: potato, filler: vinegar,   role: acid,    works_best_with: salad,   context: "acid-fat balance",     availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: mustard,   role: acid,    works_best_with: salad,   context: "mustard dressing",     availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: dill,       role: herb,    works_best_with: salad,   context: "potato salad herb",   availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: cucumber,  role: crunch,  works_best_with: salad,   context: "crunch",              availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: capers,    role: acid,    works_best_with: salad,   context: "briny crunch",         availability: occasional,  confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: eggs,      role: protein, works_best_with: salad,   context: "make it a meal",       availability: very_common, confidence: medium, evidence: [recipedb] }
+  # hash
+  - { for_ingredient: potato, filler: butter,    role: fat,     works_best_with: hash,    context: "crisp in butter",      availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: onion,     role: aromatic, works_best_with: hash,   context: "hash base",            availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: eggs,      role: protein, works_best_with: hash,    context: "egg on top",           availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: sea_salt,  role: salt,    works_best_with: hash,    context: "seasoning",            availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: parsley,  role: herb,    works_best_with: hash,    context: "finish",               availability: common,      confidence: medium, evidence: [recipedb] }
 
-# ---- Component profiles: non-tomato plate items for meal-repair logic ------
-# provides_roles is what this item brings to a plate; the meal-repair engine
-# unions these across items and subtracts from a balanced target.
-component_profiles:
-  - name: mashed_potatoes
-    aliases: "mash\nmashed potato"
-    provides_roles: "carb\ncream\nbody\nsalt\nmild_base"
-    flavour_tags: "mild\ncreamy\nbuttery"
-    texture_tags: "soft\nsmooth"
-    notes: "rich, soft, mild — cuts need acid + crunch + freshness"
-  - name: roasted_chickpea_patty
-    aliases: "chickpea patty\nchickpea patties\nlegume patty"
-    provides_roles: "protein\ncarb\numami"
-    flavour_tags: "nutty\nsavory"
-    texture_tags: "dry\ndense\ncrisp"
-    notes: "dry/dense protein — cuts need freshness + acid + crunch"
-  - name: bread
-    provides_roles: "carb\ncarrier\ncrunch"
-    flavour_tags: "toasted\nwheat"
-    texture_tags: "crust\ncrunch"
-    notes: "carrier; crunch if toasted"
-  - name: beans
-    aliases: "white beans\ncannellini"
-    provides_roles: "protein\ncarb\nbody"
-    flavour_tags: "earthy\nmild"
-    texture_tags: "creamy\nsoft"
-    notes: "soft protein + body"
-  - name: pasta
-    provides_roles: "carb\nbody"
-    flavour_tags: "wheat\nneutral"
-    texture_tags: "tender\nchewy"
-    notes: "carb anchor; absorbs sauce"
-  - name: rice
-    provides_roles: "carb\nbody\nmild_base"
-    flavour_tags: "neutral"
-    texture_tags: "tender"
-    notes: "mild carb base"
-  - name: raw_tomato
-    aliases: "fresh tomato\ntomatoes"
-    provides_roles: "acid\nhydration"
-    flavour_tags: "fresh\nacidic\nsweet"
-    texture_tags: "juicy\nsoft"
-    notes: "fresh acid + juice"
-  - name: roasted_tomato
-    aliases: "roasted tomatoes"
-    provides_roles: "acid\numami"
-    flavour_tags: "sweet\njammy\nsavory"
-    texture_tags: "jammy\nsoft"
-    notes: "concentrated sweet-savory"
-  - name: tomato_sauce
-    aliases: "tomato sauce\nsauce"
-    provides_roles: "acid\numami\nbody\nhydration"
-    flavour_tags: "savory\naromatic"
-    texture_tags: "saucy"
-    notes: "cooked acid + umami body"
+# Component profiles live in component_profiles.yaml now (separate file, richer
+# schema: provides / texture / missing_risks / heaviness_score / dryness_score).
