@@ -448,3 +448,70 @@ field is real and populated.
 42 passing (was 29): +5 potato, +4 meal-repair honesty/combos, +4 corpus
 backfill. `test_no_ontology_rot` extended to assert the ingredient `kind`
 guardrail (full + filler present).
+
+---
+
+# Round 4 — Plate Balance Engine (Cook mode)
+
+## Goal
+A component-level meal-repair engine: given a set of plate items (component
+profiles and/or raw ingredients), aggregate what the plate provides, what it
+risks lacking, and suggest missing-role fillers. Kept separate from Scout mode.
+No large new ingredient tree added (per the user's constraint).
+
+## What it does
+`query.plate_balance(conn, text)` (exposed as `foodprep plate "<items>"` and
+routed from `answer()` on `"balance"` / `"plate of"` / `"plate balance"` /
+`"<items> ... what is missing?"`):
+
+- **Recognise each item** via `_recognise_plate_item` — three kinds:
+  - `profile` — matches a `component_profiles` entry (longest term wins; the
+    `_component` / `_base` suffix is stripped so `roasted_tomato_component`
+    maps to `roasted_tomato`).
+  - `ingredient` — matches a raw ingredient by name/alias (`_match_ingredient`),
+    contributes its `base_roles`.
+  - `unknown` — neither; reported honestly with `"no profile for: X — unknown
+    item; add a component_profiles entry"`.
+- **Aggregate provided roles** — union of profile `provides` and ingredient
+  `base_roles`, run through `_canon_role` (ROLE_CANON + a small
+  `MISSING_TERM_TO_ROLE` map: sauce→hydration, fresh_side/freshness→herb).
+- **Aggregate missing_risks** — union of profile `missing_risks`, canonicalised.
+- **Plate-level heaviness / dryness** — mean of profile `heaviness_score` /
+  `dryness_score`, with qualitative reads (`_heaviness_label`:
+  heavy/rich/balanced/light; `_dryness_label`: dry/medium/moist) and lean
+  warnings when h_avg≥4 / d_avg≥3.5.
+- **Two-tier missing logic** — the key distinction:
+  - `target_gap` = `TARGET_ROLES - provided` → "missing for a balanced plate:"
+    (hard gaps — fillers grouped by role, Cook mode excludes experimental).
+  - `flagged_more` = `risk_roles - target_gap` → "also flagged by item profiles
+    (may want more):" (roles the plate *provides* but a profile still flags —
+    e.g. roasted_tomato provides acid yet lists acid as a risk: "provides some,
+    may need more"). This stops the engine from telling you to "add protein" to
+    a gratin that already provides protein.
+- **Cook vs Scout separation** — `plate_balance` is labelled "Cook mode" and
+  `_fillers_for_role(..., include_experimental=False)` excludes experimental
+  pairings (rye_crumbs absent). Scout (`query.scout`) stays labelled "Scout /
+  experimental" and surfaces them. Verified by `test_cook_and_scout_are_separate`.
+
+## Honesty
+- Unknown items are named, not guessed (`test_plate_balance_unknown_component_warns`).
+- Known-but-profile-less ingredients (onion) are recognised as ingredients with
+  base-role contributions AND warned for lacking balance data — softer than
+  "unknown", still honest (`test_plate_balance_ingredient_input`). The round-3
+  honesty test was updated from "unknown" to "(ingredient)" to match.
+- Empty plate input ("what is missing?" with no items) returns "Name the plate
+  items..." rather than guessing (`test_plate_balance_empty_input_prompts_for_items`).
+
+## Tests
+52 passing (was 42). +11 plate-balance: known profiles, ingredient input,
+component-name input, unknown-component warn, `balance` trigger routing,
+flagged-more vs hard-gap separation, heaviness/dryness reads, Cook excludes
+experimental, Cook/Scout separation, empty-input prompt.
+
+## Notes
+- Routing for `answer()` tightened so bare "plate" does not false-trigger on
+  incidental "on a plate" — only `balance` / `plate of` / `plate balance` /
+  missing+≥2-items route to `plate_balance`. `meal_repair` remains as a
+  backward-compat wrapper to `plate_balance`.
+- No new ingredient tree added (round-4 constraint honoured). The engine reuses
+  existing profiles and ingredient base_roles.

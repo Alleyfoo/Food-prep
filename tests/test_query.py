@@ -117,20 +117,25 @@ def test_meal_repair_roasted_potato_tomato_sauce(conn):
     assert "carb" not in out.split("missing for a balanced plate:")[1].split("add:")[0]
 
 
-def test_meal_repair_boiled_potato_onion_admits_unknown(conn):
+def test_meal_repair_boiled_potato_onion_ingredient(conn):
+    # Round 4: onion is now recognised as an ingredient (provides aromatic),
+    # not "unknown". It still has no component_profile, so the engine warns
+    # that it lacks balance data — honest about the limit without pretending
+    # onion is a stranger.
     out = query.answer(conn,
         "I have boiled potatoes and onion. What is missing?")
-    # boiled potato is a known profile; onion is not — engine says so honestly
     assert "boiled_potatoes" in out
-    assert "no profile for" in out
+    assert "onion (ingredient)" in out          # recognised, not unknown
+    assert "no profile for" in out               # but no balance profile
     assert "onion" in out
 
 
 def test_meal_repair_unknown_profile_steak(conn):
     out = query.answer(conn, "I have steak and eggs. What is missing?")
-    # steak has no profile — honesty message names it
+    # steak is neither a profile nor an ingredient — honesty message names it
     assert "no profile for" in out
     assert "steak" in out
+    assert "unknown item" in out
 
 
 def test_potato_gratin_too_heavy(conn):
@@ -364,3 +369,99 @@ def test_batch_prep(conn):
     techniques = {r["technique"] for r in rows}
     assert {"simmer", "reduce", "freeze", "can"} <= techniques
     assert all(r["batch_prep_value"] in ("high", "very_high") for r in rows)
+
+
+# ---- Round 4: Plate Balance Engine (Cook mode) ----------------------------
+# Evaluates a set of known component profiles / ingredients and suggests
+# missing-role fillers. Cook mode is kept separate from Scout mode.
+
+def test_plate_balance_known_profiles(conn):
+    out = query.plate_balance(conn, "mashed potatoes and roasted chickpea patties")
+    assert "Cook mode" in out
+    assert "mashed_potatoes (profile)" in out
+    assert "chickpea_patty (profile)" in out
+    # aggregates provided roles from both profiles
+    assert "provided roles:" in out
+    assert "protein" in out and "carb" in out
+    # plate-level heaviness + dryness are reported with a qualitative read
+    assert "plate heaviness:" in out
+    assert "plate dryness:" in out
+    # missing roles + fillers grouped by role
+    assert "missing for a balanced plate:" in out
+    assert "acid" in out and "herb" in out and "crunch" in out
+    assert "add:" in out
+
+
+def test_plate_balance_ingredient_input(conn):
+    # onion is a known ingredient (not a profile) — contributes base_roles,
+    # and the engine warns it lacks a balance profile.
+    out = query.plate_balance(conn, "boiled potatoes and onion")
+    assert "boiled_potatoes (profile)" in out
+    assert "onion (ingredient)" in out
+    assert "no profile for" in out
+    # aromatic comes from onion's base_roles
+    assert "aromatic" in out
+
+
+def test_plate_balance_component_name_input(conn):
+    # a transformation-output component name maps to its profile
+    out = query.plate_balance(conn, "roasted_tomato_component and pasta")
+    assert "roasted_tomato (profile)" in out
+    assert "pasta (profile)" in out
+    assert "missing for a balanced plate:" in out
+
+
+def test_plate_balance_unknown_component_warns(conn):
+    out = query.plate_balance(conn, "kangaroo and mash")
+    assert "no profile for" in out
+    assert "kangaroo" in out
+    assert "unknown item" in out
+
+
+def test_plate_balance_balance_trigger(conn):
+    # the "balance" keyword routes here even without "I have"
+    out = query.answer(conn, "balance potato gratin and toast")
+    assert "Cook mode" in out
+    assert "potato_gratin (profile)" in out
+    assert "toast (profile)" in out
+
+
+def test_plate_balance_flagged_more_separate_from_hard_gaps(conn):
+    # gratin provides fat + protein; toast flags them as risks. The engine must
+    # NOT list fat/protein as hard missing — they go under "may want more".
+    out = query.plate_balance(conn, "potato gratin and toast")
+    missing_section = out.split("missing for a balanced plate:")[1].split("add:")[0]
+    assert "fat" not in missing_section
+    assert "protein" not in missing_section
+    assert "also flagged by item profiles (may want more)" in out
+    assert "fat" in out  # but present in the flagged-more section
+
+
+def test_plate_balance_heaviness_and_dryness_reads(conn):
+    # two rich items -> heavy read; aggregated scores
+    out = query.plate_balance(conn, "potato gratin and mashed potatoes")
+    assert "plate heaviness:" in out
+    assert "rich" in out or "heavy" in out
+
+
+def test_plate_balance_cook_excludes_experimental(conn):
+    # Cook mode must not surface Scout/experimental pairings (rye_crumbs is
+    # experimental). It appears in Scout output, not in plate-balance output.
+    out = query.plate_balance(conn, "mashed potatoes and roasted chickpea patties")
+    assert "rye_crumbs" not in out
+
+
+def test_cook_and_scout_are_separate(conn):
+    cook = query.plate_balance(conn, "mashed potatoes and roasted chickpea patties")
+    scout = query.scout(conn, "roast")
+    assert "Cook mode" in cook
+    assert "Scout / experimental" in scout
+    # Scout surfaces the experimental pairing; Cook does not
+    assert "rye_crumbs" in scout
+    assert "rye_crumbs" not in cook
+
+
+def test_plate_balance_empty_input_prompts_for_items(conn):
+    # a balance request with no plate items named -> ask for items, don't guess
+    out = query.plate_balance(conn, "what is missing?")
+    assert "Name the plate items" in out

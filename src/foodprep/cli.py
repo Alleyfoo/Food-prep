@@ -50,6 +50,16 @@ def cmd_scout(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_plate(args: argparse.Namespace) -> int:
+    """Plate Balance Engine — Cook mode (separate from Scout)."""
+    conn = connect(args.db)
+    if conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] == 0:
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    print(query.plate_balance(conn, args.prompt))
+    return 0
+
+
 def cmd_backfill(args: argparse.Namespace) -> int:
     conn = connect(args.db)
     if conn.execute("SELECT count(*) FROM pairings").fetchone()[0] == 0:
@@ -90,6 +100,12 @@ def build_parser() -> argparse.ArgumentParser:
     psc.add_argument("technique", nargs="?", default=None,
                      help="limit to a technique, e.g. roast")
     psc.set_defaults(func=cmd_scout)
+
+    ppl = sub.add_parser("plate",
+                         help="Plate Balance Engine (Cook mode) — what is missing?")
+    ppl.add_argument("prompt", nargs="+",
+                     help="plate items, e.g. 'mashed potatoes and chickpea patties'")
+    ppl.set_defaults(func=cmd_plate)
 
     pbf = sub.add_parser("backfill",
                          help="Attach CulinaryDB co-occurrence evidence to pairings")

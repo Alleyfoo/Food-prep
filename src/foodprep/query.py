@@ -223,6 +223,10 @@ _INTENT_KEYWORDS = {
 # supporting richness and are not required targets on their own.
 TARGET_ROLES = ["salt", "fat", "acid", "herb", "crunch", "carb", "protein"]
 ROLE_CANON = {"cream": "fat"}
+# Profile missing_risks use cook language as well as role names. Map those cook
+# terms to real roles so a profiled gap can still be filled. (sauce -> hydration,
+# fresh_side / freshness -> herb.) Unmapped terms pass through unchanged.
+MISSING_TERM_TO_ROLE = {"sauce": "hydration", "fresh_side": "herb", "freshness": "herb"}
 
 BATCH_RANK = {"very_high": 3, "high": 2, "medium": 1, "low": 0}
 
@@ -276,17 +280,22 @@ def _find_profiles(text: str, conn: sqlite3.Connection) -> list[str]:
 
 
 def _plate_phrases(text: str) -> list[str]:
-    """Best-effort: pull the plate-item noun phrases the user says they have.
+    """Best-effort: pull the plate-item noun phrases the user names.
+    Supports 'I have X and Y', 'balance X and Y', 'plate of X and Y'.
     'I have mashed potatoes and roasted chickpea patties. What is missing?'
     -> ['mashed potatoes', 'roasted chickpea patties']"""
     low = text.lower()
     m = re.search(
-        r"(?:i have|i've got|i got)\b\s*(.*?)(?:\.|\?|!|what|how|which|$)",
+        r"(?:i have|i've got|i got|balance|plate of|plate|with)\b\s*"
+        r"(.*?)(?:\.|\?|!|what|how|which|$)",
         low,
     )
-    if not m:
-        return []
-    clause = m.group(1)
+    if m:
+        clause = m.group(1)
+    else:
+        # bare item list with no prefix (e.g. the `foodprep plate` CLI args):
+        # treat the whole text as the item clause.
+        clause = re.split(r"\bwhat\b|\bhow\b|\bwhich\b|[.?!]", low)[0]
     parts = re.split(r"\band\b|\balso\b|,", clause)
     out = []
     for p in parts:
@@ -298,17 +307,52 @@ def _plate_phrases(text: str) -> list[str]:
 
 def _match_profile(conn: sqlite3.Connection, phrase: str) -> str | None:
     """Return the most specific component_profile name matching a phrase
-    (via name or alias, longest match wins), or None if no profile fits."""
+    (via name or alias, longest match wins), or None if no profile fits.
+
+    Also maps transformation-output component names (roasted_tomato_component,
+    tomato_sauce_base) to profiles by stripping the _component / _base suffix."""
     p = phrase.lower()
+    # normalise component-style names: roasted_tomato_component -> roasted tomato
+    cleaned = (p.replace("_component", " ").replace("_base", " ")
+               .replace("_", " "))
+    cleaned = " ".join(cleaned.split())
+    candidates = [p] if p != cleaned else [p]
+    if p != cleaned:
+        candidates = [cleaned, p]
     best, best_len = None, 0
     for r in conn.execute("SELECT name, aliases FROM component_profiles").fetchall():
         terms = [r["name"].replace("_", " ")] + _split_list(r["aliases"])
         for t in terms:
             t = t.lower()
-            if t and (t == p or t in p or p in t):
-                if len(t) > best_len:
-                    best, best_len = r["name"], len(t)
+            if not t:
+                continue
+            for cand in candidates:
+                if t == cand or t in cand or cand in t:
+                    if len(t) > best_len:
+                        best, best_len = r["name"], len(t)
     return best
+
+
+def _match_ingredient(conn: sqlite3.Connection, phrase: str) -> str | None:
+    """Return the canonical ingredient name matching a phrase (name/alias,
+    longest match wins), or None. Used so raw ingredients on a plate (garlic,
+    onion, butter) contribute their base_roles even without a plate profile."""
+    p = phrase.lower()
+    best, best_len = None, 0
+    for r in conn.execute(
+        "SELECT canonical_name, aliases FROM ingredients"
+    ).fetchall():
+        terms = [r["canonical_name"]] + _split_list(r["aliases"])
+        for t in terms:
+            t = t.lower()
+            if t and (t == p or t in p or p in t) and len(t) > best_len:
+                best, best_len = r["canonical_name"], len(t)
+    return best
+
+
+def _canon_role(role: str) -> str:
+    """Canonicalise a role/cook-term to a real role name."""
+    return ROLE_CANON.get(role) or MISSING_TERM_TO_ROLE.get(role, role)
 
 
 def branch_detail(conn: sqlite3.Connection, transformation_id: int) -> dict[str, Any]:
@@ -504,10 +548,13 @@ def scout(conn: sqlite3.Connection, technique: str | None = None) -> str:
 
 
 def _fillers_for_role(conn: sqlite3.Connection, role: str,
-                      limit: int = 4) -> list[str]:
+                      limit: int = 4, include_experimental: bool = False) -> list[str]:
     """Best fillers for a role across all pairings (any transformation).
     Ties on confidence are broken by versatility (how many pairings that filler
-    has for the role) so olive_oil ranks above mozzarella for fat."""
+    has for the role) so olive_oil ranks above mozzarella for fat.
+
+    Cook mode (default) excludes `experimental` pairings — those belong to Scout
+    mode, surfaced via `scout()`. This keeps Cook and Scout answers separate."""
     rows = conn.execute(
         """
         SELECT ing.canonical_name AS filler,
@@ -516,56 +563,182 @@ def _fillers_for_role(conn: sqlite3.Connection, role: str,
                COUNT(*) AS n
         FROM pairings p JOIN ingredients ing ON ing.ingredient_id = p.ingredient_id
         JOIN roles r ON r.role_id = p.role_id
-        WHERE r.role_name = ?
+        WHERE r.role_name = :role
+          AND (:incl_exp = 1 OR p.confidence != 'experimental')
         GROUP BY ing.ingredient_id
         ORDER BY rnk DESC, COUNT(*) DESC
-        LIMIT ?
+        LIMIT :limit
         """,
-        (role, limit),
+        {"role": role, "limit": limit, "incl_exp": 1 if include_experimental else 0},
     ).fetchall()
     return [r["filler"] for r in rows]
 
 
-def meal_repair(conn: sqlite3.Connection, text: str) -> str:
-    """Given a meal-repair prompt, extract the plate-item phrases the user names,
-    match each to a component_profile, union provided roles, and report what's
-    missing for a balanced plate — honestly listing any item with no profile."""
-    phrases = _plate_phrases(text)
-    recognized: list[str] = []
-    unknown: list[str] = []
-    for ph in phrases:
-        m = _match_profile(conn, ph)
-        if m and m not in recognized:
-            recognized.append(m)
-        elif not m:
-            unknown.append(ph)
+def _recognise_plate_item(conn: sqlite3.Connection, phrase: str) -> dict[str, Any]:
+    """Recognise one plate-item phrase as a profile, an ingredient, or unknown.
 
-    provided: set[str] = set()
-    for pname in recognized:
+    Returns {kind, name, provides, missing_risks, heaviness, dryness}:
+      kind 'profile'    — a component_profile match (full balance data)
+      kind 'ingredient' — a raw ingredient (base_roles as provides; no scores)
+      kind 'unknown'    — neither, matched nothing
+    """
+    prof = _match_profile(conn, phrase)
+    if prof:
         row = conn.execute(
-            "SELECT provides_roles FROM component_profiles WHERE name = ?", (pname,)
+            "SELECT provides_roles, missing_risks, heaviness_score, dryness_score "
+            "FROM component_profiles WHERE name = ?", (prof,)
         ).fetchone()
-        for role in _split_list(row["provides_roles"]):
-            provided.add(ROLE_CANON.get(role, role))
+        return {
+            "kind": "profile", "name": prof,
+            "provides": _split_list(row["provides_roles"]),
+            "missing_risks": _split_list(row["missing_risks"]),
+            "heaviness": row["heaviness_score"],
+            "dryness": row["dryness_score"],
+        }
+    ing = _match_ingredient(conn, phrase)
+    if ing:
+        row = conn.execute(
+            "SELECT base_roles FROM ingredients WHERE canonical_name = ?", (ing,)
+        ).fetchone()
+        return {
+            "kind": "ingredient", "name": ing,
+            "provides": _split_list(row["base_roles"]),
+            "missing_risks": [], "heaviness": None, "dryness": None,
+        }
+    return {"kind": "unknown", "name": phrase, "provides": [],
+            "missing_risks": [], "heaviness": None, "dryness": None}
 
-    lines = [f"You have: {', '.join(recognized) if recognized else '(no recognised plate items)'}"]
-    if unknown:
+
+def _heaviness_label(avg: float) -> str:
+    if avg >= 4:
+        return "heavy"
+    if avg >= 3:
+        return "rich"
+    if avg >= 2:
+        return "balanced"
+    return "light"
+
+
+def _dryness_label(avg: float) -> str:
+    if avg >= 3.5:
+        return "dry"
+    if avg >= 2:
+        return "medium"
+    return "moist"
+
+
+def plate_balance(conn: sqlite3.Connection, text: str) -> str:
+    """Plate Balance Engine (Cook mode).
+
+    Evaluates a set of known component profiles / ingredients on a plate:
+      - aggregates provided roles (from profiles + ingredient base_roles)
+      - aggregates missing_risks from profiles (cook terms canonicalised)
+      - computes plate-level heaviness and dryness with a plain-English read
+      - suggests missing roles (balanced-target gap ∪ item missing_risks)
+      - suggests fillers grouped by role (Cook mode: no experimental pairings)
+      - warns about items with no component profile (incl. known ingredients
+        that lack balance data, and fully unknown items)
+
+    Honest about its limits — it never invents roles or fillers it doesn't have.
+    """
+    phrases = _plate_phrases(text)
+    items = [_recognise_plate_item(conn, ph) for ph in phrases]
+
+    profiles = [it for it in items if it["kind"] == "profile"]
+    no_profile = [it for it in items if it["kind"] != "profile"]  # ingredient or unknown
+
+    # ---- aggregate provided roles (canonicalised) ----
+    provided: set[str] = set()
+    for it in items:
+        for role in it["provides"]:
+            provided.add(_canon_role(role))
+
+    # ---- aggregate missing_risks from profiles (canonicalised) ----
+    risk_roles: set[str] = set()
+    for it in profiles:
+        for role in it["missing_risks"]:
+            risk_roles.add(_canon_role(role))
+
+    # ---- plate-level heaviness / dryness (from profiled items only) ----
+    h_vals = [it["heaviness"] for it in profiles if it["heaviness"] is not None]
+    d_vals = [it["dryness"] for it in profiles if it["dryness"] is not None]
+    plate_h = sum(h_vals) if h_vals else None
+    plate_d = sum(d_vals) if d_vals else None
+    h_avg = plate_h / len(h_vals) if h_vals else None
+    d_avg = plate_d / len(d_vals) if d_vals else None
+
+    # ---- suggested missing roles ----
+    # Hard gaps = target roles no item provides. These definitely need filling.
+    target_gap = [r for r in TARGET_ROLES if r not in provided]
+    # "may want more" = roles flagged by a profile's missing_risks even though
+    # some item provides them (e.g. roasted tomato provides acid but may want
+    # more if too sweet). These are soft suggestions, not hard gaps.
+    flagged_more = sorted(r for r in risk_roles if r not in set(target_gap))
+
+    # ---- render (Cook mode) ----
+    if not items:
+        return ("Plate balance — Cook mode\n"
+                "Name the plate items, e.g. 'balance mashed potatoes and "
+                "chickpea patties' or 'I have X and Y, what is missing?'")
+    have_parts = []
+    for it in items:
+        tag = {"profile": "profile", "ingredient": "ingredient",
+               "unknown": "unknown"}[it["kind"]]
+        have_parts.append(f"{it['name']} ({tag})")
+    lines = ["Plate balance — Cook mode",
+            f"You have: {', '.join(have_parts)}"]
+
+    if no_profile:
+        names = []
+        for it in no_profile:
+            label = "unknown item" if it["kind"] == "unknown" else "known ingredient, no balance data"
+            names.append(f"{it['name']} ({label})")
         lines.append(
-            "  no profile for: " + ", ".join(unknown)
-            + " — add a component_profiles entry so I can reason about these."
+            "  no profile for: " + ", ".join(names)
+            + " — add component_profiles entries for heaviness/dryness/missing-risk data."
         )
+
     prov_disp = sorted(provided)
     lines.append("  provided roles: " + (", ".join(prov_disp) if prov_disp else "(none)"))
-    missing_target = [r for r in TARGET_ROLES if r not in provided]
-    if not missing_target:
+
+    if plate_h is not None:
+        lines.append(f"  plate heaviness: {plate_h}  ({_heaviness_label(h_avg)})")
+    else:
+        lines.append("  plate heaviness: unknown (no profiled items)")
+    if plate_d is not None:
+        lines.append(f"  plate dryness: {plate_d}  ({_dryness_label(d_avg)})")
+    else:
+        lines.append("  plate dryness: unknown (no profiled items)")
+
+    if h_avg is not None and h_avg >= 4:
+        lines.append("  leans heavy — favor acid/herb/crunch; avoid more fat/cream.")
+    if d_avg is not None and d_avg >= 3.5:
+        lines.append("  leans dry — favor sauce/hydration/cream.")
+
+    if not target_gap and not flagged_more:
         lines.append("  balanced — nothing essential missing.")
         return "\n".join(lines)
-    lines.append("  missing for a balanced plate: " + ", ".join(missing_target))
-    lines.append("  add:")
-    for role in missing_target:
-        fillers = _fillers_for_role(conn, role)
-        lines.append(f"    - {role}: " + (", ".join(fillers) if fillers else "(no curated filler)"))
+
+    if target_gap:
+        lines.append("  missing for a balanced plate: " + ", ".join(target_gap))
+        lines.append("  add:")
+        for role in target_gap:
+            fillers = _fillers_for_role(conn, role)
+            lines.append(f"    - {role}: " + (", ".join(fillers) if fillers else "(no curated filler)"))
+    else:
+        lines.append("  no hard gaps — all target roles are covered.")
+
+    if flagged_more:
+        lines.append("  also flagged by item profiles (may want more): " + ", ".join(flagged_more))
+        for role in flagged_more:
+            fillers = _fillers_for_role(conn, role)
+            lines.append(f"    - {role}: " + (", ".join(fillers) if fillers else "(no curated filler)"))
     return "\n".join(lines)
+
+
+def meal_repair(conn: sqlite3.Connection, text: str) -> str:
+    """Backward-compat wrapper — the plate balance engine (Cook mode)."""
+    return plate_balance(conn, text)
 
 
 def lighten(conn: sqlite3.Connection, text: str) -> str:
@@ -613,14 +786,15 @@ def answer(conn: sqlite3.Connection, prompt: str) -> str:
     if intent == "scout":
         return scout(conn, tech)
 
-    # ---- meal repair: "what is missing / what should I add" + plate items ----
+    # ---- plate balance (Cook mode): "balance / plate of / what is missing" + items ----
     phrases = _plate_phrases(prompt)
-    wants_repair = (
-        ("missing" in low or "what should i add" in low or "what taste" in low)
-        and len(phrases) >= 2
+    wants_balance = (
+        "balance" in low or "plate of" in low or "plate balance" in low
+        or (("missing" in low or "what should i add" in low or "what taste" in low)
+            and len(phrases) >= 2)
     )
-    if wants_repair:
-        return meal_repair(conn, prompt)
+    if wants_balance:
+        return plate_balance(conn, prompt)
 
     # ---- lighten: "less heavy / too rich" ----
     if ("less heavy" in low or "lighter" in low or "too rich" in low
