@@ -7,11 +7,14 @@ from foodprep import query
 
 def test_schema_populated(conn):
     assert conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] >= 30
-    # 12 tomato + 4 onion
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 16
+    # 12 tomato + 4 onion + 9 potato
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 25
     assert conn.execute("SELECT count(*) FROM roles").fetchone()[0] >= 12
     assert conn.execute("SELECT count(*) FROM pairings").fetchone()[0] >= 30
     assert conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] >= 5
+    # ingredient kind guardrail: full transformation ingredients exist
+    kinds = {r[0] for r in conn.execute("SELECT DISTINCT kind FROM ingredients").fetchall()}
+    assert {"full", "filler"} <= kinds
 
 
 # ---- onion (second ingredient — proves the loader generalizes) -----------
@@ -54,6 +57,89 @@ def test_onion_hub(conn):
 def test_ingredient_detection_onion(conn):
     assert query._detect_ingredient("what can I do with onion?", conn) == "onion"
     assert query._detect_ingredient("what can I do with tomatoes?", conn) == "tomato"
+
+
+# ---- potato (third full transformation ingredient) -----------------------
+
+def test_potato_transformations_loaded(conn):
+    rows = query.transformations_for_ingredient(conn, "potato")
+    techs = {r["technique"] for r in rows}
+    assert {"boil", "mash", "roast", "fry", "gratin", "bake", "soup",
+            "salad", "hash"} == techs
+
+
+def test_potato_kind_is_both(conn):
+    # potato has a technique tree AND remains a filler (mild_base) — `both`
+    row = conn.execute(
+        "SELECT kind FROM ingredients WHERE canonical_name = 'potato'"
+    ).fetchone()
+    assert row["kind"] == "both"
+
+
+def test_potato_what_can_i_do(conn):
+    out = query.answer(conn, "what can I do with potatoes?")
+    assert "mashed_potato_component" in out
+    assert "missing:" in out
+    # potato answer must not leak tomato storage branches
+    assert "canned_tomato_base" not in out
+
+
+def test_potato_mash_now_what(conn):
+    out = query.answer(conn, "I mashed potatoes, now what?")
+    assert "mashed_potato_component" in out
+    # mash needs acid/crunch/freshness(herb)/protein — NOT more fat
+    assert "acid" in out
+    assert "crunch" in out
+    assert "protein" in out
+
+
+def test_potato_component_first(conn):
+    out = query.answer(conn, "what can I do with roasted_potato_component?")
+    assert "roasted_potato_component" in out
+    assert "use it in:" in out
+
+
+# ---- meal repair: honesty + potato plate combos --------------------------
+
+def test_meal_repair_roasted_potato_tomato_sauce(conn):
+    out = query.answer(conn,
+        "I have roasted potatoes and tomato sauce. What is missing?")
+    assert "missing for a balanced plate:" in out
+    assert "roasted_potato" in out
+    assert "tomato_sauce" in out
+    # roasted potato gives carb/umami; sauce gives acid/umami/body/hydration
+    # -> still missing salt, fat, herb, crunch, protein
+    assert "salt" in out
+    assert "fat" in out
+    assert "herb" in out
+    assert "protein" in out
+    # carb is satisfied by potato — not in the missing list
+    assert "carb" not in out.split("missing for a balanced plate:")[1].split("add:")[0]
+
+
+def test_meal_repair_boiled_potato_onion_admits_unknown(conn):
+    out = query.answer(conn,
+        "I have boiled potatoes and onion. What is missing?")
+    # boiled potato is a known profile; onion is not — engine says so honestly
+    assert "boiled_potatoes" in out
+    assert "no profile for" in out
+    assert "onion" in out
+
+
+def test_meal_repair_unknown_profile_steak(conn):
+    out = query.answer(conn, "I have steak and eggs. What is missing?")
+    # steak has no profile — honesty message names it
+    assert "no profile for" in out
+    assert "steak" in out
+
+
+def test_potato_gratin_too_heavy(conn):
+    out = query.answer(conn,
+        "I have potato gratin and it is too heavy. What lightens it?")
+    assert "acid" in out
+    assert "herb" in out
+    assert "crunch" in out
+    assert "avoid" in out.lower()  # warns against more fat/body/cream
 
 
 def test_no_ontology_rot(conn):
@@ -199,7 +285,7 @@ def test_meal_repair_mash_chickpea(conn):
     assert "fat" not in [w for w in out.split() if w == "fat"] or "fat" not in out.split("missing for a balanced plate:")[1].split("add:")[0]
     # the system recognises both items (not "only knows tomato")
     assert "mashed_potatoes" in out
-    assert "roasted_chickpea_patty" in out
+    assert "chickpea_patty" in out  # alias matches "roasted chickpea patties"
 
 
 def test_meal_repair_pasta_sauce(conn):

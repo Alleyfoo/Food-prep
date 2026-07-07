@@ -375,3 +375,76 @@ caramelized_onion_component (a reusable component)
 ## SQL integrity (post-patch)
 
 All clean: every transformation has missing roles, every pairing has a role, every component has uses, every transformation has tags and evidence, no orphan pairings. (See `tests/test_query.py::test_no_ontology_rot`.)
+
+## Round 3 — profiles split, ingredient kind, potato, honesty, corpus backfill
+
+Round 3 generalises the engine beyond tomato+onion. Changes evaluated here:
+- `component_profiles.yaml` as a separate file with a richer schema
+  (provides / texture / missing_risks / heaviness_score / dryness_score; 21 profiles)
+- ingredient `kind` guardrail: `full` (tomato, onion) / `filler` / `both` (potato)
+- **potato** as the third full ingredient (9 transformations + ~46 pairings)
+- meal-repair honesty: admits unknown plate items instead of silently ignoring them
+- CulinaryDB corpus backfill via `foodprep backfill <dir>`: co-occurrence evidence
+  attached to pairings; curated confidence and `curated_role_fit` left untouched
+
+### Q: what can I do with potatoes?
+`useful` — full product shape for a third ingredient; no tomato leak.
+
+    What you can do with potato (top branches by confidence + reuse):
+    roast
+      -> roasted_potato_component
+      -> Savory, browned, concentrated . Crisp outside, fluffy inside
+      -> missing: acid, hydration, herb, protein
+      -> add: protein: eggs . acid: lemon . herb: rosemary . hydration: stock
+      -> use in: bowl, eggs, hash, salad
+    ...
+    (9 potato transformations total)
+
+### Q: I mashed potatoes, now what?
+`useful` — next-intent now detects the new potato techniques
+(boil/mash/fry/gratin/bake/hash). Mash correctly wants acid/crunch/
+freshness(herb)/protein, NOT more fat (mash already provides cream -> fat).
+
+    After mash you have mashed_potato_component (confidence high).
+    mash
+      -> mashed_potato_component
+      -> missing: acid, crunch, herb, protein
+      -> add: protein: eggs, soft_cheese . crunch: croutons . herb: dill . acid: lemon, mustard
+
+### Q: I have roasted potatoes and tomato sauce. What is missing?
+`useful` — cross-ingredient plate reasoning (potato + tomato). Roasted potato
+gives carb/umami, sauce gives acid/umami/body/hydration; still missing
+salt/fat/herb/crunch/protein.
+
+    You have: roasted_potato, tomato_sauce
+      provided roles: acid, body, carb, hydration, umami
+      missing for a balanced plate: salt, fat, herb, crunch, protein
+      add: ...
+
+### Q: I have boiled potatoes and onion. What is missing?
+`actually surprising` — honest about the limits of the profile set: onion has
+no component_profile (it is an aromatic, not a plate item), so the engine says
+so explicitly instead of guessing.
+
+    You have: boiled_potatoes
+      no profile for: onion - add a component_profiles entry so I can reason about these.
+      provided roles: carb, mild_base
+      missing for a balanced plate: salt, fat, acid, herb, crunch, protein
+
+### Q: I have potato gratin and it is too heavy. What lightens it?
+`useful` — lighten path triggers on "too heavy"; recommends acid/herb/crunch and
+warns against more fat/body/cream.
+
+### Corpus backfill (CulinaryDB, 45,773 recipes)
+`useful` — `foodprep backfill F:/download/google/CulinaryDB` attached evidence to
+122 of 144 pairings (22 unresolved names like olive_oil / pasta_water, honestly
+0). Top co-occurrence: garlic + onion = 8114 recipes — the exact case the user
+flagged: huge co-occurrence does NOT mean garlic fixes every onion state.
+Curated confidence and `curated_role_fit` are untouched: corpus is evidence, not
+truth. Two pairings carry a `curated_role_fit` note demonstrating the guardrail
+field is real and populated.
+
+## Tests
+42 passing (was 29): +5 potato, +4 meal-repair honesty/combos, +4 corpus
+backfill. `test_no_ontology_rot` extended to assert the ingredient `kind`
+guardrail (full + filler present).
