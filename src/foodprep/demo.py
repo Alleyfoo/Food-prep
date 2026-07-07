@@ -16,9 +16,23 @@ This is the same data the Streamlit tabs render, in plain text.
 from __future__ import annotations
 
 import sqlite3
+import sys
 from typing import Any, Callable
 
 from . import query
+
+
+def _ensure_utf8_stdout() -> None:
+    """Force UTF-8 on stdout so box-drawing chars (═, →) don't crash on cp1252.
+
+    The demo prints Unicode banners; on Windows the default stdout codec is
+    cp1252, which can't encode them. Guarded so a non-reconfigurable stream
+    (e.g. a test capture) is left untouched.
+    """
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    except Exception:  # noqa: BLE001 - reconfigure may be absent or refused
+        pass
 
 
 def _banner(out: Callable[[str], None], n: int, title: str, subtitle: str) -> None:
@@ -54,6 +68,7 @@ def _card(out: Callable[[str], None], d: dict[str, Any]) -> None:
 
 def run_demo(conn: sqlite3.Connection, out: Callable[[str], None] = print) -> None:
     """Print the five demo flows to ``out`` (defaults to stdout)."""
+    _ensure_utf8_stdout()
     out("Ingredient Foundry — demo")
     out("A local cooking map for turning ingredients into useful components,")
     out("seeing what taste roles are missing, and finding the next sensible move.")

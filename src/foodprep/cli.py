@@ -90,8 +90,10 @@ def cmd_demo(args: argparse.Namespace) -> int:
     from .demo import run_demo
     conn = connect(args.db)
     if conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 0:
-        print("Database is empty. Run `foodprep build` first.")
-        return 1
+        # Work out of the box on a fresh clone: build in memory rather than
+        # demanding a prior `foodprep build`. No file is written.
+        conn = connect(":memory:")
+        build(conn)
     run_demo(conn)
     return 0
 
