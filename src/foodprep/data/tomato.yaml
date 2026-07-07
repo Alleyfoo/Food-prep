@@ -57,6 +57,11 @@ evidence_sources:
     title: "Slow-roasted / charred tomato traditions"
     license: n/a
     citation_text: "roasting concentrates & jams; charring adds smoke"
+  - id: steam_culinary
+    source_type: culinary
+    title: "Steam & blanch technique — green-veg color/texture lock"
+    license: n/a
+    citation_text: "brief wet heat sets bright green + tender-crisp; overcook → drab + sulfurous"
 
 roles:
   - { name: salt,        family: seasoning }
@@ -97,6 +102,7 @@ tags:
   - { family: texture, value: dense }
   - { family: texture, value: liquid }
   - { family: texture, value: firm }
+  - { family: texture, value: tender_crisp }
   - { family: texture, value: less_watery }
   - { family: texture, value: spoonable }
   - { family: state,    value: roasted }
@@ -181,6 +187,11 @@ techniques:
   - { name: stir_fry,     is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
   - { name: braise,       is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
   - { name: ferment,      is_modifier: 0, heat_type: none,    moisture_change: gain,  preservation_flag: 1 }
+  # ---- broccoli techniques (fifth ingredient) ----
+  # steam is the genuinely new food state: brief wet heat that locks bright
+  # green + tender-crisp. Distinct from boil (submerged, flavour leaches) and
+  # simmer (long, soft). The doneness cliff is encoded as a risk, not a role.
+  - { name: steam,        is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
 
 # ---- Ingredients -----------------------------------------------------------
 # `kind` guards the ontology hedgerow:
@@ -247,6 +258,13 @@ ingredients:
     kind: full
     availability:
       - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer-autumn; stored winter; imported year-round" }
+  - canonical_name: broccoli
+    aliases: "broccoli\nparskaali\nbroccolini"
+    base_roles: "crunch"
+    default_availability_class: very_common
+    kind: full
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer; imported year-round" }
   - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: occasional }
   - { canonical_name: greens,     aliases: "lettuce\nspinach", base_roles: "herb\nmild_base", default_availability_class: very_common }
   - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
@@ -358,6 +376,12 @@ components:
   - { name: cabbage_soup_base,                  kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
   - { name: pickled_cabbage_component,          kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
   - { name: fermented_cabbage_component,        kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: high }
+  # ---- broccoli components (fifth ingredient) ----
+  - { name: raw_broccoli_component,             kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: steamed_broccoli_component,         kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: roasted_broccoli_component,         kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: high }
+  - { name: stir_fried_broccoli_component,       kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: broccoli_soup_base,                 kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1022,6 +1046,124 @@ transformations:
     evidence:
       - { source: nchfp, scope: "lactic fermentation of cabbage (sauerkraut/kimchi family)" }
       - { source: recipedb, scope: "fermented cabbage as tangy condiment/side" }
+  # ---- broccoli (fifth full ingredient) ---------------------------------------
+  # Earns its place by modelling a genuinely new food state — STEAM — the
+  # bright-green, tender-crisp state locked by brief wet heat + shock. The
+  # doneness cliff (perfect → drab sulfurous mush in seconds) is encoded as a
+  # RISK, mirroring the cabbage guardrail: sulfurous_if_overcooked / harsh_when_raw
+  # are RISKS and TAGS, never missing roles.
+  - ingredient: broccoli
+    technique: raw_assemble
+    output_component: raw_broccoli_component
+    flavour_shift: "Crunchy, vegetal, mild; faintly sulfurous raw"
+    texture_shift: "Firm, crunchy"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,    polarity: gain }
+      - { family: flavour, value: vegetal,   polarity: gain }
+      - { family: texture, value: firm,      polarity: gain }
+    risks: "harsh_when_raw"
+    missing_roles:
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: fat,     priority: high,   note: "dip — oil/mayo/cheese" }
+      - { role: acid,    priority: medium, note: "lemon/vinegar lift" }
+      - { role: protein, priority: low,    note: "egg/cheese/nuts to make a meal" }
+    uses: [salad, dip, bowl, sandwich]
+    evidence:
+      - { source: recipedb, scope: "raw broccoli in crudités/salads with dip" }
+
+  - ingredient: broccoli
+    technique: steam
+    output_component: steamed_broccoli_component
+    flavour_shift: "Bright, sweet-nutty, vegetal; raw sharpness mellowed"
+    texture_shift: "Tender-crisp, vivid green (brief steam; shock to lock)"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,        polarity: gain }
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: flavour, value: vegetal,      polarity: gain }
+      - { family: texture, value: tender_crisp,  polarity: gain }
+      - { family: state,   value: cooked,       polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: fat,     priority: high,   note: "butter/oil/cheese" }
+      - { role: acid,    priority: medium, note: "lemon to lift" }
+      - { role: protein, priority: medium, note: "egg/cheese/nuts/tofu" }
+      - { role: carb,    priority: low,    note: "rice/pasta host" }
+    uses: [bowl, rice, eggs, pasta, salad]
+    evidence:
+      - { source: steam_culinary, scope: "brief steam + shock locks bright green and tender-crisp" }
+      - { source: recipedb, scope: "steamed broccoli with butter/lemon/cheese" }
+
+  - ingredient: broccoli
+    technique: roast
+    output_component: roasted_broccoli_component
+    flavour_shift: "Nutty, sweet, charred edges; deeper savory"
+    texture_shift: "Crisp-charred floret tips, tender stems"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,        polarity: gain }
+      - { family: flavour, value: sweet,          polarity: gain }
+      - { family: flavour, value: concentrated,   polarity: gain }
+      - { family: state,   value: roasted,        polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: salt,    priority: high,   note: "flaky salt" }
+      - { role: fat,     priority: high,   note: "olive oil" }
+      - { role: acid,    priority: medium, note: "lemon/sherry vinegar" }
+      - { role: herb,    priority: medium, note: "freshness — parsley/basil" }
+      - { role: protein, priority: medium, note: "parmesan/eggs/anchovy" }
+      - { role: carb,    priority: low,    note: "pasta/rice/bread" }
+    uses: [bowl, pasta, sandwich, eggs, hash]
+    evidence:
+      - { source: roast_culinary, scope: "roasting chars floret tips, sweetens stems" }
+      - { source: recipedb, scope: "roasted broccoli with oil/salt/lemon/cheese" }
+
+  - ingredient: broccoli
+    technique: stir_fry
+    output_component: stir_fried_broccoli_component
+    flavour_shift: "Savory, sweet, vegetal; garlicky if allium added"
+    texture_shift: "Crisp-tender with char spots"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: flavour, value: sweet,    polarity: gain }
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: texture, value: firm,    polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: salt,    priority: high,   note: "soy sauce/sea salt" }
+      - { role: protein, priority: medium, note: "egg/tofu/pork/shrimp" }
+      - { role: carb,    priority: medium, note: "rice/noodles" }
+      - { role: acid,    priority: low,    note: "vinegar lift" }
+    uses: [bowl, rice, eggs, grains]
+    evidence:
+      - { source: recipedb, scope: "stir-fried broccoli — garlic + soy, stays crisp-tender" }
+
+  - ingredient: broccoli
+    technique: soup
+    output_component: broccoli_soup_base
+    flavour_shift: "Sweet, vegetal, savory; creamy when blended"
+    texture_shift: "Liquid to silky-creamy"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: flavour, value: sweet,   polarity: gain }
+      - { family: texture, value: liquid,  polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    missing_roles:
+      - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
+      - { role: herb,    priority: high,   note: "freshness — dill/parsley" }
+      - { role: crunch,  priority: medium, note: "croutons/rye_crumbs/nuts" }
+      - { role: protein, priority: low,    note: "bacon/cheese/beans" }
+      - { role: body,    priority: medium, note: "potato to thicken" }
+    uses: [soup, chilled_soup, bowl]
+    evidence:
+      - { source: recipedb, scope: "cream of broccoli / green soup — vegetal + cream + herb" }
 
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
@@ -1253,6 +1395,43 @@ pairings:
   - { for_ingredient: cabbage, filler: lingonberry_vinegar, role: acid, works_best_with: raw_slaw, context: "Nordic berry-bright slaw", availability: common, confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry; experimental with raw cabbage" }
   - { for_ingredient: cabbage, filler: rye_crumbs,          role: crunch, works_best_with: roast, context: "rye-crumb crust on roasted cabbage", availability: very_common, confidence: experimental, evidence: [], notes: "rye crumbs: Nordic carrier + crunch; experimental with roasted cabbage" }
   - { for_ingredient: cabbage, filler: smoked_yogurt,       role: cream, works_best_with: soup, context: "smoky cabbage soup", availability: occasional, confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; experimental with cabbage soup" }
+  # ---- broccoli pairings (for_ingredient: broccoli; CulinaryDB co-occurrence) ----
+  # raw — crunchy, needs dip + lift
+  - { for_ingredient: broccoli, filler: sea_salt,   role: salt,    works_best_with: raw_assemble, context: "seasoning",          availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: olive_oil,  role: fat,     works_best_with: raw_assemble, context: "dip / oil",          availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: lemon,      role: acid,    works_best_with: raw_assemble, context: "lift",              availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: eggs,       role: protein, works_best_with: raw_assemble, context: "egg salad / meal",  availability: very_common, confidence: medium, evidence: [recipedb] }
+  # steam — bright tender-crisp, needs richness + lift (the new food state)
+  - { for_ingredient: broccoli, filler: sea_salt,   role: salt,    works_best_with: steam,   context: "seasoning",          availability: very_common, confidence: high,   evidence: [steam_culinary] }
+  - { for_ingredient: broccoli, filler: butter,    role: fat,     works_best_with: steam,   context: "buttered steamed",   availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: lemon,      role: acid,    works_best_with: steam,   context: "lift",              availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: parmesan,   role: protein, works_best_with: steam,   context: "cheese over steamed", availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: tofu,       role: protein, works_best_with: steam,   context: "steamed + tofu",     availability: common,      confidence: low,    evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: rice,       role: carb,    works_best_with: steam,   context: "rice host",         availability: very_common, confidence: high,   evidence: [recipedb] }
+  # roast — nutty charred edges
+  - { for_ingredient: broccoli, filler: olive_oil,  role: fat,     works_best_with: roast,  context: "roast in oil",       availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: broccoli, filler: sea_salt,   role: salt,    works_best_with: roast,  context: "flaky salt finish",  availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: broccoli, filler: lemon,      role: acid,    works_best_with: roast,  context: "sharpen",           availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { for_ingredient: broccoli, filler: parsley,    role: herb,    works_best_with: roast,  context: "fresh finish",       availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: parmesan,   role: protein, works_best_with: roast,  context: "roast + cheese",     availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: pasta,      role: carb,    works_best_with: roast,  context: "roast broccoli pasta", availability: very_common, confidence: medium, evidence: [recipedb] }
+  # stir_fry — savory sweet, crisp-tender
+  - { for_ingredient: broccoli, filler: soy_sauce, role: salt,    works_best_with: stir_fry, context: "season + umami",   availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: eggs,       role: protein, works_best_with: stir_fry, context: "egg + broccoli",  availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: tofu,       role: protein, works_best_with: stir_fry, context: "tofu stir-fry",   availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: rice,       role: carb,    works_best_with: stir_fry, context: "rice host",        availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: vinegar,    role: acid,    works_best_with: stir_fry, context: "lift",            availability: very_common, confidence: low,    evidence: [recipedb] }
+  # soup — creamy green
+  - { for_ingredient: broccoli, filler: cream,      role: cream,   works_best_with: soup, context: "silky soup",          availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: dill,        role: herb,    works_best_with: soup, context: "freshness",           availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: croutons,   role: crunch,  works_best_with: soup, context: "crisp contrast",     availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: potato,      role: body,    works_best_with: soup, context: "thicken",            availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: bacon,      role: protein, works_best_with: soup, context: "garnish",            availability: common,      confidence: medium, evidence: [recipedb] }
+  # ---- experimental / scout pairings for broccoli (Nordic-plausible, not classic) ----
+  - { for_ingredient: broccoli, filler: lingonberry_vinegar, role: acid,   works_best_with: steam, context: "Nordic berry-bright steamed", availability: common,      confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry; experimental with steamed broccoli" }
+  - { for_ingredient: broccoli, filler: walnut,             role: crunch, works_best_with: steam, context: "nut crunch over steamed",     availability: common,      confidence: experimental, evidence: [], notes: "walnut: crunch + fat; experimental with steamed broccoli" }
+  - { for_ingredient: broccoli, filler: brown_butter,        role: fat,    works_best_with: roast, context: "nutty brown butter",        availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; experimental with roasted broccoli" }
+  - { for_ingredient: broccoli, filler: smoked_yogurt,      role: cream,  works_best_with: soup,  context: "smoky green soup",          availability: occasional,  confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; experimental with broccoli soup" }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).

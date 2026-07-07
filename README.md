@@ -166,7 +166,7 @@ foodprep hub
 ```
 src/foodprep/
   schema.sql        SQLite schema (centre of gravity: transformations + missing roles)
-  data/tomato.yaml  curated tomato ontology (tomato/onion/potato/cabbage + filler pack)
+  data/tomato.yaml  curated ontology (tomato/onion/potato/cabbage/broccoli + filler pack)
   data/component_profiles.yaml  plate-item balance profiles
   db.py             connection + schema bootstrap
   loader.py         YAML -> SQLite
