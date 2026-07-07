@@ -1,0 +1,179 @@
+-- food-prep SQLite schema
+-- The core object is the TRANSFORMATION RECORD, not the recipe.
+-- Centre of gravity: transformations + transformation_missing_roles.
+--
+-- Conventions:
+--   - integer primary keys are surrogate ids
+--   - text *_name columns are the human labels
+--   - confidence / evidence_level use a controlled vocabulary:
+--       high | medium_high | medium | low | experimental
+--   - availability_class: very_common | common | occasional | rare | n/a
+
+PRAGMA foreign_keys = ON;
+
+-- ---------------------------------------------------------------------------
+-- Identity & vocabulary
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE ingredients (
+    ingredient_id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    canonical_name           TEXT NOT NULL UNIQUE,
+    aliases                  TEXT,            -- newline-separated
+    base_roles               TEXT,            -- newline-separated role names
+    default_availability_class TEXT,          -- very_common | common | ...
+    notes                    TEXT
+);
+
+CREATE TABLE techniques (
+    technique_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL UNIQUE,
+    is_modifier     INTEGER NOT NULL DEFAULT 0,  -- 1 = prep modifier, 0 = state-changing
+    heat_type       TEXT,    -- none | dry | wet | ambient
+    moisture_change TEXT,    -- none | lose | gain
+    preservation_flag INTEGER NOT NULL DEFAULT 0,
+    notes           TEXT
+);
+
+CREATE TABLE components (
+    component_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    name              TEXT NOT NULL UNIQUE,
+    component_kind    TEXT,          -- fresh | cooked | concentrated | preserved | storage
+    keeps_well        TEXT,          -- short | medium | long
+    freezes_well      INTEGER NOT NULL DEFAULT 0,
+    batch_prep_value  TEXT,          -- low | medium | high | very_high
+    notes             TEXT
+);
+
+CREATE TABLE tags (
+    tag_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    family     TEXT NOT NULL,        -- flavour | texture | state
+    tag_value  TEXT NOT NULL,
+    UNIQUE (family, tag_value)
+);
+
+CREATE TABLE roles (
+    role_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    role_name   TEXT NOT NULL UNIQUE,
+    role_family TEXT                 -- seasoning | structure | richness | lift | balance
+);
+
+CREATE TABLE dish_contexts (
+    dish_context_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE evidence_sources (
+    source_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_type   TEXT,              -- dataset | official | culinary | paper | tool
+    title         TEXT,
+    license       TEXT,
+    citation_text TEXT
+);
+
+CREATE TABLE users (
+    user_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    name       TEXT
+);
+
+-- ---------------------------------------------------------------------------
+-- The transformation record
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE transformations (
+    transformation_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    ingredient_id         INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    technique_id          INTEGER NOT NULL REFERENCES techniques(technique_id),
+    output_component_id   INTEGER NOT NULL REFERENCES components(component_id),
+    flavour_shift         TEXT,
+    texture_shift         TEXT,
+    confidence            TEXT NOT NULL,    -- high | medium_high | medium | low | experimental
+    notes                 TEXT,
+    UNIQUE (ingredient_id, technique_id)
+);
+
+CREATE TABLE transformation_tags (
+    transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),
+    tag_id            INTEGER NOT NULL REFERENCES tags(tag_id),
+    polarity          TEXT,            -- gain | loss
+    evidence_level    TEXT,
+    PRIMARY KEY (transformation_id, tag_id)
+);
+
+CREATE TABLE transformation_missing_roles (
+    transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),
+    role_id           INTEGER NOT NULL REFERENCES roles(role_id),
+    priority          TEXT,            -- high | medium | low
+    note              TEXT,
+    PRIMARY KEY (transformation_id, role_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- Pairings: "what should I add next?"
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE pairings (
+    pairing_id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+    ingredient_id                    INTEGER NOT NULL REFERENCES ingredients(ingredient_id),  -- filler
+    role_id                          INTEGER NOT NULL REFERENCES roles(role_id),
+    works_best_with_transformation_id INTEGER REFERENCES transformations(transformation_id),
+    common_context                   TEXT,
+    availability_class               TEXT,
+    confidence                       TEXT,
+    notes                            TEXT
+);
+
+CREATE TABLE component_uses (
+    component_id    INTEGER NOT NULL REFERENCES components(component_id),
+    dish_context_id INTEGER NOT NULL REFERENCES dish_contexts(dish_context_id),
+    strength        TEXT,            -- primary | secondary
+    PRIMARY KEY (component_id, dish_context_id)
+);
+
+CREATE TABLE transformation_evidence (
+    transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),
+    source_id         INTEGER NOT NULL REFERENCES evidence_sources(source_id),
+    claim_scope       TEXT,
+    PRIMARY KEY (transformation_id, source_id)
+);
+
+CREATE TABLE pairing_evidence (
+    pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
+    source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),
+    claim_scope TEXT,
+    PRIMARY KEY (pairing_id, source_id)
+);
+
+CREATE TABLE availability (
+    ingredient_id      INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    region_code        TEXT NOT NULL,           -- e.g. FI
+    availability_class TEXT NOT NULL,
+    seasonality_note   TEXT,
+    PRIMARY KEY (ingredient_id, region_code)
+);
+
+CREATE TABLE user_preferences (
+    user_id          INTEGER NOT NULL REFERENCES users(user_id),
+    vegetarian       INTEGER,
+    allergens        TEXT,            -- newline-separated
+    avoid_ingredients TEXT,           -- newline-separated canonical names
+    max_complexity   TEXT,            -- low | medium | high
+    PRIMARY KEY (user_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- Query helpers
+-- ---------------------------------------------------------------------------
+
+CREATE VIEW v_transformations_full AS
+SELECT
+    t.transformation_id,
+    i.canonical_name   AS ingredient,
+    tech.name          AS technique,
+    c.name             AS output_component,
+    t.flavour_shift,
+    t.texture_shift,
+    t.confidence
+FROM transformations t
+JOIN ingredients i  ON i.ingredient_id = t.ingredient_id
+JOIN techniques tech ON tech.technique_id = t.technique_id
+JOIN components c   ON c.component_id = t.output_component_id;

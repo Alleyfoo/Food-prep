@@ -1,0 +1,493 @@
+# Tomato transformation ontology — hand-authored MVP.
+# Encodes: ingredient -> technique -> component -> missing roles -> next ingredient.
+# Availability classes approximate a Finnish / Lidl-style supermarket, not live stock.
+
+evidence_sources:
+  - id: nchfp
+    source_type: official
+    title: "National Center for Home Food Preservation — tomato guidance"
+    license: public
+    citation_text: "NCHFP, tomato canning/freezing/drying/pickling guidance"
+  - id: usda_tomato
+    source_type: official
+    title: "USDA Complete Guide to Home Canning — tomato products"
+    license: public
+    citation_text: "USDA, tomato juice/crushed/sauce/salsa preserve states"
+  - id: recipedb
+    source_type: dataset
+    title: "RecipeDB (118k recipes, 268 processes)"
+    license: CC BY-NC-SA
+    citation_text: "RecipeDB, structured cooking processes"
+  - id: mmres
+    source_type: dataset
+    title: "MM-ReS workflow graphs"
+    license: research
+    citation_text: "MM-ReS, human-labeled recipe workflow graphs"
+  - id: flavordb
+    source_type: dataset
+    title: "FlavorDB / FlavorDB2"
+    license: research
+    citation_text: "FlavorDB, flavor molecules & ingredient pairings"
+  - id: caprese
+    source_type: culinary
+    title: "Caprese tradition"
+    license: n/a
+    citation_text: "tomato + mozzarella + basil + olive oil + salt"
+  - id: pico
+    source_type: culinary
+    title: "Pico de gallo / fresh salsa"
+    license: n/a
+    citation_text: "tomato + onion + chile + lime + cilantro + salt"
+  - id: pappa
+    source_type: culinary
+    title: "Pappa al pomodoro"
+    license: n/a
+    citation_text: "bread-thickened tomato soup (bread + oil + garlic + basil)"
+  - id: pomodoro
+    source_type: culinary
+    title: "Pasta al pomodoro"
+    license: n/a
+    citation_text: "olive oil + alliums + tomato + basil + cheese"
+  - id: roast_culinary
+    source_type: culinary
+    title: "Slow-roasted / charred tomato traditions"
+    license: n/a
+    citation_text: "roasting concentrates & jams; charring adds smoke"
+
+roles:
+  - { name: salt,        family: seasoning }
+  - { name: fat,         family: richness }
+  - { name: acid,        family: lift }
+  - { name: herb,        family: lift }
+  - { name: aromatic,    family: lift }
+  - { name: crunch,      family: structure }
+  - { name: body,        family: structure }
+  - { name: carb,        family: structure }
+  - { name: protein,     family: balance }
+  - { name: heat,        family: balance }
+  - { name: umami,       family: balance }
+  - { name: cream,       family: richness }
+  - { name: carrier,     family: structure }
+  - { name: hydration,   family: balance }
+  - { name: mild_base,   family: balance }
+
+# Tags are produced BY a transformation (flavour/texture/state shifts).
+tags:
+  - { family: flavour, value: fresh }
+  - { family: flavour, value: juicy }
+  - { family: flavour, value: acidic }
+  - { family: flavour, value: sweet }
+  - { family: flavour, value: concentrated }
+  - { family: flavour, value: savory }
+  - { family: flavour, value: smoky }
+  - { family: flavour, value: umami }
+  - { family: flavour, value: sweet_sour }
+  - { family: flavour, value: spicy }
+  - { family: flavour, value: sharp }
+  - { family: texture, value: soft }
+  - { family: texture, value: jammy }
+  - { family: texture, value: chewy }
+  - { family: texture, value: saucy }
+  - { family: texture, value: dense }
+  - { family: texture, value: liquid }
+  - { family: texture, value: firm }
+  - { family: texture, value: less_watery }
+  - { family: texture, value: spoonable }
+  - { family: state,    value: roasted }
+  - { family: state,    value: charred }
+  - { family: state,    value: cooked }
+  - { family: state,    value: preserved }
+  - { family: state,    value: shelf_stable }
+  - { family: state,    value: frozen }
+  - { family: state,    value: dried }
+
+dish_contexts:
+  - salad
+  - sandwich
+  - toast
+  - bowl
+  - caprese
+  - panzanella
+  - taco
+  - wrap
+  - dip
+  - pizza
+  - pasta
+  - soup
+  - chilled_soup
+  - stew
+  - braise
+  - beans
+  - rice
+  - grains
+  - eggs
+  - smoky_sauce
+  - condiment
+  - cheese_board
+  - relish
+  - future_sauce
+  - future_soup
+  - pantry_base
+
+techniques:
+  - { name: slice,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: dice,         is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: grate,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: peel,         is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: deseed,       is_modifier: 1, heat_type: none,    moisture_change: lose,  preservation_flag: 0 }
+  - { name: crush,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: raw_assemble, is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: salt_and_drain, is_modifier: 0, heat_type: none,  moisture_change: lose,  preservation_flag: 0 }
+  - { name: salsa,        is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: roast,        is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: char,         is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: simmer,       is_modifier: 0, heat_type: wet,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: reduce,       is_modifier: 0, heat_type: wet,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: soup,         is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
+  - { name: dry,          is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 1 }
+  - { name: pickle,       is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 1 }
+  - { name: freeze,       is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 1 }
+  - { name: can,          is_modifier: 0, heat_type: wet,     moisture_change: none,  preservation_flag: 1 }
+
+# ---- Ingredients -----------------------------------------------------------
+# tomato is the pilot ingredient. The rest are fillers (pairing ingredients).
+ingredients:
+  - canonical_name: tomato
+    aliases: "tomatoes\ntomaatti"
+    base_roles: "acid\njuicy_component"
+    default_availability_class: very_common
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish greenhouse July-Sep; imported year-round" }
+
+  - { canonical_name: olive_oil,  base_roles: "fat",        default_availability_class: very_common }
+  - { canonical_name: basil,      base_roles: "herb",       default_availability_class: common }
+  - { canonical_name: parsley,    base_roles: "herb",       default_availability_class: common }
+  - { canonical_name: cilantro,   base_roles: "herb",       default_availability_class: occasional }
+  - { canonical_name: garlic,     base_roles: "aromatic",   default_availability_class: very_common }
+  - { canonical_name: onion,      base_roles: "aromatic",   default_availability_class: very_common }
+  - { canonical_name: mozzarella, base_roles: "fat\nprotein", default_availability_class: common }
+  - { canonical_name: parmesan,   base_roles: "umami\nfat", default_availability_class: common }
+  - { canonical_name: soft_cheese, aliases: "ricotta\nfeta", base_roles: "fat\nprotein", default_availability_class: common }
+  - { canonical_name: bread,      base_roles: "carb\ncrunch", default_availability_class: very_common }
+  - { canonical_name: croutons,   base_roles: "crunch\ncarb", default_availability_class: common }
+  - { canonical_name: pasta,      base_roles: "carb",       default_availability_class: very_common }
+  - { canonical_name: rice,       base_roles: "carb",       default_availability_class: very_common }
+  - { canonical_name: tortilla,   base_roles: "carb\ncarrier", default_availability_class: occasional }
+  - { canonical_name: lime,       base_roles: "acid",       default_availability_class: common }
+  - { canonical_name: lemon,      base_roles: "acid",       default_availability_class: very_common }
+  - { canonical_name: vinegar,    base_roles: "acid",       default_availability_class: very_common }
+  - { canonical_name: jalapeno,   base_roles: "heat",       default_availability_class: occasional }
+  - { canonical_name: chile_flakes, aliases: "chilli flakes\nred pepper flakes", base_roles: "heat", default_availability_class: very_common }
+  - { canonical_name: cream,      base_roles: "cream\nfat", default_availability_class: common }
+  - { canonical_name: yogurt,     base_roles: "cream\nprotein", default_availability_class: very_common }
+  - { canonical_name: eggs,       base_roles: "protein",    default_availability_class: very_common }
+  - { canonical_name: cucumber,   base_roles: "crunch\nhydration", default_availability_class: very_common }
+  - { canonical_name: capers,     base_roles: "acid\numami", default_availability_class: occasional }
+  - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
+  - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
+  - { canonical_name: potato,     base_roles: "carb\nmild_base", default_availability_class: very_common }
+  - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: occasional }
+  - { canonical_name: greens,     aliases: "lettuce\nspinach", base_roles: "herb\nmild_base", default_availability_class: very_common }
+  - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
+  - { canonical_name: butter,     base_roles: "fat",        default_availability_class: very_common }
+  - { canonical_name: black_pepper, aliases: "pepper", base_roles: "aromatic", default_availability_class: very_common }
+  - { canonical_name: sea_salt,   aliases: "salt\nflaky salt", base_roles: "salt", default_availability_class: very_common }
+  - { canonical_name: grilled_fish, base_roles: "protein",  default_availability_class: occasional }
+  - { canonical_name: tofu,       base_roles: "protein",    default_availability_class: common }
+  - { canonical_name: pasta_water, base_roles: "body\nhydration", default_availability_class: very_common }
+
+components:
+  - { name: fresh_tomato_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: salted_drained_tomato_component,   kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: tomato_salsa_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: roasted_tomato_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: charred_tomato_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: tomato_sauce_base,                 kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: very_high }
+  - { name: reduced_tomato_base,               kind: concentrated, keeps_well: medium, freezes_well: 1, batch_prep_value: very_high }
+  - { name: tomato_soup_base,                  kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: dried_tomato_component,            kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: high }
+  - { name: pickled_tomato_component,          kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
+  - { name: frozen_tomato_base,                kind: storage,      keeps_well: long,   freezes_well: 1, batch_prep_value: very_high }
+  - { name: canned_tomato_base,                kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: very_high }
+
+# ---- Transformations -------------------------------------------------------
+transformations:
+  - technique: raw_assemble
+    output_component: fresh_tomato_component
+    flavour_shift: "Bright, juicy, sweet-acidic"
+    texture_shift: "Juicy, soft, sometimes watery"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,    polarity: gain }
+      - { family: flavour, value: juicy,    polarity: gain }
+      - { family: flavour, value: acidic,   polarity: gain }
+      - { family: flavour, value: sweet,    polarity: gain }
+    missing_roles:
+      - { role: salt,    priority: high,   note: "seasoning" }
+      - { role: fat,     priority: high,   note: "olive oil or cheese" }
+      - { role: herb,    priority: medium, note: "basil/parsley" }
+      - { role: crunch,  priority: medium, note: "carrier or croutons" }
+      - { role: carrier, priority: medium, note: "bread/toast" }
+    uses: [salad, sandwich, toast, bowl, caprese, panzanella]
+    evidence:
+      - { source: caprese, scope: "fresh tomato + mozzarella + basil + oil + salt" }
+      - { source: pico,    scope: "fresh chopped tomato base" }
+
+  - technique: salt_and_drain
+    output_component: salted_drained_tomato_component
+    flavour_shift: "More intense, sweeter, less bitter"
+    texture_shift: "Less watery, firmer surface"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: less_watery,  polarity: gain }
+    missing_roles:
+      - { role: fat,     priority: high,   note: "olive oil" }
+      - { role: herb,    priority: medium, note: "basil" }
+      - { role: crunch,  priority: medium, note: "croutons/toast" }
+      - { role: carrier, priority: medium, note: "bread" }
+    uses: [sandwich, panzanella, salad, toast]
+    evidence:
+      - { source: roast_culinary, scope: "osmosis drains water, intensifies flavour" }
+
+  - technique: salsa
+    output_component: tomato_salsa_component
+    flavour_shift: "Fresh, sharp, bright; spicy if chile added"
+    texture_shift: "Chunky, spoonable"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,  polarity: gain }
+      - { family: flavour, value: sharp,  polarity: gain }
+      - { family: flavour, value: acidic, polarity: gain }
+      - { family: flavour, value: spicy,  polarity: gain }
+      - { family: texture, value: spoonable, polarity: gain }
+    missing_roles:
+      - { role: carrier,  priority: high,   note: "tortilla/toast" }
+      - { role: fat,      priority: medium, note: "avocado/cheese" }
+      - { role: protein,  priority: low,    note: "eggs/beans optional" }
+    uses: [taco, wrap, bowl, dip]
+    evidence:
+      - { source: pico, scope: "tomato + onion + chile + lime + cilantro + salt" }
+
+  - technique: roast
+    output_component: roasted_tomato_component
+    flavour_shift: "Sweeter, deeper, more savory, concentrated"
+    texture_shift: "Soft, collapsed, jammy"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: savory,       polarity: gain }
+      - { family: texture, value: jammy,        polarity: gain }
+      - { family: state,   value: roasted,      polarity: gain }
+    missing_roles:
+      - { role: salt,  priority: high,   note: "flaky salt" }
+      - { role: herb,  priority: medium, note: "basil/parsley lift" }
+      - { role: acid,  priority: medium, note: "vinegar/lemon if overly sweet" }
+      - { role: carb,  priority: medium, note: "pasta/bread/beans" }
+      - { role: protein, priority: low,  note: "cheese/eggs" }
+    uses: [pasta, pizza, toast, soup, bowl]
+    evidence:
+      - { source: roast_culinary, scope: "slow roasting jams & concentrates" }
+
+  - technique: char
+    output_component: charred_tomato_component
+    flavour_shift: "Smokier, sweeter, deeper"
+    texture_shift: "Softened, blistered"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: smoky, polarity: gain }
+      - { family: flavour, value: sweet, polarity: gain }
+      - { family: state,   value: charred, polarity: gain }
+    missing_roles:
+      - { role: acid,    priority: high,   note: "lime" }
+      - { role: herb,    priority: high,   note: "fresh herbs" }
+      - { role: fat,     priority: medium, note: "olive oil" }
+      - { role: carrier, priority: medium, note: "bread/tortilla" }
+    uses: [smoky_sauce, taco, beans, grains, dip]
+    evidence:
+      - { source: roast_culinary, scope: "fire-roasting adds smoke + sweetness" }
+
+  - technique: simmer
+    output_component: tomato_sauce_base
+    flavour_shift: "Deepened, rounded, integrated with aromatics"
+    texture_shift: "Saucy, cohesive"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: saucy,  polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    missing_roles:
+      - { role: fat,       priority: high,   note: "olive oil/butter" }
+      - { role: aromatic,  priority: high,   note: "garlic/onion top notes" }
+      - { role: carb,      priority: high,   note: "pasta/rice/bread" }
+      - { role: protein,   priority: medium, note: "eggs/beans/cheese" }
+      - { role: herb,      priority: medium, note: "basil finish" }
+    uses: [pasta, eggs, beans, stew, rice]
+    evidence:
+      - { source: pomodoro,  scope: "oil + alliums + tomato + basil + cheese" }
+      - { source: usda_tomato, scope: "sauce as a distinct reduced state" }
+
+  - technique: reduce
+    output_component: reduced_tomato_base
+    flavour_shift: "Strong umami, caramelized, very concentrated"
+    texture_shift: "Thick, dense"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: umami,       polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: dense,       polarity: gain }
+    missing_roles:
+      - { role: fat,      priority: high,   note: "oil/butter" }
+      - { role: hydration, priority: high,   note: "stock/pasta water dilution" }
+      - { role: acid,     priority: medium, note: "balance" }
+    uses: [stew, braise, soup, pasta, pizza, beans]
+    evidence:
+      - { source: usda_tomato, scope: "reduction by one-third to one-half" }
+
+  - technique: soup
+    output_component: tomato_soup_base
+    flavour_shift: "Softer acidity, rounded, aromatic"
+    texture_shift: "Liquid to thick depending on bread/cream"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: texture, value: liquid, polarity: gain }
+    missing_roles:
+      - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
+      - { role: body,    priority: high,   note: "bread (pappa al pomodoro)" }
+      - { role: crunch,  priority: medium, note: "croutons/cheese toast" }
+      - { role: protein, priority: low,    note: "beans/eggs" }
+    uses: [soup, chilled_soup]
+    evidence:
+      - { source: pappa, scope: "bread + oil + garlic + basil for body" }
+
+  - technique: dry
+    output_component: dried_tomato_component
+    flavour_shift: "Intensified sweet-savory"
+    texture_shift: "Chewy or leathery until rehydrated"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: texture, value: chewy,        polarity: gain }
+      - { family: state,   value: dried,        polarity: gain }
+      - { family: state,   value: preserved,    polarity: gain }
+    missing_roles:
+      - { role: hydration, priority: high,   note: "soaking liquid / oil" }
+      - { role: fat,       priority: high,   note: "olive oil" }
+      - { role: mild_base, priority: medium, note: "pasta/bread/greens" }
+      - { role: herb,      priority: low,    note: "fresh contrast" }
+    uses: [pasta, salad, relish, toast]
+    evidence:
+      - { source: nchfp, scope: "drying as preservation; reconstitute for use" }
+
+  - technique: pickle
+    output_component: pickled_tomato_component
+    flavour_shift: "Sharper, sweet-sour, spiced"
+    texture_shift: "Firm-pickled or jammy-chutney"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: flavour, value: acidic,     polarity: gain }
+      - { family: state,   value: preserved,  polarity: gain }
+    missing_roles:
+      - { role: mild_base, priority: high,   note: "bread/potatoes" }
+      - { role: fat,       priority: medium, note: "cheese" }
+      - { role: protein,   priority: medium, note: "grilled fish/tofu/cheese" }
+    uses: [condiment, sandwich, cheese_board, relish]
+    evidence:
+      - { source: nchfp, scope: "green tomato pickles & chutney" }
+
+  - technique: freeze
+    output_component: frozen_tomato_base
+    flavour_shift: "Flavour preserved for cooked uses"
+    texture_shift: "Collapses on thawing"
+    confidence: high
+    tags_after:
+      - { family: state, value: frozen,   polarity: gain }
+      - { family: state, value: preserved, polarity: gain }
+    missing_roles:
+      - { role: mild_base, priority: low, note: "downstream recipe context supplies all roles" }
+    uses: [future_sauce, future_soup, stew]
+    evidence:
+      - { source: nchfp, scope: "freeze for cooking/seasoning, not fresh firm use" }
+
+  - technique: can
+    output_component: canned_tomato_base
+    flavour_shift: "Stable cooked-tomato flavour"
+    texture_shift: "Soft / sauce-oriented"
+    confidence: high
+    tags_after:
+      - { family: state, value: shelf_stable, polarity: gain }
+      - { family: state, value: preserved,    polarity: gain }
+      - { family: state, value: cooked,       polarity: gain }
+    missing_roles:
+      - { role: mild_base, priority: low, note: "downstream recipe context supplies all roles" }
+    uses: [pantry_base, future_sauce, future_soup, stew]
+    evidence:
+      - { source: usda_tomato, scope: "juice/crushed/sauce/salsa as formal preserve states" }
+      - { source: nchfp, scope: "canned tomato products" }
+
+# ---- Pairings: what to add next -------------------------------------------
+# role targets the missing role; works_best_with names a technique.
+pairings:
+  - { filler: olive_oil,    role: fat,       works_best_with: raw_assemble, context: caprese/panzanella/pasta, availability: very_common, confidence: high, evidence: [caprese, pomodoro] }
+  - { filler: olive_oil,    role: fat,       works_best_with: roast,        context: roasted component,        availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: olive_oil,    role: fat,       works_best_with: simmer,       context: pasta sauce,              availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { filler: olive_oil,    role: fat,       works_best_with: char,         context: smoky salsa/sauce,        availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: olive_oil,    role: fat,       works_best_with: dry,          context: oil-packed dried tomato,  availability: very_common, confidence: medium, evidence: [nchfp] }
+  - { filler: sea_salt,     role: salt,      works_best_with: raw_assemble, context: seasoning,                availability: very_common, confidence: high, evidence: [caprese] }
+  - { filler: sea_salt,     role: salt,      works_best_with: roast,        context: flaky salt finish,        availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: basil,        role: herb,      works_best_with: raw_assemble, context: caprese,                   availability: common, confidence: high, evidence: [caprese] }
+  - { filler: basil,        role: herb,      works_best_with: simmer,       context: pasta al pomodoro,         availability: common, confidence: high, evidence: [pomodoro] }
+  - { filler: basil,        role: herb,      works_best_with: soup,         context: pappa al pomodoro,         availability: common, confidence: high, evidence: [pappa] }
+  - { filler: basil,        role: herb,      works_best_with: roast,        context: roasted tomato lift,       availability: common, confidence: high, evidence: [roast_culinary] }
+  - { filler: parsley,      role: herb,      works_best_with: roast,        context: roasted component lift,    availability: common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: cilantro,     role: herb,      works_best_with: salsa,        context: pico de gallo,             availability: occasional, confidence: high, evidence: [pico] }
+  - { filler: garlic,       role: aromatic,  works_best_with: simmer,       context: pasta sauce,               availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { filler: garlic,       role: aromatic,  works_best_with: soup,         context: pappa,                     availability: very_common, confidence: high, evidence: [pappa] }
+  - { filler: garlic,       role: aromatic,  works_best_with: char,         context: charred salsa,             availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: onion,        role: aromatic,  works_best_with: salsa,        context: pico de gallo,             availability: very_common, confidence: high, evidence: [pico] }
+  - { filler: onion,        role: aromatic,  works_best_with: simmer,       context: sauce base,                availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { filler: onion,        role: crunch,    works_best_with: raw_assemble, context: panzanella,                availability: very_common, confidence: medium, evidence: [caprese] }
+  - { filler: mozzarella,   role: fat,       works_best_with: raw_assemble, context: caprese/toast,             availability: common, confidence: high, evidence: [caprese] }
+  - { filler: mozzarella,   role: protein,   works_best_with: raw_assemble, context: caprese,                   availability: common, confidence: high, evidence: [caprese] }
+  - { filler: parmesan,     role: umami,     works_best_with: simmer,       context: spaghetti al pomodoro,     availability: common, confidence: high, evidence: [pomodoro] }
+  - { filler: parmesan,     role: fat,       works_best_with: soup,         context: finishing,                 availability: common, confidence: medium, evidence: [pappa] }
+  - { filler: soft_cheese,  role: fat,       works_best_with: dry,          context: dried tomato + soft cheese, availability: common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: bread,        role: carb,      works_best_with: raw_assemble, context: panzanella/toast,          availability: very_common, confidence: high, evidence: [caprese] }
+  - { filler: bread,        role: body,      works_best_with: soup,         context: pappa al pomodoro,         availability: very_common, confidence: high, evidence: [pappa] }
+  - { filler: bread,        role: carrier,   works_best_with: salt_and_drain, context: sandwich,                availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: croutons,     role: crunch,    works_best_with: soup,         context: soup garnish,              availability: common, confidence: high, evidence: [pappa] }
+  - { filler: croutons,     role: crunch,    works_best_with: raw_assemble, context: panzanella,                availability: common, confidence: medium, evidence: [caprese] }
+  - { filler: pasta,        role: carb,      works_best_with: simmer,       context: pasta al pomodoro,         availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { filler: pasta,        role: carb,      works_best_with: roast,        context: roasted tomato pasta,      availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: pasta,        role: carb,      works_best_with: reduce,       context: concentrated sauce,        availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { filler: rice,         role: carb,      works_best_with: simmer,       context: tomato rice,               availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: tortilla,     role: carrier,   works_best_with: salsa,        context: taco/chips,                availability: occasional, confidence: high, evidence: [pico] }
+  - { filler: tortilla,     role: carrier,   works_best_with: char,         context: smoky taco,                availability: occasional, confidence: medium, evidence: [roast_culinary] }
+  - { filler: lime,         role: acid,      works_best_with: salsa,        context: pico de gallo,             availability: common, confidence: high, evidence: [pico] }
+  - { filler: lime,         role: acid,      works_best_with: char,         context: charred salsa,             availability: common, confidence: high, evidence: [roast_culinary] }
+  - { filler: lemon,        role: acid,      works_best_with: roast,        context: balancing sweet roast,     availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: vinegar,      role: acid,      works_best_with: reduce,       context: balancing concentrated,    availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: jalapeno,     role: heat,      works_best_with: salsa,        context: pico de gallo,             availability: occasional, confidence: high, evidence: [pico] }
+  - { filler: chile_flakes, role: heat,      works_best_with: char,         context: smoky sauce,               availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: chile_flakes, role: heat,      works_best_with: simmer,       context: calabrian-style sauce,     availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: cream,        role: cream,     works_best_with: soup,         context: tomato soup,               availability: common, confidence: medium_high, evidence: [pappa] }
+  - { filler: yogurt,       role: cream,     works_best_with: char,         context: smoky yogurt sauce,        availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: eggs,         role: protein,   works_best_with: simmer,       context: shakshuka,                 availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: cucumber,     role: crunch,    works_best_with: raw_assemble, context: salad/bowl,                availability: very_common, confidence: medium, evidence: [caprese] }
+  - { filler: capers,       role: acid,      works_best_with: char,         context: smoky sauce,               availability: occasional, confidence: medium, evidence: [roast_culinary] }
+  - { filler: olives,       role: umami,     works_best_with: char,         context: smoky beans/sauce,         availability: common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: white_beans,  role: protein,   works_best_with: simmer,       context: tomato beans,              availability: common, confidence: medium, evidence: [pomodoro] }
+  - { filler: white_beans,  role: carb,      works_best_with: char,         context: smoky beans,               availability: common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: potato,       role: mild_base, works_best_with: pickle,       context: pickled tomato + potato,   availability: very_common, confidence: medium, evidence: [nchfp] }
+  - { filler: avocado,      role: fat,       works_best_with: salsa,        context: salsa verde-ish contrast,  availability: occasional, confidence: medium, evidence: [pico] }
+  - { filler: greens,       role: mild_base, works_best_with: dry,          context: dried tomato salad,        availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { filler: stock,        role: hydration, works_best_with: reduce,       context: dilute concentrate,        availability: common, confidence: high, evidence: [pomodoro] }
+  - { filler: stock,        role: body,      works_best_with: soup,         context: soup base,                 availability: common, confidence: high, evidence: [pappa] }
+  - { filler: butter,       role: fat,       works_best_with: simmer,       context: rounded sauce,             availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: pasta_water,  role: hydration, works_best_with: reduce,       context: emulsify concentrated,     availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: grilled_fish, role: protein,   works_best_with: pickle,       context: pickled tomato condiment,  availability: occasional, confidence: low, evidence: [nchfp] }
+  - { filler: tofu,         role: protein,   works_best_with: pickle,       context: pickled tomato + tofu,     availability: common, confidence: low, evidence: [nchfp] }

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "foodprep"
+version = "0.1.0"
+description = "Local-first ingredient transformation knowledge map (tomato pilot) backed by SQLite."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "food-prep" }]
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+foodprep = "foodprep.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+foodprep = ["data/*.yaml", "schema.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
