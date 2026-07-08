@@ -22,7 +22,7 @@ import streamlit as st
 
 from foodprep.db import connect
 from foodprep.loader import build
-from foodprep import query
+from foodprep import export, query
 
 # ---------------------------------------------------------------------------
 # page config + design system
@@ -92,6 +92,18 @@ def debug_block(title: str, payload) -> str:
 
 def tag_class(family: str) -> str:
     return {"flavour": "flavour", "texture": "texture", "state": "state"}.get(family, "")
+
+
+def export_buttons(md: str, filename: str) -> None:
+    """Copy-Markdown (a code block with Streamlit's copy icon) + Download .md.
+    Renders from the same computed dict the card above renders from — no
+    recompute, no new query. No-op when md is empty."""
+    if not md:
+        return
+    st.download_button("Download .md", md, file_name=filename,
+                       mime="text/markdown", key=f"dl_{filename}")
+    with st.expander("Markdown", expanded=False):
+        st.code(md, language="markdown")
 
 
 # ---------------------------------------------------------------------------
@@ -228,6 +240,7 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
             part = (query.available_filter(CONN, card["transformation_id"], avail)
                     if avail else None)
             _md(branch_card_html(card, available=part))
+            export_buttons(export.render_branch_markdown(card, part), "branch.md")
         else:
             st.write(f"No transformation for {ingredient}/{tech}.")
     else:
@@ -236,10 +249,13 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
         st.markdown(
             f'<div class="eyebrow">Showing top {len(shown)} of {len(cards)} branches · '
             f'ranked cooking-before-preservation</div>', unsafe_allow_html=True)
+        md_parts = []
         for c in shown:
             part = (query.available_filter(CONN, c["transformation_id"], avail)
                     if avail else None)
             _md(branch_card_html(c, available=part))
+            md_parts.append(export.render_branch_markdown(c, part))
+        export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
 
 
 # ---------------------------------------------------------------------------
@@ -296,6 +312,7 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
       {debug_block("Show data rows", d)}
     </div>
     """)
+    export_buttons(export.render_component_markdown(d, part), "component.md")
     st.markdown(
         '<div class="hint">A component is an <b>after-state</b>. You do not always '
         'start from raw cabbage/tomato/potato — pick the component you already have.</div>',
@@ -413,6 +430,8 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
         items = [it["name"] for it in r["no_profile"]]
         _md(f'<div class="balance-section muted"><h4>No balance profile for</h4><div class="chips">{chips(items)}</div>'
             '<div class="filler-line none">add component_profiles entries for heaviness/dryness/missing-risk data.</div></div>')
+
+    export_buttons(export.render_plate_markdown(r), "plate.md")
 
     with st.expander("Debug — raw plate_balance_detail", expanded=False):
         st.json(r)

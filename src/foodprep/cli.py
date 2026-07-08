@@ -8,7 +8,30 @@ from pathlib import Path
 
 from .db import DEFAULT_DB_PATH, connect
 from .loader import DATA_PATH, build
-from . import corpus, query
+from . import corpus, export, query
+
+
+def _parse_csv(s: str | None) -> list[str] | None:
+    """Comma-separated --available value -> list of stripped names. None/empty
+    -> None so the engine takes the current (unfiltered) path."""
+    if not s:
+        return None
+    items = [x.strip() for x in s.split(",") if x.strip()]
+    return items or None
+
+
+def _emit_markdown(md: str, out: str | None) -> int:
+    """Write Markdown to --out (UTF-8) or print to stdout."""
+    if out:
+        Path(out).write_text(md, encoding="utf-8")
+        print(f"Wrote {out}")
+    else:
+        print(md)
+    return 0
+
+
+def _db_has(conn, table: str) -> bool:
+    return conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0] > 0
 
 
 def cmd_build(args: argparse.Namespace) -> int:
@@ -85,6 +108,59 @@ def cmd_backfill(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_export_branch(args: argparse.Namespace) -> int:
+    """Export one ingredient/technique branch as Markdown."""
+    conn = connect(args.db)
+    if not _db_has(conn, "transformations"):
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    available = _parse_csv(args.available)
+    md = export.branch_markdown(conn, args.ingredient, args.technique, available)
+    if md is None:
+        print(f"No transformation for {args.ingredient}/{args.technique}.")
+        return 1
+    return _emit_markdown(md, args.out)
+
+
+def cmd_export_component(args: argparse.Namespace) -> int:
+    """Export a component card as Markdown."""
+    conn = connect(args.db)
+    if not _db_has(conn, "components"):
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    available = _parse_csv(args.available)
+    md = export.component_markdown(conn, args.name, available)
+    if md is None:
+        print(f"No component named {args.name}.")
+        return 1
+    return _emit_markdown(md, args.out)
+
+
+def cmd_export_plate(args: argparse.Namespace) -> int:
+    """Export a plate balance as Markdown. Plate items are joined with ' and '
+    so the phrase parser sees them as separate items (matching the UI's text
+    construction), e.g. `mashed_potatoes chickpea_patty` -> two items."""
+    conn = connect(args.db)
+    if not _db_has(conn, "component_profiles"):
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    available = _parse_csv(args.available)
+    text = " and ".join(args.items)
+    md = export.plate_markdown(conn, text, available)
+    return _emit_markdown(md, args.out)
+
+
+def cmd_export_scout(args: argparse.Namespace) -> int:
+    """Export experimental (Scout) pairings as Markdown, disclaimer included."""
+    conn = connect(args.db)
+    if not _db_has(conn, "pairings"):
+        print("Database is empty. Run `foodprep build` first.")
+        return 1
+    md = export.scout_markdown(conn, ingredient=args.ingredient,
+                               technique=args.technique)
+    return _emit_markdown(md, args.out)
+
+
 def cmd_demo(args: argparse.Namespace) -> int:
     """Print the five-flow demo (tomato / component / plate / cabbage / scout)."""
     from .demo import run_demo
@@ -144,6 +220,40 @@ def build_parser() -> argparse.ArgumentParser:
     pdm = sub.add_parser("demo",
                          help="Print the five-flow demo (the concept in ~60 seconds)")
     pdm.set_defaults(func=cmd_demo)
+
+    # ---- export (Markdown) ----
+    pe = sub.add_parser("export",
+                        help="Export a result as Markdown (branch/component/plate/scout)")
+    pe_sub = pe.add_subparsers(dest="export_what", required=True)
+
+    peb = pe_sub.add_parser("branch", help="One ingredient/technique branch")
+    peb.add_argument("ingredient", help="e.g. broccoli")
+    peb.add_argument("technique", help="e.g. steam")
+    peb.add_argument("--available", default=None,
+                     help="comma-separated on-hand ingredients, e.g. yogurt,pickles,bread")
+    peb.add_argument("--out", default=None, help="write to file (default: stdout)")
+    peb.set_defaults(func=cmd_export_branch)
+
+    pec = pe_sub.add_parser("component", help="A component card")
+    pec.add_argument("name", help="e.g. roasted_tomato_component")
+    pec.add_argument("--available", default=None,
+                     help="comma-separated on-hand ingredients")
+    pec.add_argument("--out", default=None, help="write to file (default: stdout)")
+    pec.set_defaults(func=cmd_export_component)
+
+    pep = pe_sub.add_parser("plate", help="A plate balance")
+    pep.add_argument("items", nargs="+", help="plate items, e.g. mashed_potatoes chickpea_patty")
+    pep.add_argument("--available", default=None,
+                     help="comma-separated on-hand ingredients")
+    pep.add_argument("--out", default=None, help="write to file (default: stdout)")
+    pep.set_defaults(func=cmd_export_plate)
+
+    pes = pe_sub.add_parser("scout", help="Experimental (Scout) pairings")
+    pes.add_argument("--ingredient", default=None, help="limit to an ingredient")
+    pes.add_argument("--technique", default=None, help="limit to a technique")
+    pes.add_argument("--out", default=None, help="write to file (default: stdout)")
+    pes.set_defaults(func=cmd_export_scout)
+
     return p
 
 
