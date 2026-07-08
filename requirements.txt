@@ -1,0 +1,7 @@
+# Streamlit Community Cloud install manifest.
+# Cloud runs `pip install -r requirements.txt` from the repo root, so this is
+# what makes `import foodprep` (src-layout) resolve on the container. Without
+# it the install is intermittent and the app crash-loops on startup.
+streamlit>=1.30
+PyYAML>=6.0
+.
