@@ -16,11 +16,11 @@ from __future__ import annotations
 
 import html
 import json
+import sqlite3
 from pathlib import Path
 
 import streamlit as st
 
-from foodprep.db import connect
 from foodprep.loader import build
 from foodprep import export, query
 
@@ -58,7 +58,18 @@ def _esc(s) -> str:
 
 @st.cache_resource
 def get_conn():
-    conn = connect(":memory:")
+    # Streamlit may run each script execution on a different worker thread, but
+    # @st.cache_resource hands back the SAME connection object to all of them.
+    # sqlite3's default check_same_thread=True then raises
+    # "SQLite objects created in a thread can only be used in that same thread"
+    # on any rerun/new session. check_same_thread=False is safe here: the db is
+    # built once from YAML and only ever read (Streamlit serializes script
+    # runs), so there is no concurrent write contention. We set the same row
+    # factory + FK pragma as db.connect() but skip that helper because it does
+    # not expose check_same_thread.
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
     build(conn)
     return conn
 
@@ -547,19 +558,35 @@ def available_selector() -> list[str]:
 # layout
 # ---------------------------------------------------------------------------
 
-topbar()
-available_items = available_selector()
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "Ingredient Explorer", "Component Explorer", "Plate Balance",
-    "Filler Profiles", "Scout",
-])
-with tab1:
-    tab_ingredient_explorer(available_items)
-with tab2:
-    tab_component_explorer(available_items)
-with tab3:
-    tab_plate_balance(available_items)
-with tab4:
-    tab_filler_profiles()
-with tab5:
-    tab_scout()
+def main() -> None:
+    """Render the app.
+
+    Streamlit re-executes the entry script on every rerun (widget interaction,
+    new session). The rendering MUST live in a function that the entry script
+    calls each time — if it sat at module top level it would run only once per
+    process (Python caches the module in ``sys.modules`` after the first
+    import), and every later session would see an empty canvas. ``app.py``
+    imports and calls this on every run.
+    """
+    topbar()
+    available_items = available_selector()
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Ingredient Explorer", "Component Explorer", "Plate Balance",
+        "Filler Profiles", "Scout",
+    ])
+    with tab1:
+        tab_ingredient_explorer(available_items)
+    with tab2:
+        tab_component_explorer(available_items)
+    with tab3:
+        tab_plate_balance(available_items)
+    with tab4:
+        tab_filler_profiles()
+    with tab5:
+        tab_scout()
+
+
+# When run directly via `streamlit run src/foodprep/ui/streamlit_app.py`, render
+# the same way `app.py` does — call main() so reruns work, not the module body.
+if __name__ == "__main__":
+    main()
