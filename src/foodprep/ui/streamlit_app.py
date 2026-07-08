@@ -223,7 +223,8 @@ def topbar() -> None:
 # ---------------------------------------------------------------------------
 
 def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
-    st.markdown('<div class="section-title">Ingredient Explorer</div>')
+    st.markdown('<div class="section-title">Ingredient Explorer</div>',
+                unsafe_allow_html=True)
     trees = query.tree_ingredients(CONN)
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -263,7 +264,8 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
 # ---------------------------------------------------------------------------
 
 def tab_component_explorer(available_items: list[str] | None = None) -> None:
-    st.markdown('<div class="section-title">Component Explorer</div>')
+    st.markdown('<div class="section-title">Component Explorer</div>',
+                unsafe_allow_html=True)
     comps = query.components_list(CONN)
     default = "roasted_tomato_component" if "roasted_tomato_component" in comps else comps[0]
     comp = st.selectbox("Component", comps, index=comps.index(default))
@@ -324,7 +326,8 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
 # ---------------------------------------------------------------------------
 
 def tab_plate_balance(available_items: list[str] | None = None) -> None:
-    st.markdown('<div class="section-title">Plate Balance <span class="count">Cook mode — no experimental pairings</span></div>')
+    st.markdown('<div class="section-title">Plate Balance <span class="count">Cook mode — no experimental pairings</span></div>',
+                unsafe_allow_html=True)
     profiles = query.profiles_list(CONN)
     picked = st.multiselect("Plate items", profiles,
                             default=["mashed_potatoes", "chickpea_patty"])
@@ -442,7 +445,8 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
 # ---------------------------------------------------------------------------
 
 def tab_filler_profiles() -> None:
-    st.markdown('<div class="section-title">Filler Profiles <span class="count">the PIM tab</span></div>')
+    st.markdown('<div class="section-title">Filler Profiles <span class="count">the PIM tab</span></div>',
+                unsafe_allow_html=True)
     ings = query.ingredients_list(CONN)
     default = "lemon" if "lemon" in ings else ings[0]
     name = st.selectbox("Filler", ings, index=ings.index(default))
@@ -485,7 +489,8 @@ def tab_filler_profiles() -> None:
 # ---------------------------------------------------------------------------
 
 def tab_scout() -> None:
-    st.markdown('<div class="section-title">Scout <span class="count">experimental pairings — NOT classic</span></div>')
+    st.markdown('<div class="section-title">Scout <span class="count">experimental pairings — NOT classic</span></div>',
+                unsafe_allow_html=True)
     trees = query.tree_ingredients(CONN)
     opts = ["all ingredients"] + trees
     sel = st.selectbox("Filter by ingredient", opts, index=0)
