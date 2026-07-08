@@ -28,17 +28,7 @@ from foodprep import export, query
 # page config + design system
 # ---------------------------------------------------------------------------
 
-st.set_page_config(
-    page_title="food-prep",
-    page_icon="🍅",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
-
 _CSS_PATH = Path(__file__).with_name("design.css")
-if _CSS_PATH.exists():
-    st.markdown(f"<style>{_CSS_PATH.read_text(encoding='utf-8')}</style>",
-                unsafe_allow_html=True)
 
 
 def _md(markup: str) -> None:
@@ -562,12 +552,31 @@ def main() -> None:
     """Render the app.
 
     Streamlit re-executes the entry script on every rerun (widget interaction,
-    new session). The rendering MUST live in a function that the entry script
-    calls each time — if it sat at module top level it would run only once per
-    process (Python caches the module in ``sys.modules`` after the first
-    import), and every later session would see an empty canvas. ``app.py``
-    imports and calls this on every run.
+    new session). Everything that affects the page — page config, the CSS
+    <style> injection, and the body — MUST run inside this function so it
+    executes on every run. If any of it sat at module top level it would run
+    only once per process (Python caches the module in ``sys.modules`` after
+    the first import): a new session or a later rerun would then lose
+    ``layout="wide"`` (the layout shifts) and the design CSS (the card framing
+    vanishes). ``app.py`` imports and calls this on every run.
     """
+    # set_page_config may only be called once per session (a second call
+    # raises), so guard it with session_state — runs on the first run of each
+    # session, skipped on reruns. It must precede every other st command in a
+    # run, which it does here.
+    if not st.session_state.get("_page_configured"):
+        st.set_page_config(
+            page_title="food-prep",
+            page_icon="🍅",
+            layout="wide",
+            initial_sidebar_state="collapsed",
+        )
+        st.session_state["_page_configured"] = True
+    # Re-inject the design CSS on every run. Idempotent (just a <style> block)
+    # and guarantees the card framing survives reruns across Streamlit versions.
+    if _CSS_PATH.exists():
+        st.markdown(f"<style>{_CSS_PATH.read_text(encoding='utf-8')}</style>",
+                    unsafe_allow_html=True)
     topbar()
     available_items = available_selector()
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
