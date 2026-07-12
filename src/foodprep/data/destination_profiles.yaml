@@ -1,0 +1,40 @@
+destination_profiles:
+  - destination: complete_savoury_plate
+    texture_needs: "Contrast is useful; avoid making every component uniformly soft."
+    moisture_needs: "The plate should include enough moisture or sauce for dry anchors."
+    notes: "Compatibility profile preserving the original seven-role complete plate target."
+    functions:
+      - {role: salt, importance: required, reason: "The complete plate needs deliberate seasoning."}
+      - {role: fat, importance: required, reason: "Some richness or lubrication helps carry flavour."}
+      - {role: acid, importance: required, reason: "Acidity provides lift and prevents heaviness."}
+      - {role: herb, importance: required, reason: "A fresh or aromatic element keeps the plate defined."}
+      - {role: crunch, importance: required, reason: "Physical contrast prevents a uniformly soft plate."}
+      - {role: carb, importance: required, reason: "The legacy complete-plate profile expects a substantial base."}
+      - {role: protein, importance: required, reason: "The legacy complete-plate profile expects a satisfying protein or equivalent."}
+
+  - destination: side_dish
+    texture_needs: "One suitable texture is enough; contrast is useful but not mandatory."
+    moisture_needs: "Should be pleasant in its serving form without requiring a separate sauce."
+    notes: "A side supports another dish and is not judged as a complete meal."
+    functions:
+      - {role: salt, importance: required, reason: "A side dish still needs deliberate seasoning."}
+      - {role: acid, importance: useful, reason: "Acidity often sharpens vegetables and rich sides."}
+      - {role: fat, importance: useful, reason: "A little richness may carry flavour but is not universally required."}
+      - {role: herb, importance: useful, reason: "Freshness or aroma can provide definition."}
+      - {role: crunch, importance: optional, reason: "Contrast can help but should not be treated as a hard gap."}
+      - {role: carb, importance: unsuitable, reason: "A side does not need added carbohydrate merely to satisfy plate completeness."}
+      - {role: protein, importance: unsuitable, reason: "A side does not need added protein merely to become complete."}
+
+  - destination: soup
+    texture_needs: "Body matters; crunch is normally a garnish rather than a hard requirement."
+    moisture_needs: "Broth or another hydration source is essential to the destination."
+    notes: "Soup is evaluated around hydration, seasoning, aromatic depth, and body."
+    functions:
+      - {role: hydration, importance: required, reason: "Soup requires broth or another liquid base."}
+      - {role: salt, importance: required, reason: "A liquid base needs enough seasoning to avoid tasting diluted."}
+      - {role: body, importance: required, reason: "Body prevents the soup from reading as flavoured water."}
+      - {role: aromatic, importance: useful, reason: "Aromatics create depth in the liquid base."}
+      - {role: fat, importance: optional, reason: "Fat may add richness but is not essential to every soup."}
+      - {role: crunch, importance: optional, reason: "Crunch is a garnish option, not a structural requirement."}
+      - {role: carb, importance: optional, reason: "Starch may add body but is not universally necessary."}
+      - {role: protein, importance: optional, reason: "Protein depends on whether the soup is a starter or complete meal."}

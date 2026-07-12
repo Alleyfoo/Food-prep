@@ -95,7 +95,7 @@ def cmd_plate(args: argparse.Namespace) -> int:
     if conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] == 0:
         print("Database is empty. Run `foodprep build` first.")
         return 1
-    print(query.plate_balance(conn, args.prompt))
+    print(query.plate_balance(conn, args.prompt, args.destination))
     return 0
 
 
@@ -226,6 +226,8 @@ def build_parser() -> argparse.ArgumentParser:
                          help="Plate Balance Engine (Cook mode) — what is missing?")
     ppl.add_argument("prompt", nargs="+",
                      help="plate items, e.g. 'mashed potatoes and chickpea patties'")
+    ppl.add_argument("--destination", default="complete_savoury_plate",
+                     help="destination profile: complete_savoury_plate, side_dish, soup")
     ppl.set_defaults(func=cmd_plate)
 
     pfl = sub.add_parser("filler",

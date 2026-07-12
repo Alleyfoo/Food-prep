@@ -755,8 +755,38 @@ def _dryness_label(avg: float) -> str:
     return "moist"
 
 
+def destination_profile(conn: sqlite3.Connection,
+                        destination_id: str) -> dict[str, Any] | None:
+    """Return one destination's contextual functional targets and reasons."""
+    row = conn.execute(
+        "SELECT * FROM destination_profiles WHERE destination_id = ?",
+        (destination_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    profile = dict(row)
+    functions = conn.execute(
+        """
+        SELECT r.role_name AS role, df.importance, df.reason
+        FROM destination_functions df
+        JOIN roles r ON r.role_id = df.role_id
+        WHERE df.destination_id = ?
+        ORDER BY df.rowid
+        """,
+        (destination_id,),
+    ).fetchall()
+    profile["functions"] = [dict(function) for function in functions]
+    for importance in ("required", "useful", "optional", "unsuitable"):
+        profile[importance] = [
+            function["role"] for function in profile["functions"]
+            if function["importance"] == importance
+        ]
+    return profile
+
+
 def plate_balance_detail(conn: sqlite3.Connection, text: str,
-                           available_items: list[str] | None = None) -> dict[str, Any]:
+                           available_items: list[str] | None = None,
+                           destination_id: str = "complete_savoury_plate") -> dict[str, Any]:
     """Plate Balance Engine (Cook mode) — structured result for the UI.
 
     Returns:
@@ -783,6 +813,10 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str,
     Cook-only; Scout never leaks in. None/[] available_items = current behaviour.
     Honest about its limits — it never invents roles or fillers it doesn't have.
     """
+    destination = destination_profile(conn, destination_id)
+    if destination is None:
+        raise ValueError(f"unknown or unmodelled destination: {destination_id!r}")
+
     phrases = _plate_phrases(text)
     items = [_recognise_plate_item(conn, ph) for ph in phrases]
 
@@ -807,7 +841,9 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str,
     h_avg = plate_h / len(h_vals) if h_vals else None
     d_avg = plate_d / len(d_vals) if d_vals else None
 
-    target_gap = [r for r in TARGET_ROLES if r not in provided]
+    target_gap = [r for r in destination["required"] if r not in provided]
+    useful_gap = [r for r in destination["useful"] if r not in provided]
+    unsuitable_provided = [r for r in destination["unsuitable"] if r in provided]
     flagged_more = sorted(r for r in risk_roles if r not in set(target_gap))
 
     suggested: dict[str, list[str]] = {}
@@ -816,8 +852,12 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str,
 
     result = {
         "items": items,
+        "destination": destination,
+        "destination_id": destination_id,
         "provided": sorted(provided),
         "target_gap": target_gap,
+        "useful_gap": useful_gap,
+        "unsuitable_provided": unsuitable_provided,
         "flagged_more": flagged_more,
         "plate_heaviness": plate_h,
         "plate_dryness": plate_d,
@@ -846,7 +886,8 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str,
     return result
 
 
-def plate_balance(conn: sqlite3.Connection, text: str) -> str:
+def plate_balance(conn: sqlite3.Connection, text: str,
+                  destination_id: str = "complete_savoury_plate") -> str:
     """Plate Balance Engine (Cook mode) — human-readable render.
 
     Evaluates a set of known component profiles / ingredients on a plate:
@@ -860,7 +901,10 @@ def plate_balance(conn: sqlite3.Connection, text: str) -> str:
 
     Honest about its limits — it never invents roles or fillers it doesn't have.
     """
-    r = plate_balance_detail(conn, text)
+    try:
+        r = plate_balance_detail(conn, text, destination_id=destination_id)
+    except ValueError as exc:
+        return str(exc)
     if not r["items"]:
         return ("Plate balance — Cook mode\n"
                 "Name the plate items, e.g. 'balance mashed potatoes and "
@@ -871,6 +915,7 @@ def plate_balance(conn: sqlite3.Connection, text: str) -> str:
                "unknown": "unknown"}[it["kind"]]
         have_parts.append(f"{it['name']} ({tag})")
     lines = ["Plate balance — Cook mode",
+             f"Destination: {r['destination']['name']}",
              f"You have: {', '.join(have_parts)}"]
 
     if r["no_profile"]:
@@ -905,13 +950,30 @@ def plate_balance(conn: sqlite3.Connection, text: str) -> str:
         return "\n".join(lines)
 
     if r["target_gap"]:
-        lines.append("  missing for a balanced plate: " + ", ".join(r["target_gap"]))
+        gap_label = (
+            "missing for a balanced plate"
+            if r["destination_id"] == "complete_savoury_plate"
+            else "required for this destination"
+        )
+        lines.append(f"  {gap_label}: " + ", ".join(r["target_gap"]))
         lines.append("  add:")
         for role in r["target_gap"]:
             fillers = r["suggested_fillers"].get(role, [])
             lines.append(f"    - {role}: " + (", ".join(fillers) if fillers else "(no curated filler)"))
     else:
-        lines.append("  no hard gaps — all target roles are covered.")
+        lines.append("  no hard gaps — all required destination functions are covered.")
+
+    if r["useful_gap"]:
+        lines.append("  useful but not required here: " + ", ".join(r["useful_gap"]))
+        by_role = {f["role"]: f["reason"] for f in r["destination"]["functions"]}
+        for role in r["useful_gap"]:
+            lines.append(f"    - {role}: {by_role[role]}")
+
+    if r["unsuitable_provided"]:
+        lines.append(
+            "  not required for this destination (already present): "
+            + ", ".join(r["unsuitable_provided"])
+        )
 
     if r["flagged_more"]:
         lines.append("  also flagged by item profiles (may want more): " + ", ".join(r["flagged_more"]))

@@ -17,6 +17,7 @@ from .vocabulary import VOCABULARY_PATH, load_vocabulary
 
 DATA_PATH = Path(__file__).with_name("data") / "tomato.yaml"
 PROFILES_PATH = Path(__file__).with_name("data") / "component_profiles.yaml"
+DESTINATIONS_PATH = Path(__file__).with_name("data") / "destination_profiles.yaml"
 
 CONFIDENCE_OK = {"high", "medium_high", "medium", "low", "experimental"}
 
@@ -341,9 +342,40 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 ),
             )
 
+    # ---- destination profiles ----
+    for profile in data.get("destination_profiles", []):
+        destination = vocabulary.require("destinations", profile["destination"])
+        conn.execute(
+            "INSERT INTO destination_profiles(destination_id, name, texture_needs, "
+            "moisture_needs, notes) VALUES (?,?,?,?,?)",
+            (
+                destination.id, destination.name, profile.get("texture_needs"),
+                profile.get("moisture_needs"), profile.get("notes"),
+            ),
+        )
+        seen_roles: set[str] = set()
+        for function in profile.get("functions", []):
+            role = function["role"]
+            if role in seen_roles:
+                raise LoadError(
+                    f"duplicate destination function: {destination.id}/{role}"
+                )
+            seen_roles.add(role)
+            importance = function["importance"]
+            if importance not in {"required", "useful", "optional", "unsuitable"}:
+                raise LoadError(
+                    f"bad destination importance {importance!r} for {destination.id}/{role}"
+                )
+            conn.execute(
+                "INSERT INTO destination_functions(destination_id, role_id, "
+                "importance, reason) VALUES (?,?,?,?)",
+                (destination.id, _role_id(conn, role), importance, function["reason"]),
+            )
+
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
           profiles_path: Path | str | None = PROFILES_PATH,
+          destinations_path: Path | str | None = DESTINATIONS_PATH,
           vocabulary_path: Path | str = VOCABULARY_PATH) -> None:
     """Rebuild schema and load the YAML ontology from scratch.
 
@@ -357,5 +389,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     data = load_yaml(data_path) or {}
     if profiles_path and Path(profiles_path).exists():
         data = _deep_merge(data, load_yaml(profiles_path) or {})
+    if destinations_path and Path(destinations_path).exists():
+        data = _deep_merge(data, load_yaml(destinations_path) or {})
     populate(conn, data, vocabulary)
     conn.commit()

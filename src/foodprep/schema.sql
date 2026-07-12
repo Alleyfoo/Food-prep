@@ -187,6 +187,26 @@ CREATE TABLE journey_transitions (
     UNIQUE (journey_id, sequence_no)
 );
 
+-- ---------------------------------------------------------------------------
+-- Destination-aware functional targets
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE destination_profiles (
+    destination_id TEXT PRIMARY KEY, -- controlled by vocabularies.yaml
+    name            TEXT NOT NULL,
+    texture_needs   TEXT,
+    moisture_needs  TEXT,
+    notes           TEXT
+);
+
+CREATE TABLE destination_functions (
+    destination_id TEXT NOT NULL REFERENCES destination_profiles(destination_id),
+    role_id        INTEGER NOT NULL REFERENCES roles(role_id),
+    importance     TEXT NOT NULL, -- required | useful | optional | unsuitable
+    reason         TEXT NOT NULL,
+    PRIMARY KEY (destination_id, role_id)
+);
+
 CREATE TABLE pairing_evidence (
     pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
     source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),
