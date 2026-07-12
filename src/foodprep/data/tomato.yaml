@@ -1165,6 +1165,91 @@ transformations:
     evidence:
       - { source: recipedb, scope: "cream of broccoli / green soup — vegetal + cream + herb" }
 
+# ---- Product-facing ingredient journeys -----------------------------------
+journeys:
+  - slug: stir_fried_stems
+    ingredient: broccoli
+    title: Stir-fried broccoli stems with soy and garlic
+    preparation: sliced
+    primary_transformation: stir_fry
+    starting_state: raw broccoli stems
+    output_state: crisp-tender stir-fried broccoli stems
+    why_choose: "Uses the dense stems quickly and keeps their bite; choose it when you want a substantial topping rather than a soft side."
+    sensory_change: "Thin slicing increases surface area. Hard stir-frying browns the edges, mellows raw brassica sharpness, and leaves a crisp-tender centre."
+    flavour_direction: "Salty and umami from soy, aromatic garlic, then sourness from a restrained vinegar finish."
+    useful_additions: "soy_sauce\ngarlic\nvinegar\nrice\ntofu"
+    correction: too_rich
+    becomes_possible: "Serve over rice or noodles; add tofu or egg when more body is wanted."
+    risks: "Thick slices stay fibrous; crowding steams instead of browning; too much sweet sauce makes the result heavy."
+    confidence: high
+    destinations: [rice_or_grain_bowl, noodles]
+    transitions:
+      - {from: raw broccoli, move: separate stems and florets, to: raw broccoli stems, reason: "Stems need thinner cutting and slightly longer heat than florets."}
+      - {from: raw broccoli stems, move: slice thinly and stir-fry, to: crisp-tender stir-fried broccoli stems, reason: "More surface area encourages browning before the centre turns soft."}
+      - {from: crisp-tender stir-fried broccoli stems, move: finish with vinegar, to: seasoned broccoli topping, reason: "Acidity lifts soy and browned sweetness."}
+
+  - slug: roasted_florets
+    ingredient: broccoli
+    title: Roasted broccoli with a sour and nutty finish
+    preparation: separated
+    primary_transformation: roast
+    starting_state: raw broccoli florets
+    output_state: browned roasted broccoli florets
+    why_choose: "Choose this route for concentrated flavour, crisp edges, and a flexible side or bowl component."
+    sensory_change: "Dry heat reduces moisture, sweetens the stems, and gives the floret tips a nutty toasted bitterness."
+    flavour_direction: "Sharp lemon or vinegar contrasts the browned sweetness; sesame or nuts reinforce the toasted character."
+    useful_additions: "olive_oil\nsea_salt\nlemon\nsesame\nparmesan\nrice"
+    correction: too_bitter
+    becomes_possible: "Serve as a side dish, fold into a grain bowl, or continue into the crushed-broccoli journey."
+    risks: "Crowding prevents browning; scorched tips become bitter before thick stems turn tender."
+    confidence: high
+    destinations: [side_dish, rice_or_grain_bowl]
+    transitions:
+      - {from: raw broccoli, move: separate into evenly sized florets, to: prepared broccoli florets, reason: "Even pieces reach browning and tenderness together."}
+      - {from: prepared broccoli florets, move: roast with oil and salt, to: browned roasted broccoli florets, reason: "Dry heat concentrates sweetness and creates toasted edges."}
+      - {from: browned roasted broccoli florets, move: finish with acid and toasted seeds, to: sour and nutty roasted broccoli, reason: "Acid prevents heaviness while seeds echo the browned flavour."}
+
+  - slug: steamed_cold_side
+    ingredient: broccoli
+    title: Steamed broccoli cooled and dressed
+    preparation: separated
+    primary_transformation: steam
+    starting_state: raw broccoli florets and sliced stems
+    output_state: chilled tender-crisp broccoli
+    why_choose: "Choose this route for a bright, moist vegetable side that can be prepared ahead without roasted richness."
+    sensory_change: "Brief steam softens the fibres and mellows raw sharpness while retaining moisture; rapid cooling stops the doneness cliff and preserves tender-crisp texture."
+    flavour_direction: "Sour dressing supplies definition while sesame, nuts, or a little oil add nutty richness."
+    useful_additions: "lemon\nvinegar\nsesame\nwalnut\nolive_oil\nsea_salt"
+    correction: too_soft
+    becomes_possible: "Dress as a cold side or add to a salad after the surface moisture has drained."
+    risks: "Over-steaming turns broccoli soft, drab, and sulfurous; dressing while wet dilutes seasoning."
+    confidence: high
+    destinations: [side_dish, salad]
+    transitions:
+      - {from: raw broccoli, move: separate florets and slice stems, to: evenly prepared broccoli, reason: "Similar thickness lets stems and florets finish together."}
+      - {from: evenly prepared broccoli, move: steam briefly then cool, to: chilled tender-crisp broccoli, reason: "Cooling arrests carry-over cooking and protects colour and bite."}
+      - {from: chilled tender-crisp broccoli, move: drain and dress, to: cold dressed broccoli side, reason: "A dry surface accepts sour and nutty dressing without dilution."}
+
+  - slug: crushed_roasted_broccoli
+    ingredient: broccoli
+    title: Crushed roasted broccoli sauce, spread, or filling
+    preparation: crushed
+    primary_transformation: roast
+    starting_state: browned roasted broccoli florets
+    output_state: coarse roasted broccoli paste
+    why_choose: "Choose this continuation when roasted broccoli is leftover or when a spreadable, reusable component is more useful than intact florets."
+    sensory_change: "Crushing removes the crisp-edge contrast but distributes browned, sweet, and nutty flavour through a coarse, spoonable texture."
+    flavour_direction: "Acid keeps the paste lively; olive oil or yogurt controls dryness; garlic, herbs, or cheese can deepen it."
+    useful_additions: "lemon\nolive_oil\nyogurt\ngarlic\nparsley\nparmesan\nbread"
+    correction: too_dry
+    becomes_possible: "Spread on toast, loosen into a pasta sauce, or use as a savoury filling."
+    risks: "Over-processing makes a dull uniform purée; too little moisture leaves it fibrous, while too much oil masks the broccoli."
+    confidence: medium_high
+    destinations: [sauce_or_base, toast_or_sandwich, filling]
+    transitions:
+      - {from: browned roasted broccoli florets, move: crush while warm, to: coarse roasted broccoli paste, reason: "Warm tender stems break down while browned pieces retain flavour and some texture."}
+      - {from: coarse roasted broccoli paste, move: adjust with acid and moisture, to: balanced broccoli spread or sauce, reason: "Acid prevents heaviness and measured moisture sets the destination-specific consistency."}
+
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
 pairings:

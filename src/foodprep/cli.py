@@ -31,6 +31,11 @@ def _emit_markdown(md: str, out: str | None) -> int:
 
 
 def _db_has(conn, table: str) -> bool:
+    exists = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (table,)
+    ).fetchone()
+    if exists is None:
+        return False
     return conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0] > 0
 
 
@@ -71,6 +76,17 @@ def cmd_scout(args: argparse.Namespace) -> int:
     conn = connect(args.db)
     print(query.scout(conn, args.technique))
     return 0
+
+
+def cmd_journey(args: argparse.Namespace) -> int:
+    """Render complete Cook journeys for an ingredient."""
+    conn = connect(args.db)
+    if not _db_has(conn, "journeys"):
+        print("Database is empty or has no journeys. Run `foodprep build` first.")
+        return 1
+    result = query.render_ingredient_journeys(conn, args.ingredient, args.slug)
+    print(result)
+    return 1 if result.startswith("No journey") else 0
 
 
 def cmd_plate(args: argparse.Namespace) -> int:
@@ -199,6 +215,12 @@ def build_parser() -> argparse.ArgumentParser:
     psc.add_argument("technique", nargs="?", default=None,
                      help="limit to a technique, e.g. roast")
     psc.set_defaults(func=cmd_scout)
+
+    pj = sub.add_parser("journey", help="Complete Cook paths for an ingredient")
+    pj.add_argument("ingredient", nargs="?", default="broccoli")
+    pj.add_argument("slug", nargs="?", default=None,
+                    help="optional path id, e.g. steamed_cold_side")
+    pj.set_defaults(func=cmd_journey)
 
     ppl = sub.add_parser("plate",
                          help="Plate Balance Engine (Cook mode) — what is missing?")

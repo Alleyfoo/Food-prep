@@ -110,7 +110,7 @@ def _deep_merge(base: dict, extra: dict) -> dict:
     return base
 
 
-def populate(conn: sqlite3.Connection, data: dict) -> None:
+def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
     """Insert a parsed ontology dict into a freshly-schemed database."""
     # ---- vocabulary ----
     for r in data.get("roles", []):
@@ -293,6 +293,54 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
                 (pair_id, _source_id(conn, sid), None),
             )
 
+    # ---- product-facing journeys over existing transformations ----
+    vocabulary = vocabulary or load_vocabulary()
+    for journey in data.get("journeys", []):
+        ingredient_id = _ingredient_id(conn, journey["ingredient"])
+        preparation = vocabulary.require("preparations", journey["preparation"]).id
+        correction = vocabulary.require("corrections", journey["correction"]).id
+        confidence = vocabulary.require("confidence", journey["confidence"]).id
+        transformation = conn.execute(
+            "SELECT t.transformation_id FROM transformations t "
+            "JOIN techniques tech ON tech.technique_id = t.technique_id "
+            "WHERE t.ingredient_id = ? AND tech.name = ?",
+            (ingredient_id, journey["primary_transformation"]),
+        ).fetchone()
+        if transformation is None:
+            raise LoadError(
+                "journey primary transformation not found: "
+                f"{journey['ingredient']}/{journey['primary_transformation']}"
+            )
+        conn.execute(
+            "INSERT INTO journeys(slug, ingredient_id, title, preparation_id, "
+            "primary_transformation_id, starting_state, output_state, why_choose, "
+            "sensory_change, flavour_direction, useful_additions, correction, "
+            "becomes_possible, risks, confidence) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                journey["slug"], ingredient_id, journey["title"], preparation,
+                transformation[0], journey["starting_state"], journey["output_state"],
+                journey["why_choose"], journey["sensory_change"],
+                journey["flavour_direction"], journey.get("useful_additions"),
+                correction, journey["becomes_possible"], journey["risks"], confidence,
+            ),
+        )
+        journey_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        for destination in journey["destinations"]:
+            destination_id = vocabulary.require("destinations", destination).id
+            conn.execute(
+                "INSERT INTO journey_destinations(journey_id, destination_id) VALUES (?,?)",
+                (journey_id, destination_id),
+            )
+        for sequence_no, transition in enumerate(journey["transitions"], start=1):
+            conn.execute(
+                "INSERT INTO journey_transitions(journey_id, sequence_no, from_state, "
+                "move, to_state, reason) VALUES (?,?,?,?,?,?)",
+                (
+                    journey_id, sequence_no, transition["from"], transition["move"],
+                    transition["to"], transition["reason"],
+                ),
+            )
+
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
           profiles_path: Path | str | None = PROFILES_PATH,
@@ -304,10 +352,10 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     separate profiles_path so they can grow independently of ingredient trees."""
     # Validate the shared Cook/Scout language before making destructive schema
     # changes, so a bad vocabulary cannot wipe an existing local database.
-    load_vocabulary(vocabulary_path)
+    vocabulary = load_vocabulary(vocabulary_path)
     rebuild(conn)
     data = load_yaml(data_path) or {}
     if profiles_path and Path(profiles_path).exists():
         data = _deep_merge(data, load_yaml(profiles_path) or {})
-    populate(conn, data)
+    populate(conn, data, vocabulary)
     conn.commit()

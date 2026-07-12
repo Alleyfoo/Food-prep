@@ -146,6 +146,47 @@ CREATE TABLE transformation_evidence (
     PRIMARY KEY (transformation_id, source_id)
 );
 
+-- ---------------------------------------------------------------------------
+-- Ingredient journeys: product-facing paths across existing transformations
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE journeys (
+    journey_id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug                    TEXT NOT NULL,
+    ingredient_id           INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    title                   TEXT NOT NULL,
+    preparation_id          TEXT NOT NULL, -- controlled by vocabularies.yaml
+    primary_transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),
+    starting_state          TEXT NOT NULL,
+    output_state            TEXT NOT NULL,
+    why_choose              TEXT NOT NULL,
+    sensory_change          TEXT NOT NULL,
+    flavour_direction       TEXT NOT NULL,
+    useful_additions        TEXT,
+    correction              TEXT NOT NULL, -- controlled correction id
+    becomes_possible        TEXT NOT NULL,
+    risks                   TEXT NOT NULL,
+    confidence              TEXT NOT NULL,
+    UNIQUE (ingredient_id, slug)
+);
+
+CREATE TABLE journey_destinations (
+    journey_id    INTEGER NOT NULL REFERENCES journeys(journey_id),
+    destination_id TEXT NOT NULL, -- controlled by vocabularies.yaml
+    PRIMARY KEY (journey_id, destination_id)
+);
+
+CREATE TABLE journey_transitions (
+    transition_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    journey_id    INTEGER NOT NULL REFERENCES journeys(journey_id),
+    sequence_no   INTEGER NOT NULL,
+    from_state    TEXT NOT NULL,
+    move          TEXT NOT NULL,
+    to_state      TEXT NOT NULL,
+    reason        TEXT NOT NULL,
+    UNIQUE (journey_id, sequence_no)
+);
+
 CREATE TABLE pairing_evidence (
     pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
     source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),

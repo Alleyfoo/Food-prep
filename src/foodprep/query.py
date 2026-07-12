@@ -1312,3 +1312,100 @@ def ingredients_list(conn: sqlite3.Connection) -> list[str]:
         "SELECT canonical_name FROM ingredients ORDER BY canonical_name"
     ).fetchall()
     return [r[0] for r in rows]
+
+
+# ---- Ingredient journeys ---------------------------------------------------
+
+def ingredient_journeys(conn: sqlite3.Connection,
+                        ingredient: str) -> list[dict[str, Any]]:
+    """Return complete, ordered product-facing paths for an ingredient.
+
+    Journeys reference the existing primary transformation record and add the
+    preparation, causal explanation, destinations, and secondary transitions
+    needed by Cook. They do not replace branch cards or plate profiles.
+    """
+    rows = conn.execute(
+        """
+        SELECT j.*, i.canonical_name AS ingredient, tech.name AS primary_transformation,
+               c.name AS primary_component
+        FROM journeys j
+        JOIN ingredients i ON i.ingredient_id = j.ingredient_id
+        JOIN transformations tr
+          ON tr.transformation_id = j.primary_transformation_id
+        JOIN techniques tech ON tech.technique_id = tr.technique_id
+        JOIN components c ON c.component_id = tr.output_component_id
+        WHERE i.canonical_name = ?
+        ORDER BY j.journey_id
+        """,
+        (ingredient,),
+    ).fetchall()
+    result: list[dict[str, Any]] = []
+    for row in rows:
+        journey = dict(row)
+        journey["useful_additions"] = _split_list(journey.get("useful_additions"))
+        journey["destinations"] = [
+            r[0] for r in conn.execute(
+                "SELECT destination_id FROM journey_destinations "
+                "WHERE journey_id = ? ORDER BY rowid",
+                (journey["journey_id"],),
+            ).fetchall()
+        ]
+        journey["transitions"] = [
+            dict(r) for r in conn.execute(
+                "SELECT sequence_no, from_state, move, to_state, reason "
+                "FROM journey_transitions WHERE journey_id = ? ORDER BY sequence_no",
+                (journey["journey_id"],),
+            ).fetchall()
+        ]
+        result.append(journey)
+    return result
+
+
+def ingredient_journey(conn: sqlite3.Connection, ingredient: str,
+                       slug: str) -> dict[str, Any] | None:
+    """Return one named journey, or ``None`` when it is not modelled."""
+    return next(
+        (journey for journey in ingredient_journeys(conn, ingredient)
+         if journey["slug"] == slug),
+        None,
+    )
+
+
+def render_journey(journey: dict[str, Any]) -> str:
+    """Render one journey as a causal, text-first Cook explanation."""
+    lines = [journey["title"], f"Why choose it: {journey['why_choose']}"]
+    lines.append(f"Prepare: {journey['preparation_id'].replace('_', ' ')}")
+    lines.append(f"Transform: {journey['primary_transformation'].replace('_', ' ')}")
+    lines.append(f"What changes: {journey['sensory_change']}")
+    lines.append(f"Flavour direction: {journey['flavour_direction']}")
+    additions = journey.get("useful_additions") or []
+    if additions:
+        lines.append("Useful additions: " + ", ".join(a.replace("_", " ") for a in additions))
+    lines.append(f"What becomes possible: {journey['becomes_possible']}")
+    lines.append("Destinations: " + ", ".join(
+        d.replace("_", " ") for d in journey["destinations"]
+    ))
+    lines.append(f"Watch for: {journey['risks']}")
+    lines.append(f"Correction: {journey['correction'].replace('_', ' ')}")
+    lines.append("Path:")
+    for transition in journey["transitions"]:
+        lines.append(
+            f"  {transition['sequence_no']}. {transition['from_state']} -> "
+            f"{transition['move']} -> {transition['to_state']} — {transition['reason']}"
+        )
+    return "\n".join(lines)
+
+
+def render_ingredient_journeys(conn: sqlite3.Connection, ingredient: str,
+                               slug: str | None = None) -> str:
+    """Text-first CLI surface for all journeys or one selected journey."""
+    if slug:
+        journey = ingredient_journey(conn, ingredient, slug)
+        return render_journey(journey) if journey else (
+            f"No journey named {slug!r} for {ingredient!r}."
+        )
+    journeys = ingredient_journeys(conn, ingredient)
+    if not journeys:
+        return f"No complete journeys modelled for {ingredient!r}."
+    return (f"Complete Cook journeys for {ingredient}:\n\n" +
+            "\n\n---\n\n".join(render_journey(j) for j in journeys))
