@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .db import DEFAULT_DB_PATH, connect
 from .loader import DATA_PATH, build
-from . import corpus, export, query
+from . import corpus, export, query, tasting
 
 
 def _parse_csv(s: str | None) -> list[str] | None:
@@ -116,6 +116,38 @@ def cmd_novelty(args: argparse.Namespace) -> int:
         f"{summary['insufficient_coverage']} insufficient coverage."
     )
     print(query.render_generated_hypotheses(conn, args.component))
+    return 0
+
+
+def cmd_protocol(args: argparse.Namespace) -> int:
+    """Show the smallest controlled test for one generated hypothesis."""
+    conn = connect(args.db)
+    try:
+        result = tasting.protocol(conn, args.component, args.candidate)
+    except tasting.TastingError as exc:
+        print(str(exc))
+        return 1
+    print(tasting.render_protocol(result))
+    return 0
+
+
+def cmd_record_tasting(args: argparse.Namespace) -> int:
+    """Append a structured kitchen result."""
+    conn = connect(args.db)
+    try:
+        result = tasting.record_trial(
+            conn, args.component, args.candidate,
+            verdict=args.verdict, preparation=args.preparation, ratio=args.ratio,
+            temperature=args.temperature, observations=args.observations,
+            supporting_ingredients=args.supporting_ingredients,
+            failure_mode=args.failure_mode,
+            successful_correction=args.successful_correction,
+            safety_confirmed=args.safety_confirmed,
+        )
+    except tasting.TastingError as exc:
+        print(str(exc))
+        return 1
+    print(f"Recorded tasting trial {result['trial_id']}: {result['verdict']}")
     return 0
 
 
@@ -264,6 +296,26 @@ def build_parser() -> argparse.ArgumentParser:
     pnov.add_argument("--scope", default=None,
                       help="human-readable corpus scope; defaults to recipe count")
     pnov.set_defaults(func=cmd_novelty)
+
+    pproto = sub.add_parser("protocol", help="Show a controlled Scout tasting test")
+    pproto.add_argument("component")
+    pproto.add_argument("candidate")
+    pproto.set_defaults(func=cmd_protocol)
+
+    prec = sub.add_parser("record-tasting", help="Record a controlled tasting result")
+    prec.add_argument("component")
+    prec.add_argument("candidate")
+    prec.add_argument("--verdict", required=True, choices=sorted(tasting.VERDICTS))
+    prec.add_argument("--preparation", required=True)
+    prec.add_argument("--ratio", required=True)
+    prec.add_argument("--temperature", required=True)
+    prec.add_argument("--observations", required=True)
+    prec.add_argument("--supporting-ingredients", default=None)
+    prec.add_argument("--failure-mode", default=None)
+    prec.add_argument("--successful-correction", default=None)
+    prec.add_argument("--safety-confirmed", action="store_true", required=True,
+                     help="confirm ingredients were safely prepared; not preservation advice")
+    prec.set_defaults(func=cmd_record_tasting)
 
     ppl = sub.add_parser("plate",
                          help="Plate Balance Engine (Cook mode) — what is missing?")

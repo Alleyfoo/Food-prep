@@ -10,6 +10,13 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} as an acidic finish because {shared_function} The state contributes {matched_dimensions}."
     confidence: medium
+    protocol:
+      starting_ratio: "1 small roasted floret : 3 drops lingonberry vinegar"
+      smallest_test: "Dress one warm roasted floret with three drops; do not season the whole batch."
+      success_condition: "Acidity sharpens the browned broccoli without the berry aroma reading as jam or dessert."
+      likely_failure: "Fruit aroma dominates or makes the broccoli seem sweet."
+      corrections: "Increase salt; dilute with plain vinegar; reduce the lingonberry vinegar to one drop."
+      safety_note: "Use commercially prepared vinegar and fully cooked broccoli; this is a flavour test, not preservation guidance."
 
   - id: browned_fat_for_plain_fat_on_toasted_state
     known_pairing: "roasted broccoli with olive oil"
@@ -22,6 +29,13 @@ analogy_rules:
     required_dimensions: "nutty_toasted"
     explanation_template: "{candidate} may reinforce this state because {shared_function} The state contributes {matched_dimensions}."
     confidence: medium_high
+    protocol:
+      starting_ratio: "1 small roasted floret : 1/4 teaspoon brown butter"
+      smallest_test: "Coat one warm floret lightly with brown butter and taste before dressing the batch."
+      success_condition: "Nutty aroma reinforces browning while the broccoli remains recognizable and not greasy."
+      likely_failure: "Fat coats the palate and suppresses green character."
+      corrections: "Use half as much butter; add one drop lemon; finish with salt rather than more fat."
+      safety_note: "Use freshly prepared brown butter without burned milk solids and fully cooked broccoli."
 
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
@@ -34,3 +48,10 @@ analogy_rules:
     required_dimensions: "fermented_funky\nrich_fatty"
     explanation_template: "{candidate} is only plausible when {matched_dimensions} support the bridge: {shared_function}"
     confidence: low
+    protocol:
+      starting_ratio: "1 tablespoon soup : 1/8 teaspoon smoked yogurt"
+      smallest_test: "Stir smoked yogurt into one spoonful away from the main pot."
+      success_condition: "A faint smoke note adds depth without making the soup taste ashy."
+      likely_failure: "Smoke dominates the green vegetable aroma."
+      corrections: "Dilute with plain yogurt or soup; add fresh herbs; omit further smoke."
+      safety_note: "Use refrigerated commercial yogurt and safely cooked soup; do not use this protocol for storage or fermentation."

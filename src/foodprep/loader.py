@@ -459,6 +459,18 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 confidence,
             ),
         )
+        protocol = rule.get("protocol")
+        if protocol:
+            conn.execute(
+                "INSERT INTO tasting_protocol_templates(analogy_id, starting_ratio, "
+                "smallest_test, success_condition, likely_failure, corrections, "
+                "safety_note) VALUES (?,?,?,?,?,?,?)",
+                (
+                    rule["id"], protocol["starting_ratio"], protocol["smallest_test"],
+                    protocol["success_condition"], protocol["likely_failure"],
+                    protocol["corrections"], protocol["safety_note"],
+                ),
+            )
 
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,

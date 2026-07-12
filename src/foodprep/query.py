@@ -827,6 +827,13 @@ def generate_scout_hypotheses(
             novelty["target_covered"] = bool(novelty["target_covered"])
             novelty["candidate_covered"] = bool(novelty["candidate_covered"])
             hypothesis["novelty"] = novelty
+        protocol = conn.execute(
+            "SELECT starting_ratio, smallest_test, success_condition, "
+            "likely_failure, corrections, safety_note "
+            "FROM tasting_protocol_templates WHERE analogy_id = ?",
+            (hypothesis["analogy_id"],),
+        ).fetchone()
+        hypothesis["protocol"] = dict(protocol) if protocol else None
         hypothesis["candidate_class"] = classify_scout_candidate(
             evidence, hypothesis["novelty"]["class"]
         )
@@ -873,6 +880,16 @@ def render_generated_hypotheses(conn: sqlite3.Connection,
                      )
             ),
         ])
+        if hypothesis.get("protocol"):
+            protocol = hypothesis["protocol"]
+            lines.extend([
+                f"    smallest test: {protocol['smallest_test']}",
+                f"    starting ratio: {protocol['starting_ratio']}",
+                f"    success: {protocol['success_condition']}",
+                f"    likely failure: {protocol['likely_failure']}",
+                f"    corrections: {protocol['corrections']}",
+                f"    safety: {protocol['safety_note']}",
+            ])
     return "\n".join(lines)
 
 

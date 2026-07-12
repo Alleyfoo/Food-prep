@@ -279,6 +279,33 @@ CREATE TABLE novelty_observations (
     UNIQUE (analogy_id, component_id, corpus_id)
 );
 
+CREATE TABLE tasting_protocol_templates (
+    analogy_id        TEXT PRIMARY KEY REFERENCES analogy_rules(analogy_id),
+    starting_ratio    TEXT NOT NULL,
+    smallest_test     TEXT NOT NULL,
+    success_condition TEXT NOT NULL,
+    likely_failure    TEXT NOT NULL,
+    corrections       TEXT NOT NULL,
+    safety_note       TEXT NOT NULL
+);
+
+CREATE TABLE tasting_trials (
+    trial_id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    analogy_id             TEXT NOT NULL REFERENCES analogy_rules(analogy_id),
+    component_id           INTEGER NOT NULL REFERENCES components(component_id),
+    candidate_ingredient_id INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    tested_at              TEXT NOT NULL,
+    preparation            TEXT NOT NULL,
+    ratio                  TEXT NOT NULL,
+    temperature            TEXT NOT NULL,
+    supporting_ingredients TEXT,
+    verdict                TEXT NOT NULL,
+    observations           TEXT NOT NULL,
+    failure_mode           TEXT,
+    successful_correction  TEXT,
+    safety_confirmed       INTEGER NOT NULL
+);
+
 CREATE TABLE pairing_evidence (
     pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
     source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),
