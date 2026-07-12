@@ -13,6 +13,7 @@ from pathlib import Path
 import yaml
 
 from .db import rebuild
+from .vocabulary import VOCABULARY_PATH, load_vocabulary
 
 DATA_PATH = Path(__file__).with_name("data") / "tomato.yaml"
 PROFILES_PATH = Path(__file__).with_name("data") / "component_profiles.yaml"
@@ -294,12 +295,16 @@ def populate(conn: sqlite3.Connection, data: dict) -> None:
 
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
-          profiles_path: Path | str | None = PROFILES_PATH) -> None:
+          profiles_path: Path | str | None = PROFILES_PATH,
+          vocabulary_path: Path | str = VOCABULARY_PATH) -> None:
     """Rebuild schema and load the YAML ontology from scratch.
 
     The ingredient ontology (tomato/onion/potato, techniques, transformations,
     pairings) comes from data_path. Plate-item component profiles come from a
     separate profiles_path so they can grow independently of ingredient trees."""
+    # Validate the shared Cook/Scout language before making destructive schema
+    # changes, so a bad vocabulary cannot wipe an existing local database.
+    load_vocabulary(vocabulary_path)
     rebuild(conn)
     data = load_yaml(data_path) or {}
     if profiles_path and Path(profiles_path).exists():

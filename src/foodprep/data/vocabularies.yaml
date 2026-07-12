@@ -1,0 +1,83 @@
+preparations:
+  - {id: whole, name: Whole, definition: Kept intact before transformation.}
+  - {id: halved, name: Halved, definition: Divided into two large pieces.}
+  - {id: sliced, name: Sliced, definition: Cut into broad or thin flat pieces.}
+  - {id: chopped, name: Chopped, definition: Cut into irregular bite-sized pieces.}
+  - {id: finely_chopped, name: Finely chopped, definition: Cut into small pieces for quick cooking or dispersion.}
+  - {id: shredded, name: Shredded, definition: Cut into long narrow strips.}
+  - {id: grated, name: Grated, definition: Reduced to small shreds against a grating surface.}
+  - {id: crushed, name: Crushed, definition: Broken down by pressure into a rough mass.}
+  - {id: separated, name: Separated, definition: Divided along meaningful anatomical parts such as stems and florets.}
+  - {id: peeled, name: Peeled, definition: Outer skin or layer removed.}
+  - {id: scored, name: Scored, definition: Surface cut shallowly to alter heat or seasoning penetration.}
+
+transformation_categories:
+  - {id: preparation_modifier, name: Preparation modifier, definition: Changes physical form without creating a new cooked state.}
+  - {id: primary_state_change, name: Primary state change, definition: Produces a materially different culinary state.}
+  - {id: preservation_process, name: Preservation process, definition: Extends storage life using a validated preservation method.}
+  - {id: secondary_transformation, name: Secondary transformation, definition: Changes an already transformed state into another useful state.}
+
+flavours:
+  - {id: salty, name: Salty, definition: Salt-driven savouriness or seasoning intensity.}
+  - {id: sour, name: Sour, definition: Perceived acidity and tartness.}
+  - {id: sweet, name: Sweet, definition: Sugar-like sweetness or caramelized sweetness.}
+  - {id: bitter, name: Bitter, definition: Bitter compounds including char or vegetal bitterness.}
+  - {id: umami, name: Umami, definition: Deep savoury taste associated with glutamates and related compounds.}
+  - {id: pungent, name: Pungent, definition: Sharp heat or bite from ingredients such as mustard or raw alliums.}
+  - {id: aromatic, name: Aromatic, definition: Volatile fragrance that shapes flavour without being a basic taste.}
+  - {id: nutty_toasted, name: Nutty or toasted, definition: Roasted seed nut or browned cereal character.}
+  - {id: fresh_green, name: Fresh or green, definition: Fresh vegetal herbal or grassy character.}
+  - {id: fermented_funky, name: Fermented or funky, definition: Fermentation-derived tang aroma or savoury complexity.}
+  - {id: rich_fatty, name: Rich or fatty, definition: Fat-associated richness coating or weight.}
+
+textures:
+  - {id: crisp, name: Crisp, definition: Clean brittle bite with little density.}
+  - {id: crunchy, name: Crunchy, definition: Firm audible resistance across repeated chewing.}
+  - {id: tender, name: Tender, definition: Yields easily while retaining structure.}
+  - {id: soft, name: Soft, definition: Low resistance and little structural bite.}
+  - {id: silky, name: Silky, definition: Smooth fine texture with fluid movement.}
+  - {id: juicy, name: Juicy, definition: Releases noticeable internal moisture when eaten.}
+  - {id: dry, name: Dry, definition: Low perceived moisture or lubrication.}
+  - {id: chewy, name: Chewy, definition: Requires sustained elastic chewing.}
+  - {id: sticky, name: Sticky, definition: Adheres to itself or other surfaces.}
+  - {id: dense, name: Dense, definition: Compact substantial structure.}
+  - {id: creamy, name: Creamy, definition: Smooth thick and coating.}
+  - {id: fibrous, name: Fibrous, definition: Noticeable strands or plant fibres during chewing.}
+
+corrections:
+  - {id: too_flat, name: Too flat, definition: Lacks definition or contrast; consider salt acid or aromatics.}
+  - {id: too_sweet, name: Too sweet, definition: Sweetness dominates; consider acid bitterness or heat.}
+  - {id: too_bitter, name: Too bitter, definition: Bitterness dominates; consider fat sweetness or salt.}
+  - {id: too_soft, name: Too soft, definition: Lacks physical contrast; consider a crisp or crunchy finish.}
+  - {id: too_dry, name: Too dry, definition: Needs moisture or lubrication from sauce broth or fat.}
+  - {id: too_rich, name: Too rich, definition: Feels heavy or coating; consider acid freshness or pungency.}
+  - {id: too_watery, name: Too watery, definition: Excess water weakens flavour or structure; concentrate drain or add body.}
+  - {id: too_aggressive, name: Too aggressive, definition: Flavour intensity overwhelms; dilute or add a mild base or fat.}
+
+destinations:
+  - {id: side_dish, name: Side dish, definition: A supporting dish that need not form a complete meal.}
+  - {id: complete_savoury_plate, name: Complete savoury plate, definition: A satisfying meal with contextual structure balance and moisture.}
+  - {id: rice_or_grain_bowl, name: Rice or grain bowl, definition: A topping or component served with rice or another grain.}
+  - {id: noodles, name: Noodles, definition: A component sauce or topping intended for noodles.}
+  - {id: soup, name: Soup, definition: A broth or liquid-led destination.}
+  - {id: salad, name: Salad, definition: A fresh chilled or room-temperature assembled dish.}
+  - {id: toast_or_sandwich, name: Toast or sandwich, definition: A topping spread or filling carried by bread.}
+  - {id: filling, name: Filling, definition: A component enclosed in pastry dough leaves or vegetables.}
+  - {id: sauce_or_base, name: Sauce or base, definition: A reusable wet or spreadable foundation.}
+  - {id: condiment, name: Condiment, definition: A concentrated supporting preparation used in small amounts.}
+  - {id: preserved_component, name: Preserved component, definition: A safely preserved ingredient intended for later use.}
+  - {id: batch_prepared_ingredient, name: Batch-prepared ingredient, definition: A reusable prepared state held for later meals.}
+
+confidence:
+  - {id: high, name: High, definition: Strong curated culinary support.}
+  - {id: medium_high, name: Medium-high, definition: Good support with limited contextual uncertainty.}
+  - {id: medium, name: Medium, definition: Plausible and supported but context-sensitive.}
+  - {id: low, name: Low, definition: Weak or incomplete support.}
+  - {id: experimental, name: Experimental, definition: A hypothesis intended for controlled testing.}
+
+uncertainty:
+  - {id: established, name: Established, definition: Supported by recognizable culinary precedent.}
+  - {id: plausible, name: Plausible, definition: Has an explicit compatibility mechanism with incomplete precedent.}
+  - {id: speculative, name: Speculative, definition: Worth limited investigation but weakly supported.}
+  - {id: unsupported, name: Unsupported, definition: Lacks a meaningful compatibility case.}
+  - {id: unknown, name: Unknown, definition: Available evidence is insufficient to classify.}
