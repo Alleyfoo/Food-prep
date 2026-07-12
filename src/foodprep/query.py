@@ -440,6 +440,61 @@ def component_state_profile(conn: sqlite3.Connection,
     return profile
 
 
+def flavour_routes_for_component(
+    conn: sqlite3.Connection,
+    component_name: str,
+    available_items: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Routes fitting a transformed state, optionally matched to inventory."""
+    rows = conn.execute(
+        """
+        SELECT fr.*, frs.fit_reason
+        FROM flavour_routes fr
+        JOIN flavour_route_states frs ON frs.route_id = fr.route_id
+        JOIN components c ON c.component_id = frs.component_id
+        WHERE c.name = ?
+        ORDER BY CASE fr.confidence WHEN 'high' THEN 3 WHEN 'medium_high' THEN 2
+                                    WHEN 'medium' THEN 1 ELSE 0 END DESC,
+                 fr.name
+        """,
+        (component_name,),
+    ).fetchall()
+    available = {item.strip() for item in (available_items or []) if item.strip()}
+    result = []
+    for row in rows:
+        route = dict(row)
+        route["flavour_dimensions"] = _split_list(route["flavour_dimensions"])
+        route["destinations"] = [r[0] for r in conn.execute(
+            "SELECT destination_id FROM flavour_route_destinations "
+            "WHERE route_id = ? ORDER BY rowid", (route["route_id"],)
+        ).fetchall()]
+        route["elements"] = [dict(r) for r in conn.execute(
+            """SELECT i.canonical_name AS ingredient, fre.contribution, fre.optionality
+               FROM flavour_route_elements fre
+               JOIN ingredients i ON i.ingredient_id = fre.ingredient_id
+               WHERE fre.route_id = ? ORDER BY fre.rowid""",
+            (route["route_id"],),
+        ).fetchall()]
+        route["available_elements"] = [
+            element for element in route["elements"]
+            if element["ingredient"] in available
+        ]
+        route["missing_required"] = [
+            element for element in route["elements"]
+            if element["optionality"] == "required"
+            and element["ingredient"] not in available
+        ]
+        route["required_coverage"] = (
+            sum(e["optionality"] == "required" and e["ingredient"] in available
+                for e in route["elements"]),
+            sum(e["optionality"] == "required" for e in route["elements"]),
+        )
+        result.append(route)
+    if available_items is not None:
+        result.sort(key=lambda r: (-r["required_coverage"][0], r["route_id"]))
+    return result
+
+
 def _match_ingredient(conn: sqlite3.Connection, phrase: str) -> str | None:
     """Return the canonical ingredient name matching a phrase (name/alias,
     longest match wins), or None. Used so raw ingredients on a plate (garlic,

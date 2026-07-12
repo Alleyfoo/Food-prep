@@ -18,6 +18,7 @@ from .vocabulary import VOCABULARY_PATH, load_vocabulary
 DATA_PATH = Path(__file__).with_name("data") / "tomato.yaml"
 PROFILES_PATH = Path(__file__).with_name("data") / "component_profiles.yaml"
 DESTINATIONS_PATH = Path(__file__).with_name("data") / "destination_profiles.yaml"
+ROUTES_PATH = Path(__file__).with_name("data") / "flavour_routes.yaml"
 
 CONFIDENCE_OK = {"high", "medium_high", "medium", "low", "experimental"}
 
@@ -389,10 +390,51 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 (destination.id, _role_id(conn, role), importance, function["reason"]),
             )
 
+    # ---- reusable flavour routes ----
+    for route in data.get("flavour_routes", []):
+        confidence = vocabulary.require("confidence", route["confidence"]).id
+        for dimension in _split_list(route["dimensions"]):
+            vocabulary.require("flavours", dimension)
+        conn.execute(
+            "INSERT INTO flavour_routes(route_id, name, description, "
+            "flavour_dimensions, risks, cultural_context, confidence) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (
+                route["id"], route["name"], route["description"],
+                route["dimensions"], route["risks"], route.get("cultural_context"),
+                confidence,
+            ),
+        )
+        for state in route["states"]:
+            conn.execute(
+                "INSERT INTO flavour_route_states(route_id, component_id, fit_reason) "
+                "VALUES (?,?,?)",
+                (route["id"], _component_id(conn, state["component"]), state["reason"]),
+            )
+        for destination in route["destinations"]:
+            destination_id = vocabulary.require("destinations", destination).id
+            conn.execute(
+                "INSERT INTO flavour_route_destinations(route_id, destination_id) "
+                "VALUES (?,?)", (route["id"], destination_id),
+            )
+        for element in route["elements"]:
+            optionality = element["optionality"]
+            if optionality not in {"required", "supporting", "finish"}:
+                raise LoadError(f"bad route optionality: {optionality!r}")
+            conn.execute(
+                "INSERT INTO flavour_route_elements(route_id, ingredient_id, "
+                "contribution, optionality) VALUES (?,?,?,?)",
+                (
+                    route["id"], _ingredient_id(conn, element["ingredient"]),
+                    element["contribution"], optionality,
+                ),
+            )
+
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
           profiles_path: Path | str | None = PROFILES_PATH,
           destinations_path: Path | str | None = DESTINATIONS_PATH,
+          routes_path: Path | str | None = ROUTES_PATH,
           vocabulary_path: Path | str = VOCABULARY_PATH) -> None:
     """Rebuild schema and load the YAML ontology from scratch.
 
@@ -408,5 +450,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
         data = _deep_merge(data, load_yaml(profiles_path) or {})
     if destinations_path and Path(destinations_path).exists():
         data = _deep_merge(data, load_yaml(destinations_path) or {})
+    if routes_path and Path(routes_path).exists():
+        data = _deep_merge(data, load_yaml(routes_path) or {})
     populate(conn, data, vocabulary)
     conn.commit()

@@ -207,6 +207,37 @@ CREATE TABLE destination_functions (
     PRIMARY KEY (destination_id, role_id)
 );
 
+CREATE TABLE flavour_routes (
+    route_id         TEXT PRIMARY KEY,
+    name             TEXT NOT NULL,
+    description      TEXT NOT NULL,
+    flavour_dimensions TEXT NOT NULL,
+    risks            TEXT NOT NULL,
+    cultural_context TEXT,
+    confidence       TEXT NOT NULL
+);
+
+CREATE TABLE flavour_route_states (
+    route_id     TEXT NOT NULL REFERENCES flavour_routes(route_id),
+    component_id INTEGER NOT NULL REFERENCES components(component_id),
+    fit_reason   TEXT NOT NULL,
+    PRIMARY KEY (route_id, component_id)
+);
+
+CREATE TABLE flavour_route_destinations (
+    route_id       TEXT NOT NULL REFERENCES flavour_routes(route_id),
+    destination_id TEXT NOT NULL,
+    PRIMARY KEY (route_id, destination_id)
+);
+
+CREATE TABLE flavour_route_elements (
+    route_id      TEXT NOT NULL REFERENCES flavour_routes(route_id),
+    ingredient_id INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    contribution  TEXT NOT NULL,
+    optionality   TEXT NOT NULL, -- required | supporting | finish
+    PRIMARY KEY (route_id, ingredient_id)
+);
+
 CREATE TABLE pairing_evidence (
     pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
     source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),

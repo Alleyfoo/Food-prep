@@ -1,0 +1,47 @@
+flavour_routes:
+  - id: soy_and_garlic
+    name: Soy and garlic
+    description: "A salty, umami, aromatic route for fast high-heat broccoli states."
+    dimensions: "salty\numami\naromatic"
+    risks: "Too much soy masks fresh green character; burnt garlic turns bitter."
+    cultural_context: "A broad stir-fry structure, not a claim about one regional recipe."
+    confidence: high
+    states:
+      - {component: stir_fried_broccoli_component, reason: "High heat already provides browning; soy seasons and garlic adds aroma."}
+    destinations: [rice_or_grain_bowl, noodles]
+    elements:
+      - {ingredient: soy_sauce, contribution: "Salt and umami", optionality: required}
+      - {ingredient: garlic, contribution: "Pungent aroma", optionality: required}
+      - {ingredient: vinegar, contribution: "Sharp finish that prevents heaviness", optionality: finish}
+
+  - id: sour_and_toasted_nut
+    name: Sour and toasted nut
+    description: "Acid contrasts browned sweetness while nuts reinforce roasted character."
+    dimensions: "sour\nnutty_toasted\nrich_fatty"
+    risks: "Excess acid can make broccoli metallic; too many nuts make the route heavy."
+    cultural_context: "General browned-vegetable, sharp-condiment, and nut structure."
+    confidence: high
+    states:
+      - {component: roasted_broccoli_component, reason: "Acid balances concentration and walnut echoes toasted floret edges."}
+      - {component: steamed_broccoli_component, reason: "Acid defines the moist mild state while walnut adds contrast."}
+    destinations: [side_dish, rice_or_grain_bowl, salad]
+    elements:
+      - {ingredient: lemon, contribution: "Fresh acidity", optionality: required}
+      - {ingredient: walnut, contribution: "Toasted richness and crunch", optionality: required}
+      - {ingredient: olive_oil, contribution: "Carries flavour and softens sharpness", optionality: supporting}
+
+  - id: creamy_and_acidic
+    name: Creamy and acidic
+    description: "A cool creamy carrier with enough acidity to keep green vegetables lively."
+    dimensions: "sour\nrich_fatty\nfresh_green"
+    risks: "A thick heavy coating can mute broccoli; add yogurt gradually and preserve acidity."
+    cultural_context: "General yogurt-and-citrus dressing structure."
+    confidence: medium_high
+    states:
+      - {component: steamed_broccoli_component, reason: "The moist tender-crisp state accepts a cool dressing after draining."}
+      - {component: roasted_broccoli_component, reason: "Cool yogurt contrasts hot browned edges."}
+    destinations: [side_dish, salad, sauce_or_base]
+    elements:
+      - {ingredient: yogurt, contribution: "Creamy tang and moisture", optionality: required}
+      - {ingredient: lemon, contribution: "Acidic lift", optionality: required}
+      - {ingredient: dill, contribution: "Fresh aromatic finish", optionality: finish}
