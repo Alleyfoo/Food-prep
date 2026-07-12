@@ -1085,6 +1085,14 @@ transformations:
       - { family: texture, value: tender_crisp,  polarity: gain }
       - { family: state,   value: cooked,       polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body"
+      flavour: "fresh_green\nsweet\nvegetal"
+      texture: "tender\njuicy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Briefly steamed state; moist and tender-crisp, suitable for side or salad reasoning."
     missing_roles:
       - { role: salt,    priority: high,   note: "seasoning" }
       - { role: fat,     priority: high,   note: "butter/oil/cheese" }
@@ -1108,6 +1116,14 @@ transformations:
       - { family: flavour, value: concentrated,   polarity: gain }
       - { family: state,   value: roasted,        polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body\ncrunch\numami"
+      flavour: "nutty_toasted\nsweet\numami"
+      texture: "crisp\ntender"
+      missing_risks: "salt\nacid\nhydration"
+      heaviness_score: 2
+      dryness_score: 3
+      notes: "Browned floret state; toasted and moderately dry with crisp edges."
     missing_roles:
       - { role: salt,    priority: high,   note: "flaky salt" }
       - { role: fat,     priority: high,   note: "olive oil" }
@@ -1133,6 +1149,14 @@ transformations:
       - { family: texture, value: firm,    polarity: gain }
       - { family: state,   value: cooked,  polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body\ncrunch\numami"
+      flavour: "umami\nsweet\nfresh_green"
+      texture: "crisp\ntender"
+      missing_risks: "salt\nacid"
+      heaviness_score: 2
+      dryness_score: 2
+      notes: "Crisp-tender cooked state for bowls and noodles."
     missing_roles:
       - { role: salt,    priority: high,   note: "soy sauce/sea salt" }
       - { role: protein, priority: medium, note: "egg/tofu/pork/shrimp" }

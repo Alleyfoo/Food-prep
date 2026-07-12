@@ -250,6 +250,20 @@ CREATE TABLE component_profiles (
     notes             TEXT
 );
 
+-- Sensory/plate profile owned directly by a transformed component. This lets a
+-- journey state enter destination reasoning without an independently named
+-- shadow row in component_profiles.
+CREATE TABLE component_state_profiles (
+    component_id      INTEGER PRIMARY KEY REFERENCES components(component_id),
+    provides_roles    TEXT,
+    flavour_tags      TEXT,
+    texture_tags      TEXT,
+    missing_risks     TEXT,
+    heaviness_score   INTEGER,
+    dryness_score     INTEGER,
+    notes             TEXT
+);
+
 -- ---------------------------------------------------------------------------
 -- Query helpers
 -- ---------------------------------------------------------------------------

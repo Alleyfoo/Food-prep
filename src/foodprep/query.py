@@ -420,6 +420,26 @@ def _match_profile(conn: sqlite3.Connection, phrase: str) -> str | None:
     return best
 
 
+def component_state_profile(conn: sqlite3.Connection,
+                            component_name: str) -> dict[str, Any] | None:
+    """Profile owned by a transformed component, without a shadow name."""
+    row = conn.execute(
+        """
+        SELECT c.name, sp.*
+        FROM component_state_profiles sp
+        JOIN components c ON c.component_id = sp.component_id
+        WHERE c.name = ?
+        """,
+        (component_name,),
+    ).fetchone()
+    if row is None:
+        return None
+    profile = dict(row)
+    for field in ("provides_roles", "flavour_tags", "texture_tags", "missing_risks"):
+        profile[field] = _split_list(profile[field])
+    return profile
+
+
 def _match_ingredient(conn: sqlite3.Connection, phrase: str) -> str | None:
     """Return the canonical ingredient name matching a phrase (name/alias,
     longest match wins), or None. Used so raw ingredients on a plate (garlic,
@@ -710,6 +730,18 @@ def _recognise_plate_item(conn: sqlite3.Connection, phrase: str) -> dict[str, An
       kind 'ingredient' — a raw ingredient (base_roles as provides; no scores)
       kind 'unknown'    — neither, matched nothing
     """
+    component_name = phrase.strip().lower()
+    state_profile = component_state_profile(conn, component_name)
+    if state_profile:
+        return {
+            "kind": "profile", "name": component_name,
+            "provides": state_profile["provides_roles"],
+            "missing_risks": state_profile["missing_risks"],
+            "heaviness": state_profile["heaviness_score"],
+            "dryness": state_profile["dryness_score"],
+            "profile_source": "component_state",
+        }
+
     prof = _match_profile(conn, phrase)
     if prof:
         row = conn.execute(
@@ -1354,6 +1386,7 @@ def component_card(conn: sqlite3.Connection, component_name: str) -> dict[str, A
         "missing": detail["missing"] if detail else [],
         "fillers_by_role": detail["fillers_by_role"] if detail else {},
         "uses": uses,
+        "plate_profile": component_state_profile(conn, component_name),
     }
 
 

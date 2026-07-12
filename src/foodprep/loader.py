@@ -234,6 +234,23 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
             (ing_id, tech_id),
         ).fetchone()[0]
 
+        state_profile = tr.get("state_profile")
+        if state_profile:
+            for role in _split_list(state_profile.get("provides")):
+                _role_id(conn, role)  # validate authored functional claims
+            conn.execute(
+                "INSERT INTO component_state_profiles(component_id, provides_roles, "
+                "flavour_tags, texture_tags, missing_risks, heaviness_score, "
+                "dryness_score, notes) VALUES (?,?,?,?,?,?,?,?)",
+                (
+                    comp_id, state_profile.get("provides"),
+                    state_profile.get("flavour"), state_profile.get("texture"),
+                    state_profile.get("missing_risks"),
+                    state_profile.get("heaviness_score"),
+                    state_profile.get("dryness_score"), state_profile.get("notes"),
+                ),
+            )
+
         for tg in tr.get("tags_after", []):
             conn.execute(
                 "INSERT INTO transformation_tags(transformation_id, tag_id, "
