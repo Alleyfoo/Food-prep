@@ -89,6 +89,17 @@ def cmd_journey(args: argparse.Namespace) -> int:
     return 1 if result.startswith("No journey") else 0
 
 
+def cmd_hypotheses(args: argparse.Namespace) -> int:
+    """Generate structured Scout hypotheses for a transformed state."""
+    conn = connect(args.db)
+    if not _db_has(conn, "analogy_rules"):
+        print("Database is empty or has no Scout rules. Run `foodprep build` first.")
+        return 1
+    result = query.render_generated_hypotheses(conn, args.component)
+    print(result)
+    return 1 if result.startswith("No generated") else 0
+
+
 def cmd_plate(args: argparse.Namespace) -> int:
     """Plate Balance Engine — Cook mode (separate from Scout)."""
     conn = connect(args.db)
@@ -221,6 +232,10 @@ def build_parser() -> argparse.ArgumentParser:
     pj.add_argument("slug", nargs="?", default=None,
                     help="optional path id, e.g. steamed_cold_side")
     pj.set_defaults(func=cmd_journey)
+
+    phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
+    phyp.add_argument("component", help="e.g. roasted_broccoli_component")
+    phyp.set_defaults(func=cmd_hypotheses)
 
     ppl = sub.add_parser("plate",
                          help="Plate Balance Engine (Cook mode) — what is missing?")

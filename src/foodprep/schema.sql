@@ -238,6 +238,22 @@ CREATE TABLE flavour_route_elements (
     PRIMARY KEY (route_id, ingredient_id)
 );
 
+-- Scout generator inputs. These are reusable analogy/substitution rules, not
+-- manually authored final candidate pairings.
+CREATE TABLE analogy_rules (
+    analogy_id            TEXT PRIMARY KEY,
+    known_pairing         TEXT NOT NULL,
+    source_ingredient_id  INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    substitute_ingredient_id INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    mechanism             TEXT NOT NULL,
+    shared_function       TEXT NOT NULL,
+    meaningful_difference TEXT NOT NULL,
+    expected_risk         TEXT NOT NULL,
+    required_dimensions   TEXT NOT NULL,
+    explanation_template  TEXT NOT NULL,
+    confidence            TEXT NOT NULL
+);
+
 CREATE TABLE pairing_evidence (
     pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
     source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),

@@ -750,6 +750,101 @@ def scout(conn: sqlite3.Connection, technique: str | None = None,
     return "\n".join(lines)
 
 
+def classify_scout_candidate(compatibility_evidence: list[str],
+                             novelty_class: str = "not_checked") -> str:
+    """Classify from compatibility only; novelty cannot rescue weak evidence."""
+    if not compatibility_evidence:
+        return "rejected"
+    if len(compatibility_evidence) >= 3:
+        return "scout_candidate"
+    return "weak_hypothesis"
+
+
+def generate_scout_hypotheses(
+    conn: sqlite3.Connection,
+    component_name: str,
+    include_rejected: bool = False,
+) -> list[dict[str, Any]]:
+    """Generate hypotheses by applying reusable analogy rules to one state.
+
+    Compatibility is derived from state dimensions and the rule's functional
+    analogy. Novelty is deliberately left unchecked and never enters ranking.
+    """
+    state = component_state_profile(conn, component_name)
+    if state is None:
+        return []
+    state_dimensions = set(state["flavour_tags"])
+    rows = conn.execute(
+        """
+        SELECT ar.*, src.canonical_name AS source,
+               candidate.canonical_name AS candidate
+        FROM analogy_rules ar
+        JOIN ingredients src ON src.ingredient_id = ar.source_ingredient_id
+        JOIN ingredients candidate
+          ON candidate.ingredient_id = ar.substitute_ingredient_id
+        ORDER BY CASE ar.confidence WHEN 'high' THEN 4 WHEN 'medium_high' THEN 3
+                                    WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END DESC,
+                 ar.analogy_id
+        """
+    ).fetchall()
+    hypotheses = []
+    for row in rows:
+        hypothesis = dict(row)
+        required = _split_list(hypothesis["required_dimensions"])
+        matched = [dimension for dimension in required if dimension in state_dimensions]
+        evidence = []
+        if matched:
+            evidence.append("state fit: " + ", ".join(matched))
+            evidence.append("mechanism: " + hypothesis["mechanism"].replace("_", " "))
+            evidence.append("analogy: " + hypothesis["shared_function"])
+        hypothesis.update({
+            "state": component_name,
+            "required_dimensions": required,
+            "matched_dimensions": matched,
+            "compatibility_evidence": evidence,
+            "compatibility_score": len(evidence),
+            "novelty": {"class": "not_checked", "scope": None},
+            "risk": hypothesis["expected_risk"],
+        })
+        hypothesis["candidate_class"] = classify_scout_candidate(
+            evidence, hypothesis["novelty"]["class"]
+        )
+        if hypothesis["candidate_class"] == "rejected":
+            hypothesis["rejection_reason"] = (
+                "State lacks required dimensions: " + ", ".join(required)
+            )
+        else:
+            hypothesis["rejection_reason"] = None
+            hypothesis["explanation"] = hypothesis["explanation_template"].format(
+                candidate=hypothesis["candidate"], source=hypothesis["source"],
+                shared_function=hypothesis["shared_function"],
+                matched_dimensions=", ".join(matched),
+            )
+        if include_rejected or hypothesis["candidate_class"] != "rejected":
+            hypotheses.append(hypothesis)
+    hypotheses.sort(key=lambda h: (-h["compatibility_score"], h["candidate"]))
+    return hypotheses
+
+
+def render_generated_hypotheses(conn: sqlite3.Connection,
+                                component_name: str) -> str:
+    hypotheses = generate_scout_hypotheses(conn, component_name)
+    if not hypotheses:
+        return f"No generated Scout hypotheses for {component_name!r}."
+    lines = ["Generated Scout hypotheses (compatibility separate from novelty):"]
+    for hypothesis in hypotheses:
+        lines.extend([
+            f"  - {component_name} + {hypothesis['candidate']}",
+            f"    class: {hypothesis['candidate_class']}",
+            f"    why: {hypothesis['explanation']}",
+            f"    analogy: {hypothesis['known_pairing']}",
+            f"    difference: {hypothesis['meaningful_difference']}",
+            f"    risk: {hypothesis['risk']}",
+            "    novelty: not checked — no corpus claim yet",
+        ])
+    return "\n".join(lines)
+
+
 def _fillers_for_role(conn: sqlite3.Connection, role: str,
                       limit: int = 4, include_experimental: bool = False) -> list[str]:
     """Best fillers for a role across all pairings (any transformation).

@@ -1,0 +1,36 @@
+analogy_rules:
+  - id: tart_fruit_for_citrus_on_browned_vegetable
+    known_pairing: "browned broccoli with lemon"
+    source_ingredient: lemon
+    substitute_ingredient: lingonberry_vinegar
+    mechanism: analogue_substitution
+    shared_function: "Both act as sharp acidic finishes that can balance browned sweetness."
+    meaningful_difference: "Lingonberry vinegar adds dark berry aroma and a stronger risk of reading as sweet fruit."
+    expected_risk: "The berry character may make the broccoli taste jam-like or perfumed."
+    required_dimensions: "sweet\nnutty_toasted"
+    explanation_template: "{candidate} may replace {source} as an acidic finish because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+
+  - id: browned_fat_for_plain_fat_on_toasted_state
+    known_pairing: "roasted broccoli with olive oil"
+    source_ingredient: olive_oil
+    substitute_ingredient: brown_butter
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide fat, while browned butter also reinforces toasted aromas."
+    meaningful_difference: "Brown butter is richer and less fresh than olive oil."
+    expected_risk: "The combination may become heavy and mute broccoli's green character."
+    required_dimensions: "nutty_toasted"
+    explanation_template: "{candidate} may reinforce this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium_high
+
+  - id: smoked_cream_for_plain_cream_in_soup
+    known_pairing: "broccoli soup with yogurt"
+    source_ingredient: yogurt
+    substitute_ingredient: smoked_yogurt
+    mechanism: aroma_bridge
+    shared_function: "Both provide creamy acidity; smoke can bridge browned garnishes and a green soup base."
+    meaningful_difference: "Smoke can dominate mild green flavours."
+    expected_risk: "The soup may taste ashy or lose its fresh vegetable character."
+    required_dimensions: "fermented_funky\nrich_fatty"
+    explanation_template: "{candidate} is only plausible when {matched_dimensions} support the bridge: {shared_function}"
+    confidence: low

@@ -19,6 +19,7 @@ DATA_PATH = Path(__file__).with_name("data") / "tomato.yaml"
 PROFILES_PATH = Path(__file__).with_name("data") / "component_profiles.yaml"
 DESTINATIONS_PATH = Path(__file__).with_name("data") / "destination_profiles.yaml"
 ROUTES_PATH = Path(__file__).with_name("data") / "flavour_routes.yaml"
+SCOUT_RULES_PATH = Path(__file__).with_name("data") / "scout_rules.yaml"
 
 CONFIDENCE_OK = {"high", "medium_high", "medium", "low", "experimental"}
 
@@ -430,11 +431,41 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 ),
             )
 
+    # ---- Scout analogy rules (generator inputs, not final pairings) ----
+    mechanisms = {
+        "flavour_reinforcement", "flavour_contrast", "functional_completion",
+        "aroma_bridge", "texture_contrast", "transformation_fit",
+        "analogue_substitution",
+    }
+    for rule in data.get("analogy_rules", []):
+        if rule["mechanism"] not in mechanisms:
+            raise LoadError(f"unknown Scout mechanism: {rule['mechanism']!r}")
+        for dimension in _split_list(rule["required_dimensions"]):
+            vocabulary.require("flavours", dimension)
+        confidence = vocabulary.require("confidence", rule["confidence"]).id
+        conn.execute(
+            "INSERT INTO analogy_rules(analogy_id, known_pairing, "
+            "source_ingredient_id, substitute_ingredient_id, mechanism, "
+            "shared_function, meaningful_difference, expected_risk, "
+            "required_dimensions, explanation_template, confidence) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                rule["id"], rule["known_pairing"],
+                _ingredient_id(conn, rule["source_ingredient"]),
+                _ingredient_id(conn, rule["substitute_ingredient"]),
+                rule["mechanism"], rule["shared_function"],
+                rule["meaningful_difference"], rule["expected_risk"],
+                rule["required_dimensions"], rule["explanation_template"],
+                confidence,
+            ),
+        )
+
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
           profiles_path: Path | str | None = PROFILES_PATH,
           destinations_path: Path | str | None = DESTINATIONS_PATH,
           routes_path: Path | str | None = ROUTES_PATH,
+          scout_rules_path: Path | str | None = SCOUT_RULES_PATH,
           vocabulary_path: Path | str = VOCABULARY_PATH) -> None:
     """Rebuild schema and load the YAML ontology from scratch.
 
@@ -452,5 +483,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
         data = _deep_merge(data, load_yaml(destinations_path) or {})
     if routes_path and Path(routes_path).exists():
         data = _deep_merge(data, load_yaml(routes_path) or {})
+    if scout_rules_path and Path(scout_rules_path).exists():
+        data = _deep_merge(data, load_yaml(scout_rules_path) or {})
     populate(conn, data, vocabulary)
     conn.commit()
