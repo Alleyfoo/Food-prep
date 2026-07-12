@@ -100,6 +100,25 @@ def cmd_hypotheses(args: argparse.Namespace) -> int:
     return 1 if result.startswith("No generated") else 0
 
 
+def cmd_novelty(args: argparse.Namespace) -> int:
+    """Observe generated hypotheses in a local CulinaryDB corpus."""
+    conn = connect(args.db)
+    if not _db_has(conn, "analogy_rules"):
+        print("Database is empty or has no Scout rules. Run `foodprep build` first.")
+        return 1
+    summary = corpus.observe_hypotheses(
+        conn, args.component, args.dir, corpus_id=args.corpus_id,
+        corpus_name=args.corpus_name, scope=args.scope,
+    )
+    print(
+        f"Novelty observations: {summary['observed']} observed, "
+        f"{summary['not_observed']} not observed, "
+        f"{summary['insufficient_coverage']} insufficient coverage."
+    )
+    print(query.render_generated_hypotheses(conn, args.component))
+    return 0
+
+
 def cmd_plate(args: argparse.Namespace) -> int:
     """Plate Balance Engine — Cook mode (separate from Scout)."""
     conn = connect(args.db)
@@ -236,6 +255,15 @@ def build_parser() -> argparse.ArgumentParser:
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")
     phyp.set_defaults(func=cmd_hypotheses)
+
+    pnov = sub.add_parser("novelty", help="Check generated hypotheses in CulinaryDB")
+    pnov.add_argument("component", help="e.g. roasted_broccoli_component")
+    pnov.add_argument("dir", help="CulinaryDB directory with the three CSVs")
+    pnov.add_argument("--corpus-id", default="culinarydb")
+    pnov.add_argument("--corpus-name", default="CulinaryDB")
+    pnov.add_argument("--scope", default=None,
+                      help="human-readable corpus scope; defaults to recipe count")
+    pnov.set_defaults(func=cmd_novelty)
 
     ppl = sub.add_parser("plate",
                          help="Plate Balance Engine (Cook mode) — what is missing?")

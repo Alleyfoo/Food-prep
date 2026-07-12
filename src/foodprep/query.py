@@ -806,6 +806,27 @@ def generate_scout_hypotheses(
             "novelty": {"class": "not_checked", "scope": None},
             "risk": hypothesis["expected_risk"],
         })
+        observation = conn.execute(
+            """
+            SELECT no.observed_count, no.context_count, no.contexts,
+                   no.target_covered, no.candidate_covered, no.result_class,
+                   no.observed_at, c.corpus_id, c.name AS corpus_name,
+                   c.scope, c.recipe_count, c.search_date
+            FROM novelty_observations no
+            JOIN corpora c ON c.corpus_id = no.corpus_id
+            JOIN components component ON component.component_id = no.component_id
+            WHERE no.analogy_id = ? AND component.name = ?
+            ORDER BY no.observed_at DESC, no.observation_id DESC LIMIT 1
+            """,
+            (hypothesis["analogy_id"], component_name),
+        ).fetchone()
+        if observation:
+            novelty = dict(observation)
+            novelty["class"] = novelty.pop("result_class")
+            novelty["contexts"] = _split_list(novelty["contexts"])
+            novelty["target_covered"] = bool(novelty["target_covered"])
+            novelty["candidate_covered"] = bool(novelty["candidate_covered"])
+            hypothesis["novelty"] = novelty
         hypothesis["candidate_class"] = classify_scout_candidate(
             evidence, hypothesis["novelty"]["class"]
         )
@@ -840,7 +861,17 @@ def render_generated_hypotheses(conn: sqlite3.Connection,
             f"    analogy: {hypothesis['known_pairing']}",
             f"    difference: {hypothesis['meaningful_difference']}",
             f"    risk: {hypothesis['risk']}",
-            "    novelty: not checked — no corpus claim yet",
+            (
+                "    novelty: not checked — no corpus claim yet"
+                if hypothesis["novelty"]["class"] == "not_checked"
+                else "    novelty: {class_} ({count} occurrence(s), {scope}; "
+                     "searched {date})".format(
+                         class_=hypothesis["novelty"]["class"],
+                         count=hypothesis["novelty"]["observed_count"],
+                         scope=hypothesis["novelty"]["scope"],
+                         date=hypothesis["novelty"]["search_date"],
+                     )
+            ),
         ])
     return "\n".join(lines)
 

@@ -254,6 +254,31 @@ CREATE TABLE analogy_rules (
     confidence            TEXT NOT NULL
 );
 
+CREATE TABLE corpora (
+    corpus_id      TEXT PRIMARY KEY,
+    name           TEXT NOT NULL,
+    scope          TEXT NOT NULL,
+    source_path    TEXT,
+    recipe_count   INTEGER NOT NULL,
+    search_date    TEXT NOT NULL
+);
+
+CREATE TABLE novelty_observations (
+    observation_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    analogy_id           TEXT NOT NULL REFERENCES analogy_rules(analogy_id),
+    component_id         INTEGER NOT NULL REFERENCES components(component_id),
+    candidate_ingredient_id INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    corpus_id            TEXT NOT NULL REFERENCES corpora(corpus_id),
+    observed_count       INTEGER NOT NULL,
+    context_count        INTEGER NOT NULL,
+    contexts             TEXT,
+    target_covered       INTEGER NOT NULL,
+    candidate_covered    INTEGER NOT NULL,
+    result_class         TEXT NOT NULL,
+    observed_at          TEXT NOT NULL,
+    UNIQUE (analogy_id, component_id, corpus_id)
+);
+
 CREATE TABLE pairing_evidence (
     pairing_id  INTEGER NOT NULL REFERENCES pairings(pairing_id),
     source_id   INTEGER NOT NULL REFERENCES evidence_sources(source_id),

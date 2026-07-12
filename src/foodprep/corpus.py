@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import csv
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 # Our canonical ingredient name -> CulinaryDB ingredient name(s) to look up.
@@ -125,6 +126,18 @@ def resolve_entities(canonical: str, name_index: dict[str, int]) -> list[int]:
     return out
 
 
+def resolve_novelty_entities(canonical: str,
+                             name_index: dict[str, int]) -> list[int]:
+    """Strict resolution for novelty claims.
+
+    Broad functional aliases used by legacy pairing backfill (for example
+    brown_butter -> butter) must not establish corpus coverage for a more
+    specific Scout candidate.
+    """
+    entity = name_index.get(_norm(canonical.replace("_", " ")))
+    return [entity] if entity is not None else []
+
+
 def cooccurrence(entity_recipes: dict[int, set[int]],
                  recipe_titles: dict[int, str],
                  filler_entities: list[int],
@@ -147,6 +160,111 @@ def cooccurrence(entity_recipes: dict[int, set[int]],
         if title:
             contexts.append(title)
     return len(shared), "\n".join(contexts)
+
+
+def novelty_class(observed_count: int, covered: bool) -> str:
+    """Transparent provisional classes based on distinct recipe occurrence."""
+    if not covered:
+        return "insufficient_coverage"
+    if observed_count == 0:
+        return "not_observed"
+    if observed_count == 1:
+        return "rare"
+    if observed_count < 5:
+        return "uncommon"
+    if observed_count < 20:
+        return "established"
+    return "common"
+
+
+def observe_hypotheses(
+    conn: sqlite3.Connection,
+    component_name: str,
+    dir_path: Path | str,
+    corpus_id: str = "culinarydb",
+    corpus_name: str = "CulinaryDB",
+    scope: str | None = None,
+    search_date: str | None = None,
+) -> dict[str, int]:
+    """Measure generated candidates in one named corpus without rescoring them."""
+    # Local import avoids a query -> corpus -> query module cycle at import time.
+    from .query import generate_scout_hypotheses
+
+    entity_recipes, recipe_titles, name_index = load_corpus(dir_path)
+    component = conn.execute(
+        """SELECT c.component_id, i.canonical_name AS target
+           FROM components c
+           JOIN transformations t ON t.output_component_id = c.component_id
+           JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+           WHERE c.name = ?""",
+        (component_name,),
+    ).fetchone()
+    if component is None:
+        raise ValueError(f"unknown transformed component: {component_name!r}")
+
+    observed_at = search_date or date.today().isoformat()
+    scope_text = scope or f"{len(recipe_titles)} recipes in supplied CulinaryDB files"
+    conn.execute(
+        """INSERT INTO corpora(corpus_id, name, scope, source_path, recipe_count, search_date)
+           VALUES (?,?,?,?,?,?)
+           ON CONFLICT(corpus_id) DO UPDATE SET name=excluded.name, scope=excluded.scope,
+             source_path=excluded.source_path, recipe_count=excluded.recipe_count,
+             search_date=excluded.search_date""",
+        (corpus_id, corpus_name, scope_text, str(Path(dir_path)),
+         len(recipe_titles), observed_at),
+    )
+
+    target_entities = resolve_entities(component["target"], name_index)
+    target_covered = bool(target_entities) and any(
+        entity_recipes.get(entity) for entity in target_entities
+    )
+    summary = {"observed": 0, "not_observed": 0, "insufficient_coverage": 0}
+    for hypothesis in generate_scout_hypotheses(conn, component_name):
+        candidate_entities = resolve_novelty_entities(
+            hypothesis["candidate"], name_index
+        )
+        candidate_covered = bool(candidate_entities) and any(
+            entity_recipes.get(entity) for entity in candidate_entities
+        )
+        covered = target_covered and candidate_covered
+        count, contexts = (0, "")
+        if covered:
+            count, contexts = cooccurrence(
+                entity_recipes, recipe_titles, candidate_entities, target_entities
+            )
+        result = novelty_class(count, covered)
+        context_count = count  # every CulinaryDB recipe id is one distinct context
+        candidate_id = conn.execute(
+            "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?",
+            (hypothesis["candidate"],),
+        ).fetchone()[0]
+        conn.execute(
+            """INSERT INTO novelty_observations(
+                 analogy_id, component_id, candidate_ingredient_id, corpus_id,
+                 observed_count, context_count, contexts, target_covered,
+                 candidate_covered, result_class, observed_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)
+               ON CONFLICT(analogy_id, component_id, corpus_id) DO UPDATE SET
+                 candidate_ingredient_id=excluded.candidate_ingredient_id,
+                 observed_count=excluded.observed_count,
+                 context_count=excluded.context_count, contexts=excluded.contexts,
+                 target_covered=excluded.target_covered,
+                 candidate_covered=excluded.candidate_covered,
+                 result_class=excluded.result_class, observed_at=excluded.observed_at""",
+            (
+                hypothesis["analogy_id"], component["component_id"], candidate_id,
+                corpus_id, count, context_count, contexts or None,
+                int(target_covered), int(candidate_covered), result, observed_at,
+            ),
+        )
+        if result == "insufficient_coverage":
+            summary["insufficient_coverage"] += 1
+        elif result == "not_observed":
+            summary["not_observed"] += 1
+        else:
+            summary["observed"] += 1
+    conn.commit()
+    return summary
 
 
 def backfill(conn: sqlite3.Connection, dir_path: Path | str,
