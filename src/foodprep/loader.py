@@ -113,6 +113,60 @@ def _deep_merge(base: dict, extra: dict) -> dict:
     return base
 
 
+def _preserve_tasting_trials(conn: sqlite3.Connection) -> list[dict]:
+    """Snapshot user-authored trials by stable names before ontology rebuild."""
+    exists = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='tasting_trials'"
+    ).fetchone()
+    if exists is None:
+        return []
+    rows = conn.execute(
+        """SELECT tt.*, c.name AS component_name,
+                  i.canonical_name AS candidate_name
+           FROM tasting_trials tt
+           JOIN components c ON c.component_id = tt.component_id
+           JOIN ingredients i ON i.ingredient_id = tt.candidate_ingredient_id
+           ORDER BY tt.trial_id"""
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _restore_tasting_trials(conn: sqlite3.Connection, trials: list[dict]) -> None:
+    for trial in trials:
+        component = conn.execute(
+            "SELECT component_id FROM components WHERE name = ?",
+            (trial["component_name"],),
+        ).fetchone()
+        candidate = conn.execute(
+            "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?",
+            (trial["candidate_name"],),
+        ).fetchone()
+        analogy = conn.execute(
+            "SELECT 1 FROM analogy_rules WHERE analogy_id = ?",
+            (trial["analogy_id"],),
+        ).fetchone()
+        if component is None or candidate is None or analogy is None:
+            raise LoadError(
+                "cannot restore tasting trial because its ontology reference "
+                f"was removed: {trial['component_name']} + {trial['candidate_name']}"
+            )
+        conn.execute(
+            """INSERT INTO tasting_trials(
+                 trial_id, analogy_id, component_id, candidate_ingredient_id,
+                 tested_at, preparation, ratio, temperature,
+                 supporting_ingredients, verdict, observations, failure_mode,
+                 successful_correction, safety_confirmed)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                trial["trial_id"], trial["analogy_id"], component[0], candidate[0],
+                trial["tested_at"], trial["preparation"], trial["ratio"],
+                trial["temperature"], trial["supporting_ingredients"],
+                trial["verdict"], trial["observations"], trial["failure_mode"],
+                trial["successful_correction"], trial["safety_confirmed"],
+            ),
+        )
+
+
 def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
     """Insert a parsed ontology dict into a freshly-schemed database."""
     # ---- vocabulary ----
@@ -487,6 +541,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     # Validate the shared Cook/Scout language before making destructive schema
     # changes, so a bad vocabulary cannot wipe an existing local database.
     vocabulary = load_vocabulary(vocabulary_path)
+    tasting_trials = _preserve_tasting_trials(conn)
     rebuild(conn)
     data = load_yaml(data_path) or {}
     if profiles_path and Path(profiles_path).exists():
@@ -498,4 +553,5 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     if scout_rules_path and Path(scout_rules_path).exists():
         data = _deep_merge(data, load_yaml(scout_rules_path) or {})
     populate(conn, data, vocabulary)
+    _restore_tasting_trials(conn, tasting_trials)
     conn.commit()

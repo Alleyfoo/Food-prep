@@ -2,6 +2,7 @@ import pytest
 
 from foodprep import query, tasting
 from foodprep.cli import build_parser
+from foodprep.loader import build
 
 
 STATE = "roasted_broccoli_component"
@@ -109,3 +110,21 @@ def test_tasting_cli_parsers_require_explicit_fields():
     assert protocol_args.candidate == CANDIDATE
     assert record_args.verdict == "promising"
     assert record_args.safety_confirmed is True
+
+
+def test_trials_survive_ontology_rebuild(conn):
+    recorded = tasting.record_trial(
+        conn, STATE, CANDIDATE,
+        verdict="promising", preparation="roasted floret",
+        ratio="1 floret : 2 drops", temperature="warm",
+        observations="Worth another test.", safety_confirmed=True,
+        tested_at="2026-07-12T13:00:00+00:00",
+    )
+
+    build(conn)
+
+    restored = tasting.trial(conn, recorded["trial_id"])
+    assert restored["verdict"] == "promising"
+    assert restored["observations"] == "Worth another test."
+    assert restored["state"] == STATE
+    assert restored["candidate"] == CANDIDATE
