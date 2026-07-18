@@ -834,6 +834,17 @@ def generate_scout_hypotheses(
             (hypothesis["analogy_id"],),
         ).fetchone()
         hypothesis["protocol"] = dict(protocol) if protocol else None
+        trials = conn.execute(
+            """SELECT tt.tested_at, tt.verdict, tt.preparation, tt.ratio,
+                      tt.temperature, tt.supporting_ingredients,
+                      tt.observations, tt.failure_mode, tt.successful_correction
+               FROM tasting_trials tt
+               JOIN components component ON component.component_id = tt.component_id
+               WHERE tt.analogy_id = ? AND component.name = ?
+               ORDER BY tt.tested_at, tt.trial_id""",
+            (hypothesis["analogy_id"], component_name),
+        ).fetchall()
+        hypothesis["trials"] = [dict(trial) for trial in trials]
         hypothesis["candidate_class"] = classify_scout_candidate(
             evidence, hypothesis["novelty"]["class"]
         )
@@ -890,6 +901,27 @@ def render_generated_hypotheses(conn: sqlite3.Connection,
                 f"    corrections: {protocol['corrections']}",
                 f"    safety: {protocol['safety_note']}",
             ])
+        trials = hypothesis["trials"]
+        if not trials:
+            lines.append("    trials: none recorded")
+        else:
+            lines.append(f"    trials: {len(trials)} recorded")
+            for trial in trials:
+                lines.append(
+                    "      [{date}] {verdict} — {ratio}, {temperature}: "
+                    "{observations}".format(
+                        date=trial["tested_at"].split("T")[0],
+                        verdict=trial["verdict"], ratio=trial["ratio"],
+                        temperature=trial["temperature"],
+                        observations=trial["observations"],
+                    )
+                )
+                if trial["failure_mode"]:
+                    lines.append(f"        failure: {trial['failure_mode']}")
+                if trial["successful_correction"]:
+                    lines.append(
+                        f"        correction: {trial['successful_correction']}"
+                    )
     return "\n".join(lines)
 
 

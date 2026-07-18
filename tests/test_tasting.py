@@ -112,6 +112,32 @@ def test_tasting_cli_parsers_require_explicit_fields():
     assert record_args.safety_confirmed is True
 
 
+def test_scout_output_shows_read_only_trial_history(conn):
+    tasting.record_trial(
+        conn, STATE, CANDIDATE,
+        verdict="promising",
+        preparation="Roasted floret, vinegar added warm",
+        ratio="1 floret : 3 drops", temperature="warm",
+        observations="Acid sharpened the browned edge.",
+        failure_mode="Slightly too fruity",
+        successful_correction="One extra pinch of salt",
+        safety_confirmed=True, tested_at="2026-07-12T12:00:00+00:00",
+    )
+
+    hypotheses = {h["candidate"]: h
+                  for h in query.generate_scout_hypotheses(conn, STATE)}
+    output = query.render_generated_hypotheses(conn, STATE)
+
+    tested = hypotheses[CANDIDATE]["trials"]
+    assert [t["verdict"] for t in tested] == ["promising"]
+    assert hypotheses["brown_butter"]["trials"] == []
+    assert "trials: 1 recorded" in output
+    assert "[2026-07-12] promising — 1 floret : 3 drops, warm: " \
+           "Acid sharpened the browned edge." in output
+    assert "correction: One extra pinch of salt" in output
+    assert "trials: none recorded" in output  # the untested candidates
+
+
 def test_trials_survive_ontology_rebuild(conn):
     recorded = tasting.record_trial(
         conn, STATE, CANDIDATE,
