@@ -792,8 +792,11 @@ def generate_scout_hypotheses(
         hypothesis = dict(row)
         required = _split_list(hypothesis["required_dimensions"])
         matched = [dimension for dimension in required if dimension in state_dimensions]
+        missing = [dimension for dimension in required if dimension not in state_dimensions]
         evidence = []
-        if matched:
+        # A rule fires only when the state shows EVERY required dimension —
+        # a partial match must not qualify as full compatibility evidence.
+        if matched and not missing:
             evidence.append("state fit: " + ", ".join(matched))
             evidence.append("mechanism: " + hypothesis["mechanism"].replace("_", " "))
             evidence.append("analogy: " + hypothesis["shared_function"])
@@ -850,7 +853,7 @@ def generate_scout_hypotheses(
         )
         if hypothesis["candidate_class"] == "rejected":
             hypothesis["rejection_reason"] = (
-                "State lacks required dimensions: " + ", ".join(required)
+                "State lacks required dimensions: " + ", ".join(missing)
             )
         else:
             hypothesis["rejection_reason"] = None
