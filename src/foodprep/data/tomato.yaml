@@ -265,8 +265,46 @@ ingredients:
     kind: full
     availability:
       - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer; imported year-round" }
-  - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: occasional }
-  - { canonical_name: greens,     aliases: "lettuce\nspinach", base_roles: "herb\nmild_base", default_availability_class: very_common }
+  - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: common }
+  - { canonical_name: greens,     aliases: "lettuce\nspinach\nsalad\nsalaatti", base_roles: "herb\nmild_base", default_availability_class: very_common }
+  # ---- Lidl-available catalogue basics (the user's actual shopping list) ----
+  # Filler-level for now; rutabaga, kale, cucumber and stone fruit are queued
+  # for full journey treatment in that order.
+  - canonical_name: rutabaga
+    aliases: "swede\nlanttu"
+    base_roles: "carb\nmild_base"
+    default_availability_class: very_common
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown, stored year-round; cheapest in autumn-winter" }
+  - canonical_name: corn
+    aliases: "sweetcorn\nmaissi\ncorn kernels"
+    base_roles: "carb\ncrunch"
+    default_availability_class: very_common
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "canned/frozen year-round; fresh cobs late summer" }
+  - canonical_name: kale
+    aliases: "lehtikaali\ncurly kale"
+    base_roles: "mild_base\ncrunch"
+    default_availability_class: common
+    availability:
+      - { region_code: FI, availability_class: common, seasonality_note: "Finnish season autumn-winter; bagged imports most of the year" }
+  - canonical_name: mango
+    base_roles: "acid\nhydration"
+    default_availability_class: common
+    availability:
+      - { region_code: FI, availability_class: common, seasonality_note: "imported year-round; ripeness varies — ripe is sweet, firm is tart" }
+  - canonical_name: apricot
+    aliases: "aprikoosi"
+    base_roles: "acid"
+    default_availability_class: occasional
+    availability:
+      - { region_code: FI, availability_class: occasional, seasonality_note: "fresh only in summer; dried year-round" }
+  - canonical_name: peach
+    aliases: "persikka\nnectarine"
+    base_roles: "acid\nhydration"
+    default_availability_class: occasional
+    availability:
+      - { region_code: FI, availability_class: occasional, seasonality_note: "fresh mid-late summer; canned year-round" }
   - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
   - canonical_name: butter
     base_roles: "fat"
