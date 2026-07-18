@@ -9,6 +9,9 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
         "raw_rutabaga_slaw_component",
         "roasted_rutabaga_component",
         "mashed_rutabaga_component",
+        "raw_cucumber_component",
+        "salted_cucumber_component",
+        "quick_pickled_cucumber_component",
     }
 
     rows = conn.execute(
@@ -18,9 +21,13 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
     assert {row[0] for row in rows} == expected
     shadows = conn.execute(
         "SELECT name FROM component_profiles "
-        "WHERE name LIKE '%broccoli%' OR name LIKE '%rutabaga%'"
+        "WHERE name LIKE '%broccoli%' OR name LIKE '%rutabaga%' "
+        "OR name LIKE '%cucumber%'"
     ).fetchall()
-    assert shadows == []
+    # pickled_cucumber predates the journey system: it is the hand-typed
+    # Plate Balance alias for shop pickles, not a shadow of the new
+    # quick_pickled_cucumber_component state.
+    assert {row[0] for row in shadows} == {"pickled_cucumber"}
 
 
 def test_journey_state_enters_destination_reasoning_directly(conn):

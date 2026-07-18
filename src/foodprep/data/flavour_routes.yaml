@@ -8,6 +8,7 @@ flavour_routes:
     confidence: high
     states:
       - {component: stir_fried_broccoli_component, reason: "High heat already provides browning; soy seasons and garlic adds aroma."}
+      - {component: salted_cucumber_component, reason: "The drained concentrated pieces carry soy and raw garlic without going watery."}
     destinations: [rice_or_grain_bowl, noodles]
     elements:
       - {ingredient: soy_sauce, contribution: "Salt and umami", optionality: required}
@@ -42,6 +43,7 @@ flavour_routes:
       - {component: steamed_broccoli_component, reason: "The moist tender-crisp state accepts a cool dressing after draining."}
       - {component: roasted_broccoli_component, reason: "Cool yogurt contrasts hot browned edges."}
       - {component: raw_rutabaga_slaw_component, reason: "Yogurt and lemon mellow the raw pungency while keeping the slaw fresh."}
+      - {component: raw_cucumber_component, reason: "Yogurt, lemon and dill turn the watery crunch into a tzatziki-family side."}
     destinations: [side_dish, salad, sauce_or_base]
     elements:
       - {ingredient: yogurt, contribution: "Creamy tang and moisture", optionality: required}

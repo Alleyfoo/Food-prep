@@ -251,7 +251,13 @@ ingredients:
     repairs: "spicy\nfried\nroasted\nheavy\nbland\nsoup"
     avoid_when: "high_heat_boil\nalready_high_acid\ndairy_free"
   - { canonical_name: eggs,       base_roles: "protein",    default_availability_class: very_common }
-  - { canonical_name: cucumber,   base_roles: "crunch\nhydration", default_availability_class: very_common }
+  - canonical_name: cucumber
+    aliases: "kurkku\ncucumbers"
+    base_roles: "crunch\nhydration"
+    default_availability_class: very_common
+    kind: both
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish greenhouse year-round; cheapest in summer" }
   - { canonical_name: capers,     base_roles: "acid\numami", default_availability_class: occasional }
   - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
   - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
@@ -437,6 +443,11 @@ components:
   - { name: roasted_rutabaga_component,         kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
   - { name: mashed_rutabaga_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
   - { name: rutabaga_soup_base,                 kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  # ---- cucumber components (seventh full ingredient; all no-cook) ----
+  - { name: raw_cucumber_component,             kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: salted_cucumber_component,          kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: quick_pickled_cucumber_component,   kind: preserved,    keeps_well: medium, freezes_well: 0, batch_prep_value: high }
+  - { name: cucumber_soup_base,                 kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1363,6 +1374,113 @@ transformations:
     evidence:
       - { source: recipedb, scope: "blended root vegetable soup — sweet base + cream + sharp garnish" }
 
+  # ---- cucumber (seventh full ingredient) -------------------------------------
+  # Cucumber stress-tests the NO-COOK corner of the model: every state is made
+  # without heat — raw slices, salted-and-drained, refrigerator quick pickle,
+  # and a blended cold soup. Water management replaces heat management: salt
+  # timing, draining, and brine are the transformations. The quick pickle is a
+  # FLAVOUR state, never preservation guidance (not_shelf_stable is a risk).
+  - ingredient: cucumber
+    technique: raw_assemble
+    output_component: raw_cucumber_component
+    flavour_shift: "Cool, fresh, mildly sweet; mostly water"
+    texture_shift: "Crisp, juicy"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh, polarity: gain }
+      - { family: flavour, value: juicy, polarity: gain }
+      - { family: texture, value: firm,  polarity: gain }
+    risks: "weeps_when_dressed"
+    state_profile:
+      provides: "crunch\nhydration"
+      flavour: "fresh_green\nsweet"
+      texture: "crisp\njuicy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Fresh sliced state; cool crunch and water — dress just before serving."
+    missing_roles:
+      - { role: salt, priority: high,   note: "brings out flavour; salt just before serving or it weeps" }
+      - { role: acid, priority: high,   note: "vinegar/lemon lift" }
+      - { role: fat,  priority: medium, note: "yogurt/oil rounds the dressing" }
+      - { role: herb, priority: medium, note: "dill is the classic" }
+    uses: [salad, sandwich, bowl, dip]
+    evidence:
+      - { source: recipedb, scope: "cucumber salads with vinegar, yogurt and dill" }
+
+  - ingredient: cucumber
+    technique: salt_and_drain
+    output_component: salted_cucumber_component
+    flavour_shift: "Concentrated, seasoned through; green sweetness stays"
+    texture_shift: "Denser snap; noticeably less watery"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: less_watery,  polarity: gain }
+      - { family: texture, value: firm,         polarity: gain }
+    state_profile:
+      provides: "crunch"
+      flavour: "fresh_green\nsalty"
+      texture: "crunchy\ndense"
+      missing_risks: "acid"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "Salted and drained state; concentrated snap that holds a dressing without dilution."
+    missing_roles:
+      - { role: acid,     priority: high,   note: "vinegar sharpens the concentrated state" }
+      - { role: aromatic, priority: medium, note: "garlic is the smashed-cucumber classic" }
+      - { role: heat,     priority: low,    note: "chile flakes" }
+      - { role: fat,      priority: low,    note: "a little oil carries the dressing" }
+    uses: [slaw, salad, sandwich, bowl]
+    evidence:
+      - { source: recipedb, scope: "smashed/salted cucumber salads — garlic, soy, vinegar" }
+
+  - ingredient: cucumber
+    technique: pickle
+    output_component: quick_pickled_cucumber_component
+    flavour_shift: "Sharp, sweet-sour, aromatic"
+    texture_shift: "Crisp while fresh; softens over days"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: acidic,     polarity: gain }
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: state,   value: preserved,  polarity: gain }
+    risks: "not_shelf_stable"
+    state_profile:
+      provides: "acid\ncrunch"
+      flavour: "sour\nsweet\naromatic"
+      texture: "crisp\njuicy"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Refrigerator quick pickle; a sharp crunchy condiment state, not a canned preserve."
+    missing_roles:
+      - { role: mild_base, priority: high,   note: "needs something rich or bland to cut against" }
+      - { role: fat,       priority: medium, note: "butter/cheese/fatty foods it sharpens" }
+      - { role: herb,      priority: low,    note: "dill in the brine" }
+    uses: [sandwich, relish, taco, cheese_board, condiment]
+    evidence:
+      - { source: recipedb, scope: "refrigerator quick pickles — vinegar, dill, mustard seed" }
+
+  - ingredient: cucumber
+    technique: soup
+    output_component: cucumber_soup_base
+    flavour_shift: "Cool, green, tangy with yogurt; served cold"
+    texture_shift: "Liquid, lightly creamy"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: fresh,  polarity: gain }
+      - { family: texture, value: liquid, polarity: gain }
+    risks: "flat_when_cold"
+    missing_roles:
+      - { role: cream,  priority: high,   note: "yogurt gives the body" }
+      - { role: salt,   priority: high,   note: "cold mutes seasoning — salt harder than tastes right warm" }
+      - { role: acid,   priority: medium, note: "lemon/vinegar definition" }
+      - { role: crunch, priority: medium, note: "croutons or diced cucumber garnish" }
+      - { role: herb,   priority: medium, note: "dill/mint freshness" }
+    uses: [chilled_soup, soup, bowl]
+    evidence:
+      - { source: recipedb, scope: "cold cucumber-yogurt soups (tarator/cacık family)" }
+
 # ---- Product-facing ingredient journeys -----------------------------------
 journeys:
   - slug: stir_fried_stems
@@ -1530,6 +1648,88 @@ journeys:
     transitions:
       - {from: buttery rutabaga mash, move: enrich with cream and egg, to: rutabaga casserole base, reason: "Egg sets the loose mash into a sliceable bake; cream keeps it tender."}
       - {from: rutabaga casserole base, move: top with rye crumbs and bake until browned, to: browned baked rutabaga casserole, reason: "The crumb top toasts into crunch against the soft sweet interior."}
+
+  - slug: fresh_cucumber_salad
+    ingredient: cucumber
+    title: Fresh cucumber salad dressed at the last minute
+    preparation: sliced
+    primary_transformation: raw_assemble
+    starting_state: whole cucumber
+    output_state: dressed fresh cucumber salad
+    why_choose: "Choose this route when you want cool crunch and hydration on the table in five minutes with no heat at all."
+    sensory_change: "Thin slicing turns the watery flesh into cool, juicy snap; salt and acid brighten it but also start pulling water out, so timing is the whole technique."
+    flavour_direction: "Sharp vinegar or lemon with dill; yogurt turns the same slices toward a creamy tangy side."
+    useful_additions: "vinegar\nlemon\nyogurt\ndill\nolive_oil\nsea_salt"
+    correction: too_watery
+    becomes_possible: "Serve beside anything rich or spicy; leftover undressed slices move into the salted or quick-pickled journeys."
+    risks: "Dressed slices weep within the hour and drown the seasoning; a blunt knife crushes instead of slicing and the salad turns soggy fast."
+    confidence: high
+    destinations: [salad, side_dish]
+    transitions:
+      - {from: whole cucumber, move: slice thinly, to: thin cucumber slices, reason: "Thin slices carry dressing on maximum surface while keeping snap."}
+      - {from: thin cucumber slices, move: dress just before serving, to: dressed fresh cucumber salad, reason: "Salt and acid draw water within minutes; dressing late keeps the flavour undiluted."}
+
+  - slug: smashed_cucumber
+    ingredient: cucumber
+    title: Smashed and salted cucumber with garlic and vinegar
+    preparation: crushed
+    primary_transformation: salt_and_drain
+    starting_state: whole cucumber
+    output_state: smashed salted cucumber salad
+    why_choose: "Choose this route when the salad must hold a punchy dressing: the ragged smashed edges drink seasoning that slides off smooth slices."
+    sensory_change: "Smashing cracks the flesh into irregular pieces; salting and draining pulls water out so the pieces stay snappy and take flavour all the way through instead of diluting it."
+    flavour_direction: "Garlic, soy and vinegar over the drained pieces; chile flakes push it further."
+    useful_additions: "garlic\nsoy_sauce\nvinegar\nchile_flakes\nolive_oil\nsea_salt"
+    correction: too_flat
+    becomes_possible: "Serve as a cold side with rice dishes or anything fried; it holds its dressing for hours better than sliced salads."
+    risks: "Skipping the draining step leaves a puddle that washes out the dressing; over-salting cannot be undone — rinse lightly and re-dress if it happens."
+    confidence: high
+    destinations: [side_dish, salad]
+    transitions:
+      - {from: whole cucumber, move: smash with the flat of a knife and tear into pieces, to: cracked cucumber pieces, reason: "Ragged surfaces absorb dressing; smooth cuts shed it."}
+      - {from: cracked cucumber pieces, move: salt and drain briefly, to: drained seasoned cucumber, reason: "Salt pulls water out so the dressing seasons instead of diluting."}
+      - {from: drained seasoned cucumber, move: "dress with garlic, soy and vinegar", to: smashed salted cucumber salad, reason: "The concentrated pieces carry a sharp aromatic dressing without going watery."}
+
+  - slug: quick_pickled_cucumber
+    ingredient: cucumber
+    title: Refrigerator quick pickles
+    preparation: sliced
+    primary_transformation: pickle
+    starting_state: thin cucumber slices
+    output_state: refrigerator quick pickles
+    why_choose: "Choose this route to turn cucumber into a sharp crunchy condiment that keeps for days and cuts through rich food."
+    sensory_change: "A vinegar brine with dill and mustard seed replaces the mild wateriness with sweet-sour sharpness; thin fresh slices stay crisp for days, then slowly soften."
+    flavour_direction: "Vinegar carries it; dill and mustard seed make it aromatic; keep sweetness restrained so it stays a condiment."
+    useful_additions: "vinegar\ndill\nmustard\nblack_pepper\nsea_salt"
+    correction: too_sweet
+    becomes_possible: "Lift sandwiches, burgers, rice bowls and cheese; the leftover brine can dress a new batch of raw slices once."
+    risks: "This is a fridge condiment, not preservation — a quick brine is never shelf-stable and does not follow canning safety; old or thick slices turn soft and dull in the jar."
+    confidence: high
+    destinations: [condiment, side_dish]
+    transitions:
+      - {from: whole cucumber, move: slice thinly and pack into a clean jar, to: packed cucumber slices, reason: "Thin slices take brine quickly and evenly."}
+      - {from: packed cucumber slices, move: cover with seasoned vinegar brine and refrigerate, to: refrigerator quick pickles, reason: "The cold brine sharpens and seasons the slices within hours while they keep their crunch."}
+
+  - slug: chilled_cucumber_soup
+    ingredient: cucumber
+    title: Chilled cucumber and yogurt soup
+    preparation: grated
+    primary_transformation: soup
+    starting_state: grated cucumber
+    output_state: chilled cucumber yogurt soup
+    why_choose: "Choose this no-cook route on a hot day, or when soft bendy cucumbers need using — blending hides what slicing would expose."
+    sensory_change: "Grating and blending release all the cucumber's water into the body of the soup; yogurt thickens it and adds tang, and chilling tightens the texture while muting the seasoning."
+    flavour_direction: "Yogurt tang with dill and garlic; season harder than tastes right at room temperature, because cold flattens salt and acid."
+    useful_additions: "yogurt\ndill\ngarlic\nlemon\nolive_oil\nbread"
+    correction: too_flat
+    becomes_possible: "Serve in glasses as a starter or beside bread and eggs as a light meal; it keeps a day in the fridge."
+    risks: "Cold mutes salt and acid so the soup tastes flat straight from the fridge — re-season before serving; without yogurt or bread for body it is thin cucumber water."
+    confidence: medium_high
+    destinations: [soup]
+    transitions:
+      - {from: whole cucumber, move: grate coarsely, to: grated cucumber, reason: "Grating breaks the flesh so its water becomes the soup's liquid."}
+      - {from: grated cucumber, move: blend with yogurt and garlic then chill, to: chilled cucumber yogurt soup, reason: "Yogurt gives body and tang; chilling sets the texture."}
+      - {from: chilled cucumber yogurt soup, move: re-season cold and finish with dill and oil, to: seasoned chilled soup, reason: "Cold flattens seasoning, so the final salt and acid adjustment happens at serving temperature."}
 
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
@@ -1813,6 +2013,21 @@ pairings:
   - { for_ingredient: rutabaga, filler: yogurt,       role: cream,    works_best_with: raw_slaw, context: "creamy dressing",          availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: rutabaga, filler: cream,        role: cream,    works_best_with: soup,     context: "silky finish",             availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: rutabaga, filler: rye_crumbs,   role: crunch,   works_best_with: soup,     context: "crisp contrast",           availability: occasional,  confidence: medium, evidence: [nordic_root] }
+
+  # ---- cucumber pairings (seventh full ingredient) ----
+  - { for_ingredient: cucumber, filler: vinegar,      role: acid,     works_best_with: raw_assemble,   context: "sharp fresh salad",     availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: yogurt,       role: cream,    works_best_with: raw_assemble,   context: "creamy tangy dressing", availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: dill,         role: herb,     works_best_with: raw_assemble,   context: "the classic pair",      availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: sea_salt,     role: salt,     works_best_with: raw_assemble,   context: "salt just before serving", availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: garlic,       role: aromatic, works_best_with: salt_and_drain, context: "smashed cucumber classic", availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: soy_sauce,    role: umami,    works_best_with: salt_and_drain, context: "seasoned dressing",     availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: vinegar,      role: acid,     works_best_with: salt_and_drain, context: "sharpens the drained state", availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: chile_flakes, role: heat,     works_best_with: salt_and_drain, context: "pushes the dressing",   availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: dill,         role: herb,     works_best_with: pickle,         context: "dill pickle brine",     availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: mustard,      role: aromatic, works_best_with: pickle,         context: "mustard seed in brine", availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: yogurt,       role: cream,    works_best_with: soup,           context: "the body of the cold soup", availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: garlic,       role: aromatic, works_best_with: soup,           context: "tarator/cacık backbone", availability: very_common, confidence: high,  evidence: [recipedb] }
+  - { for_ingredient: cucumber, filler: bread,        role: body,     works_best_with: soup,           context: "thickens like gazpacho", availability: very_common, confidence: medium, evidence: [recipedb] }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).

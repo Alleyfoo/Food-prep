@@ -56,6 +56,25 @@ analogy_rules:
       corrections: "Add salt or black pepper; use a firmer more sour apricot; halve the fruit amount."
       safety_note: "Use washed ripe fruit and fully cooked mash; this is a flavour test, not preservation guidance."
 
+  - id: stone_fruit_for_tomato_in_cool_salad
+    known_pairing: "cucumber and tomato salad"
+    source_ingredient: tomato
+    substitute_ingredient: peach
+    mechanism: analogue_substitution
+    shared_function: "Both are juicy sweet-acid fruits that give a cool green salad its lift and body."
+    meaningful_difference: "Peach is sweeter and more floral than tomato, with no savoury umami backbone."
+    expected_risk: "The salad may read as fruit salad instead of a savoury side."
+    required_dimensions: "fresh_green\nsweet"
+    explanation_template: "{candidate} may replace {source} in a cool salad because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 cucumber slices : 1 thin slice of ripe peach"
+      smallest_test: "Salt one cucumber slice, top with a sliver of peach, and taste before mixing a bowl."
+      success_condition: "Peach adds perfumed sweetness while salt and the cucumber keep the bite savoury."
+      likely_failure: "Sweetness dominates and the pairing reads as dessert."
+      corrections: "More salt; a drop of vinegar; add chile flakes or black pepper."
+      safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
+
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
     source_ingredient: yogurt
