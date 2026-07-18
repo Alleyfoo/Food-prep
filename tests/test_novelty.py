@@ -1,5 +1,6 @@
 from foodprep import corpus, query
 from foodprep.cli import build_parser
+from foodprep.loader import build
 from test_corpus import _write_corpus
 
 
@@ -48,6 +49,63 @@ def test_absent_alias_is_insufficient_coverage_not_zero(conn, tmp_path):
     assert summary["insufficient_coverage"] == 2
     assert all(h["novelty"]["class"] == "insufficient_coverage" for h in hypotheses)
     assert all(h["novelty"]["candidate_covered"] is False for h in hypotheses)
+
+
+def test_novelty_observations_survive_ontology_rebuild(conn, tmp_path):
+    _write_corpus(
+        tmp_path,
+        recipes=[(1, "Broccoli Brown Butter"), (2, "Plain Broccoli"),
+                 (3, "Vinegar Dressing")],
+        ingredients=[("Broccoli", 100), ("Brown Butter", 101),
+                     ("Lingonberry Vinegar", 102)],
+        links=[(1, "broccoli", 100), (1, "brown butter", 101),
+               (2, "broccoli", 100), (3, "lingonberry vinegar", 102)],
+    )
+    corpus.observe_hypotheses(
+        conn, "roasted_broccoli_component", tmp_path,
+        scope="3 synthetic savoury recipes", search_date="2026-07-12",
+    )
+
+    build(conn)
+
+    by_candidate = {
+        h["candidate"]: h
+        for h in query.generate_scout_hypotheses(conn, "roasted_broccoli_component")
+    }
+    assert by_candidate["brown_butter"]["novelty"]["class"] == "rare"
+    assert by_candidate["brown_butter"]["novelty"]["scope"] == "3 synthetic savoury recipes"
+    assert by_candidate["brown_butter"]["novelty"]["search_date"] == "2026-07-12"
+    assert by_candidate["lingonberry_vinegar"]["novelty"]["class"] == "not_observed"
+    stored_corpus = conn.execute(
+        "SELECT name, recipe_count FROM corpora WHERE corpus_id = 'culinarydb'"
+    ).fetchone()
+    assert stored_corpus["recipe_count"] == 3
+
+
+def test_orphaned_novelty_observations_are_dropped_not_restored(conn, tmp_path):
+    _write_corpus(
+        tmp_path,
+        recipes=[(1, "Broccoli Brown Butter")],
+        ingredients=[("Broccoli", 100), ("Brown Butter", 101)],
+        links=[(1, "broccoli", 100), (1, "brown butter", 101)],
+    )
+    corpus.observe_hypotheses(
+        conn, "roasted_broccoli_component", tmp_path, search_date="2026-07-12",
+    )
+    assert conn.execute(
+        "SELECT count(*) FROM novelty_observations"
+    ).fetchone()[0] > 0
+
+    # Rebuild without any Scout rules: every observation loses its analogy.
+    build(conn, scout_rules_path=tmp_path / "no_scout_rules.yaml")
+
+    assert conn.execute(
+        "SELECT count(*) FROM novelty_observations"
+    ).fetchone()[0] == 0
+    # Corpus metadata is still kept: it describes the search, not the ontology.
+    assert conn.execute(
+        "SELECT count(*) FROM corpora WHERE corpus_id = 'culinarydb'"
+    ).fetchone()[0] == 1
 
 
 def test_novelty_thresholds_are_explicit():

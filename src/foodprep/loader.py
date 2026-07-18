@@ -167,6 +167,77 @@ def _restore_tasting_trials(conn: sqlite3.Connection, trials: list[dict]) -> Non
         )
 
 
+def _preserve_novelty_evidence(
+    conn: sqlite3.Connection,
+) -> tuple[list[dict], list[dict]]:
+    """Snapshot corpora and novelty observations by stable names before rebuild."""
+    exists = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='novelty_observations'"
+    ).fetchone()
+    if exists is None:
+        return [], []
+    corpora = [dict(row) for row in conn.execute("SELECT * FROM corpora")]
+    observations = [dict(row) for row in conn.execute(
+        """SELECT no.*, c.name AS component_name,
+                  i.canonical_name AS candidate_name
+           FROM novelty_observations no
+           JOIN components c ON c.component_id = no.component_id
+           JOIN ingredients i ON i.ingredient_id = no.candidate_ingredient_id
+           ORDER BY no.observation_id"""
+    )]
+    return corpora, observations
+
+
+def _restore_novelty_evidence(conn: sqlite3.Connection, corpora: list[dict],
+                              observations: list[dict]) -> None:
+    """Re-attach corpus evidence after a rebuild.
+
+    Unlike tasting trials, novelty observations are machine-derived and can be
+    reproduced by rerunning `foodprep novelty`, so observations whose analogy,
+    component or candidate no longer exist are dropped rather than raising.
+    """
+    for corpus in corpora:
+        conn.execute(
+            """INSERT INTO corpora(corpus_id, name, scope, source_path,
+                                   recipe_count, search_date)
+               VALUES (?,?,?,?,?,?)""",
+            (corpus["corpus_id"], corpus["name"], corpus["scope"],
+             corpus["source_path"], corpus["recipe_count"],
+             corpus["search_date"]),
+        )
+    for observation in observations:
+        component = conn.execute(
+            "SELECT component_id FROM components WHERE name = ?",
+            (observation["component_name"],),
+        ).fetchone()
+        candidate = conn.execute(
+            "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?",
+            (observation["candidate_name"],),
+        ).fetchone()
+        analogy = conn.execute(
+            "SELECT 1 FROM analogy_rules WHERE analogy_id = ?",
+            (observation["analogy_id"],),
+        ).fetchone()
+        if component is None or candidate is None or analogy is None:
+            continue
+        conn.execute(
+            """INSERT INTO novelty_observations(
+                 observation_id, analogy_id, component_id,
+                 candidate_ingredient_id, corpus_id, observed_count,
+                 context_count, contexts, target_covered, candidate_covered,
+                 result_class, observed_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                observation["observation_id"], observation["analogy_id"],
+                component[0], candidate[0], observation["corpus_id"],
+                observation["observed_count"], observation["context_count"],
+                observation["contexts"], observation["target_covered"],
+                observation["candidate_covered"], observation["result_class"],
+                observation["observed_at"],
+            ),
+        )
+
+
 def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
     """Insert a parsed ontology dict into a freshly-schemed database."""
     # ---- vocabulary ----
@@ -542,6 +613,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     # changes, so a bad vocabulary cannot wipe an existing local database.
     vocabulary = load_vocabulary(vocabulary_path)
     tasting_trials = _preserve_tasting_trials(conn)
+    corpora, novelty_observations = _preserve_novelty_evidence(conn)
     rebuild(conn)
     data = load_yaml(data_path) or {}
     if profiles_path and Path(profiles_path).exists():
@@ -554,4 +626,5 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
         data = _deep_merge(data, load_yaml(scout_rules_path) or {})
     populate(conn, data, vocabulary)
     _restore_tasting_trials(conn, tasting_trials)
+    _restore_novelty_evidence(conn, corpora, novelty_observations)
     conn.commit()
