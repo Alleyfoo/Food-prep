@@ -9,6 +9,7 @@ flavour_routes:
     states:
       - {component: stir_fried_broccoli_component, reason: "High heat already provides browning; soy seasons and garlic adds aroma."}
       - {component: salted_cucumber_component, reason: "The drained concentrated pieces carry soy and raw garlic without going watery."}
+      - {component: sauteed_kale_component, reason: "Collapsed greens take soy's salt-umami and late garlic without losing their green depth."}
     destinations: [rice_or_grain_bowl, noodles]
     elements:
       - {ingredient: soy_sauce, contribution: "Salt and umami", optionality: required}
@@ -26,6 +27,7 @@ flavour_routes:
       - {component: roasted_broccoli_component, reason: "Acid balances concentration and walnut echoes toasted floret edges."}
       - {component: steamed_broccoli_component, reason: "Acid defines the moist mild state while walnut adds contrast."}
       - {component: roasted_rutabaga_component, reason: "Sharp acid cuts the caramelised sweetness while walnut echoes the browned edges."}
+      - {component: massaged_kale_component, reason: "Lemon is already the massage medium and walnut answers the tender chew — the classic kale salad structure."}
     destinations: [side_dish, rice_or_grain_bowl, salad]
     elements:
       - {ingredient: lemon, contribution: "Fresh acidity", optionality: required}

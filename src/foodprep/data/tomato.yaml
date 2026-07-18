@@ -197,6 +197,12 @@ techniques:
   # green + tender-crisp. Distinct from boil (submerged, flavour leaches) and
   # simmer (long, soft). The doneness cliff is encoded as a risk, not a role.
   - { name: steam,        is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
+  # ---- kale techniques (eighth full ingredient) ----
+  # massage is the genuinely new food state: salt, oil and acid worked into
+  # sturdy raw leaves break cell walls mechanically — no heat. Distinct from
+  # raw_slaw (cut + dressed) and salt_and_drain (water pulled out): the leaves
+  # darken, soften and shrink while staying raw.
+  - { name: massage,      is_modifier: 0, heat_type: none,    moisture_change: lose,  preservation_flag: 0 }
 
 # ---- Ingredients -----------------------------------------------------------
 # `kind` guards the ontology hedgerow:
@@ -304,6 +310,7 @@ ingredients:
     aliases: "lehtikaali\ncurly kale"
     base_roles: "mild_base\ncrunch"
     default_availability_class: common
+    kind: both
     availability:
       - { region_code: FI, availability_class: common, seasonality_note: "Finnish season autumn-winter; bagged imports most of the year" }
   - canonical_name: mango
@@ -448,6 +455,11 @@ components:
   - { name: salted_cucumber_component,          kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
   - { name: quick_pickled_cucumber_component,   kind: preserved,    keeps_well: medium, freezes_well: 0, batch_prep_value: high }
   - { name: cucumber_soup_base,                 kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  # ---- kale components (eighth full ingredient) ----
+  - { name: massaged_kale_component,            kind: fresh,        keeps_well: medium, freezes_well: 0, batch_prep_value: medium }
+  - { name: crisped_kale_component,             kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: sauteed_kale_component,             kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: braised_kale_component,             kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1481,6 +1493,129 @@ transformations:
     evidence:
       - { source: recipedb, scope: "cold cucumber-yogurt soups (tarator/cacık family)" }
 
+  # ---- kale (eighth full ingredient) ------------------------------------------
+  # Kale is the sturdy leafy green the model lacked: leaves tough enough to
+  # need mechanical or long-heat breakdown. massage is the genuinely new
+  # state; the same leaf also crisps bone-dry (chips), collapses fast in a hot
+  # pan, or braises to silk. Brassica guardrail as always: rawness/bitterness
+  # are RISKS and TAGS, never missing roles. Stems are the recurring hazard —
+  # every journey starts by dealing with them.
+  - ingredient: kale
+    technique: massage
+    output_component: massaged_kale_component
+    flavour_shift: "Green, mineral, mellowed bitterness; seasoned through"
+    texture_shift: "Darkened, softened, shrunken — tender-chewy but still raw"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,   polarity: gain }
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: texture, value: soft,    polarity: gain }
+    risks: "harsh_when_raw"
+    state_profile:
+      provides: "body"
+      flavour: "fresh_green\nbitter"
+      texture: "tender\nchewy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "Salt, oil and acid massaged into raw ribbons; a hearty salad base that keeps days."
+    missing_roles:
+      - { role: acid,   priority: high,   note: "lemon is the massage medium" }
+      - { role: fat,    priority: high,   note: "oil softens and carries" }
+      - { role: salt,   priority: high,   note: "starts the breakdown" }
+      - { role: umami,  priority: medium, note: "parmesan deepens the salad" }
+      - { role: crunch, priority: medium, note: "walnut or apple against the chew" }
+    uses: [salad, bowl, sandwich]
+    evidence:
+      - { source: recipedb, scope: "massaged kale salads — lemon, oil, parmesan" }
+
+  - ingredient: kale
+    technique: bake
+    output_component: crisped_kale_component
+    flavour_shift: "Toasty, concentrated, savoury; bitterness turns pleasant"
+    texture_shift: "Brittle, shattering-crisp when fully dry"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: savory,       polarity: gain }
+      - { family: state,   value: dried,        polarity: gain }
+    risks: "burns_easily"
+    state_profile:
+      provides: "crunch"
+      flavour: "nutty_toasted\nbitter"
+      texture: "crisp\ndry"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 3
+      notes: "Kale chips: bone-dry brittle leaves; a crisp topping that goes stale in open air."
+    missing_roles:
+      - { role: salt, priority: high,   note: "chips are flat unsalted" }
+      - { role: fat,  priority: high,   note: "a light oil coat before the oven" }
+      - { role: heat, priority: low,    note: "chile flakes" }
+    uses: [salad, bowl]
+    evidence:
+      - { source: roast_culinary, scope: "low dry heat crisps leaves; minutes separate crisp from scorched" }
+      - { source: recipedb, scope: "baked kale chips with oil and salt" }
+
+  - ingredient: kale
+    technique: saute
+    output_component: sauteed_kale_component
+    flavour_shift: "Deep green, garlicky, mellowed; bitterness stays present"
+    texture_shift: "Collapsed, tender with some chew"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: texture, value: soft,    polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body"
+      flavour: "fresh_green\nbitter\naromatic"
+      texture: "tender\nchewy"
+      missing_risks: "acid\nsalt"
+      heaviness_score: 2
+      dryness_score: 2
+      notes: "The weeknight greens: hot oil and garlic collapse the ribbons in minutes."
+    missing_roles:
+      - { role: aromatic, priority: high,   note: "garlic after the leaves wilt" }
+      - { role: acid,     priority: medium, note: "lemon finish wakes it" }
+      - { role: salt,     priority: high,   note: "seasoning" }
+      - { role: heat,     priority: low,    note: "chile flakes bloom in the oil" }
+      - { role: carb,     priority: low,    note: "toast/pasta/grains host" }
+    uses: [toast, eggs, pasta, bowl]
+    evidence:
+      - { source: recipedb, scope: "sautéed garlicky greens — oil, garlic, chile, lemon" }
+
+  - ingredient: kale
+    technique: braise
+    output_component: braised_kale_component
+    flavour_shift: "Savoury depth; bitterness folds into the braising liquid"
+    texture_shift: "Silky, completely tender; the pot liquid becomes part of the dish"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: flavour, value: umami,  polarity: gain }
+      - { family: texture, value: soft,   polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "body\nmild_base"
+      flavour: "umami\nbitter\nsweet"
+      texture: "silky\ntender"
+      missing_risks: "acid"
+      heaviness_score: 2
+      dryness_score: 1
+      notes: "Long wet heat turns the sturdiest leaves silky; improves overnight."
+    missing_roles:
+      - { role: acid,    priority: high,   note: "a sharp finish keeps the pot from tasting muddy" }
+      - { role: protein, priority: medium, note: "white beans make it a meal" }
+      - { role: body,    priority: medium, note: "stock is the braising medium" }
+      - { role: salt,    priority: high,   note: "season the liquid, not just the leaves" }
+      - { role: carb,    priority: low,    note: "bread or grains alongside" }
+    uses: [stew, soup, beans, bowl]
+    evidence:
+      - { source: recipedb, scope: "braised greens with beans — ribollita/caldo verde family" }
+
 # ---- Product-facing ingredient journeys -----------------------------------
 journeys:
   - slug: stir_fried_stems
@@ -1730,6 +1865,90 @@ journeys:
       - {from: whole cucumber, move: grate coarsely, to: grated cucumber, reason: "Grating breaks the flesh so its water becomes the soup's liquid."}
       - {from: grated cucumber, move: blend with yogurt and garlic then chill, to: chilled cucumber yogurt soup, reason: "Yogurt gives body and tang; chilling sets the texture."}
       - {from: chilled cucumber yogurt soup, move: re-season cold and finish with dill and oil, to: seasoned chilled soup, reason: "Cold flattens seasoning, so the final salt and acid adjustment happens at serving temperature."}
+
+  - slug: massaged_kale_salad
+    ingredient: kale
+    title: Massaged kale salad that keeps for days
+    preparation: shredded
+    primary_transformation: massage
+    starting_state: raw kale leaves
+    output_state: massaged kale salad base
+    why_choose: "Choose this route for a hearty raw salad that improves instead of wilting — unmassaged raw kale is punishment, massaged kale is a keeper."
+    sensory_change: "Stripping the stems removes the woody cores; working salt, oil and lemon into the ribbons breaks cell walls so the leaves darken, soften and shrink while staying raw."
+    flavour_direction: "Lemon, oil and salt are the massage itself; parmesan adds depth, walnut or apple adds crunch against the chew."
+    useful_additions: "lemon\nolive_oil\nsea_salt\nparmesan\nwalnut\napple"
+    correction: too_bitter
+    becomes_possible: "Dress fully and it holds two days in the fridge; use as a salad, a grain-bowl base, or a sandwich layer."
+    risks: "Unstripped stems stay woody in every bite; skipping the massage leaves the ribbons tough and aggressively bitter; over-massaging turns them slimy."
+    confidence: high
+    destinations: [salad, side_dish]
+    transitions:
+      - {from: raw kale leaves, move: strip leaves off the stems and shred, to: kale ribbons, reason: "The stems never soften raw; ribbons take the massage evenly."}
+      - {from: kale ribbons, move: "massage with salt, oil and lemon", to: darkened softened ribbons, reason: "Mechanical work breaks cell walls — the no-heat equivalent of cooking."}
+      - {from: darkened softened ribbons, move: rest and finish with cheese and crunch, to: massaged kale salad base, reason: "A short rest lets seasoning penetrate; toppings play against the tender chew."}
+
+  - slug: kale_chips
+    ingredient: kale
+    title: Kale chips from a low oven
+    preparation: separated
+    primary_transformation: bake
+    starting_state: stemmed kale pieces
+    output_state: crisp kale chips
+    why_choose: "Choose this route to turn cheap leaves into a brittle crisp topping or snack using nothing but a low oven, oil and salt."
+    sensory_change: "A low oven dries the leaves until they shatter; the green bitterness turns toasty and concentrated, and the thin oil coat carries the salt."
+    flavour_direction: "Oil and salt are the whole formula; chile flakes or a dust of parmesan push it further."
+    useful_additions: "olive_oil\nsea_salt\nchile_flakes\nparmesan"
+    correction: too_soft
+    becomes_possible: "Scatter over bowls, soups and salads for crunch, or eat straight off the tray — they go stale within hours in open air."
+    risks: "Minutes separate crisp from scorched and bitter; wet or heavily oiled leaves steam and never crisp; stored in open air the chips turn soggy."
+    confidence: high
+    destinations: [side_dish, rice_or_grain_bowl]
+    transitions:
+      - {from: raw kale leaves, move: strip from stems and tear into chip-size pieces, to: stemmed kale pieces, reason: "Stems burn before leaves crisp; even pieces dry at the same rate."}
+      - {from: stemmed kale pieces, move: coat thinly with oil and bake low, to: crisp kale chips, reason: "Low heat dries before it browns — the leaf must lose its water to shatter."}
+
+  - slug: garlicky_sauteed_kale
+    ingredient: kale
+    title: Garlicky sautéed kale in minutes
+    preparation: chopped
+    primary_transformation: saute
+    starting_state: chopped kale leaves
+    output_state: collapsed garlicky kale
+    why_choose: "Choose this route for the fastest hot kale — the weeknight greens that go from bag to plate in ten minutes."
+    sensory_change: "Hot oil collapses the ribbons in minutes; garlic and chile bloom in the fat, the bitterness mellows but stays honest, and a lemon finish wakes the pan up."
+    flavour_direction: "Garlic in the oil after the leaves wilt, chile if you like, lemon at the end — the classic greens grammar."
+    useful_additions: "garlic\nolive_oil\nchile_flakes\nlemon\nsea_salt"
+    correction: too_bitter
+    becomes_possible: "Serve as a side, pile on toast under a fried egg, or fold through pasta or a grain bowl."
+    risks: "Burnt garlic turns the whole pan bitter — it goes in after the leaves wilt, not before; crowding steams the leaves instead of searing them."
+    confidence: high
+    destinations: [side_dish, toast_or_sandwich]
+    transitions:
+      - {from: raw kale leaves, move: strip stems and chop roughly, to: chopped kale leaves, reason: "Rough pieces collapse evenly in a hot pan."}
+      - {from: chopped kale leaves, move: sauté hot until wilted, to: collapsed kale, reason: "High heat drives off water and mellows the raw bite in minutes."}
+      - {from: collapsed kale, move: "add garlic and chile, then finish with lemon", to: collapsed garlicky kale, reason: "Garlic added late browns without burning; acid lifts the deep green flavour."}
+
+  - slug: braised_kale_and_beans
+    ingredient: kale
+    title: Braised kale with white beans
+    preparation: sliced
+    primary_transformation: braise
+    starting_state: sliced kale ribbons
+    output_state: silky braised kale pot
+    why_choose: "Choose this hands-off route when the sturdiest leaves should become silky and the pot should improve overnight — one pot, no attention."
+    sensory_change: "Long wet heat breaks the fibres to silk and folds the bitterness into savoury depth; the braising liquid becomes part of the dish rather than something drained away."
+    flavour_direction: "Stock and aromatics build the base; white beans make it a meal; a sharp splash of vinegar at the end keeps the pot from tasting muddy."
+    useful_additions: "stock\nwhite_beans\ngarlic\nonion\nvinegar\nolive_oil"
+    correction: too_flat
+    becomes_possible: "Serve as a stew over bread, thin it toward soup, or hold it — it is better the next day and freezes well."
+    risks: "Underbraised stems stay squeaky; boiled hard the greens turn drab and sulfurous; without the sharp finish the long-cooked pot tastes muddy."
+    confidence: high
+    destinations: [side_dish, complete_savoury_plate]
+    transitions:
+      - {from: raw kale leaves, move: slice into ribbons with stems finely chopped, to: sliced kale ribbons, reason: "Fine-cut stems soften in the braise instead of staying squeaky."}
+      - {from: sliced kale ribbons, move: sweat aromatics and wilt the ribbons, to: wilted kale and aromatics, reason: "Building the base in the same pot layers flavour into the liquid."}
+      - {from: wilted kale and aromatics, move: cover with stock and braise until silky, to: braised kale pot, reason: "Slow wet heat is the only thing that turns sturdy leaves silky."}
+      - {from: braised kale pot, move: "fold in white beans, finish with vinegar", to: silky braised kale pot, reason: "Beans add body and protein; acid brightens the long-cooked depth."}
 
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
@@ -2028,6 +2247,23 @@ pairings:
   - { for_ingredient: cucumber, filler: yogurt,       role: cream,    works_best_with: soup,           context: "the body of the cold soup", availability: very_common, confidence: high, evidence: [recipedb] }
   - { for_ingredient: cucumber, filler: garlic,       role: aromatic, works_best_with: soup,           context: "tarator/cacık backbone", availability: very_common, confidence: high,  evidence: [recipedb] }
   - { for_ingredient: cucumber, filler: bread,        role: body,     works_best_with: soup,           context: "thickens like gazpacho", availability: very_common, confidence: medium, evidence: [recipedb] }
+
+  # ---- kale pairings (eighth full ingredient) ----
+  - { for_ingredient: kale, filler: lemon,        role: acid,     works_best_with: massage, context: "the massage medium",       availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: olive_oil,    role: fat,      works_best_with: massage, context: "softens and carries",      availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: sea_salt,     role: salt,     works_best_with: massage, context: "starts the breakdown",     availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: parmesan,     role: umami,    works_best_with: massage, context: "kale caesar direction",    availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: apple,        role: crunch,   works_best_with: massage, context: "sweet-tart crunch vs chew", availability: very_common, confidence: high,  evidence: [recipedb] }
+  - { for_ingredient: kale, filler: walnut,       role: crunch,   works_best_with: massage, context: "toasted crunch",           availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: kale, filler: olive_oil,    role: fat,      works_best_with: bake,    context: "thin coat before the oven", availability: very_common, confidence: high,  evidence: [recipedb] }
+  - { for_ingredient: kale, filler: sea_salt,     role: salt,     works_best_with: bake,    context: "chips are flat unsalted",  availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: chile_flakes, role: heat,     works_best_with: bake,    context: "spiced chips",             availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: kale, filler: garlic,       role: aromatic, works_best_with: saute,   context: "in after the wilt",        availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: lemon,        role: acid,     works_best_with: saute,   context: "wakes the pan",            availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: soy_sauce,    role: umami,    works_best_with: saute,   context: "soy-garlic greens",        availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: kale, filler: stock,        role: body,     works_best_with: braise,  context: "the braising medium",      availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: white_beans,  role: protein,  works_best_with: braise,  context: "greens-and-beans classic", availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: kale, filler: vinegar,      role: acid,     works_best_with: braise,  context: "sharp finish vs muddiness", availability: very_common, confidence: high,  evidence: [recipedb] }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).

@@ -76,7 +76,7 @@ def test_journey_references_existing_transformations(conn):
     ).fetchone()[0]
 
     assert orphan_count == 0
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 46
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 50
 
 
 def test_journey_cli_parser_supports_all_or_one_path():

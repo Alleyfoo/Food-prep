@@ -75,6 +75,25 @@ analogy_rules:
       corrections: "More salt; a drop of vinegar; add chile flakes or black pepper."
       safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
 
+  - id: tropical_fruit_for_apple_on_massaged_greens
+    known_pairing: "massaged kale salad with apple"
+    source_ingredient: apple
+    substitute_ingredient: mango
+    mechanism: analogue_substitution
+    shared_function: "Both are sweet-tart fruits that brighten a bitter massaged green and break up its chew."
+    meaningful_difference: "Mango is softer and more perfumed than apple, trading crisp contrast for tropical aroma."
+    expected_risk: "Ripe mango may read tropical-sweet and lose the crunch the salad wanted from apple."
+    required_dimensions: "fresh_green\nbitter"
+    explanation_template: "{candidate} may replace {source} on massaged greens because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 ribbon of massaged kale : 1 small cube of firm mango"
+      smallest_test: "Wrap one ribbon of dressed massaged kale around one cube of firm (not fully ripe) mango and taste."
+      success_condition: "The fruit's sweet-tart note lifts the bitter green without turning the bite tropical-dessert."
+      likely_failure: "Soft ripe mango dominates with perfume and the bite loses its savoury footing."
+      corrections: "Use firmer greener mango; add salt or chile flakes; cut the cubes smaller."
+      safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
+
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
     source_ingredient: yogurt
