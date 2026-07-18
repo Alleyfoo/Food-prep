@@ -62,6 +62,11 @@ evidence_sources:
     title: "Steam & blanch technique — green-veg color/texture lock"
     license: n/a
     citation_text: "brief wet heat sets bright green + tender-crisp; overcook → drab + sulfurous"
+  - id: nordic_root
+    source_type: culinary
+    title: "Nordic root vegetable traditions"
+    license: n/a
+    citation_text: "swede/rutabaga mash and baked casserole (rotmos, lanttulaatikko), roasted winter roots, raw root slaws with apple"
 
 roles:
   - { name: salt,        family: seasoning }
@@ -274,8 +279,15 @@ ingredients:
     aliases: "swede\nlanttu"
     base_roles: "carb\nmild_base"
     default_availability_class: very_common
+    kind: both
     availability:
       - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown, stored year-round; cheapest in autumn-winter" }
+  - canonical_name: apple
+    aliases: "omena"
+    base_roles: "acid\ncrunch"
+    default_availability_class: very_common
+    availability:
+      - { region_code: FI, availability_class: very_common, seasonality_note: "imported year-round; Finnish apples in autumn" }
   - canonical_name: corn
     aliases: "sweetcorn\nmaissi\ncorn kernels"
     base_roles: "carb\ncrunch"
@@ -420,6 +432,11 @@ components:
   - { name: roasted_broccoli_component,         kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: high }
   - { name: stir_fried_broccoli_component,       kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
   - { name: broccoli_soup_base,                 kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  # ---- rutabaga components (sixth full ingredient) ----
+  - { name: raw_rutabaga_slaw_component,        kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: roasted_rutabaga_component,         kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: mashed_rutabaga_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: rutabaga_soup_base,                 kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1227,6 +1244,125 @@ transformations:
     evidence:
       - { source: recipedb, scope: "cream of broccoli / green soup — vegetal + cream + herb" }
 
+  # ---- rutabaga (sixth full ingredient) ---------------------------------------
+  # Rutabaga is a brassica ROOT: mustard-family pungency raw, sweet when cooked.
+  # It earns its place by modelling the dense-storage-root states the model
+  # lacked — long roast, boiled-and-dried mash, and a no-cook grated slaw.
+  # Raw pungency and bitterness from old/scorched roots are RISKS and TAGS,
+  # never missing roles (the cabbage/broccoli guardrail applies: same family).
+  - ingredient: rutabaga
+    technique: raw_slaw
+    output_component: raw_rutabaga_slaw_component
+    flavour_shift: "Sweet, juicy, mustard-sharp; mellowed by salt and dressing"
+    texture_shift: "Crunchy, juicy when finely grated"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,    polarity: gain }
+      - { family: flavour, value: sweet,    polarity: gain }
+      - { family: flavour, value: sharp,    polarity: gain }
+      - { family: texture, value: firm,     polarity: gain }
+    risks: "harsh_when_raw"
+    state_profile:
+      provides: "crunch"
+      flavour: "sweet\npungent\nfresh_green"
+      texture: "crunchy\njuicy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Finely grated raw root; crunchy and juicy with mustardy bite until dressed."
+    missing_roles:
+      - { role: acid,   priority: high,   note: "vinegar/lemon mellows pungency" }
+      - { role: salt,   priority: high,   note: "draws juice, softens bite" }
+      - { role: fat,    priority: medium, note: "oil/yogurt rounds the dressing" }
+      - { role: herb,   priority: low,    note: "dill/parsley freshness" }
+    uses: [slaw, salad, sandwich, bowl]
+    evidence:
+      - { source: nordic_root, scope: "raw winter-root slaws with apple and sharp dressing" }
+      - { source: recipedb, scope: "grated root salads with vinaigrette" }
+
+  - ingredient: rutabaga
+    technique: roast
+    output_component: roasted_rutabaga_component
+    flavour_shift: "Caramelised, sweet, faintly bitter edges; mustard sharpness fades"
+    texture_shift: "Browned surface, tender dense centre"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: savory,       polarity: gain }
+      - { family: state,   value: roasted,      polarity: gain }
+    state_profile:
+      provides: "body\ncarb"
+      flavour: "sweet\nnutty_toasted\nbitter"
+      texture: "tender\ndense"
+      missing_risks: "salt\nacid"
+      heaviness_score: 2
+      dryness_score: 2
+      notes: "Browned cube state; caramel-sweet with toasted edges and a dense tender centre."
+    missing_roles:
+      - { role: salt,   priority: high,   note: "seasoning against sweetness" }
+      - { role: fat,    priority: high,   note: "oil to brown; butter to finish" }
+      - { role: acid,   priority: medium, note: "lemon/vinegar keeps sweetness grounded" }
+      - { role: herb,   priority: medium, note: "thyme/parsley" }
+      - { role: protein, priority: low,   note: "eggs/cheese/beans to make a meal" }
+    uses: [bowl, hash, salad, stew]
+    evidence:
+      - { source: roast_culinary, scope: "dry heat caramelises root sugars; browning needs space and time" }
+      - { source: recipedb, scope: "roasted root vegetables with oil, salt and herbs" }
+
+  - ingredient: rutabaga
+    technique: mash
+    output_component: mashed_rutabaga_component
+    flavour_shift: "Sweet, mellow, buttery; no potato starch to gum"
+    texture_shift: "Soft, spoonable; looser than potato mash"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,     polarity: gain }
+      - { family: flavour, value: savory,    polarity: gain }
+      - { family: texture, value: soft,      polarity: gain }
+      - { family: texture, value: spoonable, polarity: gain }
+      - { family: state,   value: cooked,    polarity: gain }
+    risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "carb\nmild_base\nbody"
+      flavour: "sweet\nrich_fatty"
+      texture: "creamy\nsoft\ndense"
+      missing_risks: "salt\nacid"
+      heaviness_score: 3
+      dryness_score: 1
+      notes: "Buttery boiled-and-mashed root; sweet, rich and spoonable — the rotmos/lanttulaatikko base state."
+    missing_roles:
+      - { role: salt,    priority: high,   note: "sweetness reads flat unseasoned" }
+      - { role: fat,     priority: high,   note: "butter is the classic carrier" }
+      - { role: aromatic, priority: medium, note: "black/white pepper grounds it" }
+      - { role: acid,    priority: medium, note: "a small sharp note cuts richness" }
+      - { role: crunch,  priority: low,    note: "crumbs or crisp topping" }
+    uses: [mash_plate, bowl, stew]
+    evidence:
+      - { source: nordic_root, scope: "swede mash (rotmos) — butter, salt, pepper; base for lanttulaatikko" }
+      - { source: recipedb, scope: "mashed root vegetables with butter and cream" }
+
+  - ingredient: rutabaga
+    technique: soup
+    output_component: rutabaga_soup_base
+    flavour_shift: "Sweet, mellow, rooty-savoury; silky when blended"
+    texture_shift: "Liquid to silky-creamy"
+    confidence: medium_high
+    tags_after:
+      - { family: flavour, value: sweet,   polarity: gain }
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: texture, value: liquid,  polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    missing_roles:
+      - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
+      - { role: acid,    priority: high,   note: "sharpness against the sweet base" }
+      - { role: crunch,  priority: medium, note: "croutons/rye_crumbs contrast" }
+      - { role: body,    priority: medium, note: "potato to thicken" }
+      - { role: protein, priority: low,    note: "cheese/beans/bacon" }
+    uses: [soup, stew, bowl]
+    evidence:
+      - { source: recipedb, scope: "blended root vegetable soup — sweet base + cream + sharp garnish" }
+
 # ---- Product-facing ingredient journeys -----------------------------------
 journeys:
   - slug: stir_fried_stems
@@ -1311,6 +1447,89 @@ journeys:
     transitions:
       - {from: browned roasted broccoli florets, move: crush while warm, to: coarse roasted broccoli paste, reason: "Warm tender stems break down while browned pieces retain flavour and some texture."}
       - {from: coarse roasted broccoli paste, move: adjust with acid and moisture, to: balanced broccoli spread or sauce, reason: "Acid prevents heaviness and measured moisture sets the destination-specific consistency."}
+
+  - slug: winter_slaw
+    ingredient: rutabaga
+    title: Raw rutabaga winter slaw with apple and sharp dressing
+    preparation: grated
+    primary_transformation: raw_slaw
+    starting_state: raw peeled rutabaga
+    output_state: dressed raw rutabaga slaw
+    why_choose: "Choose this no-cook route when you want crunch and freshness from a winter root without turning on the oven."
+    sensory_change: "Fine grating breaks cell walls so the shreds turn juicy and lose their woody chew; salt and an acidic dressing mellow the mustardy pungency into sweet crunch."
+    flavour_direction: "Sharp vinegar or lemon against the root's sweetness; yogurt or oil rounds the dressing; apple deepens the sweet-tart theme."
+    useful_additions: "vinegar\nlemon\napple\nyogurt\nolive_oil\nsea_salt\ndill"
+    correction: too_aggressive
+    becomes_possible: "Serve as a crisp side or salad base; it keeps a day dressed and longer undressed."
+    risks: "Coarse grating stays woody and hard to chew; an underseasoned slaw tastes flat and harshly pungent; dressing far ahead draws water and dilutes."
+    confidence: high
+    destinations: [salad, side_dish]
+    transitions:
+      - {from: raw rutabaga, move: peel deeply below the waxy skin, to: raw peeled rutabaga, reason: "The outer layer is bitter and usually waxed; deep peeling removes both."}
+      - {from: raw peeled rutabaga, move: grate finely and salt lightly, to: juicy grated rutabaga, reason: "Fine shreds release juice and soften while salt starts mellowing the pungency."}
+      - {from: juicy grated rutabaga, move: dress with acid and fat, to: dressed raw rutabaga slaw, reason: "Acid and fat balance sweetness and bite into a finished slaw."}
+
+  - slug: roasted_cubes
+    ingredient: rutabaga
+    title: Roasted rutabaga cubes with a sharp finish
+    preparation: chopped
+    primary_transformation: roast
+    starting_state: peeled rutabaga cubes
+    output_state: browned roasted rutabaga cubes
+    why_choose: "Choose this route to concentrate the root's sweetness into browned, substantial cubes for sides and bowls."
+    sensory_change: "Dry heat drives off water and caramelises the surface; the mustard sharpness fades, leaving sweet toasted edges over a tender, dense centre."
+    flavour_direction: "Salt and fat first; a sharp lemon or vinegar finish keeps the caramelised sweetness grounded; thyme or butter deepens it."
+    useful_additions: "olive_oil\nsea_salt\nbutter\nthyme\nlemon\nblack_pepper"
+    correction: too_sweet
+    becomes_possible: "Serve as a side, fold into a grain bowl, or carry leftovers into a hash with eggs."
+    risks: "Large cubes scorch outside before the dense centre turns tender; crowding the tray steams instead of browning."
+    confidence: high
+    destinations: [side_dish, rice_or_grain_bowl]
+    transitions:
+      - {from: raw rutabaga, move: peel and cut into small even cubes, to: peeled rutabaga cubes, reason: "Small even cubes let the dense flesh cook through before the surface scorches."}
+      - {from: peeled rutabaga cubes, move: roast hot with oil and salt, to: browned roasted rutabaga cubes, reason: "High dry heat caramelises surface sugars and drives off the raw sharpness."}
+      - {from: browned roasted rutabaga cubes, move: finish with acid and herbs, to: seasoned roasted rutabaga, reason: "Sharpness and freshness keep the concentrated sweetness from turning heavy."}
+
+  - slug: buttery_mash
+    ingredient: rutabaga
+    title: Buttery rutabaga mash
+    preparation: chopped
+    primary_transformation: mash
+    starting_state: peeled rutabaga chunks
+    output_state: buttery rutabaga mash
+    why_choose: "Choose this route for a soft, sweet, comforting base that behaves like mashed potato but brings its own flavour."
+    sensory_change: "Long simmering turns the dense flesh completely tender and sweet; drying the drained chunks in the hot pan before mashing keeps the mash rich instead of watery."
+    flavour_direction: "Butter and salt carry it; black pepper and a small sharp note keep the sweetness grounded."
+    useful_additions: "butter\ncream\nsea_salt\nblack_pepper\npotato"
+    correction: too_watery
+    becomes_possible: "Serve beside anything browned or salty, blend into soup, or continue into the baked casserole journey."
+    risks: "Rutabaga holds water — mashed wet it turns soupy, so dry the chunks in the pan first; old oversized roots can be bitter and fibrous."
+    confidence: high
+    destinations: [side_dish, complete_savoury_plate]
+    transitions:
+      - {from: raw rutabaga, move: peel and cut into chunks, to: peeled rutabaga chunks, reason: "Even chunks simmer to uniform tenderness."}
+      - {from: peeled rutabaga chunks, move: simmer until completely tender, to: drained tender rutabaga, reason: "The dense root needs longer than potato; underdone pieces stay stubbornly firm in the mash."}
+      - {from: drained tender rutabaga, move: dry in the hot pan then mash with butter, to: buttery rutabaga mash, reason: "Steaming off surface water first lets butter enrich instead of thin."}
+
+  - slug: baked_rutabaga_casserole
+    ingredient: rutabaga
+    title: Baked rutabaga casserole with a browned crumb top
+    preparation: crushed
+    primary_transformation: mash
+    starting_state: buttery rutabaga mash
+    output_state: browned baked rutabaga casserole
+    why_choose: "Choose this continuation to turn mash into a make-ahead oven dish with a browned top — the shape of the Finnish lanttulaatikko."
+    sensory_change: "Cream and egg let the mash set in the oven; the top browns and deepens toward toasted sweetness while the inside stays soft and custardy."
+    flavour_direction: "Cream rounds the root's sweetness, the browned crumb top adds toasted contrast, and black pepper keeps it savoury."
+    useful_additions: "cream\neggs\nbutter\nrye_crumbs\nblack_pepper"
+    correction: too_flat
+    becomes_possible: "Bake ahead and reheat; serve as a festive side or a weeknight oven dish alongside anything salty."
+    risks: "A wet mash never sets; too hot an oven scorches the crumb top before the centre warms; unseasoned, the sweetness reads flat."
+    confidence: medium_high
+    destinations: [side_dish, batch_prepared_ingredient]
+    transitions:
+      - {from: buttery rutabaga mash, move: enrich with cream and egg, to: rutabaga casserole base, reason: "Egg sets the loose mash into a sliceable bake; cream keeps it tender."}
+      - {from: rutabaga casserole base, move: top with rye crumbs and bake until browned, to: browned baked rutabaga casserole, reason: "The crumb top toasts into crunch against the soft sweet interior."}
 
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
@@ -1579,6 +1798,21 @@ pairings:
   - { for_ingredient: broccoli, filler: walnut,             role: crunch, works_best_with: steam, context: "nut crunch over steamed",     availability: common,      confidence: experimental, evidence: [], notes: "walnut: crunch + fat; experimental with steamed broccoli" }
   - { for_ingredient: broccoli, filler: brown_butter,        role: fat,    works_best_with: roast, context: "nutty brown butter",        availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; experimental with roasted broccoli" }
   - { for_ingredient: broccoli, filler: smoked_yogurt,      role: cream,  works_best_with: soup,  context: "smoky green soup",          availability: occasional,  confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; experimental with broccoli soup" }
+
+  # ---- rutabaga pairings (sixth full ingredient) ----
+  - { for_ingredient: rutabaga, filler: butter,       role: fat,      works_best_with: mash,     context: "buttery mash",             availability: very_common, confidence: high,   evidence: [nordic_root] }
+  - { for_ingredient: rutabaga, filler: cream,        role: cream,    works_best_with: mash,     context: "enriched mash / casserole", availability: common,      confidence: high,   evidence: [nordic_root] }
+  - { for_ingredient: rutabaga, filler: black_pepper, role: aromatic, works_best_with: mash,     context: "grounds the sweetness",    availability: very_common, confidence: high,   evidence: [nordic_root] }
+  - { for_ingredient: rutabaga, filler: eggs,         role: protein,  works_best_with: mash,     context: "sets the baked casserole", availability: very_common, confidence: high,   evidence: [nordic_root] }
+  - { for_ingredient: rutabaga, filler: sea_salt,     role: salt,     works_best_with: roast,    context: "seasoning vs sweetness",   availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: rutabaga, filler: olive_oil,    role: fat,      works_best_with: roast,    context: "browning medium",          availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: rutabaga, filler: thyme,        role: herb,     works_best_with: roast,    context: "woody herb for roots",     availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: lemon,        role: acid,     works_best_with: roast,    context: "sharp finish",             availability: very_common, confidence: medium, evidence: [roast_culinary] }
+  - { for_ingredient: rutabaga, filler: vinegar,      role: acid,     works_best_with: raw_slaw, context: "mellows raw pungency",     availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: apple,        role: acid,     works_best_with: raw_slaw, context: "sweet-tart companion",     availability: very_common, confidence: high,   evidence: [nordic_root] }
+  - { for_ingredient: rutabaga, filler: yogurt,       role: cream,    works_best_with: raw_slaw, context: "creamy dressing",          availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: cream,        role: cream,    works_best_with: soup,     context: "silky finish",             availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: rye_crumbs,   role: crunch,   works_best_with: soup,     context: "crisp contrast",           availability: occasional,  confidence: medium, evidence: [nordic_root] }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).

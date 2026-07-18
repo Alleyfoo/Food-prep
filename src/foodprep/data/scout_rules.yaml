@@ -37,6 +37,25 @@ analogy_rules:
       corrections: "Use half as much butter; add one drop lemon; finish with salt rather than more fat."
       safety_note: "Use freshly prepared brown butter without burned milk solids and fully cooked broccoli."
 
+  - id: tart_stone_fruit_for_apple_on_sweet_root_mash
+    known_pairing: "swede and apple mash"
+    source_ingredient: apple
+    substitute_ingredient: apricot
+    mechanism: analogue_substitution
+    shared_function: "Both are tart-sweet fruits that cut the sweetness and weight of a buttery root mash."
+    meaningful_difference: "Apricot brings floral aroma and less juice, so it reads more perfumed than apple."
+    expected_risk: "The mash may turn dessert-like if the apricot's sweetness outweighs its acidity."
+    required_dimensions: "sweet\nrich_fatty"
+    explanation_template: "{candidate} may replace {source} against a rich sweet mash because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tablespoon warm rutabaga mash : 1 thin sliver of ripe apricot"
+      smallest_test: "Fold one sliver of apricot into one spoonful of finished mash; do not add fruit to the pot."
+      success_condition: "Fruit acidity lightens the buttery sweetness without the spoonful reading as dessert."
+      likely_failure: "Apricot sweetness stacks on the mash and the spoonful turns jammy."
+      corrections: "Add salt or black pepper; use a firmer more sour apricot; halve the fruit amount."
+      safety_note: "Use washed ripe fruit and fully cooked mash; this is a flavour test, not preservation guidance."
+
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
     source_ingredient: yogurt

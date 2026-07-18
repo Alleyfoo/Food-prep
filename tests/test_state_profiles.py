@@ -1,11 +1,14 @@
 from foodprep import query
 
 
-def test_broccoli_states_own_profiles_without_shadow_rows(conn):
+def test_journey_states_own_profiles_without_shadow_rows(conn):
     expected = {
         "steamed_broccoli_component",
         "roasted_broccoli_component",
         "stir_fried_broccoli_component",
+        "raw_rutabaga_slaw_component",
+        "roasted_rutabaga_component",
+        "mashed_rutabaga_component",
     }
 
     rows = conn.execute(
@@ -14,7 +17,8 @@ def test_broccoli_states_own_profiles_without_shadow_rows(conn):
     ).fetchall()
     assert {row[0] for row in rows} == expected
     shadows = conn.execute(
-        "SELECT name FROM component_profiles WHERE name LIKE '%broccoli%'"
+        "SELECT name FROM component_profiles "
+        "WHERE name LIKE '%broccoli%' OR name LIKE '%rutabaga%'"
     ).fetchall()
     assert shadows == []
 

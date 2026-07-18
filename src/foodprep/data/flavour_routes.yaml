@@ -24,6 +24,7 @@ flavour_routes:
     states:
       - {component: roasted_broccoli_component, reason: "Acid balances concentration and walnut echoes toasted floret edges."}
       - {component: steamed_broccoli_component, reason: "Acid defines the moist mild state while walnut adds contrast."}
+      - {component: roasted_rutabaga_component, reason: "Sharp acid cuts the caramelised sweetness while walnut echoes the browned edges."}
     destinations: [side_dish, rice_or_grain_bowl, salad]
     elements:
       - {ingredient: lemon, contribution: "Fresh acidity", optionality: required}
@@ -40,6 +41,7 @@ flavour_routes:
     states:
       - {component: steamed_broccoli_component, reason: "The moist tender-crisp state accepts a cool dressing after draining."}
       - {component: roasted_broccoli_component, reason: "Cool yogurt contrasts hot browned edges."}
+      - {component: raw_rutabaga_slaw_component, reason: "Yogurt and lemon mellow the raw pungency while keeping the slaw fresh."}
     destinations: [side_dish, salad, sauce_or_base]
     elements:
       - {ingredient: yogurt, contribution: "Creamy tang and moisture", optionality: required}
