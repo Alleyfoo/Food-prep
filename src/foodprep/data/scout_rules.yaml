@@ -113,6 +113,25 @@ analogy_rules:
       corrections: "Add salt; cut with a drop of plain vinegar; add chile flakes to bridge."
       safety_note: "Use commercially prepared vinegar and washed fruit; this is a flavour test, not preservation guidance."
 
+  - id: toasted_grain_for_nut_on_browned_sweet_state
+    known_pairing: "roasted apricots with toasted walnuts"
+    source_ingredient: walnut
+    substitute_ingredient: rye_crumbs
+    mechanism: flavour_reinforcement
+    shared_function: "Both add toasted crunch that echoes browning on a sweet caramelised surface."
+    meaningful_difference: "Rye crumbs bring dark grain bitterness and go soggy faster than nuts."
+    expected_risk: "Crumbs may sog on juicy fruit, or the rye bitterness may clash instead of echoing."
+    required_dimensions: "sweet\nnutty_toasted"
+    explanation_template: "{candidate} may replace {source} on a browned sweet state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 roasted apricot half : 1 small pinch of toasted rye crumbs"
+      smallest_test: "Scatter a pinch of freshly toasted rye crumbs on one warm roasted half; eat within a minute, before they sog."
+      success_condition: "The dark grain crunch reads as an echo of the browned fruit, not as bread on fruit."
+      likely_failure: "Crumbs sog in the juice or the rye bitterness fights the fruit."
+      corrections: "Toast the crumbs darker and drier; add a pinch of salt; serve the crumbs under the fruit instead of on top."
+      safety_note: "Use fully toasted crumbs from ordinary bread and washed ripe fruit; this is a flavour test, not preservation guidance."
+
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
     source_ingredient: yogurt

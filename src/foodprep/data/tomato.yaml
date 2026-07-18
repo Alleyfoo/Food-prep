@@ -330,6 +330,7 @@ ingredients:
     aliases: "aprikoosi"
     base_roles: "acid"
     default_availability_class: occasional
+    kind: both
     availability:
       - { region_code: FI, availability_class: occasional, seasonality_note: "fresh only in summer; dried year-round" }
   - canonical_name: peach
@@ -344,6 +345,20 @@ ingredients:
     default_availability_class: very_common
     repairs: "dry\nbland\nroasted\nsaute_base\nsauce_body"
     avoid_when: "already_heavy\nhigh_heat_frying\ndairy_free"
+  - canonical_name: ghee
+    aliases: "clarified butter\nkirkastettu voi"
+    base_roles: "fat"
+    default_availability_class: common
+    repairs: "dry\nbland\nroasted\nsaute_base\nhigh_heat_frying"
+    avoid_when: "already_heavy\ndairy_free"
+    notes: "Butter with the water and milk solids removed: high smoke point, gently nutty, keeps for months. The fat for hot pans where butter would burn."
+  - canonical_name: garlic_butter
+    aliases: "valkosipulivoi"
+    base_roles: "fat\naromatic"
+    default_availability_class: common
+    repairs: "dry\nbland\nroasted\nsteamed"
+    avoid_when: "already_heavy\ndairy_free\ndelicate_raw"
+    notes: "Fat and aromatic in one move; melts over hot vegetables. Established, not Scout — the flavour logic is garlic's, the carrier is butter's."
   - { canonical_name: black_pepper, aliases: "pepper", base_roles: "aromatic", default_availability_class: very_common }
   - { canonical_name: sea_salt,   aliases: "salt\nflaky salt", base_roles: "salt", default_availability_class: very_common }
   - { canonical_name: grilled_fish, base_roles: "protein",  default_availability_class: occasional }
@@ -473,6 +488,11 @@ components:
   - { name: green_mango_slaw_component,         kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
   - { name: mango_salsa_component,              kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
   - { name: mango_lassi_base,                   kind: fresh,        keeps_well: short,  freezes_well: 1, batch_prep_value: low }
+  # ---- apricot components (tenth full ingredient; fresh vs dried is the axis) ----
+  - { name: fresh_apricot_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: roasted_apricot_component,          kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: dried_apricot_component,            kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: high }
+  - { name: apricot_compote_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1745,6 +1765,125 @@ transformations:
     evidence:
       - { source: recipedb, scope: "mango lassi — blended mango, yogurt, sweet or salted" }
 
+  # ---- apricot (tenth full ingredient) -----------------------------------------
+  # Apricot's state axis is FRESH vs DRIED — the second stone fruit, modelled
+  # separately because its uses barely overlap mango's. Fresh is a brief
+  # summer window; dried is the year-round Lidl staple and the genuinely new
+  # state: dried fruit cooked INTO savoury food (the tagine grammar), not
+  # eaten as a snack. Dessert drift is again a RISK, never a role.
+  - ingredient: apricot
+    technique: raw_assemble
+    output_component: fresh_apricot_component
+    flavour_shift: "Sweet-tart, floral; the skin adds a gentle bitter edge"
+    texture_shift: "Tender, juicy when ripe"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh, polarity: gain }
+      - { family: flavour, value: sweet, polarity: gain }
+      - { family: texture, value: soft,  polarity: gain }
+    risks: "reads_as_dessert"
+    state_profile:
+      provides: "acid"
+      flavour: "sweet\nsour\naromatic"
+      texture: "tender\njuicy"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Ripe summer fruit sliced into savoury contexts; salt and cheese keep it off the dessert path."
+    missing_roles:
+      - { role: salt,     priority: high,   note: "the savoury anchor" }
+      - { role: fat,      priority: medium, note: "soft cheese is the classic partner" }
+      - { role: crunch,   priority: medium, note: "toasted nuts" }
+      - { role: aromatic, priority: low,    note: "black pepper over the fruit" }
+    uses: [salad, cheese_board, bowl]
+    evidence:
+      - { source: recipedb, scope: "stone fruit with soft cheese, pepper and greens" }
+
+  - ingredient: apricot
+    technique: roast
+    output_component: roasted_apricot_component
+    flavour_shift: "Concentrated, jammy, caramelised edges; acidity sharpens as water leaves"
+    texture_shift: "Collapsing-soft with browned cut faces"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: texture, value: jammy,        polarity: gain }
+      - { family: state,   value: roasted,      polarity: gain }
+    risks: "reads_as_dessert"
+    state_profile:
+      provides: "acid"
+      flavour: "sweet\nsour\nnutty_toasted"
+      texture: "soft\njuicy"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "Halves roasted cut side up until the edges brown; a sharp-sweet accent for savoury plates or yogurt."
+    missing_roles:
+      - { role: fat,      priority: medium, note: "yogurt or soft cheese underneath" }
+      - { role: salt,     priority: medium, note: "a pinch against the jam" }
+      - { role: crunch,   priority: medium, note: "toasted nuts or crumbs" }
+      - { role: aromatic, priority: low,    note: "black pepper or thyme" }
+    uses: [salad, bowl, cheese_board, condiment]
+    evidence:
+      - { source: roast_culinary, scope: "dry heat concentrates and browns stone fruit sugars" }
+      - { source: recipedb, scope: "roasted apricots with yogurt, honey and nuts" }
+
+  - ingredient: apricot
+    technique: dry
+    output_component: dried_apricot_component
+    flavour_shift: "Deeply concentrated sweet-tart; raisin-dark notes"
+    texture_shift: "Chewy, dense, sticky"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: sweet,        polarity: gain }
+      - { family: texture, value: chewy,        polarity: gain }
+      - { family: state,   value: dried,        polarity: gain }
+    state_profile:
+      provides: "body"
+      flavour: "sweet\nsour"
+      texture: "chewy\ndense"
+      missing_risks: "salt\numami"
+      heaviness_score: 2
+      dryness_score: 3
+      notes: "The year-round pantry state; plumps in liquid and cooks INTO savoury stews rather than being snacked."
+    missing_roles:
+      - { role: aromatic, priority: high,   note: "onion and spices — the stew backbone" }
+      - { role: body,     priority: medium, note: "stock to plump and carry" }
+      - { role: umami,    priority: medium, note: "savoury depth against the fruit sugar" }
+      - { role: heat,     priority: low,    note: "chile keeps the sweetness in check" }
+    uses: [stew, pantry_base, cheese_board]
+    evidence:
+      - { source: recipedb, scope: "tagine-family stews — dried apricots, onion, spices" }
+
+  - ingredient: apricot
+    technique: simmer
+    output_component: apricot_compote_component
+    flavour_shift: "Bright sweet-sour; the skins melt and sharpen the pot"
+    texture_shift: "Spoonable, soft, glossy"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: texture, value: spoonable,  polarity: gain }
+      - { family: state,   value: cooked,     polarity: gain }
+    state_profile:
+      provides: "acid"
+      flavour: "sweet\nsour"
+      texture: "soft\nsilky"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Ten-minute compote; a sharp-sweet condiment for yogurt, porridge or roast meat plates."
+    missing_roles:
+      - { role: acid,   priority: medium, note: "lemon if the fruit is very ripe" }
+      - { role: cream,  priority: medium, note: "yogurt underneath" }
+      - { role: crunch, priority: low,    note: "toasted crumbs or nuts on top" }
+      - { role: salt,   priority: low,    note: "a pinch keeps it savoury-capable" }
+    uses: [condiment, toast, bowl]
+    evidence:
+      - { source: recipedb, scope: "quick stone-fruit compote — fruit, splash of water, short simmer" }
+
 # ---- Product-facing ingredient journeys -----------------------------------
 journeys:
   - slug: stir_fried_stems
@@ -2159,6 +2298,86 @@ journeys:
       - {from: ripe mango chunks, move: blend smooth with yogurt, to: thick mango yogurt blend, reason: "Blending dissolves the silky flesh into the yogurt's body."}
       - {from: thick mango yogurt blend, move: balance with salt and chill, to: mango lassi, reason: "Salt and cold sharpen the drink so sweetness does not cloy."}
 
+  - slug: fresh_apricot_with_cheese
+    ingredient: apricot
+    title: Fresh apricots with soft cheese and pepper
+    preparation: sliced
+    primary_transformation: raw_assemble
+    starting_state: ripe fresh apricots
+    output_state: apricot and cheese plate
+    why_choose: "Choose this route in the short fresh-apricot window — salt, cheese and pepper walk a dessert fruit straight onto the savoury table."
+    sensory_change: "Slicing exposes the floral sweet-tart flesh; salt anchors it, soft cheese answers with fat and tang, and black pepper reframes the perfume as savoury."
+    flavour_direction: "Soft cheese and salt first, black pepper over the fruit, olive oil to tie the plate."
+    useful_additions: "soft_cheese\nsea_salt\nblack_pepper\nolive_oil\nwalnut\ngreens"
+    correction: too_sweet
+    becomes_possible: "Serve as a starter or salad; leftover halves go onward to the roasting journey."
+    risks: "Underripe apricots are woolly and sour in the wrong way; without salt and pepper the plate reads as dessert."
+    confidence: high
+    destinations: [salad, side_dish]
+    transitions:
+      - {from: ripe fresh apricots, move: halve and slice, to: sliced fresh apricots, reason: "The pit twists out of a ripe fruit; slices expose flesh to seasoning."}
+      - {from: sliced fresh apricots, move: "plate with cheese, salt and pepper", to: apricot and cheese plate, reason: "Fat, salt and pepper hold the floral sweetness on the savoury side."}
+
+  - slug: roasted_apricot_halves
+    ingredient: apricot
+    title: Roasted apricot halves with browned edges
+    preparation: halved
+    primary_transformation: roast
+    starting_state: halved apricots
+    output_state: caramelised roasted apricot halves
+    why_choose: "Choose this route for mediocre fruit — roasting concentrates what ripeness failed to deliver, and the browned cut faces work on both sweet and savoury plates."
+    sensory_change: "Cut side up in a hot oven, the faces caramelise while the flesh collapses; water leaves, so both sweetness and acidity sharpen."
+    flavour_direction: "A pinch of salt against the jam, yogurt or soft cheese underneath, toasted crumbs or nuts for contrast."
+    useful_additions: "yogurt\nsea_salt\nblack_pepper\nwalnut\nrye_crumbs\nthyme"
+    correction: too_sweet
+    becomes_possible: "Serve over yogurt, beside roast plates, or crush onward into the compote."
+    risks: "Overcrowded halves steam instead of browning; past the collapse point they slump to purée on the tray."
+    confidence: high
+    destinations: [side_dish, sauce_or_base]
+    transitions:
+      - {from: halved apricots, move: roast cut side up until the edges brown, to: caramelised roasted apricot halves, reason: "The dry cut face is where browning happens; skin side down holds the shape."}
+      - {from: caramelised roasted apricot halves, move: finish with salt and crunch, to: plated roasted apricots, reason: "Salt and a toasted topping keep the concentrated sweetness in balance."}
+
+  - slug: dried_apricot_savoury_stew
+    ingredient: apricot
+    title: Dried apricots cooked into a savoury stew
+    preparation: whole
+    primary_transformation: dry
+    starting_state: dried apricots
+    output_state: plumped apricots in savoury stew
+    why_choose: "Choose this route year-round — the dried pantry state is not a snack but a stew ingredient, bringing sweet-sour depth the way the tagine tradition uses it."
+    sensory_change: "Simmered in a savoury base the dried fruit plumps, releasing concentrated sweet-sour into the liquid while soaking up onion, spice and stock."
+    flavour_direction: "Onion and stock build the base, chile keeps the fruit sugar in check, and the apricots read as depth rather than dessert."
+    useful_additions: "onion\ngarlic\nstock\nchile_flakes\nwhite_beans\ncilantro"
+    correction: too_sweet
+    becomes_possible: "Serve over rice or grains, or with white beans as a complete plate; the pot improves overnight."
+    risks: "Too many apricots turn the stew syrupy; without heat or acid the sweetness flattens the savoury base."
+    confidence: high
+    destinations: [complete_savoury_plate, side_dish]
+    transitions:
+      - {from: dried apricots, move: sweat onion and spices then add the fruit, to: apricots in aromatic base, reason: "The fruit should meet a built savoury base, not lead it."}
+      - {from: apricots in aromatic base, move: simmer in stock until plumped, to: plumped apricots in savoury stew, reason: "Liquid re-inflates the dried state while trading sweetness for savoury depth both ways."}
+
+  - slug: quick_apricot_compote
+    ingredient: apricot
+    title: Ten-minute apricot compote
+    preparation: chopped
+    primary_transformation: simmer
+    starting_state: chopped apricots
+    output_state: glossy apricot compote
+    why_choose: "Choose this route for a batch of fruit going soft — ten minutes turns it into a sharp-sweet condiment that outlives the fresh window by a week."
+    sensory_change: "A short simmer melts the skins into the pot and turns the flesh spoonable; the skins carry the tartness, so the compote sharpens as it cooks."
+    flavour_direction: "Lemon if the fruit is very ripe, a pinch of salt to keep it savoury-capable, yogurt underneath when serving."
+    useful_additions: "lemon\nsea_salt\nyogurt\nrye_crumbs"
+    correction: too_watery
+    becomes_possible: "Spoon over yogurt or porridge, serve beside roast plates, or keep as the week's condiment."
+    risks: "Undercooked, it is wet fruit salad; boiled hard, it jumps past compote to jam — pull it while pieces still hold."
+    confidence: high
+    destinations: [condiment, sauce_or_base]
+    transitions:
+      - {from: chopped apricots, move: simmer with a splash of water, to: collapsing apricot pot, reason: "Gentle heat melts the skins and frees the pectin without caramelising."}
+      - {from: collapsing apricot pot, move: pull while pieces hold and season, to: glossy apricot compote, reason: "Stopping early keeps texture; lemon and salt set the sweet-sour balance."}
+
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
 pairings:
@@ -2488,6 +2707,27 @@ pairings:
   - { for_ingredient: mango, filler: cilantro,     role: herb,     works_best_with: salsa,        context: "finish",                 availability: occasional,  confidence: medium, evidence: [pico] }
   - { for_ingredient: mango, filler: yogurt,       role: cream,    works_best_with: blend,        context: "the lassi body",         availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: mango, filler: sea_salt,     role: salt,     works_best_with: blend,        context: "salted lassi",           availability: very_common, confidence: high,   evidence: [recipedb] }
+
+  # ---- pantry fats across existing states (user's actual pantry) ----
+  - { for_ingredient: broccoli, filler: ghee,          role: fat, works_best_with: roast, context: "high smoke point — butter flavour that survives the oven", availability: common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: ghee,          role: fat, works_best_with: roast, context: "roasting fat for the long hot roast",  availability: common, confidence: high,        evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: ghee,          role: fat, works_best_with: mash,  context: "nutty mash enrichment",                availability: common, confidence: medium_high, evidence: [recipedb] }
+  - { for_ingredient: kale,     filler: ghee,          role: fat, works_best_with: saute, context: "greens bloomed in ghee — saag grammar", availability: common, confidence: high,       evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: garlic_butter, role: fat, works_best_with: roast, context: "fat + aromatic in one move over browned florets", availability: common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: garlic_butter, role: fat, works_best_with: steam, context: "melts over the hot tender-crisp state", availability: common, confidence: high,       evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: garlic_butter, role: fat, works_best_with: mash,  context: "garlic mash",                          availability: common, confidence: medium_high, evidence: [recipedb] }
+
+  # ---- apricot pairings (tenth full ingredient) ----
+  - { for_ingredient: apricot, filler: soft_cheese,  role: fat,      works_best_with: raw_assemble, context: "the classic partner",       availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: sea_salt,     role: salt,     works_best_with: raw_assemble, context: "the savoury anchor",        availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: black_pepper, role: aromatic, works_best_with: raw_assemble, context: "reframes the perfume",      availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: yogurt,       role: cream,    works_best_with: roast,        context: "cool tang under hot fruit", availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: walnut,       role: crunch,   works_best_with: roast,        context: "toasted contrast",          availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: onion,        role: aromatic, works_best_with: dry,          context: "the stew backbone",         availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: stock,        role: body,     works_best_with: dry,          context: "plumps and carries",        availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: chile_flakes, role: heat,     works_best_with: dry,          context: "keeps the sugar in check",  availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: lemon,        role: acid,     works_best_with: simmer,       context: "keeps compote from cloying", availability: very_common, confidence: high,  evidence: [recipedb] }
+  - { for_ingredient: apricot, filler: yogurt,       role: cream,    works_best_with: simmer,       context: "compote over yogurt",       availability: very_common, confidence: high,   evidence: [recipedb] }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).
