@@ -7,8 +7,8 @@ from foodprep import query
 
 def test_schema_populated(conn):
     assert conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] >= 30
-    # 12 tomato + 4 onion + 9 potato + 8 cabbage + 5 broccoli + 4 rutabaga + 4 cucumber + 4 kale = 50
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 50
+    # 12 tomato + 4 onion + 9 potato + 8 cabbage + 5 broccoli + 4 rutabaga + 4 cucumber + 4 kale + 4 mango = 54
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 54
     assert conn.execute("SELECT count(*) FROM roles").fetchone()[0] >= 12
     assert conn.execute("SELECT count(*) FROM pairings").fetchone()[0] >= 30
     assert conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] >= 5
@@ -582,11 +582,11 @@ def test_new_fillers_are_cook_suggestable(conn):
 def test_no_ontology_rot_round6(conn):
     # the round-6 additions keep the guardrails intact: every pairing still
     # has a role; every transformation's missing_roles reference real roles;
-    # and the transformation count is the expected 50 (12+4+9+8+5+4+4+4).
+    # and the transformation count is the expected 54 (12+4+9+8+5+4+4+4+4).
     assert conn.execute(
         "SELECT count(*) FROM pairings WHERE role_id IS NULL").fetchone()[0] == 0
     assert conn.execute(
-        "SELECT count(*) FROM transformations").fetchone()[0] == 50
+        "SELECT count(*) FROM transformations").fetchone()[0] == 54
     # every missing-role row points at a real role id
     assert conn.execute(
         "SELECT count(*) FROM transformation_missing_roles mr "

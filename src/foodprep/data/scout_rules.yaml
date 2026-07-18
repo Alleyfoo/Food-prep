@@ -94,6 +94,25 @@ analogy_rules:
       corrections: "Use firmer greener mango; add salt or chile flakes; cut the cubes smaller."
       safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
 
+  - id: dark_berry_acid_for_lime_on_sour_slaw
+    known_pairing: "green mango slaw with lime"
+    source_ingredient: lime
+    substitute_ingredient: lingonberry_vinegar
+    mechanism: analogue_substitution
+    shared_function: "Both are sharp acids that frame a sour-crunch slaw instead of merely seasoning it."
+    meaningful_difference: "Lingonberry vinegar swaps lime's citrus perfume for dark Nordic berry tartness."
+    expected_risk: "The berry aroma may clash with the tropical green-fruit character instead of framing it."
+    required_dimensions: "sour\nfresh_green"
+    explanation_template: "{candidate} may replace {source} on a sour slaw because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 forkful of undressed green mango shreds : 2 drops lingonberry vinegar"
+      smallest_test: "Dress one forkful of shreds with two drops plus a pinch of salt; taste against a lime-dressed forkful."
+      success_condition: "The berry acid frames the sour crunch as lime would, adding dark fruit without muddying it."
+      likely_failure: "Berry and green mango read as two competing fruits rather than one dish."
+      corrections: "Add salt; cut with a drop of plain vinegar; add chile flakes to bridge."
+      safety_note: "Use commercially prepared vinegar and washed fruit; this is a flavour test, not preservation guidance."
+
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
     source_ingredient: yogurt

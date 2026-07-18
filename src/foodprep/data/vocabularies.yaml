@@ -67,6 +67,7 @@ destinations:
   - {id: condiment, name: Condiment, definition: A concentrated supporting preparation used in small amounts.}
   - {id: preserved_component, name: Preserved component, definition: A safely preserved ingredient intended for later use.}
   - {id: batch_prepared_ingredient, name: Batch-prepared ingredient, definition: A reusable prepared state held for later meals.}
+  - {id: drink, name: Drink, definition: A blended or poured drinkable preparation.}
 
 confidence:
   - {id: high, name: High, definition: Strong curated culinary support.}

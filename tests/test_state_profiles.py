@@ -16,6 +16,10 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
         "crisped_kale_component",
         "sauteed_kale_component",
         "braised_kale_component",
+        "ripe_mango_component",
+        "green_mango_slaw_component",
+        "mango_salsa_component",
+        "mango_lassi_base",
     }
 
     rows = conn.execute(
@@ -26,7 +30,8 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
     shadows = conn.execute(
         "SELECT name FROM component_profiles "
         "WHERE name LIKE '%broccoli%' OR name LIKE '%rutabaga%' "
-        "OR name LIKE '%cucumber%' OR name LIKE '%kale%'"
+        "OR name LIKE '%cucumber%' OR name LIKE '%kale%' "
+        "OR name LIKE '%mango%'"
     ).fetchall()
     # pickled_cucumber predates the journey system: it is the hand-typed
     # Plate Balance alias for shop pickles, not a shadow of the new

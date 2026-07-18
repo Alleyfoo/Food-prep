@@ -157,6 +157,8 @@ dish_contexts:
   - boiled_potato
   # ---- cabbage dish contexts ----
   - slaw
+  # ---- mango dish contexts ----
+  - drink
 
 techniques:
   - { name: slice,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
@@ -203,6 +205,11 @@ techniques:
   # raw_slaw (cut + dressed) and salt_and_drain (water pulled out): the leaves
   # darken, soften and shrink while staying raw.
   - { name: massage,      is_modifier: 0, heat_type: none,    moisture_change: lose,  preservation_flag: 0 }
+  # ---- mango techniques (ninth full ingredient) ----
+  # blend is the genuinely new food state: fruit and dairy blended into a
+  # drinkable preparation (lassi). Distinct from soup (a plated liquid
+  # course) — a drink is portable, sippable, and a destination of its own.
+  - { name: blend,        is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
 
 # ---- Ingredients -----------------------------------------------------------
 # `kind` guards the ontology hedgerow:
@@ -316,6 +323,7 @@ ingredients:
   - canonical_name: mango
     base_roles: "acid\nhydration"
     default_availability_class: common
+    kind: both
     availability:
       - { region_code: FI, availability_class: common, seasonality_note: "imported year-round; ripeness varies — ripe is sweet, firm is tart" }
   - canonical_name: apricot
@@ -460,6 +468,11 @@ components:
   - { name: crisped_kale_component,             kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: low }
   - { name: sauteed_kale_component,             kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
   - { name: braised_kale_component,             kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  # ---- mango components (ninth full ingredient; ripeness is the state axis) ----
+  - { name: ripe_mango_component,               kind: fresh,        keeps_well: short,  freezes_well: 1, batch_prep_value: low }
+  - { name: green_mango_slaw_component,         kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: mango_salsa_component,              kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
+  - { name: mango_lassi_base,                   kind: fresh,        keeps_well: short,  freezes_well: 1, batch_prep_value: low }
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1616,6 +1629,122 @@ transformations:
     evidence:
       - { source: recipedb, scope: "braised greens with beans — ribollita/caldo verde family" }
 
+  # ---- mango (ninth full ingredient) ------------------------------------------
+  # Mango's state axis is RIPENESS, not heat: the same fruit is a crunchy
+  # sour vegetable when firm and green, and a silky sweet fruit when ripe.
+  # Each state has different uses — the model treats them as different
+  # culinary objects. The recurring risk is dessert drift: reads_as_dessert
+  # is a RISK, and salt/chile/acid are the standing corrections. blend is
+  # the genuinely new state (lassi — a drinkable destination).
+  - ingredient: mango
+    technique: raw_assemble
+    output_component: ripe_mango_component
+    flavour_shift: "Sweet, perfumed, tropical; gentle acidity when fully ripe"
+    texture_shift: "Silky, juicy, soft"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet, polarity: gain }
+      - { family: flavour, value: juicy, polarity: gain }
+      - { family: texture, value: soft,  polarity: gain }
+    risks: "reads_as_dessert"
+    state_profile:
+      provides: "hydration"
+      flavour: "sweet\nsour\naromatic"
+      texture: "silky\njuicy"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Ripe slices; silky tropical sweetness that needs salt, chile or lime to stay savoury."
+    missing_roles:
+      - { role: salt, priority: high,   note: "salt is what keeps ripe mango savoury" }
+      - { role: heat, priority: high,   note: "chile flakes — the street-food classic" }
+      - { role: acid, priority: medium, note: "lime sharpens the perfume" }
+    uses: [salad, bowl, salsa]
+    evidence:
+      - { source: recipedb, scope: "ripe mango with chile, salt and lime — street-fruit tradition" }
+
+  - ingredient: mango
+    technique: raw_slaw
+    output_component: green_mango_slaw_component
+    flavour_shift: "Tart, green, faintly sweet; a sour vegetable, not a fruit"
+    texture_shift: "Crunchy, firm shreds"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh, polarity: gain }
+      - { family: flavour, value: sharp, polarity: gain }
+      - { family: texture, value: firm,  polarity: gain }
+    state_profile:
+      provides: "crunch\nacid"
+      flavour: "sour\nfresh_green\nsweet"
+      texture: "crunchy\njuicy"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Firm underripe shreds; the som tam-family sour-crunch state."
+    missing_roles:
+      - { role: salt,  priority: high,   note: "seasoning against the sourness" }
+      - { role: heat,  priority: high,   note: "chile drives the slaw" }
+      - { role: umami, priority: medium, note: "soy stands in for fish sauce" }
+      - { role: crunch, priority: low,   note: "toasted nuts on top" }
+    uses: [slaw, salad, bowl]
+    evidence:
+      - { source: recipedb, scope: "green mango / green papaya slaws — lime, chile, fish sauce family" }
+
+  - ingredient: mango
+    technique: salsa
+    output_component: mango_salsa_component
+    flavour_shift: "Sweet-sharp, pungent with onion and chile"
+    texture_shift: "Juicy dice bound by its own liquid"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet_sour, polarity: gain }
+      - { family: flavour, value: fresh,      polarity: gain }
+      - { family: texture, value: saucy,      polarity: gain }
+    risks: "weeps_when_dressed"
+    state_profile:
+      provides: "acid"
+      flavour: "sweet\nsour\npungent"
+      texture: "juicy\nsoft"
+      missing_risks: "salt"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Diced condiment state; sweet acidity that lifts rich, charred or fried food."
+    missing_roles:
+      - { role: aromatic, priority: high,   note: "onion is the backbone" }
+      - { role: heat,     priority: high,   note: "jalapeno or chile flakes" }
+      - { role: acid,     priority: high,   note: "lime binds it" }
+      - { role: herb,     priority: medium, note: "cilantro" }
+    uses: [salsa, taco, condiment, relish]
+    evidence:
+      - { source: pico, scope: "fresh salsa structure — fruit + onion + chile + lime + salt" }
+      - { source: recipedb, scope: "mango salsa with grilled fish and tacos" }
+
+  - ingredient: mango
+    technique: blend
+    output_component: mango_lassi_base
+    flavour_shift: "Sweet, tangy, aromatic; yogurt rounds the fruit"
+    texture_shift: "Thick, creamy, pourable"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: sweet,  polarity: gain }
+      - { family: texture, value: liquid, polarity: gain }
+    state_profile:
+      provides: "hydration\ncream"
+      flavour: "sweet\nsour\nrich_fatty"
+      texture: "creamy\nsilky"
+      missing_risks: "salt"
+      heaviness_score: 2
+      dryness_score: 1
+      notes: "Blended fruit-and-yogurt drink; the salted variant is as traditional as the sweet one."
+    missing_roles:
+      - { role: cream,    priority: high,   note: "yogurt is the body" }
+      - { role: salt,     priority: medium, note: "a pinch — or go fully salted lassi" }
+      - { role: acid,     priority: low,    note: "lime if the mango is very ripe" }
+      - { role: aromatic, priority: low,    note: "cardamom or mint if on hand" }
+    uses: [drink, bowl]
+    evidence:
+      - { source: recipedb, scope: "mango lassi — blended mango, yogurt, sweet or salted" }
+
 # ---- Product-facing ingredient journeys -----------------------------------
 journeys:
   - slug: stir_fried_stems
@@ -1950,6 +2079,86 @@ journeys:
       - {from: wilted kale and aromatics, move: cover with stock and braise until silky, to: braised kale pot, reason: "Slow wet heat is the only thing that turns sturdy leaves silky."}
       - {from: braised kale pot, move: "fold in white beans, finish with vinegar", to: silky braised kale pot, reason: "Beans add body and protein; acid brightens the long-cooked depth."}
 
+  - slug: chili_salt_mango
+    ingredient: mango
+    title: Ripe mango with chile, salt and lime
+    preparation: sliced
+    primary_transformation: raw_assemble
+    starting_state: ripe mango
+    output_state: chile-salt mango slices
+    why_choose: "Choose this route to keep ripe mango savoury — the street-fruit classic that turns dessert sweetness into a snack or salad with three pantry moves."
+    sensory_change: "Ripeness has already done the cooking: the flesh is silky and perfumed. Salt pulls the sweetness into focus, chile adds heat against it, and lime sharpens the aroma."
+    flavour_direction: "Chile and salt first, lime over the top; the fruit does the rest."
+    useful_additions: "chile_flakes\nsea_salt\nlime\ncilantro"
+    correction: too_sweet
+    becomes_possible: "Eat as is, fold into a green salad, or dice onward into the salsa journey."
+    risks: "Underripe fruit is joyless here — this route needs full ripeness; without salt and chile the plate reads as dessert."
+    confidence: high
+    destinations: [salad, side_dish]
+    transitions:
+      - {from: ripe mango, move: cut cheeks and slice, to: ripe mango slices, reason: "Slicing off the flat seed wastes the least of the silky flesh."}
+      - {from: ripe mango slices, move: "dust with chile, salt and lime", to: chile-salt mango slices, reason: "Salt focuses the sweetness while chile and lime keep it savoury."}
+
+  - slug: green_mango_slaw
+    ingredient: mango
+    title: Green mango slaw with lime and chile
+    preparation: shredded
+    primary_transformation: raw_slaw
+    starting_state: firm underripe mango
+    output_state: dressed green mango slaw
+    why_choose: "Choose this route when the shop mango is hard — underripe mango is not a failed fruit but a crunchy sour vegetable with its own tradition."
+    sensory_change: "Firm flesh shreds into tart crunchy strands; a lime, chile and salty-savoury dressing turns the sourness from a defect into the point of the dish."
+    flavour_direction: "Lime and chile drive it; soy stands in for fish sauce; toasted nuts finish the som tam structure."
+    useful_additions: "lime\nchile_flakes\nsoy_sauce\nsea_salt\nwalnut\ncilantro"
+    correction: too_aggressive
+    becomes_possible: "Serve beside rich, fried or grilled food; it holds its crunch for hours."
+    risks: "A ripe mango turns this to mush — the fruit must be hard; underseasoned, the slaw is just sour."
+    confidence: high
+    destinations: [salad, side_dish]
+    transitions:
+      - {from: firm underripe mango, move: peel and shred coarsely, to: green mango shreds, reason: "Firm flesh holds the shred; ripe flesh would collapse."}
+      - {from: green mango shreds, move: "dress with lime, chile and soy", to: dressed green mango slaw, reason: "Sharp, hot and savoury seasoning frames the sourness as the dish's spine."}
+
+  - slug: mango_salsa
+    ingredient: mango
+    title: Mango salsa for tacos and grilled fish
+    preparation: chopped
+    primary_transformation: salsa
+    starting_state: just-ripe mango
+    output_state: mango salsa
+    why_choose: "Choose this route to turn one fruit into a condiment that lifts a whole meal — sweet acidity against anything charred, fried or rich."
+    sensory_change: "Dicing releases juice that binds onion, chile and lime into a spoonable condiment; the mango's sweetness plays the role tomato plays in pico de gallo."
+    flavour_direction: "Onion and jalapeno against the sweetness, lime to bind, cilantro to finish."
+    useful_additions: "onion\njalapeno\nlime\ncilantro\nsea_salt"
+    correction: too_sweet
+    becomes_possible: "Spoon over fish tacos, grilled fish or rice bowls; best the same day, before the dice weeps."
+    risks: "Overripe fruit turns the salsa to jam; it waters out on standing, so salt shortly before serving."
+    confidence: high
+    destinations: [condiment, side_dish]
+    transitions:
+      - {from: just-ripe mango, move: dice small with onion and chile, to: bound salsa dice, reason: "Small dice releases enough juice to bind the salsa without pureeing it."}
+      - {from: bound salsa dice, move: "season with lime, salt and cilantro", to: mango salsa, reason: "Acid and salt pull the sweet, hot and pungent parts into one condiment."}
+
+  - slug: mango_lassi
+    ingredient: mango
+    title: Mango lassi, sweet or salted
+    preparation: chopped
+    primary_transformation: blend
+    starting_state: ripe mango chunks
+    output_state: mango lassi
+    why_choose: "Choose this route for the softest, most perfumed fruit — blending forgives texture completely, and the drink is a destination of its own."
+    sensory_change: "Blending with yogurt turns silky flesh into a thick pourable drink; the yogurt's tang holds the sweetness in check, and a pinch of salt deepens both."
+    flavour_direction: "Yogurt is the body and the balance; sweet lassi takes a pinch of salt, and the fully salted version is just as traditional."
+    useful_additions: "yogurt\nsea_salt\nlime\nfresh_herbs"
+    correction: too_sweet
+    becomes_possible: "Serve cold as a drink with spicy food, or freeze the base toward a dessert; it keeps a day in the fridge."
+    risks: "Watery or fibrous mango makes a thin stringy drink — blend longer and strain if needed; too much sweetness with no salt or tang turns it cloying."
+    confidence: high
+    destinations: [drink]
+    transitions:
+      - {from: ripe mango chunks, move: blend smooth with yogurt, to: thick mango yogurt blend, reason: "Blending dissolves the silky flesh into the yogurt's body."}
+      - {from: thick mango yogurt blend, move: balance with salt and chill, to: mango lassi, reason: "Salt and cold sharpen the drink so sweetness does not cloy."}
+
 # ---- Pairings: what to add next -------------------------------------------
 # role targets the missing role; works_best_with names a technique.
 pairings:
@@ -2264,6 +2473,21 @@ pairings:
   - { for_ingredient: kale, filler: stock,        role: body,     works_best_with: braise,  context: "the braising medium",      availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: kale, filler: white_beans,  role: protein,  works_best_with: braise,  context: "greens-and-beans classic", availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: kale, filler: vinegar,      role: acid,     works_best_with: braise,  context: "sharp finish vs muddiness", availability: very_common, confidence: high,  evidence: [recipedb] }
+
+  # ---- mango pairings (ninth full ingredient) ----
+  - { for_ingredient: mango, filler: chile_flakes, role: heat,     works_best_with: raw_assemble, context: "chile-salt street fruit", availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: mango, filler: sea_salt,     role: salt,     works_best_with: raw_assemble, context: "keeps ripe mango savoury", availability: very_common, confidence: high,  evidence: [recipedb] }
+  - { for_ingredient: mango, filler: lime,         role: acid,     works_best_with: raw_assemble, context: "sharpens the perfume",   availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: mango, filler: lime,         role: acid,     works_best_with: raw_slaw,     context: "drives the slaw",        availability: common,      confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: mango, filler: chile_flakes, role: heat,     works_best_with: raw_slaw,     context: "som tam heat",           availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: mango, filler: soy_sauce,    role: umami,    works_best_with: raw_slaw,     context: "stands in for fish sauce", availability: very_common, confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: mango, filler: walnut,       role: crunch,   works_best_with: raw_slaw,     context: "toasted top",            availability: common,      confidence: medium, evidence: [recipedb] }
+  - { for_ingredient: mango, filler: onion,        role: aromatic, works_best_with: salsa,        context: "salsa backbone",         availability: very_common, confidence: high,   evidence: [pico] }
+  - { for_ingredient: mango, filler: jalapeno,     role: heat,     works_best_with: salsa,        context: "fresh heat",             availability: occasional,  confidence: high,   evidence: [pico] }
+  - { for_ingredient: mango, filler: lime,         role: acid,     works_best_with: salsa,        context: "binds the salsa",        availability: common,      confidence: high,   evidence: [pico] }
+  - { for_ingredient: mango, filler: cilantro,     role: herb,     works_best_with: salsa,        context: "finish",                 availability: occasional,  confidence: medium, evidence: [pico] }
+  - { for_ingredient: mango, filler: yogurt,       role: cream,    works_best_with: blend,        context: "the lassi body",         availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: mango, filler: sea_salt,     role: salt,     works_best_with: blend,        context: "salted lassi",           availability: very_common, confidence: high,   evidence: [recipedb] }
 
 # Component profiles live in component_profiles.yaml now (separate file, richer
 # schema: provides / texture / missing_risks / heaviness_score / dryness_score).

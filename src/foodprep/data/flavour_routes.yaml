@@ -28,6 +28,7 @@ flavour_routes:
       - {component: steamed_broccoli_component, reason: "Acid defines the moist mild state while walnut adds contrast."}
       - {component: roasted_rutabaga_component, reason: "Sharp acid cuts the caramelised sweetness while walnut echoes the browned edges."}
       - {component: massaged_kale_component, reason: "Lemon is already the massage medium and walnut answers the tender chew — the classic kale salad structure."}
+      - {component: green_mango_slaw_component, reason: "The slaw is built on sourness and finishes with toasted nuts — the som tam structure in this route's grammar."}
     destinations: [side_dish, rice_or_grain_bowl, salad]
     elements:
       - {ingredient: lemon, contribution: "Fresh acidity", optionality: required}
@@ -46,6 +47,7 @@ flavour_routes:
       - {component: roasted_broccoli_component, reason: "Cool yogurt contrasts hot browned edges."}
       - {component: raw_rutabaga_slaw_component, reason: "Yogurt and lemon mellow the raw pungency while keeping the slaw fresh."}
       - {component: raw_cucumber_component, reason: "Yogurt, lemon and dill turn the watery crunch into a tzatziki-family side."}
+      - {component: mango_lassi_base, reason: "The lassi is this route as a drink: yogurt's creamy tang holding sweet fruit in balance."}
     destinations: [side_dish, salad, sauce_or_base]
     elements:
       - {ingredient: yogurt, contribution: "Creamy tang and moisture", optionality: required}
