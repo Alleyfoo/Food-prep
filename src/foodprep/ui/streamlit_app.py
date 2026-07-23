@@ -27,7 +27,7 @@ from foodprep.ui.render import (
     available_partition_html, branch_card_html,
     hypothesis_card_html, journey_card_html, route_card_html,
 )
-from foodprep.ui.graph import build_ingredient_graph, graph_to_html
+from foodprep.ui.graph import build_ingredient_graph, build_scout_graph, graph_to_html
 
 _CSS_PATH = Path(__file__).with_name("design.css")
 
@@ -142,6 +142,23 @@ def tab_map() -> None:
     ingredient = st.selectbox("Ingredient", trees, key="map_ing",
                               index=trees.index("broccoli") if "broccoli" in trees else 0)
     net = build_ingredient_graph(CONN, ingredient)
+    html = graph_to_html(net)
+    components.html(html, height=620, scrolling=False)
+
+
+def tab_scout_map() -> None:
+    st.markdown('<div class="section-title">Scout Map <span class="count">'
+                'generated hypotheses from analogy rules</span></div>',
+                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="hint">Select an ingredient to see Scout hypotheses for its '
+        'transformed states. Diamond nodes = scout_candidate (3+ compatibility evidence), '
+        'dot nodes = weak_hypothesis. Drag nodes to explore.</div>',
+        unsafe_allow_html=True)
+    trees = query.tree_ingredients(CONN)
+    ingredient = st.selectbox("Ingredient", trees, key="scout_map_ing",
+                              index=trees.index("broccoli") if "broccoli" in trees else 0)
+    net = build_scout_graph(CONN, ingredient)
     html = graph_to_html(net)
     components.html(html, height=620, scrolling=False)
 
@@ -443,8 +460,8 @@ def main() -> None:
                     unsafe_allow_html=True)
     topbar()
     available_items = available_selector()
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-        "Ingredient Explorer", "Map", "Journeys", "Component Explorer",
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+        "Ingredient Explorer", "Map", "Scout Map", "Journeys", "Component Explorer",
         "Plate Balance", "Filler Profiles", "Scout",
     ])
     with tab1:
@@ -452,14 +469,16 @@ def main() -> None:
     with tab2:
         tab_map()
     with tab3:
-        tab_journeys()
+        tab_scout_map()
     with tab4:
-        tab_component_explorer(available_items)
+        tab_journeys()
     with tab5:
-        tab_plate_balance(available_items)
+        tab_component_explorer(available_items)
     with tab6:
-        tab_filler_profiles()
+        tab_plate_balance(available_items)
     with tab7:
+        tab_filler_profiles()
+    with tab8:
         tab_scout()
 
 
