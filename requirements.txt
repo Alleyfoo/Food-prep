@@ -4,4 +4,5 @@
 # it the install is intermittent and the app crash-loops on startup.
 streamlit>=1.30
 PyYAML>=6.0
+pyvis>=0.3
 .

@@ -1,12 +1,13 @@
 """Food-prep — ingredient transformation graph UI (Streamlit).
 
-Six tabs:
+Seven tabs:
   Tab 1 Ingredient Explorer  — branch_card / all_branch_cards
-  Tab 2 Journeys             — ingredient_journeys
-  Tab 3 Component Explorer   — component_card + flavour_routes
-  Tab 4 Plate Balance        — plate_balance_detail
-  Tab 5 Filler Profiles      — filler_profile_detail
-  Tab 6 Scout                — generate_scout_hypotheses + trials
+  Tab 2 Map                  — interactive ingredient mindmap (pyvis)
+  Tab 3 Journeys             — ingredient_journeys
+  Tab 4 Component Explorer   — component_card + flavour_routes
+  Tab 5 Plate Balance        — plate_balance_detail
+  Tab 6 Filler Profiles      — filler_profile_detail
+  Tab 7 Scout                — generate_scout_hypotheses + trials
 
 Run:  streamlit run app.py
 """
@@ -17,6 +18,7 @@ import sqlite3
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from foodprep.loader import build
 from foodprep import export, query
@@ -25,6 +27,7 @@ from foodprep.ui.render import (
     available_partition_html, branch_card_html,
     hypothesis_card_html, journey_card_html, route_card_html,
 )
+from foodprep.ui.graph import build_ingredient_graph, graph_to_html
 
 _CSS_PATH = Path(__file__).with_name("design.css")
 
@@ -124,6 +127,23 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
             _md(branch_card_html(c, available=part))
             md_parts.append(export.render_branch_markdown(c, part))
         export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
+
+
+def tab_map() -> None:
+    st.markdown('<div class="section-title">Map <span class="count">'
+                'interactive ingredient mindmap</span></div>',
+                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="hint">Select an ingredient to see its transformation tree: '
+        'how it can be cooked, what components it becomes, what fillers pair with it, '
+        'and what flavour routes it opens. Drag nodes to explore.</div>',
+        unsafe_allow_html=True)
+    trees = query.tree_ingredients(CONN)
+    ingredient = st.selectbox("Ingredient", trees, key="map_ing",
+                              index=trees.index("broccoli") if "broccoli" in trees else 0)
+    net = build_ingredient_graph(CONN, ingredient)
+    html = graph_to_html(net)
+    components.html(html, height=620, scrolling=False)
 
 
 def tab_journeys() -> None:
@@ -423,21 +443,23 @@ def main() -> None:
                     unsafe_allow_html=True)
     topbar()
     available_items = available_selector()
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "Ingredient Explorer", "Journeys", "Component Explorer",
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+        "Ingredient Explorer", "Map", "Journeys", "Component Explorer",
         "Plate Balance", "Filler Profiles", "Scout",
     ])
     with tab1:
         tab_ingredient_explorer(available_items)
     with tab2:
-        tab_journeys()
+        tab_map()
     with tab3:
-        tab_component_explorer(available_items)
+        tab_journeys()
     with tab4:
-        tab_plate_balance(available_items)
+        tab_component_explorer(available_items)
     with tab5:
-        tab_filler_profiles()
+        tab_plate_balance(available_items)
     with tab6:
+        tab_filler_profiles()
+    with tab7:
         tab_scout()
 
 
