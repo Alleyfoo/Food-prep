@@ -379,6 +379,20 @@ ingredients:
   - { canonical_name: orange_zest,      base_roles: "aromatic\nacid",     default_availability_class: common }
   - { canonical_name: miso,            base_roles: "umami",              default_availability_class: occasional }
   - { canonical_name: fennel_pollen,    base_roles: "herb\naromatic",     default_availability_class: rare }
+  - { canonical_name: tahini,           base_roles: "fat\numami",         default_availability_class: common }
+  - { canonical_name: horseradish,      base_roles: "heat\naromatic",     default_availability_class: common }
+  - { canonical_name: caraway_seeds,    base_roles: "aromatic",           default_availability_class: common }
+  - { canonical_name: pomegranate_seeds, base_roles: "acid\ncrunch",      default_availability_class: occasional }
+  - { canonical_name: chili_crisp,      aliases: "chili crunch", base_roles: "heat\nfat\numami", default_availability_class: common }
+  - { canonical_name: zaatar,           aliases: "za'atar", base_roles: "herb\naromatic\nacid", default_availability_class: occasional }
+  - { canonical_name: pomegranate_molasses, base_roles: "acid\nsweet",    default_availability_class: occasional }
+  - { canonical_name: fish_sauce,       base_roles: "salt\numami",        default_availability_class: common }
+  - { canonical_name: cardamom,         base_roles: "aromatic",           default_availability_class: common }
+  - { canonical_name: goat_cheese,      aliases: "chèvre", base_roles: "fat\nprotein\nacid", default_availability_class: common }
+  - { canonical_name: nutmeg,           base_roles: "aromatic",           default_availability_class: common }
+  - { canonical_name: dried_cranberries, base_roles: "sweet\nacid",       default_availability_class: common }
+  - { canonical_name: sugar,            base_roles: "sweet",              default_availability_class: very_common }
+  - { canonical_name: honey,            base_roles: "sweet",              default_availability_class: very_common }
   # ---- role-only fillers (no tree; pure role providers) ----
   - canonical_name: mustard
     aliases: "dijon\nwhole-grain mustard"

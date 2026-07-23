@@ -1,4 +1,5 @@
 analogy_rules:
+  # === BROCCOLI ===
   - id: tart_fruit_for_citrus_on_browned_vegetable
     known_pairing: "browned broccoli with lemon"
     source_ingredient: lemon
@@ -37,6 +38,45 @@ analogy_rules:
       corrections: "Use half as much butter; add one drop lemon; finish with salt rather than more fat."
       safety_note: "Use freshly prepared brown butter without burned milk solids and fully cooked broccoli."
 
+  - id: fermented_paste_for_salt_on_steamed_green
+    known_pairing: "steamed broccoli with soy sauce"
+    source_ingredient: soy_sauce
+    substitute_ingredient: miso
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide salt and umami, while miso adds fermented depth that echoes the vegetal character."
+    meaningful_difference: "Miso is thicker, sweeter, and less sharp than soy sauce."
+    expected_risk: "The paste may coat too heavily and mute the bright green flavour."
+    required_dimensions: "fresh_green\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 floret : 1/8 teaspoon thinned miso"
+      smallest_test: "Thin miso with a drop of water, dab on one warm floret, taste."
+      success_condition: "Umami deepens the green character without overwhelming it."
+      likely_failure: "Paste coats too thickly and the broccoli tastes like miso soup."
+      corrections: "Thin with more water; add a drop of rice vinegar; use white miso instead of red."
+      safety_note: "Use refrigerated commercial miso and fully cooked broccoli."
+
+  - id: nut_paste_for_oil_on_roasted_crucifer
+    known_pairing: "roasted broccoli with olive oil and lemon"
+    source_ingredient: olive_oil
+    substitute_ingredient: tahini
+    mechanism: texture_contrast
+    shared_function: "Both provide fat, while tahini adds creamy body and nutty depth that echoes the roasted character."
+    meaningful_difference: "Tahini is thicker, more bitter, and less fresh than olive oil."
+    expected_risk: "The sesame bitterness may stack with the roasted bitterness and become harsh."
+    required_dimensions: "nutty_toasted\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 floret : 1/4 teaspoon thinned tahini"
+      smallest_test: "Thin tahini with lemon juice and water, drizzle on one warm floret."
+      success_condition: "Creamy nuttiness echoes the roasted character without becoming bitter."
+      likely_failure: "Sesame bitterness dominates or the texture is too thick and pasty."
+      corrections: "Add more lemon; thin with water; use a lighter tahini; add a pinch of salt."
+      safety_note: "Use fresh tahini without rancidity and fully cooked broccoli."
+
+  # === RUTABAGA ===
   - id: tart_stone_fruit_for_apple_on_sweet_root_mash
     known_pairing: "swede and apple mash"
     source_ingredient: apple
@@ -56,25 +96,45 @@ analogy_rules:
       corrections: "Add salt or black pepper; use a firmer more sour apricot; halve the fruit amount."
       safety_note: "Use washed ripe fruit and fully cooked mash; this is a flavour test, not preservation guidance."
 
-  - id: stone_fruit_for_tomato_in_cool_salad
-    known_pairing: "cucumber and tomato salad"
-    source_ingredient: tomato
-    substitute_ingredient: peach
-    mechanism: analogue_substitution
-    shared_function: "Both are juicy sweet-acid fruits that give a cool green salad its lift and body."
-    meaningful_difference: "Peach is sweeter and more floral than tomato, with no savoury umami backbone."
-    expected_risk: "The salad may read as fruit salad instead of a savoury side."
-    required_dimensions: "fresh_green\nsweet"
-    explanation_template: "{candidate} may replace {source} in a cool salad because {shared_function} The state contributes {matched_dimensions}."
+  - id: sharp_root_for_butter_on_roasted_root
+    known_pairing: "roasted rutabaga with butter"
+    source_ingredient: butter
+    substitute_ingredient: horseradish
+    mechanism: aroma_bridge
+    shared_function: "Both add richness, while horseradish cuts through the sweetness with sharp pungency."
+    meaningful_difference: "Horseradish is sharp and sinus-clearing rather than creamy and mild."
+    expected_risk: "The pungency may overwhelm the subtle roasted sweetness."
+    required_dimensions: "sweet\nnutty_toasted"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     confidence: medium
     protocol:
-      starting_ratio: "2 cucumber slices : 1 thin slice of ripe peach"
-      smallest_test: "Salt one cucumber slice, top with a sliver of peach, and taste before mixing a bowl."
-      success_condition: "Peach adds perfumed sweetness while salt and the cucumber keep the bite savoury."
-      likely_failure: "Sweetness dominates and the pairing reads as dessert."
-      corrections: "More salt; a drop of vinegar; add chile flakes or black pepper."
-      safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
+      starting_ratio: "1 cube roasted rutabaga : 1/8 teaspoon grated horseradish"
+      smallest_test: "Top one warm cube with a small grating of fresh horseradish."
+      success_condition: "Sharp pungency cuts the sweetness and adds complexity without burning."
+      likely_failure: "Horseradish dominates and the rutabaga disappears."
+      corrections: "Use less horseradish; add a dot of cream; balance with salt."
+      safety_note: "Use fresh horseradish root and fully cooked rutabaga."
 
+  - id: warm_seed_for_nutmeg_on_root_mash
+    known_pairing: "rutabaga mash with nutmeg"
+    source_ingredient: nutmeg
+    substitute_ingredient: caraway_seeds
+    mechanism: aroma_bridge
+    shared_function: "Both add warm aromatic notes that complement sweet root vegetables."
+    meaningful_difference: "Caraway is more anise-like and savoury than nutmeg's sweet warmth."
+    expected_risk: "The anise character may clash with the buttery richness."
+    required_dimensions: "sweet\nrich_fatty"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 tablespoon mash : 2-3 toasted caraway seeds"
+      smallest_test: "Toast seeds lightly, crush, fold into one spoonful of mash."
+      success_condition: "Warm anise note adds complexity without reading as bread or sauerkraut."
+      likely_failure: "Caraway dominates and the mash tastes like rye bread."
+      corrections: "Use fewer seeds; toast less; add more butter; finish with black pepper."
+      safety_note: "Use food-grade caraway seeds and fully cooked mash."
+
+  # === KALE ===
   - id: tropical_fruit_for_apple_on_massaged_greens
     known_pairing: "massaged kale salad with apple"
     source_ingredient: apple
@@ -94,6 +154,122 @@ analogy_rules:
       corrections: "Use firmer greener mango; add salt or chile flakes; cut the cubes smaller."
       safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
 
+  - id: jewel_seeds_for_dried_fruit_on_bitter_greens
+    known_pairing: "massaged kale with dried cranberries"
+    source_ingredient: dried_cranberries
+    substitute_ingredient: pomegranate_seeds
+    mechanism: texture_contrast
+    shared_function: "Both add sweet-tart bursts that interrupt the bitter chew of massaged kale."
+    meaningful_difference: "Pomegranate is juicier and more floral, with crunchy seeds instead of chewy fruit."
+    expected_risk: "The seeds may be too crunchy and the juice too thin compared to dried fruit's concentrated chew."
+    required_dimensions: "fresh_green\nbitter"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 ribbon kale : 5-6 pomegranate seeds"
+      smallest_test: "Scatter seeds over one ribbon of dressed kale and taste."
+      success_condition: "Juicy sweet-tart bursts brighten the bitter green without making it watery."
+      likely_failure: "Seeds are too crunchy or the juice dilutes the dressing."
+      corrections: "Use fewer seeds; crush some to release juice; add more acid to the dressing."
+      safety_note: "Use fresh pomegranate and washed kale."
+
+  - id: chili_oil_for_plain_oil_on_crisped_greens
+    known_pairing: "kale chips with olive oil"
+    source_ingredient: olive_oil
+    substitute_ingredient: chili_crisp
+    mechanism: aroma_bridge
+    shared_function: "Both provide fat for crisping, while chili crisp adds heat and umami that answers the bitter char."
+    meaningful_difference: "Chili crisp is spicy, salty, and crunchy rather than neutral and smooth."
+    expected_risk: "The heat may overwhelm the subtle toasted kale flavour."
+    required_dimensions: "nutty_toasted\nbitter"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 kale chip : 2-3 flakes from chili crisp"
+      smallest_test: "Scatter a few chili crisp flakes on one finished kale chip."
+      success_condition: "Heat and umami add complexity without burning out the toasted character."
+      likely_failure: "Chili heat dominates or the oil makes the chip soggy."
+      corrections: "Use less chili crisp; drain excess oil; add a pinch of salt."
+      safety_note: "Use commercial chili crisp and fully crisped kale."
+
+  - id: fermented_paste_for_soy_on_braised_greens
+    known_pairing: "braised kale with soy sauce"
+    source_ingredient: soy_sauce
+    substitute_ingredient: miso
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide salt and umami that deepen the savoury character of braised greens."
+    meaningful_difference: "Miso is thicker, sweeter, and more fermented than soy sauce."
+    expected_risk: "The paste may make the braise too thick or the fermented note too strong."
+    required_dimensions: "umami\nbitter"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 forkful braised kale : 1/8 teaspoon thinned miso"
+      smallest_test: "Thin miso with a drop of the braising liquid, stir into one forkful."
+      success_condition: "Fermented umami deepens the savoury character without overwhelming."
+      likely_failure: "Miso makes the braise too thick or tastes like miso soup."
+      corrections: "Thin with more liquid; use white miso; add a drop of vinegar."
+      safety_note: "Use refrigerated commercial miso and fully cooked kale."
+
+  # === CUCUMBER ===
+  - id: stone_fruit_for_tomato_in_cool_salad
+    known_pairing: "cucumber and tomato salad"
+    source_ingredient: tomato
+    substitute_ingredient: peach
+    mechanism: analogue_substitution
+    shared_function: "Both are juicy sweet-acid fruits that give a cool green salad its lift and body."
+    meaningful_difference: "Peach is sweeter and more floral than tomato, with no savoury umami backbone."
+    expected_risk: "The salad may read as fruit salad instead of a savoury side."
+    required_dimensions: "fresh_green\nsweet"
+    explanation_template: "{candidate} may replace {source} in a cool salad because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 cucumber slices : 1 thin slice of ripe peach"
+      smallest_test: "Salt one cucumber slice, top with a sliver of peach, and taste before mixing a bowl."
+      success_condition: "Peach adds perfumed sweetness while salt and the cucumber keep the bite savoury."
+      likely_failure: "Sweetness dominates and the pairing reads as dessert."
+      corrections: "More salt; a drop of vinegar; add chile flakes or black pepper."
+      safety_note: "Use washed ripe fruit; this is a flavour test, not preservation guidance."
+
+  - id: herb_blend_for_dill_on_salt_drained_cucumber
+    known_pairing: "salted cucumber with dill"
+    source_ingredient: dill
+    substitute_ingredient: zaatar
+    mechanism: aroma_bridge
+    shared_function: "Both add aromatic herbal notes that lift the cool crunch of salted cucumber."
+    meaningful_difference: "Za'atar is earthier and more complex with sumac's tartness and sesame's nuttiness."
+    expected_risk: "The blend may be too complex and muddy the clean cucumber flavour."
+    required_dimensions: "fresh_green\nsalty"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 cucumber slices : 1 pinch za'atar"
+      smallest_test: "Sprinkle za'atar over salted cucumber slices and taste."
+      success_condition: "Herbal complexity adds interest without overwhelming the clean crunch."
+      likely_failure: "Za'atar dominates or the sumac makes it too sour."
+      corrections: "Use less za'atar; reduce salt; add a drop of olive oil."
+      safety_note: "Use fresh za'atar blend and washed cucumber."
+
+  - id: dark_syrup_for_sugar_on_pickled_cucumber
+    known_pairing: "quick pickles with sugar"
+    source_ingredient: sugar
+    substitute_ingredient: pomegranate_molasses
+    mechanism: flavour_reinforcement
+    shared_function: "Both add sweetness to balance vinegar, while molasses adds dark fruit depth."
+    meaningful_difference: "Molasses is tart, complex, and dark rather than neutral sweet."
+    expected_risk: "The dark fruit character may clash with the bright pickle acidity."
+    required_dimensions: "sour\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 pickle slice : 1 drop pomegranate molasses"
+      smallest_test: "Dab one drop on a pickle slice and taste."
+      success_condition: "Dark fruit sweetness adds complexity without muddying the bright acid."
+      likely_failure: "Molasses dominates and the pickle tastes like chutney."
+      corrections: "Use less molasses; add more vinegar; balance with salt."
+      safety_note: "Use commercial pomegranate molasses and properly pickled cucumber."
+
+  # === MANGO ===
   - id: dark_berry_acid_for_lime_on_sour_slaw
     known_pairing: "green mango slaw with lime"
     source_ingredient: lime
@@ -113,6 +289,45 @@ analogy_rules:
       corrections: "Add salt; cut with a drop of plain vinegar; add chile flakes to bridge."
       safety_note: "Use commercially prepared vinegar and washed fruit; this is a flavour test, not preservation guidance."
 
+  - id: fish_sauce_for_salt_on_tropical_slaw
+    known_pairing: "green mango slaw with salt"
+    source_ingredient: sea_salt
+    substitute_ingredient: fish_sauce
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide salt, while fish sauce adds umami depth that echoes Southeast Asian slaw traditions."
+    meaningful_difference: "Fish sauce is pungent and funky rather than clean and neutral."
+    expected_risk: "The fish sauce may make the slaw smell and taste too strongly of fermented fish."
+    required_dimensions: "sour\nfresh_green"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 forkful slaw : 2 drops fish sauce"
+      smallest_test: "Dress one forkful with fish sauce and lime, taste."
+      success_condition: "Umami depth adds savoury complexity without overwhelming the bright fruit."
+      likely_failure: "Fish sauce dominates and the slaw smells like Thai restaurant kitchen."
+      corrections: "Use less fish sauce; add more lime; balance with sugar or palm sugar."
+      safety_note: "Use commercial fish sauce and washed fruit."
+
+  - id: warm_spice_for_plain_yogurt_in_fruit_lassi
+    known_pairing: "mango lassi with plain yogurt"
+    source_ingredient: yogurt
+    substitute_ingredient: cardamom
+    mechanism: aroma_bridge
+    shared_function: "Both are traditional lassi components, while cardamom adds warm aromatic complexity."
+    meaningful_difference: "Cardamom is intensely aromatic and floral rather than neutral and creamy."
+    expected_risk: "The spice may overwhelm the mango's delicate perfume."
+    required_dimensions: "sweet\nsour\nrich_fatty"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tablespoon lassi : 1 crushed cardamom pod"
+      smallest_test: "Crush one pod, stir into one spoonful of lassi, let sit 1 minute, taste."
+      success_condition: "Warm floral notes echo the mango's perfume without dominating."
+      likely_failure: "Cardamom is too strong and the lassi tastes like chai."
+      corrections: "Use less cardamom; remove pod sooner; add more mango."
+      safety_note: "Use food-grade cardamom pods and refrigerated yogurt."
+
+  # === APRICOT ===
   - id: toasted_grain_for_nut_on_browned_sweet_state
     known_pairing: "roasted apricots with toasted walnuts"
     source_ingredient: walnut
@@ -132,6 +347,45 @@ analogy_rules:
       corrections: "Toast the crumbs darker and drier; add a pinch of salt; serve the crumbs under the fruit instead of on top."
       safety_note: "Use fully toasted crumbs from ordinary bread and washed ripe fruit; this is a flavour test, not preservation guidance."
 
+  - id: woody_herb_for_honey_on_roasted_stone_fruit
+    known_pairing: "roasted apricots with honey"
+    source_ingredient: honey
+    substitute_ingredient: rosemary
+    mechanism: aroma_bridge
+    shared_function: "Both add aromatic complexity to roasted stone fruit, while rosemary's pine notes echo the caramelisation."
+    meaningful_difference: "Rosemary is savoury and resinous rather than sweet and floral."
+    expected_risk: "The herb may make the fruit taste like a roast dinner rather than dessert."
+    required_dimensions: "sweet\nnutty_toasted"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 roasted apricot half : 1 small rosemary needle"
+      smallest_test: "Chop one rosemary needle finely, scatter on one warm roasted half."
+      success_condition: "Pine aroma adds complexity without making it taste like meat."
+      likely_failure: "Rosemary dominates and the apricot tastes like a roast."
+      corrections: "Use less rosemary; add honey; serve with cheese to bridge."
+      safety_note: "Use fresh rosemary and washed ripe fruit."
+
+  - id: pungent_cheese_for_cream_on_fresh_stone_fruit
+    known_pairing: "fresh apricots with cream"
+    source_ingredient: cream
+    substitute_ingredient: goat_cheese
+    mechanism: texture_contrast
+    shared_function: "Both add richness, while goat cheese's tang cuts the fruit's sweetness."
+    meaningful_difference: "Goat cheese is tangy and crumbly rather than smooth and neutral."
+    expected_risk: "The cheese may overwhelm the delicate apricot flavour."
+    required_dimensions: "sweet\nsour\naromatic"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 apricot slice : 1 small crumble of goat cheese"
+      smallest_test: "Top one slice of fresh apricot with a small crumble of cheese."
+      success_condition: "Tangy richness balances the sweet-tart fruit without dominating."
+      likely_failure: "Goat cheese is too strong and the apricot disappears."
+      corrections: "Use less cheese; add a drizzle of honey; use a milder cheese."
+      safety_note: "Use fresh pasteurized goat cheese and washed ripe fruit."
+
+  # === GENERAL ===
   - id: smoked_cream_for_plain_cream_in_soup
     known_pairing: "broccoli soup with yogurt"
     source_ingredient: yogurt
