@@ -1,4 +1,195 @@
 analogy_rules:
+  # === POTATO ===
+  - id: soft_egg_for_butter_on_mashed_potato
+    known_pairing: "mashed potatoes with butter"
+    source_ingredient: butter
+    substitute_ingredient: eggs
+    mechanism: texture_contrast
+    shared_function: "Both add richness, while a soft egg adds silky body that echoes the mash's creaminess."
+    meaningful_difference: "Egg adds protein structure and a distinct cooked-egg flavour rather than pure fat."
+    expected_risk: "The egg may make the mash taste like breakfast or become gluey if over-mixed."
+    required_dimensions: "sweet\nrich_fatty"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 tablespoons mash : 1 soft-boiled egg"
+      smallest_test: "Fold one soft-boiled egg into two tablespoons of warm mash."
+      success_condition: "Egg adds silky richness without making it taste like breakfast."
+      likely_failure: "Egg makes the mash gluey or tastes too much like scrambled eggs."
+      corrections: "Use less egg; add more butter; finish with chives."
+      safety_note: "Use fresh eggs and fully cooked potatoes."
+
+  - id: poached_egg_for_cheese_on_roasted_potato
+    known_pairing: "roasted potatoes with cheese"
+    source_ingredient: parmesan
+    substitute_ingredient: eggs
+    mechanism: texture_contrast
+    shared_function: "Both add richness, while a poached egg's runny yolk acts as a sauce for the crispy potato."
+    meaningful_difference: "Egg adds liquid richness and protein rather than salty umami."
+    expected_risk: "The yolk may make the crispy potato soggy if not eaten immediately."
+    required_dimensions: "nutty_toasted\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 roasted potato pieces : 1 poached egg"
+      smallest_test: "Place one poached egg on three warm roasted potato pieces."
+      success_condition: "Runny yolk acts as sauce without making the potato soggy."
+      likely_failure: "Yolk makes the crispy exterior soft or the egg dominates."
+      corrections: "Use less yolk; add more acid; serve immediately."
+      safety_note: "Use fresh eggs and fully cooked potatoes."
+
+  - id: fried_egg_for_bacon_on_potato_hash
+    known_pairing: "potato hash with bacon"
+    source_ingredient: bacon
+    substitute_ingredient: eggs
+    mechanism: functional_completion
+    shared_function: "Both add protein and richness, while a fried egg's crispy edge echoes the hash's texture."
+    meaningful_difference: "Egg adds silky yolk and protein structure rather than smoky salt."
+    expected_risk: "The egg may make the hash taste like breakfast rather than a savoury dish."
+    required_dimensions: "nutty_toasted\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 portion hash : 1 fried egg"
+      smallest_test: "Top one portion of warm hash with a crispy fried egg."
+      success_condition: "Crispy egg edge echoes hash texture while yolk adds richness."
+      likely_failure: "Egg makes it taste like breakfast or the yolk makes it soggy."
+      corrections: "Use a crispier egg; add more acid; finish with hot sauce."
+      safety_note: "Use fresh eggs and fully cooked potatoes."
+
+  - id: smoked_salt_for_plain_salt_on_fried_potato
+    known_pairing: "fries with sea salt"
+    source_ingredient: sea_salt
+    substitute_ingredient: smoked_salt
+    mechanism: aroma_bridge
+    shared_function: "Both provide salt, while smoked salt adds charred depth that echoes the fried crust."
+    meaningful_difference: "Smoked salt is smoky and complex rather than clean and neutral."
+    expected_risk: "The smoke may overwhelm the potato's subtle sweetness."
+    required_dimensions: "nutty_toasted\nrich_fatty"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 fries : 1 pinch smoked salt"
+      smallest_test: "Sprinkle smoked salt on three warm fries and taste."
+      success_condition: "Smoke adds depth without overwhelming the potato."
+      likely_failure: "Smoke dominates or the salt makes it too salty."
+      corrections: "Use less smoked salt; add plain salt; balance with acid."
+      safety_note: "Use food-grade smoked salt and fully cooked potatoes."
+
+  - id: malt_vinegar_for_plain_vinegar_on_fried_potato
+    known_pairing: "fries with vinegar"
+    source_ingredient: vinegar
+    substitute_ingredient: malt_vinegar
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide acid, while malt vinegar adds malty sweetness that echoes the fried crust."
+    meaningful_difference: "Malt vinegar is sweeter and more complex than plain vinegar."
+    expected_risk: "The malt character may make the fries taste like fish and chips."
+    required_dimensions: "nutty_toasted\nrich_fatty"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 fries : 1/4 teaspoon malt vinegar"
+      smallest_test: "Drizzle malt vinegar on three warm fries and taste."
+      success_condition: "Malty acid cuts fat without making it taste like fish and chips."
+      likely_failure: "Malt dominates or the vinegar makes it too sour."
+      corrections: "Use less malt vinegar; add plain vinegar; balance with salt."
+      safety_note: "Use commercial malt vinegar and fully cooked potatoes."
+
+  - id: horseradish_for_sour_cream_on_baked_potato
+    known_pairing: "baked potato with sour cream"
+    source_ingredient: cream
+    substitute_ingredient: horseradish
+    mechanism: aroma_bridge
+    shared_function: "Both add richness, while horseradish adds sharp pungency that cuts the potato's mildness."
+    meaningful_difference: "Horseradish is sharp and sinus-clearing rather than creamy and mild."
+    expected_risk: "The pungency may overwhelm the potato's subtle earthiness."
+    required_dimensions: "sweet\nnutty_toasted"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 baked potato : 1/2 teaspoon grated horseradish"
+      smallest_test: "Top one warm baked potato with grated horseradish and butter."
+      success_condition: "Sharp pungency cuts the mildness without overwhelming."
+      likely_failure: "Horseradish dominates or the potato tastes like roast beef."
+      corrections: "Use less horseradish; add more butter; balance with chives."
+      safety_note: "Use fresh horseradish root and fully cooked potatoes."
+
+  - id: anchovy_for_bacon_on_potato_soup
+    known_pairing: "potato soup with bacon"
+    source_ingredient: bacon
+    substitute_ingredient: anchovy
+    mechanism: flavour_reinforcement
+    shared_function: "Both add umami depth, while anchovy adds fermented complexity that echoes the soup's savoury base."
+    meaningful_difference: "Anchovy is fishy and fermented rather than smoky and fatty."
+    expected_risk: "The fishiness may make the soup taste like chowder rather than potato soup."
+    required_dimensions: "umami\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 cup soup : 1 anchovy fillet"
+      smallest_test: "Melt one anchovy fillet into one cup of warm potato soup."
+      success_condition: "Umami depth adds complexity without making it taste like chowder."
+      likely_failure: "Anchovy dominates or the soup tastes fishy."
+      corrections: "Use less anchovy; add more cream; balance with fresh herbs."
+      safety_note: "Use commercial anchovy fillets and fully cooked soup."
+
+  - id: capers_for_pickles_on_potato_salad
+    known_pairing: "potato salad with pickles"
+    source_ingredient: pickles
+    substitute_ingredient: capers
+    mechanism: texture_contrast
+    shared_function: "Both add acid and crunch, while capers add briny complexity that echoes the salad's tang."
+    meaningful_difference: "Capers are smaller, more briny, and less crunchy than pickles."
+    expected_risk: "The capers may be too small and briny, making the salad taste like tapenade."
+    required_dimensions: "sour\nsweet\nrich_fatty"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 tablespoons potato salad : 1 teaspoon capers"
+      smallest_test: "Fold capers into two tablespoons of potato salad and taste."
+      success_condition: "Briny crunch adds complexity without making it taste like tapenade."
+      likely_failure: "Capers dominate or the salad tastes too briny."
+      corrections: "Use fewer capers; add more pickles; balance with fresh herbs."
+      safety_note: "Use commercial capers and properly prepared potato salad."
+
+  - id: gruyere_for_cheddar_on_potato_gratin
+    known_pairing: "potato gratin with cheddar"
+    source_ingredient: parmesan
+    substitute_ingredient: gruyere
+    mechanism: flavour_reinforcement
+    shared_function: "Both add umami and richness, while gruyere adds nutty complexity that echoes the gratin's toasted top."
+    meaningful_difference: "Gruyere is nuttier and more complex than cheddar or parmesan."
+    expected_risk: "The nuttiness may make the gratin taste too Swiss or Alpine."
+    required_dimensions: "umami\nrich_fatty\nnutty_toasted"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 portion gratin : 1 tablespoon grated gruyere"
+      smallest_test: "Top one portion of gratin with grated gruyere and broil briefly."
+      success_condition: "Nutty cheese adds complexity without making it taste too Swiss."
+      likely_failure: "Gruyere dominates or the gratin tastes like fondue."
+      corrections: "Use less gruyere; add more parmesan; balance with fresh herbs."
+      safety_note: "Use fresh gruyere and fully cooked gratin."
+
+  - id: dill_oil_for_plain_oil_on_boiled_potato
+    known_pairing: "boiled potatoes with butter"
+    source_ingredient: butter
+    substitute_ingredient: dill
+    mechanism: aroma_bridge
+    shared_function: "Both add richness, while dill adds fresh herbal aroma that echoes Nordic potato traditions."
+    meaningful_difference: "Dill is fresh and herbal rather than rich and fatty."
+    expected_risk: "The dill may make the potato taste like pickles or Scandinavian fish."
+    required_dimensions: "umami\nsweet"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 boiled potatoes : 1 tablespoon chopped dill"
+      smallest_test: "Toss warm boiled potatoes with chopped dill and butter."
+      success_condition: "Fresh dill adds aroma without making it taste like pickles."
+      likely_failure: "Dill dominates or the potato tastes like gravlax."
+      corrections: "Use less dill; add more butter; balance with lemon."
+      safety_note: "Use fresh dill and fully cooked potatoes."
+
   # === CABBAGE ===
   - id: miso_butter_for_plain_fat_on_roasted_brassica
     known_pairing: "roasted cabbage with butter"

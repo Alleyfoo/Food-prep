@@ -32,6 +32,15 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
         "cabbage_soup_base",
         "pickled_cabbage_component",
         "fermented_cabbage_component",
+        "boiled_potato_component",
+        "mashed_potato_component",
+        "roasted_potato_component",
+        "fried_potato_component",
+        "potato_gratin_component",
+        "baked_potato_component",
+        "potato_soup_base",
+        "potato_salad_component",
+        "potato_hash_component",
     }
 
     rows = conn.execute(

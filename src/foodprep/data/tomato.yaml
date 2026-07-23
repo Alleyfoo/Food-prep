@@ -396,6 +396,9 @@ ingredients:
   - { canonical_name: juniper_berries,  base_roles: "aromatic",           default_availability_class: rare }
   - { canonical_name: gochugaru,        aliases: "Korean chili flakes", base_roles: "heat\naromatic", default_availability_class: occasional }
   - { canonical_name: smoked_paprika,   aliases: "pimentón", base_roles: "aromatic\nheat", default_availability_class: common }
+  - { canonical_name: smoked_salt,      aliases: "smoked sea salt", base_roles: "salt\naromatic", default_availability_class: common }
+  - { canonical_name: malt_vinegar,     base_roles: "acid",            default_availability_class: common }
+  - { canonical_name: anchovy,          aliases: "anchovies", base_roles: "umami\nsalt", default_availability_class: common }
   # ---- role-only fillers (no tree; pure role providers) ----
   - canonical_name: mustard
     aliases: "dijon\nwhole-grain mustard"
@@ -832,6 +835,14 @@ transformations:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: soft,   polarity: gain }
       - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "body\ncarb"
+      flavour: "savory\nsweet"
+      texture: "soft\ntender"
+      missing_risks: "salt\nfat"
+      heaviness_score: 2
+      dryness_score: 1
+      notes: "Boiled potato base state; neutral starchy carrier, needs fat and salt."
     missing_roles:
       - { role: fat,  priority: high,   note: "butter/oil" }
       - { role: salt, priority: high,   note: "seasoning" }
@@ -851,6 +862,14 @@ transformations:
       - { family: flavour, value: savory,   polarity: gain }
       - { family: texture, value: soft,     polarity: gain }
       - { family: texture, value: spoonable, polarity: gain }
+    state_profile:
+      provides: "body\ncarb\nmild_base"
+      flavour: "sweet\nrich_fatty"
+      texture: "soft\nsilky"
+      missing_risks: "salt\nacid"
+      heaviness_score: 3
+      dryness_score: 1
+      notes: "Mashed potato state; rich and creamy, needs acid and crunch to balance."
     missing_roles:
       - { role: acid,    priority: high,   note: "lemon/vinegar cuts richness" }
       - { role: crunch,  priority: high,   note: "croutons/crisp skin" }
@@ -871,6 +890,14 @@ transformations:
       - { family: flavour, value: concentrated, polarity: gain }
       - { family: texture, value: firm,        polarity: gain }
       - { family: state,   value: roasted,     polarity: gain }
+    state_profile:
+      provides: "body\ncarb\ncrunch"
+      flavour: "nutty_toasted\nsweet\numami"
+      texture: "crisp\ntender"
+      missing_risks: "salt\nacid\nhydration"
+      heaviness_score: 2
+      dryness_score: 3
+      notes: "Roasted potato state; crispy exterior with fluffy interior, needs sauce/acid."
     missing_roles:
       - { role: hydration, priority: high,   note: "sauce/aioli/stock — roast is dry" }
       - { role: acid,      priority: high,   note: "lemon to sharpen" }
@@ -890,6 +917,14 @@ transformations:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: firm,  polarity: gain }
       - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "body\ncarb\ncrunch"
+      flavour: "nutty_toasted\nsweet\nrich_fatty"
+      texture: "crisp\ndense"
+      missing_risks: "salt\nacid"
+      heaviness_score: 3
+      dryness_score: 2
+      notes: "Fried potato state; crispy and rich, needs acid to cut fat."
     missing_roles:
       - { role: salt,    priority: high,   note: "seasoning while hot" }
       - { role: acid,    priority: high,   note: "vinegar/mustard/ketchup cut fat" }
@@ -910,6 +945,14 @@ transformations:
       - { family: flavour, value: umami,    polarity: gain }
       - { family: texture, value: soft,     polarity: gain }
       - { family: texture, value: dense,    polarity: gain }
+    state_profile:
+      provides: "body\ncarb\numami"
+      flavour: "umami\nrich_fatty\nnutty_toasted"
+      texture: "soft\ndense\ncreamy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 4
+      dryness_score: 2
+      notes: "Potato gratin state; very rich and cheesy, needs acid and fresh side."
     missing_roles:
       - { role: acid, priority: high,   note: "acid to cut the richness" }
       - { role: herb, priority: medium, note: "fresh side — salad/greens" }
@@ -928,6 +971,14 @@ transformations:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: soft,   polarity: gain }
       - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "body\ncarb\nmild_base"
+      flavour: "sweet\nnutty_toasted"
+      texture: "soft\ntender"
+      missing_risks: "salt\nfat"
+      heaviness_score: 2
+      dryness_score: 2
+      notes: "Baked potato state; mild carrier with crispy skin, needs fat and protein."
     missing_roles:
       - { role: fat,     priority: high,   note: "butter/cream/sour cream" }
       - { role: salt,    priority: high,   note: "seasoning" }
@@ -946,6 +997,14 @@ transformations:
     tags_after:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: liquid, polarity: gain }
+    state_profile:
+      provides: "body\nhydration\ncarb"
+      flavour: "umami\nsweet"
+      texture: "liquid\nsoft"
+      missing_risks: "salt\ncream\nacid"
+      heaviness_score: 2
+      dryness_score: 0
+      notes: "Potato soup base state; starchy and creamy, needs herb and crunch."
     missing_roles:
       - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
       - { role: herb,    priority: high,   note: "dill/parsley/leek-green freshness" }
@@ -965,6 +1024,14 @@ transformations:
       - { family: flavour, value: savory,     polarity: gain }
       - { family: flavour, value: sweet_sour, polarity: gain }
       - { family: texture, value: soft,       polarity: gain }
+    state_profile:
+      provides: "body\ncarb\nacid"
+      flavour: "sour\nsweet\nrich_fatty"
+      texture: "soft\ncreamy"
+      missing_risks: "salt\nherb"
+      heaviness_score: 3
+      dryness_score: 1
+      notes: "Potato salad state; tangy and creamy, needs herb and crunch."
     missing_roles:
       - { role: acid,   priority: high,   note: "sharpen the acid-fat balance (vinegar/mustard)" }
       - { role: herb,   priority: medium, note: "dill/parsley/celery" }
@@ -984,6 +1051,14 @@ transformations:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: firm,  polarity: gain }
       - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "body\ncarb\ncrunch"
+      flavour: "nutty_toasted\nsweet\numami"
+      texture: "crisp\ntender"
+      missing_risks: "salt\nfat"
+      heaviness_score: 2
+      dryness_score: 2
+      notes: "Potato hash state; crispy edges with soft centre, needs egg and herb."
     missing_roles:
       - { role: fat,     priority: high,   note: "butter/oil to crisp" }
       - { role: salt,    priority: high,   note: "seasoning" }
