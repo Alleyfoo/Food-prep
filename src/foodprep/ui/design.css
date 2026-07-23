@@ -137,6 +137,10 @@ code, .mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
   padding: 14px 16px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 12px;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 .card.cook    { border-left-color: var(--green); }
 .card.scout   { border-left-color: var(--purple); }
@@ -272,11 +276,194 @@ code, .mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
   white-space: pre-wrap;
 }
 
+/* ============= HYPOTHESIS CARDS (Scout engine) ============= */
+.card.hypothesis {
+  border-left-color: var(--purple);
+}
+.hyp-header {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.hyp-candidate {
+  font-size: 15px; font-weight: 600; color: var(--ink);
+}
+.hyp-class {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 2px 8px; border-radius: var(--r-sm);
+}
+.hyp-class.scout_candidate { color: var(--purple); background: var(--purple-tint); }
+.hyp-class.weak_hypothesis { color: var(--ink-4); background: var(--bg-2); }
+.hyp-class.rejected { color: var(--red); background: var(--red-tint); }
+.hyp-explanation {
+  font-size: 12px; color: var(--ink-3); line-height: 1.5;
+  margin: 4px 0 8px; padding: 6px 10px;
+  background: var(--surface-2); border-radius: var(--r-sm);
+  border-left: 2px solid var(--purple-soft);
+}
+.hyp-meta {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px;
+  font-size: 11.5px; margin-bottom: 8px;
+}
+.hyp-meta .lbl {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--ink-4);
+}
+.hyp-meta .val { color: var(--ink-2); }
+
+/* ============= PROTOCOL BLOCK ============= */
+.protocol-block {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 10px 12px; margin-top: 8px;
+}
+.protocol-block h5 {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--purple); margin-bottom: 6px; font-weight: 600;
+}
+.protocol-row {
+  display: grid; grid-template-columns: 110px 1fr; gap: 8px;
+  font-size: 11.5px; padding: 2px 0;
+}
+.protocol-row .lbl {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink-4);
+}
+.protocol-row .val { color: var(--ink-2); }
+
+/* ============= TRIAL HISTORY ============= */
+.trial-block {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 10px 12px; margin-top: 8px;
+}
+.trial-block h5 {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--blue); margin-bottom: 6px; font-weight: 600;
+}
+.trial-row {
+  display: grid; grid-template-columns: 100px 1fr; gap: 8px;
+  font-size: 11.5px; padding: 2px 0;
+  border-bottom: 1px solid var(--line);
+}
+.trial-row:last-child { border-bottom: none; }
+.trial-row .lbl {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink-4);
+}
+.trial-row .val { color: var(--ink-2); }
+.trial-verdict {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--r-sm); display: inline-block;
+}
+.trial-verdict.accept { color: var(--green); background: var(--green-tint); }
+.trial-verdict.reject { color: var(--red); background: var(--red-tint); }
+.trial-verdict.partial { color: var(--amber); background: var(--amber-tint); }
+.trial-verdict.mixed { color: var(--ink-3); background: var(--bg-2); }
+
+/* ============= NOVELTY BADGE ============= */
+.novelty-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--r-sm); display: inline-block;
+}
+.novelty-badge.novel { color: var(--green); background: var(--green-tint); }
+.novelty-badge.seen { color: var(--ink-4); background: var(--bg-2); }
+.novelty-badge.not_checked { color: var(--ink-5); background: var(--bg-2); font-style: italic; }
+
+/* ============= JOURNEY CARDS ============= */
+.card.journey {
+  border-left-color: var(--green-deep);
+}
+.journey-title {
+  font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px;
+}
+.journey-why {
+  font-size: 12px; color: var(--ink-3); line-height: 1.5;
+  margin-bottom: 8px; font-style: italic;
+}
+.journey-path {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 8px 0;
+}
+.journey-state {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: var(--r-sm);
+  background: var(--green-tint); color: var(--green-deep);
+  border: 1px solid var(--green-soft);
+}
+.journey-arrow {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-5);
+}
+.journey-move {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-4);
+  padding: 2px 6px; background: var(--bg-2); border-radius: var(--r-sm);
+}
+.journey-transitions {
+  margin-top: 8px;
+}
+.journey-transition {
+  display: flex; align-items: center; gap: 8px; padding: 4px 0;
+  font-size: 12px; border-bottom: 1px solid var(--line);
+}
+.journey-transition:last-child { border-bottom: none; }
+.journey-transition .seq {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-5);
+  width: 16px; text-align: center;
+}
+
+/* ============= FLAVOUR ROUTE CARDS ============= */
+.card.route {
+  border-left-color: var(--amber);
+}
+.route-elements {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.route-element {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11.5px; padding: 3px 8px;
+  border-radius: var(--r-sm); border: 1px solid var(--line-2);
+  background: var(--surface);
+}
+.route-element .name { color: var(--ink-2); font-weight: 500; }
+.route-element .contribution { color: var(--ink-4); font-size: 10.5px; }
+.route-element.required { border-color: var(--amber-soft); }
+.route-element.available { border-color: var(--green-soft); background: var(--green-tint); }
+
 /* ============= EMPTY / HINT ============= */
 .hint {
   font-size: 12px; color: var(--ink-4); padding: 14px 0; line-height: 1.5;
 }
 .hint b { color: var(--ink-3); }
+
+/* ============= TAB POLISH ============= */
+[data-baseweb="tab"] {
+  transition: color .15s ease, background-color .15s ease;
+}
+[data-baseweb="tab"]:hover {
+  background-color: var(--bg-2) !important;
+}
+
+/* ============= SELECT / MULTISELECT POLISH ============= */
+[data-baseweb="select"] > div {
+  transition: border-color .15s ease;
+}
+[data-baseweb="select"] > div:hover {
+  border-color: var(--line-3) !important;
+}
+
+/* ============= KPI POLISH ============= */
+.kpi {
+  transition: box-shadow .15s ease;
+}
+.kpi:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ============= BALANCE SECTION POLISH ============= */
+.balance-section {
+  transition: box-shadow .15s ease;
+}
+.balance-section:hover {
+  box-shadow: var(--shadow-md);
+}
 
 /* compact streamlit widget labels */
 .stSelect > label, .stMultiSelect > label, .stRadio > label {

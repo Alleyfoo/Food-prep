@@ -1,21 +1,18 @@
 """Food-prep — ingredient transformation graph UI (Streamlit).
 
-Round 7: handles on the engine, no new ontology. Five tabs map 1:1 to the
-existing query API:
+Six tabs:
   Tab 1 Ingredient Explorer  — branch_card / all_branch_cards
-  Tab 2 Component Explorer  — component_card
-  Tab 3 Plate Balance        — plate_balance_detail
-  Tab 4 Filler Profiles      — filler_profile_detail
-  Tab 5 Scout                — scout_rows
+  Tab 2 Journeys             — ingredient_journeys
+  Tab 3 Component Explorer   — component_card + flavour_routes
+  Tab 4 Plate Balance        — plate_balance_detail
+  Tab 5 Filler Profiles      — filler_profile_detail
+  Tab 6 Scout                — generate_scout_hypotheses + trials
 
 Run:  streamlit run app.py
-       streamlit run src/foodprep/ui/streamlit_app.py
 """
 
 from __future__ import annotations
 
-import html
-import json
 import sqlite3
 from pathlib import Path
 
@@ -23,40 +20,22 @@ import streamlit as st
 
 from foodprep.loader import build
 from foodprep import export, query
-
-# ---------------------------------------------------------------------------
-# page config + design system
-# ---------------------------------------------------------------------------
+from foodprep.ui.render import (
+    _esc, chip, chips, conf_pill, debug_block, tag_class,
+    available_partition_html, branch_card_html,
+    hypothesis_card_html, journey_card_html, route_card_html,
+)
 
 _CSS_PATH = Path(__file__).with_name("design.css")
 
 
 def _md(markup: str) -> None:
-    """Render HTML markup with leading per-line whitespace stripped (so the
-    indented source stays readable without becoming a code block)."""
     cleaned = "\n".join(line.lstrip() for line in markup.splitlines())
     st.markdown(cleaned.strip(), unsafe_allow_html=True)
 
 
-def _esc(s) -> str:
-    return html.escape(str(s) if s is not None else "")
-
-
-# ---------------------------------------------------------------------------
-# connection (built once from YAML, cached for the session)
-# ---------------------------------------------------------------------------
-
 @st.cache_resource
 def get_conn():
-    # Streamlit may run each script execution on a different worker thread, but
-    # @st.cache_resource hands back the SAME connection object to all of them.
-    # sqlite3's default check_same_thread=True then raises
-    # "SQLite objects created in a thread can only be used in that same thread"
-    # on any rerun/new session. check_same_thread=False is safe here: the db is
-    # built once from YAML and only ever read (Streamlit serializes script
-    # runs), so there is no concurrent write contention. We set the same row
-    # factory + FK pragma as db.connect() but skip that helper because it does
-    # not expose check_same_thread.
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -67,38 +46,7 @@ def get_conn():
 CONN = get_conn()
 
 
-# ---------------------------------------------------------------------------
-# small render primitives
-# ---------------------------------------------------------------------------
-
-def chip(value, cls: str = "") -> str:
-    return f'<span class="chip {cls}">{_esc(value)}</span>'
-
-
-def chips(values, cls: str = "") -> str:
-    if not values:
-        return f'<span class="chip" style="color:var(--ink-5)">—</span>'
-    return " ".join(chip(v, cls) for v in values)
-
-
-def conf_pill(conf: str) -> str:
-    return f'<span class="card-conf {conf}">{_esc(conf)}</span>'
-
-
-def debug_block(title: str, payload) -> str:
-    body = json.dumps(payload, indent=2, default=str, ensure_ascii=False)
-    return (f'<details class="debug"><summary>{_esc(title)}</summary>'
-            f'<pre>{_esc(body)}</pre></details>')
-
-
-def tag_class(family: str) -> str:
-    return {"flavour": "flavour", "texture": "texture", "state": "state"}.get(family, "")
-
-
 def export_buttons(md: str, filename: str) -> None:
-    """Copy-Markdown (a code block with Streamlit's copy icon) + Download .md.
-    Renders from the same computed dict the card above renders from — no
-    recompute, no new query. No-op when md is empty."""
     if not md:
         return
     st.download_button("Download .md", md, file_name=filename,
@@ -107,101 +55,10 @@ def export_buttons(md: str, filename: str) -> None:
         st.code(md, language="markdown")
 
 
-# ---------------------------------------------------------------------------
-# branch card (Tabs 1 + 2 share it)
-# ---------------------------------------------------------------------------
-
-def available_partition_html(part: dict) -> str:
-    """Round 11 — render the 'what do I have' partition (Available now /
-    Missing but useful / No match) as card rows. Returns '' if empty."""
-    rows = []
-    if part.get("available_now"):
-        groups = []
-        for g in part["available_now"]:
-            roles = " ".join(chip(r, "missing") for r in g["roles"])
-            groups.append(
-                f'<div class="chip-group"><span class="gl have">{_esc(g["filler"])}</span>{roles}</div>'
-            )
-        rows.append(f'<div class="row"><span class="lbl">Available now</span>'
-                    f'<div>{"".join(groups)}</div></div>')
-    if part.get("missing_but_useful"):
-        groups = []
-        for m in part["missing_but_useful"]:
-            if m["fillers"]:
-                fch = " ".join(chip(f, "filler") for f in m["fillers"])
-            else:
-                fch = '<span class="none">(no curated filler)</span>'
-            groups.append(
-                f'<div class="chip-group"><span class="gl">{_esc(m["role"])}</span>{fch}</div>'
-            )
-        rows.append(f'<div class="row"><span class="lbl">Missing but useful</span>'
-                    f'<div>{"".join(groups)}</div></div>')
-    no_match = list(part.get("unknown_items") or []) + list(part.get("no_match_known") or [])
-    if no_match:
-        rows.append(f'<div class="row"><span class="lbl">No match here</span>'
-                    f'<div class="chips">{"".join(chip(n, "muted") for n in no_match)}</div></div>')
-    return "".join(rows)
-
-
-def branch_card_html(d: dict, with_debug: bool = True,
-                     available: dict | None = None) -> str:
-    conf = d.get("confidence") or ""
-    card_cls = "scout" if conf == "experimental" else "cook"
-    tags = d.get("tags") or []
-    tag_chips = " ".join(
-        chip(t["value"], tag_class(t.get("family", ""))) for t in tags
-    ) or '<span class="chip" style="color:var(--ink-5)">—</span>'
-    risks = d.get("risks") or []
-    risk_chips = " ".join(chip(r, "risk") for r in risks)
-    missing = [m["role_name"] for m in (d.get("missing") or [])]
-    miss_chips = " ".join(chip(r, "missing") for r in missing)
-    # "Try:" groups fillers by the role they fill
-    try_groups = []
-    for role, fillers in (d.get("fillers_by_role") or {}).items():
-        names = [f["filler"] for f in fillers[:3]] or ["(no curated filler)"]
-        try_groups.append(
-            f'<div class="chip-group"><span class="gl">{_esc(role)}</span>'
-            + " ".join(chip(n, "filler") for n in names) + "</div>"
-        )
-    try_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
-    # Round 11: when a 'what do I have' partition is supplied, replace the
-    # plain Try row with Available now / Missing but useful / No match.
-    partition_html = available_partition_html(available) if available else ""
-    uses = d.get("uses") or []
-
-    shift = ""
-    if d.get("flavour_shift") or d.get("texture_shift"):
-        shift = f'<div class="card-shift">{_esc(d.get("flavour_shift") or "—")} · {_esc(d.get("texture_shift") or "—")}</div>'
-
-    parts = [f'<div class="card {card_cls}">']
-    parts.append(
-        f'<div class="card-head"><span class="card-tech">{_esc(d["technique"])}</span>'
-        f'<span class="card-comp">{_esc(d.get("component") or "")}</span>'
-        f'{conf_pill(conf)}</div>'
-    )
-    parts.append(shift)
-    parts.append(f'<div class="row"><span class="lbl">Tags</span><div class="chips">{tag_chips}</div></div>')
-    if risks:
-        parts.append(f'<div class="row"><span class="lbl">Risks</span><div class="chips">{risk_chips}</div></div>')
-    if missing:
-        parts.append(f'<div class="row"><span class="lbl">Missing</span><div class="chips">{miss_chips}</div></div>')
-    if partition_html:
-        parts.append(partition_html)
-    else:
-        parts.append(f'<div class="row"><span class="lbl">Try</span><div>{try_html}</div></div>')
-    if uses:
-        parts.append(f'<div class="row"><span class="lbl">Use in</span><div class="chips">{chips(uses)}</div></div>')
-    if with_debug:
-        parts.append(debug_block("Show data rows", d))
-    parts.append("</div>")
-    return "".join(parts)
-
-
-# ---------------------------------------------------------------------------
-# top bar
-# ---------------------------------------------------------------------------
-
 def topbar() -> None:
+    trees = query.tree_ingredients(CONN)
+    comps = query.components_list(CONN)
+    profiles = query.profiles_list(CONN)
     _md(f"""
     <div class="topbar">
       <div class="brand">
@@ -212,16 +69,24 @@ def topbar() -> None:
         </div>
       </div>
       <div class="topbar-spacer"></div>
-      <div class="topbar-pill">{len(query.tree_ingredients(CONN))} full ingredients</div>
-      <div class="topbar-pill">{len(query.components_list(CONN))} components</div>
-      <div class="topbar-pill">{len(query.profiles_list(CONN))} plate profiles</div>
+      <div class="topbar-pill">{len(trees)} full ingredients</div>
+      <div class="topbar-pill">{len(comps)} components</div>
+      <div class="topbar-pill">{len(profiles)} plate profiles</div>
     </div>
     """)
 
 
-# ---------------------------------------------------------------------------
-# Tab 1 — Ingredient Explorer
-# ---------------------------------------------------------------------------
+def available_selector() -> list[str]:
+    ings = query.ingredients_list(CONN)
+    st.markdown('<div class="avail-strip"><span class="avail-label">'
+                'What do I have right now?</span>'
+                '<span class="avail-hint">filters Ingredient / Component / Plate '
+                'suggestions into Available now · Missing but useful · No match</span>'
+                '</div>', unsafe_allow_html=True)
+    return st.multiselect("Available ingredients", ings,
+                          placeholder="e.g. lemon, yogurt, pickles, bread, eggs, beans",
+                          help="Pick what's in your kitchen. Empty = show all curated fillers.")
+
 
 def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Ingredient Explorer</div>',
@@ -229,11 +94,12 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
     trees = query.tree_ingredients(CONN)
     col1, col2 = st.columns([1, 1])
     with col1:
-        ingredient = st.selectbox("Ingredient", trees, index=trees.index("cabbage") if "cabbage" in trees else 0)
+        ingredient = st.selectbox("Ingredient", trees,
+                                  index=trees.index("cabbage") if "cabbage" in trees else 0)
     with col2:
         mode = st.radio("Mode", ["Best branches", "Choose technique"], horizontal=True)
 
-    avail = available_items or None  # [] -> current Try view (no partition)
+    avail = available_items or None
     techs = query.techniques_for_ingredient(CONN, ingredient)
     if mode == "Choose technique":
         tech = st.selectbox("Technique", techs)
@@ -260,9 +126,25 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
         export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
 
 
-# ---------------------------------------------------------------------------
-# Tab 2 — Component Explorer
-# ---------------------------------------------------------------------------
+def tab_journeys() -> None:
+    st.markdown('<div class="section-title">Journeys <span class="count">'
+                'complete Cook paths for an ingredient</span></div>',
+                unsafe_allow_html=True)
+    trees = query.tree_ingredients(CONN)
+    ingredient = st.selectbox("Ingredient", trees, key="journey_ing",
+                              index=trees.index("broccoli") if "broccoli" in trees else 0)
+    journeys = query.ingredient_journeys(CONN, ingredient)
+    if not journeys:
+        st.markdown(
+            f'<div class="hint">No complete journeys modelled for <b>{_esc(ingredient)}</b> yet.</div>',
+            unsafe_allow_html=True)
+        return
+    st.markdown(
+        f'<div class="eyebrow">{len(journeys)} journey{"s" if len(journeys) != 1 else ""}</div>',
+        unsafe_allow_html=True)
+    for j in journeys:
+        _md(journey_card_html(j))
+
 
 def tab_component_explorer(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Component Explorer</div>',
@@ -281,8 +163,6 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
     risks = d.get("risks") or []
     missing = [m["role_name"] for m in (d.get("missing") or [])]
     avail = available_items or None
-    # Round 11: the component's next-moves come from its first producing
-    # transformation; partition those against what the user has on hand.
     part = None
     if avail and producers:
         part = query.available_filter(CONN, producers[0]["transformation_id"], avail)
@@ -316,15 +196,21 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
     </div>
     """)
     export_buttons(export.render_component_markdown(d, part), "component.md")
+
+    routes = query.flavour_routes_for_component(CONN, comp, available_items=avail)
+    if routes:
+        st.markdown(
+            f'<div class="section-title">Flavour Routes <span class="count">'
+            f'{len(routes)} direction{"s" if len(routes) != 1 else ""} from this state</span></div>',
+            unsafe_allow_html=True)
+        for r in routes:
+            _md(route_card_html(r))
+
     st.markdown(
         '<div class="hint">A component is an <b>after-state</b>. You do not always '
         'start from raw cabbage/tomato/potato — pick the component you already have.</div>',
         unsafe_allow_html=True)
 
-
-# ---------------------------------------------------------------------------
-# Tab 3 — Plate Balance
-# ---------------------------------------------------------------------------
 
 def tab_plate_balance(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Plate Balance <span class="count">Cook mode — no experimental pairings</span></div>',
@@ -337,16 +223,13 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
                     'has, what it lacks, and what to add.</div>', unsafe_allow_html=True)
         return
     text = "I have " + " and ".join(picked) + ". what is missing?"
-    avail = available_items or None  # [] -> current behaviour (no partition)
+    avail = available_items or None
     r = query.plate_balance_detail(CONN, text, available_items=avail)
-    has_part = "available_now" in r  # partition computed only when avail passed
+    has_part = "available_now" in r
 
-    # ---- summary KPIs ----
     gap_n = len(r["target_gap"])
     more_n = len(r["flagged_more"])
-    unk_n = len(r["unknown"])
     h_cls = "k-warn" if r["leans_heavy"] else "k-ok"
-    d_cls = "k-warn" if r["leans_dry"] else "k-ok"
     _md(f"""
     <div class="kpis">
       <div class="kpi"><div class="lbl">Items</div><div class="val">{len(r['items'])}</div><div class="foot">on the plate</div></div>
@@ -356,13 +239,9 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
     </div>
     """)
 
-    # ---- already provides ----
     _md(f'<div class="balance-section have"><h4>Already provides</h4><div class="chips">{chips(r["provided"])}</div></div>')
 
-    # ---- gaps + suggested fillers (or the 'what do I have' partition) ----
     if has_part:
-        # Round 11: partition on-hand fillers into Available now / Missing but
-        # useful / No match, instead of the plain per-role suggested lists.
         if r["available_now"]:
             lines = []
             for g in r["available_now"]:
@@ -387,7 +266,6 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
             _md('<div class="balance-section gap"><h4>Hard gaps</h4>'
                 '<div class="filler-line none">none of the on-hand items fill these — see Missing but useful</div></div>')
     else:
-        # current behaviour: plain per-role suggested fillers
         if r["target_gap"]:
             lines = []
             for role in r["target_gap"]:
@@ -401,7 +279,6 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
         else:
             _md('<div class="balance-section have"><h4>Hard gaps</h4><div class="filler-line">none — all target roles covered</div></div>')
 
-        # ---- may want more ----
         if r["flagged_more"]:
             lines = []
             for role in r["flagged_more"]:
@@ -413,7 +290,6 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
                     lines.append(f'<div class="filler-line"><span class="role">{_esc(role)}</span><span class="none">(no curated filler)</span></div>')
             _md(f'<div class="balance-section more"><h4>May want more</h4>{"".join(lines)}</div>')
 
-    # ---- risks / avoid ----
     warn_lines = []
     if r["leans_heavy"]:
         warn_lines.append('<div class="filler-line">leans heavy — favour acid / herb / crunch.</div>')
@@ -429,7 +305,6 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
     if avoid:
         _md(f'<div class="balance-section warn"><h4>Avoid adding more of</h4><div class="chips">{chips(avoid)}</div></div>')
 
-    # ---- unknown / no-profile ----
     if r["no_profile"]:
         items = [it["name"] for it in r["no_profile"]]
         _md(f'<div class="balance-section muted"><h4>No balance profile for</h4><div class="chips">{chips(items)}</div>'
@@ -440,10 +315,6 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
     with st.expander("Debug — raw plate_balance_detail", expanded=False):
         st.json(r)
 
-
-# ---------------------------------------------------------------------------
-# Tab 4 — Filler Profiles
-# ---------------------------------------------------------------------------
 
 def tab_filler_profiles() -> None:
     st.markdown('<div class="section-title">Filler Profiles <span class="count">the PIM tab</span></div>',
@@ -485,85 +356,60 @@ def tab_filler_profiles() -> None:
             '<b>Ingredient Explorer</b> tab.</div>', unsafe_allow_html=True)
 
 
-# ---------------------------------------------------------------------------
-# Tab 5 — Scout
-# ---------------------------------------------------------------------------
-
 def tab_scout() -> None:
-    st.markdown('<div class="section-title">Scout <span class="count">experimental pairings — NOT classic</span></div>',
+    st.markdown('<div class="section-title">Scout <span class="count">'
+                'generated hypotheses from analogy rules</span></div>',
                 unsafe_allow_html=True)
-    trees = query.tree_ingredients(CONN)
-    opts = ["all ingredients"] + trees
-    sel = st.selectbox("Filter by ingredient", opts, index=0)
-    ingredient = None if sel == "all ingredients" else sel
-    rows = query.scout_rows(CONN, ingredient=ingredient)
     _md("""
     <div class="disclaimer">
       <span class="eyebrow">Scout mode</span>
-      Scout shows role-compatible but uncommon ideas. They are <b>not classics</b>.
-      Taste a small amount before serving — a tiny spoon first, before any culinary
-      heroism. These are speculative, labelled so no one pretends they are tradition.
+      Hypotheses are generated from reusable analogy rules applied to transformed
+      states. They are <b>not classics</b> — they are role-compatible but uncommon
+      ideas. Taste a small amount before serving. Each hypothesis shows its
+      compatibility evidence, novelty status (if checked), and a test protocol.
     </div>
     """)
-    if not rows:
-        st.markdown('<div class="hint">No experimental pairings curated yet for this filter.</div>',
+
+    comps = query.components_list(CONN)
+    state_comps = []
+    for c in comps:
+        if query.component_state_profile(CONN, c) is not None:
+            state_comps.append(c)
+
+    if not state_comps:
+        st.markdown('<div class="hint">No components with state profiles found. '
+                    'Run <code>foodprep build</code> first.</div>',
                     unsafe_allow_html=True)
         return
-    for r in rows:
-        subj = r["technique"] or r["target"] or "(general)"
-        note = r["notes"] or f"{r['filler']} ({r['role']})"
-        _md(f"""
-        <div class="card scout">
-          <div class="card-head"><span class="card-tech">{_esc(r["filler"])}</span>
-            <span class="card-comp">+ {_esc(subj)}</span>
-            {conf_pill("experimental")}</div>
-          <div class="card-shift">{_esc(note)}</div>
-          <div class="row"><span class="lbl">Role</span><div class="val">{chip(r["role"], "role")}</div></div>
-          <div class="row"><span class="lbl">FI shop</span><div class="val">{_esc(r.get("availability") or "—")}</div></div>
-          {debug_block("Show data rows", dict(r))}
-        </div>
-        """)
 
+    default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
+    comp = st.selectbox("Transformed state", state_comps,
+                        index=state_comps.index(default))
 
-# ---------------------------------------------------------------------------
-# 'What do I have right now?' — shared selector (Round 11)
-# ---------------------------------------------------------------------------
+    hypotheses = query.generate_scout_hypotheses(CONN, comp)
+    if not hypotheses:
+        st.markdown(
+            f'<div class="hint">No generated hypotheses for <b>{_esc(comp)}</b>.</div>',
+            unsafe_allow_html=True)
+        return
 
-def available_selector() -> list[str]:
-    """A single 'available ingredients' multiselect above the tabs. Empty
-    selection = current behaviour; non-empty filters Tab 1/2/3 suggestions into
-    Available now / Missing but useful / No match. Not a pantry system, not
-    inventory, not shopping — just 'what's in the kitchen right now?'."""
-    ings = query.ingredients_list(CONN)
-    st.markdown('<div class="avail-strip"><span class="avail-label">'
-                'What do I have right now?</span>'
-                '<span class="avail-hint">filters Ingredient / Component / Plate '
-                'suggestions into Available now · Missing but useful · No match</span>'
-                '</div>', unsafe_allow_html=True)
-    return st.multiselect("Available ingredients", ings, placeholder="e.g. lemon, yogurt, pickles, bread, eggs, beans",
-                          help="Pick what's in your kitchen. Empty = show all curated fillers (current behaviour).")
+    candidates = [h for h in hypotheses if h["candidate_class"] != "rejected"]
+    rejected = [h for h in hypotheses if h["candidate_class"] == "rejected"]
 
+    st.markdown(
+        f'<div class="eyebrow">{len(candidates)} candidate{"s" if len(candidates) != 1 else ""} · '
+        f'{len(rejected)} rejected</div>', unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# layout
-# ---------------------------------------------------------------------------
+    for h in candidates:
+        _md(hypothesis_card_html(h))
+
+    if rejected:
+        with st.expander(f"Show {len(rejected)} rejected hypotheses", expanded=False):
+            for h in rejected:
+                _md(hypothesis_card_html(h))
+
 
 def main() -> None:
-    """Render the app.
-
-    Streamlit re-executes the entry script on every rerun (widget interaction,
-    new session). Everything that affects the page — page config, the CSS
-    <style> injection, and the body — MUST run inside this function so it
-    executes on every run. If any of it sat at module top level it would run
-    only once per process (Python caches the module in ``sys.modules`` after
-    the first import): a new session or a later rerun would then lose
-    ``layout="wide"`` (the layout shifts) and the design CSS (the card framing
-    vanishes). ``app.py`` imports and calls this on every run.
-    """
-    # set_page_config may only be called once per session (a second call
-    # raises), so guard it with session_state — runs on the first run of each
-    # session, skipped on reruns. It must precede every other st command in a
-    # run, which it does here.
     if not st.session_state.get("_page_configured"):
         st.set_page_config(
             page_title="food-prep",
@@ -572,30 +418,28 @@ def main() -> None:
             initial_sidebar_state="collapsed",
         )
         st.session_state["_page_configured"] = True
-    # Re-inject the design CSS on every run. Idempotent (just a <style> block)
-    # and guarantees the card framing survives reruns across Streamlit versions.
     if _CSS_PATH.exists():
         st.markdown(f"<style>{_CSS_PATH.read_text(encoding='utf-8')}</style>",
                     unsafe_allow_html=True)
     topbar()
     available_items = available_selector()
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "Ingredient Explorer", "Component Explorer", "Plate Balance",
-        "Filler Profiles", "Scout",
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "Ingredient Explorer", "Journeys", "Component Explorer",
+        "Plate Balance", "Filler Profiles", "Scout",
     ])
     with tab1:
         tab_ingredient_explorer(available_items)
     with tab2:
-        tab_component_explorer(available_items)
+        tab_journeys()
     with tab3:
-        tab_plate_balance(available_items)
+        tab_component_explorer(available_items)
     with tab4:
-        tab_filler_profiles()
+        tab_plate_balance(available_items)
     with tab5:
+        tab_filler_profiles()
+    with tab6:
         tab_scout()
 
 
-# When run directly via `streamlit run src/foodprep/ui/streamlit_app.py`, render
-# the same way `app.py` does — call main() so reruns work, not the module body.
 if __name__ == "__main__":
     main()
