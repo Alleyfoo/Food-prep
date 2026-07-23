@@ -1,6 +1,292 @@
 analogy_rules:
+  # === TOMATO ===
+  - id: balsamic_for_lemon_on_fresh_tomato
+    known_pairing: "fresh tomato with lemon"
+    source_ingredient: lemon
+    substitute_ingredient: balsamic_vinegar
+    mechanism: aroma_bridge
+    shared_function: "Both provide acid, while balsamic adds sweet complexity that echoes the tomato's natural sweetness."
+    meaningful_difference: "Balsamic is sweeter and more complex than lemon's bright acidity."
+    expected_risk: "The sweetness may make the tomato taste like dessert rather than a savoury dish."
+    required_dimensions: "fresh_green\nsour\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tomato slice : 1/4 teaspoon balsamic"
+      smallest_test: "Drizzle balsamic on one tomato slice and taste."
+      success_condition: "Sweet acid enhances without making it taste like dessert."
+      likely_failure: "Balsamic dominates or the tomato tastes too sweet."
+      corrections: "Use less balsamic; add more salt; balance with fresh basil."
+      safety_note: "Use commercial balsamic vinegar and fresh tomatoes."
+
+  - id: smoked_salt_for_plain_salt_on_roasted_tomato
+    known_pairing: "roasted tomatoes with sea salt"
+    source_ingredient: sea_salt
+    substitute_ingredient: smoked_salt
+    mechanism: aroma_bridge
+    shared_function: "Both provide salt, while smoked salt adds charred depth that echoes the roasted character."
+    meaningful_difference: "Smoked salt is smoky and complex rather than clean and neutral."
+    expected_risk: "The smoke may overwhelm the tomato's subtle sweetness."
+    required_dimensions: "sweet\numami\nnutty_toasted"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 roasted tomato halves : 1 pinch smoked salt"
+      smallest_test: "Sprinkle smoked salt on three warm roasted tomato halves and taste."
+      success_condition: "Smoke adds depth without overwhelming the tomato."
+      likely_failure: "Smoke dominates or the salt makes it too salty."
+      corrections: "Use less smoked salt; add plain salt; balance with fresh herbs."
+      safety_note: "Use food-grade smoked salt and fully cooked tomatoes."
+
+  - id: miso_for_anchovy_on_tomato_sauce
+    known_pairing: "tomato sauce with anchovy"
+    source_ingredient: anchovy
+    substitute_ingredient: miso
+    mechanism: flavour_reinforcement
+    shared_function: "Both add umami depth, while miso adds fermented complexity that echoes the sauce's savoury base."
+    meaningful_difference: "Miso is fermented and sweeter rather than fishy and salty."
+    expected_risk: "The fermented note may make the sauce taste like soup rather than pasta sauce."
+    required_dimensions: "umami\nsweet\nsour"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 cup sauce : 1 teaspoon thinned miso"
+      smallest_test: "Thin miso with sauce liquid, stir into one cup of warm sauce."
+      success_condition: "Fermented umami adds depth without making it taste like soup."
+      likely_failure: "Miso dominates or the sauce tastes too fermented."
+      corrections: "Use less miso; add more tomato; balance with fresh basil."
+      safety_note: "Use refrigerated commercial miso and fully cooked sauce."
+
+  - id: chili_oil_for_plain_oil_on_charred_tomato
+    known_pairing: "charred tomatoes with olive oil"
+    source_ingredient: olive_oil
+    substitute_ingredient: chili_crisp
+    mechanism: aroma_bridge
+    shared_function: "Both provide fat, while chili crisp adds heat and umami that echoes the charred character."
+    meaningful_difference: "Chili crisp is spicy, salty, and crunchy rather than neutral and smooth."
+    expected_risk: "The heat may overwhelm the tomato's subtle smokiness."
+    required_dimensions: "sweet\nnutty_toasted\numami"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 charred tomato pieces : 1/2 teaspoon chili crisp"
+      smallest_test: "Drizzle chili crisp on three warm charred tomato pieces and taste."
+      success_condition: "Heat and umami add complexity without overwhelming the smoke."
+      likely_failure: "Chili heat dominates or the oil makes it too greasy."
+      corrections: "Use less chili crisp; add more acid; balance with fresh herbs."
+      safety_note: "Use commercial chili crisp and fully cooked tomatoes."
+
+  - id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+    known_pairing: "roasted tomatoes with balsamic"
+    source_ingredient: balsamic_vinegar
+    substitute_ingredient: pomegranate_molasses
+    mechanism: flavour_reinforcement
+    shared_function: "Both add sweet-acid complexity, while pomegranate molasses adds dark fruit depth that echoes the tomato's caramelization."
+    meaningful_difference: "Pomegranate molasses is tarter and more complex than balsamic."
+    expected_risk: "The tartness may make the tomato taste too sour or like chutney."
+    required_dimensions: "sweet\numami\nnutty_toasted"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "3 roasted tomato halves : 1/2 teaspoon pomegranate molasses"
+      smallest_test: "Drizzle pomegranate molasses on three warm roasted tomato halves and taste."
+      success_condition: "Dark fruit acid enhances without making it taste like chutney."
+      likely_failure: "Pomegranate dominates or the tomato tastes too sour."
+      corrections: "Use less molasses; add more salt; balance with fresh herbs."
+      safety_note: "Use commercial pomegranate molasses and fully cooked tomatoes."
+
+  - id: zaatar_for_basil_on_fresh_tomato
+    known_pairing: "fresh tomato with basil"
+    source_ingredient: basil
+    substitute_ingredient: zaatar
+    mechanism: aroma_bridge
+    shared_function: "Both add herbal aroma, while za'atar adds earthy complexity with sumac's tartness that echoes the tomato's acidity."
+    meaningful_difference: "Za'atar is earthier and more complex with sumac's tartness and sesame's nuttiness."
+    expected_risk: "The blend may be too complex and muddy the clean tomato flavour."
+    required_dimensions: "fresh_green\nsour\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tomato slice : 1 pinch za'atar"
+      smallest_test: "Sprinkle za'atar over one tomato slice and taste."
+      success_condition: "Herbal complexity adds interest without overwhelming the clean tomato."
+      likely_failure: "Za'atar dominates or the sumac makes it too sour."
+      corrections: "Use less za'atar; add more salt; balance with olive oil."
+      safety_note: "Use fresh za'atar blend and fresh tomatoes."
+
+  - id: tahini_for_mozzarella_on_fresh_tomato
+    known_pairing: "caprese (tomato + mozzarella)"
+    source_ingredient: mozzarella
+    substitute_ingredient: tahini
+    mechanism: texture_contrast
+    shared_function: "Both add richness, while tahini adds creamy body and nutty depth that echoes the tomato's sweetness."
+    meaningful_difference: "Tahini is thicker, more bitter, and less fresh than mozzarella."
+    expected_risk: "The sesame bitterness may clash with the tomato's bright acidity."
+    required_dimensions: "fresh_green\nsour\nsweet"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tomato slice : 1/2 teaspoon thinned tahini"
+      smallest_test: "Thin tahini with lemon juice, drizzle on one tomato slice."
+      success_condition: "Creamy nuttiness enhances without making it bitter."
+      likely_failure: "Tahini dominates or the sesame clashes with the tomato."
+      corrections: "Use less tahini; add more lemon; balance with salt."
+      safety_note: "Use fresh tahini without rancidity and fresh tomatoes."
+
+  - id: fish_sauce_for_salt_on_tomato_salsa
+    known_pairing: "tomato salsa with salt"
+    source_ingredient: sea_salt
+    substitute_ingredient: fish_sauce
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide salt, while fish sauce adds umami depth that echoes Southeast Asian salsa traditions."
+    meaningful_difference: "Fish sauce is pungent and funky rather than clean and neutral."
+    expected_risk: "The fish sauce may make the salsa smell and taste too strongly of fermented fish."
+    required_dimensions: "fresh_green\nsour\npungent"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tablespoon salsa : 2 drops fish sauce"
+      smallest_test: "Add fish sauce to one tablespoon of salsa and taste."
+      success_condition: "Umami depth adds savoury complexity without overwhelming the bright fruit."
+      likely_failure: "Fish sauce dominates and the salsa smells like Thai restaurant kitchen."
+      corrections: "Use less fish sauce; add more lime; balance with sugar or palm sugar."
+      safety_note: "Use commercial fish sauce and fresh tomatoes."
+
+  - id: horseradish_for_garlic_on_tomato_soup
+    known_pairing: "tomato soup with garlic"
+    source_ingredient: garlic
+    substitute_ingredient: horseradish
+    mechanism: aroma_bridge
+    shared_function: "Both add pungent aroma, while horseradish adds sharp heat that cuts the soup's richness."
+    meaningful_difference: "Horseradish is sharp and sinus-clearing rather than aromatic and sweet."
+    expected_risk: "The pungency may overwhelm the soup's subtle tomato flavour."
+    required_dimensions: "umami\nsweet\nsour"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 cup soup : 1/4 teaspoon grated horseradish"
+      smallest_test: "Top one cup of warm tomato soup with grated horseradish."
+      success_condition: "Sharp pungency cuts the richness without overwhelming."
+      likely_failure: "Horseradish dominates or the soup tastes like cocktail sauce."
+      corrections: "Use less horseradish; add more cream; balance with fresh herbs."
+      safety_note: "Use fresh horseradish root and fully cooked soup."
+
+  - id: cardamom_for_basil_on_tomato_sauce
+    known_pairing: "tomato sauce with basil"
+    source_ingredient: basil
+    substitute_ingredient: cardamom
+    mechanism: aroma_bridge
+    shared_function: "Both add aromatic complexity, while cardamom adds warm floral notes that echo the sauce's depth."
+    meaningful_difference: "Cardamom is intensely aromatic and floral rather than fresh and herbal."
+    expected_risk: "The spice may overwhelm the tomato's delicate flavour."
+    required_dimensions: "umami\nsweet\nsour"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 cup sauce : 1 crushed cardamom pod"
+      smallest_test: "Crush one pod, stir into one cup of warm sauce, let sit 1 minute, taste."
+      success_condition: "Warm floral notes add complexity without dominating."
+      likely_failure: "Cardamom is too strong and the sauce tastes like chai."
+      corrections: "Use less cardamom; remove pod sooner; add more tomato."
+      safety_note: "Use food-grade cardamom pods and fully cooked sauce."
+
+  # === ONION ===
+  - id: sumac_for_vinegar_on_raw_onion
+    known_pairing: "raw onion with vinegar"
+    source_ingredient: vinegar
+    substitute_ingredient: sumac
+    mechanism: aroma_bridge
+    shared_function: "Both provide acid, while sumac adds fruity tartness that echoes the onion's sharpness."
+    meaningful_difference: "Sumac is fruitier and more complex than plain vinegar."
+    expected_risk: "The fruitiness may make the onion taste like a Middle Eastern salad rather than a sharp condiment."
+    required_dimensions: "pungent\nfresh_green"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tablespoon raw onion : 1/4 teaspoon sumac"
+      smallest_test: "Sprinkle sumac over one tablespoon of raw onion and taste."
+      success_condition: "Fruity tartness mellows the onion without making it taste exotic."
+      likely_failure: "Sumac dominates or the onion tastes too fruity."
+      corrections: "Use less sumac; add more salt; balance with olive oil."
+      safety_note: "Use food-grade sumac and fresh onions."
+
+  - id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+    known_pairing: "caramelized onions with balsamic"
+    source_ingredient: balsamic_vinegar
+    substitute_ingredient: pomegranate_molasses
+    mechanism: flavour_reinforcement
+    shared_function: "Both add sweet-acid complexity, while pomegranate molasses adds dark fruit depth that echoes the onion's caramelization."
+    meaningful_difference: "Pomegranate molasses is tarter and more complex than balsamic."
+    expected_risk: "The tartness may make the onion taste too sour or like chutney."
+    required_dimensions: "sweet\nnutty_toasted\numami"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 tablespoons caramelized onion : 1/2 teaspoon pomegranate molasses"
+      smallest_test: "Drizzle pomegranate molasses on two tablespoons of warm caramelized onion and taste."
+      success_condition: "Dark fruit acid enhances without making it taste like chutney."
+      likely_failure: "Pomegranate dominates or the onion tastes too sour."
+      corrections: "Use less molasses; add more salt; balance with fresh thyme."
+      safety_note: "Use commercial pomegranate molasses and fully cooked onions."
+
+  - id: miso_for_soy_on_sauteed_onion
+    known_pairing: "sauteed onions with soy sauce"
+    source_ingredient: soy_sauce
+    substitute_ingredient: miso
+    mechanism: flavour_reinforcement
+    shared_function: "Both add umami depth, while miso adds fermented complexity that echoes the onion's sweetness."
+    meaningful_difference: "Miso is thicker, sweeter, and more fermented than soy sauce."
+    expected_risk: "The fermented note may make the onion taste like soup rather than a base."
+    required_dimensions: "sweet\numami"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 tablespoons sauteed onion : 1/2 teaspoon thinned miso"
+      smallest_test: "Thin miso with a drop of water, stir into two tablespoons of warm sauteed onion."
+      success_condition: "Fermented umami adds depth without making it taste like soup."
+      likely_failure: "Miso dominates or the onion tastes too fermented."
+      corrections: "Use less miso; add more onion; balance with fresh herbs."
+      safety_note: "Use refrigerated commercial miso and fully cooked onions."
+
+  - id: gochugaru_for_plain_chili_on_pickled_onion
+    known_pairing: "pickled onions with chili flakes"
+    source_ingredient: chile_flakes
+    substitute_ingredient: gochugaru
+    mechanism: aroma_bridge
+    shared_function: "Both add heat, while gochugaru's fermented chili character echoes the pickling's fermentation."
+    meaningful_difference: "Gochugaru is milder, sweeter, and more complex than plain chili flakes."
+    expected_risk: "The sweetness may make the onion taste like kimchi rather than a European pickle."
+    required_dimensions: "sour\nsweet\npungent"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 tablespoon pickled onion : 1/4 teaspoon gochugaru"
+      smallest_test: "Sprinkle gochugaru over one tablespoon of pickled onion and taste."
+      success_condition: "Fermented chili heat adds complexity without making it taste like kimchi."
+      likely_failure: "Gochugaru dominates or the onion loses its European character."
+      corrections: "Use less gochugaru; add more vinegar; balance with fresh herbs."
+      safety_note: "Use commercial gochugaru and properly pickled onions."
+
+  - id: tahini_for_cheese_on_caramelized_onion
+    known_pairing: "caramelized onion tart with cheese"
+    source_ingredient: parmesan
+    substitute_ingredient: tahini
+    mechanism: texture_contrast
+    shared_function: "Both add richness, while tahini adds creamy body and nutty depth that echoes the onion's caramelization."
+    meaningful_difference: "Tahini is thicker, more bitter, and less fresh than cheese."
+    expected_risk: "The sesame bitterness may clash with the onion's sweet caramelization."
+    required_dimensions: "sweet\nnutty_toasted\numami"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "2 tablespoons caramelized onion : 1/2 teaspoon thinned tahini"
+      smallest_test: "Thin tahini with lemon juice, drizzle on two tablespoons of warm caramelized onion."
+      success_condition: "Creamy nuttiness enhances without making it bitter."
+      likely_failure: "Tahini dominates or the sesame clashes with the onion."
+      corrections: "Use less tahini; add more lemon; balance with salt."
+      safety_note: "Use fresh tahini without rancidity and fully cooked onions."
+
   # === POTATO ===
-  - id: soft_egg_for_butter_on_mashed_potato
     known_pairing: "mashed potatoes with butter"
     source_ingredient: butter
     substitute_ingredient: eggs

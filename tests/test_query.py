@@ -406,7 +406,7 @@ def test_plate_balance_ingredient_input(conn):
 def test_plate_balance_component_name_input(conn):
     # a transformation-output component name maps to its profile
     out = query.plate_balance(conn, "roasted_tomato_component and pasta")
-    assert "roasted_tomato (profile)" in out
+    assert "roasted_tomato_component (profile)" in out
     assert "pasta (profile)" in out
     assert "missing for a balanced plate:" in out
 

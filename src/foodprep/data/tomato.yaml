@@ -399,6 +399,7 @@ ingredients:
   - { canonical_name: smoked_salt,      aliases: "smoked sea salt", base_roles: "salt\naromatic", default_availability_class: common }
   - { canonical_name: malt_vinegar,     base_roles: "acid",            default_availability_class: common }
   - { canonical_name: anchovy,          aliases: "anchovies", base_roles: "umami\nsalt", default_availability_class: common }
+  - { canonical_name: balsamic_vinegar, base_roles: "acid\nsweet",     default_availability_class: common }
   # ---- role-only fillers (no tree; pure role providers) ----
   - canonical_name: mustard
     aliases: "dijon\nwhole-grain mustard"
@@ -526,6 +527,14 @@ transformations:
       - { family: flavour, value: juicy,    polarity: gain }
       - { family: flavour, value: acidic,   polarity: gain }
       - { family: flavour, value: sweet,    polarity: gain }
+    state_profile:
+      provides: "acid\nhydration"
+      flavour: "fresh_green\nsour\nsweet"
+      texture: "juicy\nsoft"
+      missing_risks: "salt\nfat"
+      heaviness_score: 0
+      dryness_score: 0
+      notes: "Fresh tomato state; bright sweet-acidic with juicy texture, needs salt and fat."
     missing_roles:
       - { role: salt,    priority: high,   note: "seasoning" }
       - { role: fat,     priority: high,   note: "olive oil or cheese" }
@@ -545,6 +554,14 @@ transformations:
     tags_after:
       - { family: flavour, value: concentrated, polarity: gain }
       - { family: texture, value: less_watery,  polarity: gain }
+    state_profile:
+      provides: "acid\nhydration"
+      flavour: "sour\nsweet\numami"
+      texture: "firm\njuicy"
+      missing_risks: "fat\nsalt"
+      heaviness_score: 0
+      dryness_score: 2
+      notes: "Salt-drained tomato state; concentrated sweet-acidic with less water, firmer surface."
     missing_roles:
       - { role: fat,     priority: high,   note: "olive oil" }
       - { role: herb,    priority: medium, note: "basil" }
@@ -565,6 +582,14 @@ transformations:
       - { family: flavour, value: acidic, polarity: gain }
       - { family: flavour, value: spicy,  polarity: gain }
       - { family: texture, value: spoonable, polarity: gain }
+    state_profile:
+      provides: "acid\nhydration"
+      flavour: "fresh_green\nsour\npungent"
+      texture: "juicy\nspoonable"
+      missing_risks: "salt\nfat"
+      heaviness_score: 0
+      dryness_score: 1
+      notes: "Tomato salsa state; fresh sharp acidic with chunky texture, needs carrier."
     missing_roles:
       - { role: carrier,  priority: high,   note: "tortilla/toast" }
       - { role: fat,      priority: medium, note: "avocado/cheese" }
@@ -584,6 +609,14 @@ transformations:
       - { family: flavour, value: savory,       polarity: gain }
       - { family: texture, value: jammy,        polarity: gain }
       - { family: state,   value: roasted,      polarity: gain }
+    state_profile:
+      provides: "acid\numami"
+      flavour: "sweet\numami\nnutty_toasted"
+      texture: "soft\njammy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 3
+      notes: "Roasted tomato state; sweet concentrated with umami depth, jammy texture."
     missing_roles:
       - { role: salt,  priority: high,   note: "flaky salt" }
       - { role: herb,  priority: medium, note: "basil/parsley lift" }
@@ -603,6 +636,14 @@ transformations:
       - { family: flavour, value: smoky, polarity: gain }
       - { family: flavour, value: sweet, polarity: gain }
       - { family: state,   value: charred, polarity: gain }
+    state_profile:
+      provides: "acid\numami"
+      flavour: "sweet\nnutty_toasted\numami"
+      texture: "soft\njuicy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "Charred tomato state; smoky sweet with umami depth, blistered texture."
     missing_roles:
       - { role: acid,    priority: high,   note: "lime" }
       - { role: herb,    priority: high,   note: "fresh herbs" }
@@ -621,6 +662,14 @@ transformations:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: saucy,  polarity: gain }
       - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "acid\numami\nbody"
+      flavour: "umami\nsweet\nsour"
+      texture: "liquid\nsoft"
+      missing_risks: "salt\nfat"
+      heaviness_score: 2
+      dryness_score: 1
+      notes: "Tomato sauce base state; deep rounded umami with saucy texture, needs fat and aromatics."
     missing_roles:
       - { role: fat,       priority: high,   note: "olive oil/butter" }
       - { role: aromatic,  priority: high,   note: "garlic/onion top notes" }
@@ -641,6 +690,14 @@ transformations:
       - { family: flavour, value: umami,       polarity: gain }
       - { family: flavour, value: concentrated, polarity: gain }
       - { family: texture, value: dense,       polarity: gain }
+    state_profile:
+      provides: "acid\numami\nbody"
+      flavour: "umami\nsweet\nnutty_toasted"
+      texture: "dense\nsoft"
+      missing_risks: "salt\nfat\nhydration"
+      heaviness_score: 3
+      dryness_score: 4
+      notes: "Reduced tomato base state; very concentrated umami with caramelized depth, needs dilution."
     missing_roles:
       - { role: fat,      priority: high,   note: "oil/butter" }
       - { role: hydration, priority: high,   note: "stock/pasta water dilution" }
@@ -657,6 +714,14 @@ transformations:
     tags_after:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: liquid, polarity: gain }
+    state_profile:
+      provides: "acid\numami\nhydration"
+      flavour: "umami\nsweet\nsour"
+      texture: "liquid\nsoft"
+      missing_risks: "salt\ncream"
+      heaviness_score: 2
+      dryness_score: 0
+      notes: "Tomato soup base state; rounded aromatic with softer acidity, needs cream and body."
     missing_roles:
       - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
       - { role: body,    priority: high,   note: "bread (pappa al pomodoro)" }
@@ -677,6 +742,14 @@ transformations:
       - { family: texture, value: chewy,        polarity: gain }
       - { family: state,   value: dried,        polarity: gain }
       - { family: state,   value: preserved,    polarity: gain }
+    state_profile:
+      provides: "acid\numami"
+      flavour: "sweet\numami\nnutty_toasted"
+      texture: "chewy\ndense"
+      missing_risks: "hydration\nfat"
+      heaviness_score: 2
+      dryness_score: 5
+      notes: "Dried tomato state; very concentrated sweet-savory with chewy texture, needs rehydration."
     missing_roles:
       - { role: hydration, priority: high,   note: "soaking liquid / oil" }
       - { role: fat,       priority: high,   note: "olive oil" }
@@ -695,6 +768,14 @@ transformations:
       - { family: flavour, value: sweet_sour, polarity: gain }
       - { family: flavour, value: acidic,     polarity: gain }
       - { family: state,   value: preserved,  polarity: gain }
+    state_profile:
+      provides: "acid\numami"
+      flavour: "sour\nsweet\naromatic"
+      texture: "firm\njuicy"
+      missing_risks: "salt\nfat"
+      heaviness_score: 0
+      dryness_score: 1
+      notes: "Pickled tomato state; sharp sweet-sour with spice notes, firm texture."
     missing_roles:
       - { role: mild_base, priority: high,   note: "bread/potatoes" }
       - { role: fat,       priority: medium, note: "cheese" }
@@ -711,11 +792,19 @@ transformations:
     tags_after:
       - { family: state, value: frozen,   polarity: gain }
       - { family: state, value: preserved, polarity: gain }
+    state_profile:
+      provides: "acid\numami"
+      flavour: "sweet\nsour\numami"
+      texture: "soft\njuicy"
+      missing_risks: "salt\nfat"
+      heaviness_score: 1
+      dryness_score: 1
+      notes: "Frozen tomato base state; preserved flavour that collapses on thawing, needs downstream cooking."
     missing_roles:
       - { role: mild_base, priority: low, note: "downstream recipe context supplies all roles" }
     uses: [future_sauce, future_soup, stew]
     evidence:
-      - { source: nchfp, scope: "freeze for cooking/seasoning, not fresh firm use" }
+      - { source: nchfp, scope: "freezing as preservation; thaw and cook" }
 
   - technique: can
     output_component: canned_tomato_base
@@ -746,6 +835,14 @@ transformations:
       - { family: flavour, value: sharp,  polarity: gain }
       - { family: flavour, value: fresh,  polarity: gain }
       - { family: texture, value: firm,   polarity: gain }
+    state_profile:
+      provides: "aromatic\ncrunch"
+      flavour: "pungent\nfresh_green"
+      texture: "crisp\ncrunchy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 0
+      dryness_score: 2
+      notes: "Raw onion state; sharp pungent with crisp texture, needs acid to mellow."
     missing_roles:
       - { role: acid,    priority: high,   note: "vinegar/lemon mellows pungency" }
       - { role: salt,    priority: high,   note: "seasoning" }
@@ -767,6 +864,14 @@ transformations:
       - { family: flavour, value: savory, polarity: gain }
       - { family: texture, value: soft,   polarity: gain }
       - { family: state,   value: cooked, polarity: gain }
+    state_profile:
+      provides: "aromatic\nbody"
+      flavour: "sweet\numami"
+      texture: "soft\ntender"
+      missing_risks: "salt\nfat"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "Sauteed onion state; sweetened aromatic with soft texture, base for sauces and soups."
     missing_roles:
       - { role: fat,      priority: high,   note: "oil/butter to sweat in" }
       - { role: aromatic, priority: medium, note: "garlic builds the base" }
@@ -789,6 +894,14 @@ transformations:
       - { family: flavour, value: concentrated, polarity: gain }
       - { family: texture, value: jammy,        polarity: gain }
       - { family: state,   value: cooked,       polarity: gain }
+    state_profile:
+      provides: "aromatic\nbody\numami"
+      flavour: "sweet\nnutty_toasted\numami"
+      texture: "soft\njammy"
+      missing_risks: "salt\nacid"
+      heaviness_score: 2
+      dryness_score: 3
+      notes: "Caramelized onion state; deeply sweet with jammy texture, needs acid to balance."
     missing_roles:
       - { role: acid,       priority: high,   note: "vinegar balance sweetness" }
       - { role: salt,       priority: high,   note: "seasoning" }
@@ -810,6 +923,14 @@ transformations:
       - { family: flavour, value: sweet_sour, polarity: gain }
       - { family: flavour, value: sharp,     polarity: gain }
       - { family: state,   value: preserved,  polarity: gain }
+    state_profile:
+      provides: "acid\ncrunch"
+      flavour: "sour\nsweet\npungent"
+      texture: "crisp\njuicy"
+      missing_risks: "salt\nfat"
+      heaviness_score: 0
+      dryness_score: 1
+      notes: "Pickled onion state; sharp sweet-sour with crisp texture, bright condiment."
     missing_roles:
       - { role: mild_base, priority: high,   note: "taco/beans/potato host" }
       - { role: fat,      priority: medium, note: "cheese/avocado" }

@@ -41,6 +41,21 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
         "potato_soup_base",
         "potato_salad_component",
         "potato_hash_component",
+        "fresh_tomato_component",
+        "salted_drained_tomato_component",
+        "tomato_salsa_component",
+        "roasted_tomato_component",
+        "charred_tomato_component",
+        "tomato_sauce_base",
+        "reduced_tomato_base",
+        "tomato_soup_base",
+        "dried_tomato_component",
+        "pickled_tomato_component",
+        "frozen_tomato_base",
+        "raw_onion_component",
+        "sauteed_onion_component",
+        "caramelized_onion_component",
+        "pickled_onion_component",
     }
 
     rows = conn.execute(

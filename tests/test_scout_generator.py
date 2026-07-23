@@ -13,10 +13,13 @@ def test_roasted_broccoli_generates_analogy_candidates(conn):
     # the sweet + nutty_toasted dimensions.
     # eggs, anchovy, and dill joined via potato rules that match umami + sweet or
     # nutty_toasted + sweet dimensions (Scout rules are generic, not ingredient-specific).
+    # smoked_salt, chili_crisp, and pomegranate_molasses joined via tomato rules that
+    # match sweet + nutty_toasted + umami dimensions.
     assert {h["candidate"] for h in hypotheses} == {
         "lingonberry_vinegar", "brown_butter", "rye_crumbs",
         "tahini", "rosemary", "horseradish", "miso",
-        "eggs", "anchovy", "dill"
+        "eggs", "anchovy", "dill",
+        "smoked_salt", "chili_crisp", "pomegranate_molasses"
     }
     for hypothesis in hypotheses:
         assert hypothesis["candidate_class"] == "scout_candidate"

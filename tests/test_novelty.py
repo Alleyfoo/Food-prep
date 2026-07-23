@@ -26,7 +26,7 @@ def test_observation_records_corpus_scope_and_occurrence(conn, tmp_path):
     # rye_crumbs, tahini, rosemary, horseradish, miso, eggs, anchovy, dill, and other
     # candidates have no entity in the synthetic corpus, so they land honestly in
     # insufficient_coverage, not zero.
-    assert summary == {"observed": 1, "not_observed": 1, "insufficient_coverage": 10}
+    assert summary == {"observed": 1, "not_observed": 1, "insufficient_coverage": 15}
     by_candidate = {h["candidate"]: h for h in after}
     assert by_candidate["brown_butter"]["novelty"]["class"] == "rare"
     assert by_candidate["brown_butter"]["novelty"]["observed_count"] == 1
@@ -49,7 +49,7 @@ def test_absent_alias_is_insufficient_coverage_not_zero(conn, tmp_path):
     )
     hypotheses = query.generate_scout_hypotheses(conn, "roasted_broccoli_component")
 
-    assert summary["insufficient_coverage"] == 12
+    assert summary["insufficient_coverage"] == 17
     assert all(h["novelty"]["class"] == "insufficient_coverage" for h in hypotheses)
     assert all(h["novelty"]["candidate_covered"] is False for h in hypotheses)
 
