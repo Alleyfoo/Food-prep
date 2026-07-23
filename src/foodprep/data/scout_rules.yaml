@@ -1,4 +1,100 @@
 analogy_rules:
+  # === CABBAGE ===
+  - id: miso_butter_for_plain_fat_on_roasted_brassica
+    known_pairing: "roasted cabbage with butter"
+    source_ingredient: butter
+    substitute_ingredient: miso
+    mechanism: flavour_reinforcement
+    shared_function: "Both provide fat and richness, while miso adds fermented umami that echoes the roasted sweetness."
+    meaningful_difference: "Miso is saltier, more fermented, and less creamy than butter."
+    expected_risk: "The fermented note may clash with the cabbage's sulfurous character if overcooked."
+    required_dimensions: "sweet\nnutty_toasted"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 cabbage wedge : 1/2 teaspoon thinned miso"
+      smallest_test: "Thin miso with melted butter, brush on one warm roasted wedge."
+      success_condition: "Fermented umami deepens the roasted sweetness without overwhelming."
+      likely_failure: "Miso makes the cabbage taste like soup or the ferment clashes with sulfur."
+      corrections: "Use less miso; add more butter; finish with lemon."
+      safety_note: "Use refrigerated commercial miso and fully cooked cabbage."
+
+  - id: juniper_for_bacon_on_braised_cabbage
+    known_pairing: "braised cabbage with bacon"
+    source_ingredient: bacon
+    substitute_ingredient: juniper_berries
+    mechanism: aroma_bridge
+    shared_function: "Both add aromatic complexity to slow-cooked cabbage, while juniper's pine notes cut the sweetness."
+    meaningful_difference: "Juniper is resinous and medicinal rather than smoky and fatty."
+    expected_risk: "The pine character may make the cabbage taste medicinal or like gin."
+    required_dimensions: "sweet\numami\nrich_fatty"
+    explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
+    confidence: low
+    protocol:
+      starting_ratio: "1 forkful braised cabbage : 1 crushed juniper berry"
+      smallest_test: "Crush one berry, fold into one forkful of warm braised cabbage."
+      success_condition: "Pine aroma adds complexity and cuts sweetness without tasting medicinal."
+      likely_failure: "Juniper dominates and the cabbage tastes like gin or medicine."
+      corrections: "Use less juniper; add more acid; balance with black pepper."
+      safety_note: "Use food-grade juniper berries and fully cooked cabbage."
+
+  - id: gochugaru_for_plain_chili_on_fermented_cabbage
+    known_pairing: "sauerkraut with caraway"
+    source_ingredient: chile_flakes
+    substitute_ingredient: gochugaru
+    mechanism: aroma_bridge
+    shared_function: "Both add heat, while gochugaru's fermented chili character echoes the lactic fermentation."
+    meaningful_difference: "Gochugaru is milder, sweeter, and more complex than plain chili flakes."
+    expected_risk: "The sweetness may make the sauerkraut taste like kimchi rather than European ferment."
+    required_dimensions: "sour\nfermented_funky"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 forkful sauerkraut : 1/4 teaspoon gochugaru"
+      smallest_test: "Sprinkle gochugaru over one forkful of sauerkraut, mix, taste."
+      success_condition: "Fermented chili heat adds complexity without making it taste like kimchi."
+      likely_failure: "Gochugaru dominates and the sauerkraut loses its European character."
+      corrections: "Use less gochugaru; add more caraway; balance with fat."
+      safety_note: "Use commercial gochugaru and properly fermented cabbage."
+
+  - id: pomegranate_for_apple_on_raw_slaw
+    known_pairing: "cabbage slaw with apple"
+    source_ingredient: apple
+    substitute_ingredient: pomegranate_seeds
+    mechanism: texture_contrast
+    shared_function: "Both add sweet-tart bursts that interrupt the sharp raw cabbage."
+    meaningful_difference: "Pomegranate is juicier and more floral, with crunchy seeds instead of crisp fruit."
+    expected_risk: "The seeds may be too crunchy and the juice too thin compared to apple's body."
+    required_dimensions: "fresh_green\npungent"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 forkful slaw : 5-6 pomegranate seeds"
+      smallest_test: "Scatter seeds over one forkful of dressed slaw and taste."
+      success_condition: "Juicy sweet-tart bursts brighten the sharp cabbage without making it watery."
+      likely_failure: "Seeds are too crunchy or the juice dilutes the dressing."
+      corrections: "Use fewer seeds; crush some to release juice; add more acid to the dressing."
+      safety_note: "Use fresh pomegranate and washed cabbage."
+
+  - id: smoked_paprika_for_plain_paprika_on_fermented_cabbage
+    known_pairing: "sauerkraut with paprika"
+    source_ingredient: chile_flakes
+    substitute_ingredient: smoked_paprika
+    mechanism: aroma_bridge
+    shared_function: "Both add heat, while smoked paprika's charred character bridges the fermentation funk."
+    meaningful_difference: "Smoked paprika is smoky and sweet rather than sharp and neutral."
+    expected_risk: "The smoke may overwhelm the delicate fermentation character."
+    required_dimensions: "sour\nfermented_funky"
+    explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
+    confidence: medium
+    protocol:
+      starting_ratio: "1 forkful sauerkraut : 1/8 teaspoon smoked paprika"
+      smallest_test: "Sprinkle smoked paprika over one forkful of sauerkraut, mix, taste."
+      success_condition: "Smoke adds depth and bridges the fermentation without overwhelming."
+      likely_failure: "Smoke dominates and the sauerkraut tastes like barbecue."
+      corrections: "Use less paprika; add more caraway; balance with fat."
+      safety_note: "Use fresh smoked paprika and properly fermented cabbage."
+
   # === BROCCOLI ===
   - id: tart_fruit_for_citrus_on_browned_vegetable
     known_pairing: "browned broccoli with lemon"

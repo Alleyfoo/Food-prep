@@ -393,6 +393,9 @@ ingredients:
   - { canonical_name: dried_cranberries, base_roles: "sweet\nacid",       default_availability_class: common }
   - { canonical_name: sugar,            base_roles: "sweet",              default_availability_class: very_common }
   - { canonical_name: honey,            base_roles: "sweet",              default_availability_class: very_common }
+  - { canonical_name: juniper_berries,  base_roles: "aromatic",           default_availability_class: rare }
+  - { canonical_name: gochugaru,        aliases: "Korean chili flakes", base_roles: "heat\naromatic", default_availability_class: occasional }
+  - { canonical_name: smoked_paprika,   aliases: "pimentón", base_roles: "aromatic\nheat", default_availability_class: common }
   # ---- role-only fillers (no tree; pure role providers) ----
   - canonical_name: mustard
     aliases: "dijon\nwhole-grain mustard"
@@ -1008,6 +1011,14 @@ transformations:
       - { family: flavour, value: vegetal,   polarity: gain }
       - { family: texture, value: firm,      polarity: gain }
     risks: "harsh_when_raw"
+    state_profile:
+      provides: "crunch"
+      flavour: "fresh_green\npungent"
+      texture: "crisp\ncrunchy"
+      missing_risks: "salt\nacid\nfat"
+      heaviness_score: 0
+      dryness_score: 2
+      notes: "Raw shredded cabbage state; sharp vegetal pungency, needs acid and fat to mellow."
     missing_roles:
       - { role: fat,    priority: high,   note: "dressing — oil/mayo" }
       - { role: acid,   priority: high,   note: "vinegar/lemon to mellow pungency" }
@@ -1030,6 +1041,14 @@ transformations:
       - { family: texture, value: less_watery,  polarity: gain }
       - { family: texture, value: firm,         polarity: gain }
     risks: "harsh_when_raw"
+    state_profile:
+      provides: "crunch\nbody"
+      flavour: "fresh_green\nsalty"
+      texture: "crunchy\ndense"
+      missing_risks: "acid\nfat"
+      heaviness_score: 0
+      dryness_score: 3
+      notes: "Salt-drained cabbage state; concentrated vegetal character, less watery, still needs acid."
     missing_roles:
       - { role: acid,     priority: high,   note: "vinegar/lemon lift" }
       - { role: fat,      priority: medium, note: "oil" }
@@ -1054,6 +1073,14 @@ transformations:
       - { family: texture, value: firm,    polarity: gain }
       - { family: state,   value: cooked,  polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body\ncrunch"
+      flavour: "umami\nsweet\nfresh_green"
+      texture: "crisp\ntender"
+      missing_risks: "salt\nacid"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "High-heat stir-fried state; savory-sweet with char spots, stays crisp-tender."
     missing_roles:
       - { role: salt,    priority: high,   note: "soy sauce/sea salt" }
       - { role: acid,    priority: medium, note: "vinegar/lemon lift" }
@@ -1077,6 +1104,14 @@ transformations:
       - { family: texture, value: firm,         polarity: gain }
       - { family: state,   value: roasted,      polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body\ncrunch"
+      flavour: "sweet\nnutty_toasted\numami"
+      texture: "crisp\ntender"
+      missing_risks: "salt\nacid\nhydration"
+      heaviness_score: 2
+      dryness_score: 3
+      notes: "Roasted cabbage state; caramelized sweetness with charred edges, moderately dry."
     missing_roles:
       - { role: acid,    priority: high,   note: "vinegar/lemon to sharpen" }
       - { role: fat,     priority: high,   note: "oil/butter" }
@@ -1102,6 +1137,14 @@ transformations:
       - { family: texture, value: spoonable, polarity: gain }
       - { family: state,   value: cooked,  polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body\nmild_base"
+      flavour: "sweet\numami\nrich_fatty"
+      texture: "soft\nsilky"
+      missing_risks: "salt\nacid"
+      heaviness_score: 3
+      dryness_score: 1
+      notes: "Slow-braised cabbage state; deep sweet-savory with silky texture, moderately rich."
     missing_roles:
       - { role: acid,    priority: high,   note: "vinegar — cut the sweetness" }
       - { role: herb,    priority: high,   note: "freshness — dill/parsley/celery" }
@@ -1123,6 +1166,14 @@ transformations:
       - { family: texture, value: liquid,  polarity: gain }
       - { family: state,   value: cooked,  polarity: gain }
     risks: "sulfurous_if_overcooked"
+    state_profile:
+      provides: "body\nhydration"
+      flavour: "umami\nfresh_green"
+      texture: "liquid\nsoft"
+      missing_risks: "salt\ncream\nacid"
+      heaviness_score: 1
+      dryness_score: 0
+      notes: "Cabbage soup base state; savory-vegetal, needs cream or acid to finish."
     missing_roles:
       - { role: cream,   priority: high,   note: "cream/yogurt for silkiness" }
       - { role: herb,    priority: high,   note: "dill/parsley freshness" }
@@ -1144,6 +1195,14 @@ transformations:
       - { family: flavour, value: acidic,     polarity: gain }
       - { family: flavour, value: sharp,      polarity: gain }
       - { family: state,   value: preserved,  polarity: gain }
+    state_profile:
+      provides: "acid\ncrunch"
+      flavour: "sour\nsweet\naromatic"
+      texture: "crisp\njuicy"
+      missing_risks: "salt\nfat"
+      heaviness_score: 0
+      dryness_score: 1
+      notes: "Quick-pickled cabbage state; sharp sweet-sour with spice notes, crisp texture."
     missing_roles:
       - { role: mild_base, priority: high,   note: "potato/bread/sausage host" }
       - { role: fat,      priority: medium, note: "cheese/oil" }
@@ -1163,6 +1222,14 @@ transformations:
       - { family: flavour, value: umami,   polarity: gain }
       - { family: texture, value: firm,    polarity: gain }
       - { family: state,   value: preserved, polarity: gain }
+    state_profile:
+      provides: "acid\ncrunch"
+      flavour: "sour\numami\nfermented_funky"
+      texture: "crisp\nchewy"
+      missing_risks: "salt\nfat"
+      heaviness_score: 1
+      dryness_score: 2
+      notes: "Lactic-fermented cabbage state (sauerkraut/kimchi family); sour-tangy with umami depth."
     missing_roles:
       - { role: mild_base, priority: high,   note: "potato/sausage/pork host" }
       - { role: fat,      priority: medium, note: "butter/oil" }

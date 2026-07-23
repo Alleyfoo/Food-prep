@@ -9,11 +9,11 @@ def test_roasted_broccoli_generates_analogy_candidates(conn):
 
     # rye_crumbs joined via the toasted-grain reinforcement rule: roasted
     # broccoli carries both of its required dimensions (sweet, nutty_toasted).
-    # tahini, rosemary, and horseradish joined via new rules that also match
+    # tahini, rosemary, horseradish, and miso joined via new rules that also match
     # the sweet + nutty_toasted dimensions.
     assert {h["candidate"] for h in hypotheses} == {
         "lingonberry_vinegar", "brown_butter", "rye_crumbs",
-        "tahini", "rosemary", "horseradish"
+        "tahini", "rosemary", "horseradish", "miso"
     }
     for hypothesis in hypotheses:
         assert hypothesis["candidate_class"] == "scout_candidate"

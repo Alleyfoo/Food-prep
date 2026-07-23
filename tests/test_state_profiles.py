@@ -24,6 +24,14 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
         "roasted_apricot_component",
         "dried_apricot_component",
         "apricot_compote_component",
+        "raw_cabbage_slaw_component",
+        "salted_cabbage_component",
+        "stir_fried_cabbage_component",
+        "roasted_cabbage_component",
+        "braised_cabbage_component",
+        "cabbage_soup_base",
+        "pickled_cabbage_component",
+        "fermented_cabbage_component",
     }
 
     rows = conn.execute(
