@@ -440,6 +440,111 @@ def component_state_profile(conn: sqlite3.Connection,
     return profile
 
 
+# Mapping from roles to flavour dimensions for the taste circle builder
+ROLE_TO_FLAVOUR_DIMENSION = {
+    "salt": "salty",
+    "acid": "sour",
+    "fat": "rich_fatty",
+    "cream": "rich_fatty",
+    "umami": "umami",
+    "herb": "fresh_green",
+    "aromatic": "aromatic",
+    "heat": "pungent",
+    "protein": "umami",  # proteins often add umami
+    "crunch": None,  # texture, not flavour
+    "body": None,  # structure, not flavour
+    "carb": None,  # structure, not flavour
+    "carrier": None,  # structure, not flavour
+    "hydration": None,  # texture, not flavour
+    "mild_base": None,  # structure, not flavour
+}
+
+
+def taste_circle_fillers(
+    conn: sqlite3.Connection,
+    component_name: str,
+    locked_dimensions: set[str] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Get fillers grouped by flavour dimension for the taste circle builder.
+
+    Returns a dict mapping flavour dimensions (salty, sour, sweet, etc.) to
+    lists of fillers that provide that dimension. Dimensions already provided
+    by the component or locked by the user are excluded.
+
+    Args:
+        conn: Database connection
+        component_name: The component to build around
+        locked_dimensions: Flavour dimensions already filled (locked)
+
+    Returns:
+        Dict mapping flavour dimension → list of {filler, role, confidence}
+    """
+    locked = locked_dimensions or set()
+
+    # Get the component's state profile
+    profile = component_state_profile(conn, component_name)
+    if profile is None:
+        return {}
+
+    # Dimensions already provided by the component
+    provided = set(profile["flavour_tags"])
+
+    # Get all fillers for this component's transformations
+    comp = conn.execute(
+        "SELECT component_id FROM components WHERE name = ?",
+        (component_name,),
+    ).fetchone()
+    if comp is None:
+        return {}
+
+    # Find transformations that produce this component
+    transformations = conn.execute(
+        """
+        SELECT t.transformation_id
+        FROM transformations t
+        WHERE t.output_component_id = ?
+        """,
+        (comp["component_id"],),
+    ).fetchall()
+
+    if not transformations:
+        return {}
+
+    # Collect all fillers for these transformations
+    all_fillers = []
+    for tr in transformations:
+        fillers = fillers_for_transformation(conn, tr["transformation_id"])
+        all_fillers.extend(fillers)
+
+    # Group by flavour dimension
+    by_dimension: dict[str, list[dict[str, Any]]] = {}
+    for filler in all_fillers:
+        role = filler["role"]
+        dimension = ROLE_TO_FLAVOUR_DIMENSION.get(role)
+
+        # Skip if no dimension mapping, already provided, or locked
+        if dimension is None or dimension in provided or dimension in locked:
+            continue
+
+        by_dimension.setdefault(dimension, []).append({
+            "filler": filler["filler"],
+            "role": role,
+            "confidence": filler["confidence"],
+        })
+
+    # Deduplicate fillers within each dimension
+    for dimension in by_dimension:
+        seen = set()
+        unique = []
+        for f in by_dimension[dimension]:
+            if f["filler"] not in seen:
+                seen.add(f["filler"])
+                unique.append(f)
+        by_dimension[dimension] = unique
+
+    return by_dimension
+
+
 def flavour_routes_for_component(
     conn: sqlite3.Connection,
     component_name: str,
