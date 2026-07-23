@@ -26,6 +26,10 @@ _COLORS = {
     "destination": "#B23B2E",
 }
 
+_UNIVERSAL_FILLERS = {
+    "sea_salt", "olive_oil", "lemon", "black_pepper",
+}
+
 
 def _add_node(net: Network, node_id: str, label: str, group: str,
               size: int = 20, title: str = "") -> None:
@@ -84,7 +88,7 @@ def build_ingredient_graph(conn: sqlite3.Connection,
             for role, fillers in (card.get("fillers_by_role") or {}).items():
                 for f in fillers[:3]:
                     fname = f["filler"]
-                    if fname in seen_fillers:
+                    if fname in seen_fillers or fname in _UNIVERSAL_FILLERS:
                         continue
                     seen_fillers.add(fname)
                     filler_id = f"fill:{fname}"
