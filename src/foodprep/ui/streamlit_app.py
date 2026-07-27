@@ -613,7 +613,7 @@ def tab_taste_circle_map() -> None:
     st.markdown(
         '<div class="hint">Select a component to see its flavour profile as a circle. '
         'Click on a flavour dimension to expand it and see available fillers. '
-        'Lock your choice to build a complete dish!</div>',
+        'Click a filler to lock your choice and build a complete dish!</div>',
         unsafe_allow_html=True)
 
     # Initialize session state for the taste circle map
@@ -621,6 +621,10 @@ def tab_taste_circle_map() -> None:
         st.session_state.taste_circle_map_locked = set()
     if "taste_circle_map_selections" not in st.session_state:
         st.session_state.taste_circle_map_selections = {}
+    if "taste_circle_map_selected_dim" not in st.session_state:
+        st.session_state.taste_circle_map_selected_dim = None
+    if "taste_circle_map_last_click" not in st.session_state:
+        st.session_state.taste_circle_map_last_click = None
 
     # Component selector
     comps = query.components_list(CONN)
@@ -644,25 +648,35 @@ def tab_taste_circle_map() -> None:
     )
 
     # Reset button
-    if st.button("🔄 Reset Taste Circle Map"):
-        st.session_state.taste_circle_map_locked = set()
-        st.session_state.taste_circle_map_selections = {}
-        st.rerun()
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        if st.button("🔄 Reset"):
+            st.session_state.taste_circle_map_locked = set()
+            st.session_state.taste_circle_map_selections = {}
+            st.session_state.taste_circle_map_selected_dim = None
+            st.session_state.taste_circle_map_last_click = None
+            st.rerun()
 
+    # Process click events from the graph
+    # Note: This is a simplified approach. Full bidirectional communication
+    # would require a custom Streamlit component.
+    click_info = st.empty()
+    
     # Build the circular graph
     net = build_taste_circle_graph(
         CONN,
         component,
         locked_dimensions=st.session_state.taste_circle_map_locked,
         selections=st.session_state.taste_circle_map_selections,
+        selected_dimension=st.session_state.taste_circle_map_selected_dim,
     )
     
     # Render the graph
     html = graph_to_html(net)
     components.html(html, height=720, scrolling=False)
 
-    # Show selection interface below the graph
-    st.markdown("### Select Fillers")
+    # Show current state and manual selection interface
+    st.markdown("### Current Selections")
     
     # Get fillers grouped by dimension
     fillers_by_dim = query.taste_circle_fillers(
@@ -696,28 +710,38 @@ def tab_taste_circle_map() -> None:
             provided_tags = set(profile["flavour_tags"]) if profile else set()
             is_provided = dim_key in provided_tags
             is_locked = dim_key in st.session_state.taste_circle_map_locked
+            is_selected = dim_key == st.session_state.taste_circle_map_selected_dim
 
             if is_provided:
                 st.markdown(f"**{dim_label}** ✅")
             elif is_locked:
                 selection = st.session_state.taste_circle_map_selections.get(dim_key)
                 st.markdown(f"**{dim_label}** 🔒 `{selection}`")
-            elif dim_key in fillers_by_dim:
-                st.markdown(f"**{dim_label}**")
+                if st.button(f"Unlock", key=f"unlock_map_{dim_key}"):
+                    st.session_state.taste_circle_map_locked.remove(dim_key)
+                    del st.session_state.taste_circle_map_selections[dim_key]
+                    st.rerun()
+            elif is_selected and dim_key in fillers_by_dim:
+                st.markdown(f"**{dim_label}** 👆")
                 fillers = fillers_by_dim[dim_key]
                 filler_names = [f["filler"] for f in fillers]
 
                 selected = st.selectbox(
                     f"Choose for {dim_label}",
-                    ["(none)"] + filler_names,
+                    ["(click to select)"] + filler_names,
                     key=f"taste_circle_map_{dim_key}",
                 )
 
-                if selected != "(none)":
+                if selected != "(click to select)":
                     if st.button(f"Lock {dim_label}", key=f"lock_map_{dim_key}"):
                         st.session_state.taste_circle_map_locked.add(dim_key)
                         st.session_state.taste_circle_map_selections[dim_key] = selected
+                        st.session_state.taste_circle_map_selected_dim = None
                         st.rerun()
+            elif dim_key in fillers_by_dim:
+                if st.button(f"{dim_label}", key=f"select_map_{dim_key}"):
+                    st.session_state.taste_circle_map_selected_dim = dim_key
+                    st.rerun()
             else:
                 st.markdown(f"**{dim_label}** ⚪")
 

@@ -214,12 +214,14 @@ def build_taste_circle_graph(
     component_name: str,
     locked_dimensions: set[str] | None = None,
     selections: dict[str, str] | None = None,
+    selected_dimension: str | None = None,
 ) -> Network:
     """Build a pyvis Network showing the Taste Circle for a component.
 
     Shows: component (center) → flavour dimensions → fillers
     Dimensions are arranged in a circle around the component.
     Locked dimensions show selected fillers.
+    Selected dimension expands to show available fillers.
     """
     net = Network(height="700px", width="100%", bgcolor="#F4F2EC",
                   font_color="#1A1B16", directed=True)
@@ -242,6 +244,10 @@ def build_taste_circle_graph(
       },
       "physics": {
         "enabled": false
+      },
+      "interaction": {
+        "hover": true,
+        "clickToUse": false
       }
     }
     """)
@@ -283,6 +289,7 @@ def build_taste_circle_graph(
         # Check if this dimension is provided by the component
         is_provided = dim_key in provided_tags
         is_locked = dim_key in locked
+        is_selected = dim_key == selected_dimension
         has_fillers = dim_key in fillers_by_dim
 
         if is_provided:
@@ -303,12 +310,28 @@ def build_taste_circle_graph(
             _add_node(net, filler_id, selected_filler.replace("_", " "), "filler",
                       size=15, color=dim_color, title=f"Selected: {selected_filler}")
             _add_edge(net, dim_id, filler_id, "selected", color=dim_color)
+        elif is_selected and has_fillers:
+            # Dimension selected - expand to show all fillers
+            _add_node(net, dim_id, f"{dim_label}\n(click to select)",
+                      "dimension", size=30, color=dim_color,
+                      title=f"{dim_label}: click a filler to lock")
+            _add_edge(net, comp_id, dim_id, "needs", color=dim_color, dashes=True)
+            
+            # Add all available fillers as child nodes
+            fillers = fillers_by_dim[dim_key]
+            for i, filler in enumerate(fillers[:10]):  # Limit to 10 for readability
+                filler_name = filler["filler"]
+                filler_id = f"filler:{dim_key}:{filler_name}"
+                _add_node(net, filler_id, filler_name.replace("_", " "), "filler",
+                          size=12, color=dim_color,
+                          title=f"Click to lock: {filler_name}")
+                _add_edge(net, dim_id, filler_id, "option", color=dim_color, dashes=True)
         elif has_fillers:
             # Dimension available - show count of fillers
             filler_count = len(fillers_by_dim[dim_key])
             _add_node(net, dim_id, f"{dim_label}\n({filler_count} options)",
                       "dimension", size=25, color=dim_color,
-                      title=f"{dim_label}: {filler_count} fillers available")
+                      title=f"{dim_label}: {filler_count} fillers available - click to expand")
             _add_edge(net, comp_id, dim_id, "needs", color=dim_color, dashes=True)
         else:
             # No fillers available
@@ -316,6 +339,20 @@ def build_taste_circle_graph(
                       size=20, color="#9AA092",
                       title=f"{dim_label}: no fillers available")
             _add_edge(net, comp_id, dim_id, "missing", color="#9AA092", dashes=True)
+
+    # Add JavaScript for click handling
+    net.add_event_handler("click", """
+        function(params) {
+            var nodeId = params.nodes[0];
+            if (nodeId) {
+                // Send node ID to Streamlit via postMessage
+                window.parent.postMessage({
+                    type: 'streamlit:setComponentValue',
+                    nodeId: nodeId
+                }, '*');
+            }
+        }
+    """)
 
     return net
 
