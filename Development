@@ -1,0 +1,441 @@
+Food-prep — Development Roadmap
+Roadmap principle
+Do not expand the ingredient catalogue aggressively yet.
+The next work should prove the complete product loop using a small number of ingredients. Additional data only becomes valuable after the journey, explanation and hypothesis systems work.
+The recommended development order is:
+clarify the model → build one complete journey → build one hypothesis engine → test in the kitchen → expand carefully
+
+Phase 0 — Preserve the current foundation
+Goal
+Protect the useful work already present before restructuring the product.
+Work
+    • Keep the current SQLite schema, YAML loader, query engine, tests, CLI and Streamlit tabs working.
+    • Label the existing UI internally as the Workshop or Curator interface.
+    • Document current concepts and known limitations.
+    • Add a short architectural decision record stating that Cook and Scout are equally important product modes.
+    • Avoid major schema deletion until the new journey model has been tested.
+Deliverables
+    • docs/PRODUCT_DESIGN.md
+    • docs/ROADMAP.md
+    • docs/adr/dual-mode-cook-scout.md
+    • Current test suite passing.
+Exit condition
+The project can change direction without losing the existing ontology inspection tools.
+
+Phase 1 — Define the common language
+Goal
+Create a controlled vocabulary for flavour, texture, preparation, transformation, destination and correction.
+Work
+Define a compact initial vocabulary.
+Preparation
+    • whole
+    • halved
+    • sliced
+    • chopped
+    • finely chopped
+    • shredded
+    • grated
+    • crushed
+    • separated
+Transformation
+Keep the existing techniques, but clarify which are:
+    • preparation modifiers;
+    • primary state changes;
+    • preservation processes;
+    • secondary transformations.
+Flavour
+Start with approximately ten dimensions:
+    • salty
+    • sour
+    • sweet
+    • bitter
+    • umami
+    • pungent
+    • aromatic
+    • nutty/toasted
+    • fresh/green
+    • rich/fatty
+Texture
+Start with approximately ten dimensions:
+    • crisp
+    • crunchy
+    • tender
+    • soft
+    • silky
+    • juicy
+    • dry
+    • chewy
+    • sticky
+    • creamy
+Destinations
+Start with:
+    • side
+    • complete plate
+    • rice or grain bowl
+    • noodles
+    • soup
+    • salad
+    • toast or sandwich
+    • filling
+    • sauce or base
+    • condiment
+    • preserve for later
+Corrections
+Define common sensory problems and suitable responses.
+Deliverables
+    • Vocabulary YAML files.
+    • Validation rules.
+    • Documentation defining each term.
+    • Tests preventing unknown or duplicate vocabulary values.
+Exit condition
+The same language can describe both reliable cooking routes and Scout hypotheses.
+
+Phase 2 — Model one complete ingredient journey
+Goal
+Prove that Food-prep can tell a coherent cooking story.
+Recommended ingredient
+Broccoli or cabbage.
+Broccoli is suitable because its stems and florets create different preparation paths.
+Cabbage is suitable because it supports raw, salted, fried, braised, roasted, pickled and fermented states.
+Choose one and finish it before expanding.
+Work
+For the chosen ingredient, define:
+    • preparation options;
+    • transformations;
+    • resulting states;
+    • sensory changes;
+    • risks;
+    • next transitions;
+    • flavour routes;
+    • corrections;
+    • destinations.
+Build approximately four complete journeys.
+Example broccoli journeys:
+    1. sliced stems → stir-fry → soy and garlic → vinegar finish → rice or noodles;
+    2. florets → roast → sour and nutty route → side or grain bowl;
+    3. florets → steam → cool and dress → cold vegetable side;
+    4. roasted broccoli → crush → sauce, spread or filling.
+User-facing story requirements
+Each journey must explain:
+    • why to choose it;
+    • what changes;
+    • what becomes possible;
+    • what can go wrong;
+    • what can be added;
+    • where it leads.
+Deliverables
+    • New journey data structures.
+    • Ingredient Journey query endpoint.
+    • CLI rendering for journeys.
+    • Tests for four end-to-end paths.
+    • No new consumer UI required until the text output is convincing.
+Exit condition
+A user can start with one ingredient and follow a complete path without reading raw tags or database terminology.
+
+Phase 3 — Add destination-aware reasoning
+Goal
+Stop treating every component as though it must become the same generic balanced plate.
+Work
+Create destination profiles.
+Each destination should define:
+    • essential functions;
+    • useful functions;
+    • optional functions;
+    • unsuitable additions;
+    • typical texture needs;
+    • typical moisture needs.
+Examples:
+Side dish
+May require:
+    • seasoning;
+    • one balancing flavour;
+    • suitable texture.
+Does not inherently require carbohydrate and protein.
+Complete plate
+May require:
+    • satisfying anchor;
+    • protein or equivalent body;
+    • carbohydrate or another substantial base;
+    • seasoning;
+    • moisture and contrast.
+Soup
+May need:
+    • broth or hydration;
+    • aromatic depth;
+    • salt;
+    • body.
+Crunch may be optional or a garnish rather than a hard gap.
+Refactor
+Replace the universal TARGET_ROLES assumption with destination-aware targets.
+Retain the current plate target as one profile, such as complete_savoury_plate.
+Deliverables
+    • Destination schema or YAML.
+    • Destination-aware gap calculation.
+    • Regression tests for side, soup and complete plate.
+    • Updated output explaining why something is or is not missing.
+Exit condition
+The engine no longer tells every dish that it needs the same seven things.
+
+Phase 4 — Unify states and plate profiles
+Goal
+Make the ingredient journey and plate-balance systems operate on the same culinary objects.
+Work
+    • Link transformed components to sensory or plate profiles.
+    • Remove duplicate naming where possible.
+    • Allow any sufficiently modelled transformed state to enter destination or plate reasoning directly.
+    • Retain lightweight profiles for foods that do not yet need full ingredient trees.
+A transformed component should not need a separately authored shadow entry merely to participate in Plate Balance.
+Deliverables
+    • Explicit state-to-profile relationship.
+    • Migration or compatibility layer for current data.
+    • Tests showing that a component produced in Ingredient Journey can be used immediately in destination reasoning.
+    • Updated debug views.
+Exit condition
+The system behaves as one graph rather than two adjacent databases.
+
+Phase 5 — Build flavour routes
+Goal
+Create reusable culinary structures between individual ingredients and full recipes.
+Initial routes
+Build approximately six:
+    • soy and garlic;
+    • sesame and vinegar;
+    • ginger and scallion;
+    • chilli and umami;
+    • sweet and sour;
+    • toasted nut and sharp fruit.
+Each route should define:
+    • flavour contribution;
+    • suitable transformed states;
+    • common supporting ingredients;
+    • possible finishes;
+    • destinations;
+    • known risks;
+    • cultural context;
+    • confidence.
+Work
+    • Add route matching to Cook.
+    • Explain why a route suits a state.
+    • Let available ingredients partially or fully satisfy a route.
+    • Allow substitution within a route while preserving function.
+Deliverables
+    • Flavour-route data model.
+    • Route selection query.
+    • Available-ingredient route matching.
+    • Tests covering reinforcement, contrast and unsuitable combinations.
+Exit condition
+The system can recommend a coherent flavour direction rather than a loose list of fillers.
+
+Phase 6 — Build the Scout hypothesis engine
+Goal
+Return to the project’s central research question.
+First implementation
+Do not begin with machine learning.
+Use transparent rule-based candidate generation.
+For a transformed state:
+    1. identify dominant flavour and texture dimensions;
+    2. identify useful contrasts or reinforcements;
+    3. identify established ingredients that perform those functions;
+    4. locate substitutes with similar functional profiles;
+    5. exclude obviously incompatible or unsafe candidates;
+    6. check direct recipe occurrence;
+    7. rank candidates by compatibility and novelty separately;
+    8. generate an explanation.
+Candidate evidence
+Every hypothesis must include at least one of:
+    • analogy substitution;
+    • flavour contrast;
+    • flavour reinforcement;
+    • transformation fit;
+    • functional completion;
+    • aroma bridge;
+    • texture contrast.
+Deliverables
+    • Candidate hypothesis schema.
+    • Compatibility calculation.
+    • Novelty observation structure.
+    • Explanation generator using structured templates.
+    • Rejection reasons.
+    • Tests demonstrating that rarity alone cannot create a high-ranking candidate.
+Exit condition
+Scout can generate a plausible uncommon pairing without relying on a manually written final pairing record.
+
+Phase 7 — Add corpus-based novelty checking
+Goal
+Measure how common or uncommon candidate combinations appear in available evidence.
+Work
+    • Select one legally usable recipe dataset or corpus.
+    • Normalise ingredient aliases.
+    • Record direct co-occurrence counts.
+    • Record distinct recipe contexts.
+    • Track corpus identity, scope and date.
+    • Distinguish zero observations from missing coverage.
+    • Add context-sensitive checks where possible.
+A combination appearing only in smoothies should not automatically establish suitability for roasted vegetables.
+Novelty classes
+    • common;
+    • established;
+    • uncommon;
+    • rare;
+    • not observed;
+    • insufficient coverage.
+Deliverables
+    • Corpus ingestion or lookup process.
+    • Reproducible novelty calculation.
+    • Corpus metadata.
+    • Tests for aliases, sparse data and misleading zero counts.
+    • Scout UI showing evidence scope.
+Exit condition
+Scout can say exactly what “rare” means and where the claim came from.
+
+Phase 8 — Add controlled tasting protocols
+Goal
+Turn hypotheses into kitchen experiments.
+Work
+Each Scout candidate should define:
+    • transformed state;
+    • candidate ingredient;
+    • starting ratio;
+    • smallest useful test;
+    • success condition;
+    • likely failure;
+    • correction options;
+    • safety note where relevant.
+Example
+Test one piece of roasted broccoli with three drops of blackcurrant vinegar and a small pinch of toasted sesame. Do not glaze the whole batch. Success means the acidity sharpens the browned broccoli without producing a jam-like fruit impression.
+Deliverables
+    • Tasting protocol schema.
+    • Protocol renderer.
+    • Result-entry form.
+    • Verdict classes.
+    • Notes for ratio and transformation dependence.
+Verdict classes
+    • works;
+    • promising;
+    • works only in this form;
+    • needs adjustment;
+    • dominated;
+    • texturally wrong;
+    • clashes;
+    • inconclusive.
+Exit condition
+At least five Scout candidates have been physically tested and recorded.
+
+Phase 9 — Build the new front-end
+Goal
+Present the project as a guided journey rather than an ontology dashboard.
+Main view
+    1. What do you have?
+    2. What state is it in?
+    3. What do you want to make?
+    4. How much effort?
+    5. Show three paths.
+Path card
+    • preparation;
+    • transformation;
+    • change;
+    • flavour route;
+    • useful available ingredients;
+    • correction;
+    • destination;
+    • risk;
+    • explanation.
+Scout view
+    • candidate;
+    • compatibility story;
+    • analogy;
+    • novelty evidence;
+    • risk;
+    • tasting protocol;
+    • result history.
+Workshop view
+Move current technical tabs under Workshop:
+    • Ingredient Explorer;
+    • Component Explorer;
+    • Plate Balance;
+    • Filler Profiles;
+    • Scout records;
+    • Evidence and Debug.
+Deliverables
+    • Guided Cook interface.
+    • First-class Scout interface.
+    • Workshop navigation.
+    • Responsive rendering.
+    • Updated screenshots and README.
+Exit condition
+A new user can understand the project without first understanding its schema.
+
+Phase 10 — Expand carefully
+Goal
+Increase coverage after the model has proved itself.
+Ingredient expansion strategy
+Prefer ingredients that stress different areas of the model:
+    • mushroom — umami, moisture, meat analogies;
+    • aubergine — bitterness, oil absorption, soft texture;
+    • carrot — sweetness, raw versus roasted;
+    • cucumber — fresh, salted, crushed and pickled states;
+    • apple — sweet and savoury crossover;
+    • beetroot — earthiness and sweetness;
+    • beans — body, dryness and protein;
+    • tofu — mild base and texture transformation.
+Expansion rules
+A new full ingredient should include:
+    • several distinct transformed states;
+    • sensory shifts;
+    • at least two destinations;
+    • at least two flavour routes;
+    • risks;
+    • transitions;
+    • Cook evidence;
+    • at least one potential Scout hypothesis.
+Do not add an ingredient merely to increase a counter in the header.
+Exit condition
+New ingredients strengthen the reasoning model rather than only enlarging the catalogue.
+
+Suggested first working sequence
+When development resumes, the first practical sequence should be:
+    1. Add the design and roadmap documents.
+    2. Rename the current interface conceptually to Workshop.
+    3. Choose broccoli or cabbage as the full pilot journey.
+    4. Define preparation, state, flavour, texture, correction and destination vocabularies.
+    5. Implement four complete journeys in text output.
+    6. Replace universal plate completeness with destination-aware reasoning.
+    7. Add six reusable flavour routes.
+    8. Generate one Scout hypothesis from analogy rather than manual pairing.
+    9. Check its occurrence in one recipe corpus.
+    10. Cook and record the result.
+That is the shortest credible path from the current repo to the intended project.
+
+Things to postpone
+Avoid spending the next rounds on:
+    • dozens of new ingredients;
+    • polished recipe generation;
+    • user accounts;
+    • shopping lists;
+    • cloud infrastructure;
+    • LLM chat;
+    • embeddings;
+    • flavour-compound scraping;
+    • complex machine learning;
+    • elaborate dashboards;
+    • automatic weekly corpus refreshes.
+Those may become useful later, but none answer the central question yet.
+
+First milestone
+Milestone name
+One ingredient, two truths
+Cook proof
+Food-prep gives a useful, contextual path from a raw ingredient to a finished culinary destination.
+Scout proof
+Using the same structured knowledge, Food-prep identifies one uncommon combination, explains why it should work, confirms that it is rare in the searched evidence, and provides a controlled tasting method.
+Completion criteria
+    • One ingredient has four complete Cook journeys.
+    • At least three destination types work.
+    • At least three flavour routes work.
+    • One hypothesis is generated through analogy.
+    • Compatibility and novelty are shown separately.
+    • The combination is physically tested.
+    • The result is recorded honestly.
+    • The README tells this story clearly.
+Once that milestone exists, the project has a spine.
+Everything after it is expansion rather than speculation.

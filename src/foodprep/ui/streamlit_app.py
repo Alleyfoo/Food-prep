@@ -27,7 +27,7 @@ from foodprep.ui.render import (
     available_partition_html, branch_card_html,
     hypothesis_card_html, journey_card_html, route_card_html,
 )
-from foodprep.ui.graph import build_ingredient_graph, build_scout_graph, graph_to_html
+from foodprep.ui.graph import build_ingredient_graph, build_scout_graph, build_taste_circle_graph, graph_to_html
 
 _CSS_PATH = Path(__file__).with_name("design.css")
 
@@ -605,6 +605,139 @@ def generate_dish_name(
         return f"Seasoned {component_short}"
 
 
+def tab_taste_circle_map() -> None:
+    """Taste Circle Map tab — circular visualization of flavour dimensions."""
+    st.markdown('<div class="section-title">Taste Circle Map <span class="count">'
+                'visual flavour wheel builder</span></div>',
+                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="hint">Select a component to see its flavour profile as a circle. '
+        'Click on a flavour dimension to expand it and see available fillers. '
+        'Lock your choice to build a complete dish!</div>',
+        unsafe_allow_html=True)
+
+    # Initialize session state for the taste circle map
+    if "taste_circle_map_locked" not in st.session_state:
+        st.session_state.taste_circle_map_locked = set()
+    if "taste_circle_map_selections" not in st.session_state:
+        st.session_state.taste_circle_map_selections = {}
+
+    # Component selector
+    comps = query.components_list(CONN)
+    state_comps = []
+    for c in comps:
+        if query.component_state_profile(CONN, c) is not None:
+            state_comps.append(c)
+
+    if not state_comps:
+        st.markdown('<div class="hint">No components with state profiles found. '
+                    'Run <code>foodprep build</code> first.</div>',
+                    unsafe_allow_html=True)
+        return
+
+    default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
+    component = st.selectbox(
+        "Select a component to build around:",
+        state_comps,
+        index=state_comps.index(default),
+        key="taste_circle_map_component",
+    )
+
+    # Reset button
+    if st.button("🔄 Reset Taste Circle Map"):
+        st.session_state.taste_circle_map_locked = set()
+        st.session_state.taste_circle_map_selections = {}
+        st.rerun()
+
+    # Build the circular graph
+    net = build_taste_circle_graph(
+        CONN,
+        component,
+        locked_dimensions=st.session_state.taste_circle_map_locked,
+        selections=st.session_state.taste_circle_map_selections,
+    )
+    
+    # Render the graph
+    html = graph_to_html(net)
+    components.html(html, height=720, scrolling=False)
+
+    # Show selection interface below the graph
+    st.markdown("### Select Fillers")
+    
+    # Get fillers grouped by dimension
+    fillers_by_dim = query.taste_circle_fillers(
+        CONN,
+        component,
+        locked_dimensions=st.session_state.taste_circle_map_locked,
+    )
+
+    # Define the flavour dimensions
+    dimensions = [
+        ("salty", "🧂 Salty"),
+        ("sour", "🍋 Sour"),
+        ("sweet", "🍯 Sweet"),
+        ("bitter", "🌿 Bitter"),
+        ("umami", "🍄 Umami"),
+        ("pungent", "🌶️ Pungent"),
+        ("aromatic", "🌸 Aromatic"),
+        ("nutty_toasted", "🥜 Nutty/Toasted"),
+        ("fresh_green", "🥬 Fresh/Green"),
+        ("fermented_funky", "🧀 Fermented/Funky"),
+        ("rich_fatty", "🧈 Rich/Fatty"),
+    ]
+
+    # Create columns for dimension selection
+    cols = st.columns(4)
+    for i, (dim_key, dim_label) in enumerate(dimensions):
+        col = cols[i % 4]
+        with col:
+            # Check if this dimension is provided or locked
+            profile = query.component_state_profile(CONN, component)
+            provided_tags = set(profile["flavour_tags"]) if profile else set()
+            is_provided = dim_key in provided_tags
+            is_locked = dim_key in st.session_state.taste_circle_map_locked
+
+            if is_provided:
+                st.markdown(f"**{dim_label}** ✅")
+            elif is_locked:
+                selection = st.session_state.taste_circle_map_selections.get(dim_key)
+                st.markdown(f"**{dim_label}** 🔒 `{selection}`")
+            elif dim_key in fillers_by_dim:
+                st.markdown(f"**{dim_label}**")
+                fillers = fillers_by_dim[dim_key]
+                filler_names = [f["filler"] for f in fillers]
+
+                selected = st.selectbox(
+                    f"Choose for {dim_label}",
+                    ["(none)"] + filler_names,
+                    key=f"taste_circle_map_{dim_key}",
+                )
+
+                if selected != "(none)":
+                    if st.button(f"Lock {dim_label}", key=f"lock_map_{dim_key}"):
+                        st.session_state.taste_circle_map_locked.add(dim_key)
+                        st.session_state.taste_circle_map_selections[dim_key] = selected
+                        st.rerun()
+            else:
+                st.markdown(f"**{dim_label}** ⚪")
+
+    # Display the final dish
+    st.markdown("### Your Dish")
+    if st.session_state.taste_circle_map_selections:
+        dish_components = [component]
+        for dim, filler in st.session_state.taste_circle_map_selections.items():
+            dish_components.append(filler)
+
+        st.markdown("**Components:**")
+        st.markdown(", ".join(f"`{c}`" for c in dish_components))
+
+        # Generate a dish name
+        dish_name = generate_dish_name(component, st.session_state.taste_circle_map_selections)
+        st.markdown(f"**Dish name:** {dish_name}")
+    else:
+        st.info("Select items to fill the flavour dimensions and build your dish.")
+
+
 def main() -> None:
     if not st.session_state.get("_page_configured"):
         st.set_page_config(
@@ -619,9 +752,9 @@ def main() -> None:
                     unsafe_allow_html=True)
     topbar()
     available_items = available_selector()
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
         "Ingredient Explorer", "Map", "Scout Map", "Journeys", "Component Explorer",
-        "Plate Balance", "Filler Profiles", "Scout", "Taste Circle",
+        "Plate Balance", "Filler Profiles", "Scout", "Taste Circle", "Taste Circle Map",
     ])
     with tab1:
         tab_ingredient_explorer(available_items)
@@ -641,6 +774,8 @@ def main() -> None:
         tab_scout()
     with tab9:
         tab_taste_circle()
+    with tab10:
+        tab_taste_circle_map()
 
 
 if __name__ == "__main__":
