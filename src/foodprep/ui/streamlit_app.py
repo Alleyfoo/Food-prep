@@ -421,7 +421,8 @@ def tab_scout() -> None:
 
     default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
     comp = st.selectbox("Transformed state", state_comps,
-                        index=state_comps.index(default))
+                        index=state_comps.index(default),
+                        key="scout_component")
 
     hypotheses = query.generate_scout_hypotheses(CONN, comp)
     if not hypotheses:
