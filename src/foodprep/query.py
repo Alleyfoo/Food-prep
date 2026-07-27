@@ -459,6 +459,138 @@ ROLE_TO_FLAVOUR_DIMENSION = {
     "mild_base": None,  # structure, not flavour
 }
 
+# Comprehensive mapping of ingredients to their primary flavour dimensions
+INGREDIENT_FLAVOUR_DIMENSIONS = {
+    # Salty
+    "sea_salt": ["salty"],
+    "soy_sauce": ["salty", "umami"],
+    "miso": ["salty", "umami"],
+    "fish_sauce": ["salty", "umami"],
+    "anchovy": ["salty", "umami"],
+    "bacon": ["salty", "umami", "rich_fatty"],
+    "parmesan": ["salty", "umami"],
+    "capers": ["salty", "sour"],
+    "olives": ["salty", "umami"],
+    "pickles": ["salty", "sour"],
+    "sauerkraut": ["salty", "sour", "fermented_funky"],
+    
+    # Sour
+    "lemon": ["sour", "aromatic"],
+    "lime": ["sour", "aromatic"],
+    "vinegar": ["sour"],
+    "balsamic_vinegar": ["sour", "sweet"],
+    "malt_vinegar": ["sour"],
+    "lingonberry_vinegar": ["sour", "sweet"],
+    "yogurt": ["sour", "rich_fatty"],
+    "tomato": ["sour", "sweet"],
+    "sumac": ["sour", "aromatic"],
+    "pomegranate_molasses": ["sour", "sweet"],
+    
+    # Sweet
+    "honey": ["sweet"],
+    "sugar": ["sweet"],
+    "apricot": ["sweet", "sour"],
+    "mango": ["sweet", "sour", "aromatic"],
+    "peach": ["sweet", "sour"],
+    "apple": ["sweet", "sour"],
+    "dried_cranberries": ["sweet", "sour"],
+    
+    # Bitter
+    "kale": ["bitter", "fresh_green"],
+    "dark_chocolate": ["bitter", "rich_fatty"],
+    
+    # Umami
+    "mushroom": ["umami"],
+    "tomato_paste": ["umami", "sweet"],
+    "nutritional_yeast": ["umami"],
+    
+    # Pungent
+    "garlic": ["pungent", "aromatic"],
+    "onion": ["pungent", "sweet"],
+    "chile_flakes": ["pungent", "heat"],
+    "jalapeno": ["pungent", "heat"],
+    "horseradish": ["pungent", "heat"],
+    "mustard": ["pungent", "sour"],
+    "gochugaru": ["pungent", "heat"],
+    "smoked_paprika": ["pungent", "aromatic"],
+    "chili_crisp": ["pungent", "heat", "rich_fatty"],
+    
+    # Aromatic
+    "basil": ["aromatic", "fresh_green"],
+    "parsley": ["aromatic", "fresh_green"],
+    "dill": ["aromatic", "fresh_green"],
+    "thyme": ["aromatic"],
+    "rosemary": ["aromatic"],
+    "cilantro": ["aromatic", "fresh_green"],
+    "cardamom": ["aromatic", "sweet"],
+    "nutmeg": ["aromatic", "sweet"],
+    "zaatar": ["aromatic", "fresh_green"],
+    "caraway_seeds": ["aromatic"],
+    "juniper_berries": ["aromatic"],
+    "fennel_pollen": ["aromatic"],
+    "orange_zest": ["aromatic", "sour"],
+    
+    # Nutty/Toasted
+    "walnut": ["nutty_toasted", "rich_fatty"],
+    "tahini": ["nutty_toasted", "rich_fatty"],
+    "rye_crumbs": ["nutty_toasted"],
+    "brown_butter": ["nutty_toasted", "rich_fatty"],
+    "smoked_salt": ["nutty_toasted", "salty"],
+    "smoked_yogurt": ["nutty_toasted", "sour", "rich_fatty"],
+    
+    # Fresh/Green
+    "greens": ["fresh_green"],
+    "cucumber": ["fresh_green"],
+    "fresh_herbs": ["fresh_green", "aromatic"],
+    
+    # Fermented/Funky
+    "fermented_cabbage_component": ["fermented_funky", "sour"],
+    "pickled_cabbage_component": ["fermented_funky", "sour"],
+    "pickled_onion_component": ["fermented_funky", "sour"],
+    
+    # Rich/Fatty
+    "butter": ["rich_fatty"],
+    "olive_oil": ["rich_fatty"],
+    "cream": ["rich_fatty"],
+    "ghee": ["rich_fatty"],
+    "garlic_butter": ["rich_fatty", "pungent"],
+    "mozzarella": ["rich_fatty"],
+    "gruyere": ["rich_fatty", "umami"],
+    "goat_cheese": ["rich_fatty", "sour"],
+    "soft_cheese": ["rich_fatty"],
+    "avocado": ["rich_fatty"],
+    "eggs": ["rich_fatty", "umami"],
+    "tofu": ["rich_fatty"],
+}
+
+
+def ingredient_flavour_dimensions(conn: sqlite3.Connection, ingredient: str) -> list[str]:
+    """Get the flavour dimensions an ingredient provides.
+    
+    Returns a list of flavour dimension keys (e.g., 'salty', 'sour', 'umami').
+    """
+    # First check the comprehensive mapping
+    if ingredient in INGREDIENT_FLAVOUR_DIMENSIONS:
+        return INGREDIENT_FLAVOUR_DIMENSIONS[ingredient]
+    
+    # Fall back to checking the ingredient's base_roles
+    row = conn.execute(
+        "SELECT base_roles FROM ingredients WHERE canonical_name = ?",
+        (ingredient,),
+    ).fetchone()
+    
+    if not row or not row["base_roles"]:
+        return []
+    
+    roles = _split_list(row["base_roles"])
+    dimensions = []
+    for role in roles:
+        dim = ROLE_TO_FLAVOUR_DIMENSION.get(role)
+        if dim and dim not in dimensions:
+            dimensions.append(dim)
+    
+    return dimensions
+
 
 def taste_circle_fillers(
     conn: sqlite3.Connection,
@@ -489,48 +621,33 @@ def taste_circle_fillers(
     # Dimensions already provided by the component
     provided = set(profile["flavour_tags"])
 
-    # Get all fillers for this component's transformations
-    comp = conn.execute(
-        "SELECT component_id FROM components WHERE name = ?",
-        (component_name,),
-    ).fetchone()
-    if comp is None:
-        return {}
-
-    # Find transformations that produce this component
-    transformations = conn.execute(
-        """
-        SELECT t.transformation_id
-        FROM transformations t
-        WHERE t.output_component_id = ?
-        """,
-        (comp["component_id"],),
+    # Get all ingredients
+    all_ingredients = conn.execute(
+        "SELECT canonical_name, base_roles, default_availability_class FROM ingredients"
     ).fetchall()
-
-    if not transformations:
-        return {}
-
-    # Collect all fillers for these transformations
-    all_fillers = []
-    for tr in transformations:
-        fillers = fillers_for_transformation(conn, tr["transformation_id"])
-        all_fillers.extend(fillers)
 
     # Group by flavour dimension
     by_dimension: dict[str, list[dict[str, Any]]] = {}
-    for filler in all_fillers:
-        role = filler["role"]
-        dimension = ROLE_TO_FLAVOUR_DIMENSION.get(role)
-
-        # Skip if no dimension mapping, already provided, or locked
-        if dimension is None or dimension in provided or dimension in locked:
-            continue
-
-        by_dimension.setdefault(dimension, []).append({
-            "filler": filler["filler"],
-            "role": role,
-            "confidence": filler["confidence"],
-        })
+    
+    for ing in all_ingredients:
+        ingredient_name = ing["canonical_name"]
+        dimensions = ingredient_flavour_dimensions(conn, ingredient_name)
+        
+        for dimension in dimensions:
+            # Skip if already provided or locked
+            if dimension in provided or dimension in locked:
+                continue
+            
+            # Determine the primary role this ingredient fills
+            roles = _split_list(ing["base_roles"]) if ing["base_roles"] else []
+            primary_role = roles[0] if roles else "unknown"
+            
+            by_dimension.setdefault(dimension, []).append({
+                "filler": ingredient_name,
+                "role": primary_role,
+                "confidence": "high",  # All ingredients in the catalogue are curated
+                "availability": ing["default_availability_class"],
+            })
 
     # Deduplicate fillers within each dimension
     for dimension in by_dimension:
@@ -540,6 +657,9 @@ def taste_circle_fillers(
             if f["filler"] not in seen:
                 seen.add(f["filler"])
                 unique.append(f)
+        # Sort by availability (very_common first)
+        availability_rank = {"very_common": 0, "common": 1, "occasional": 2, "rare": 3}
+        unique.sort(key=lambda x: (availability_rank.get(x["availability"], 4), x["filler"]))
         by_dimension[dimension] = unique
 
     return by_dimension
