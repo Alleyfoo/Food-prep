@@ -340,20 +340,6 @@ def build_taste_circle_graph(
                       title=f"{dim_label}: no fillers available")
             _add_edge(net, comp_id, dim_id, "missing", color="#9AA092", dashes=True)
 
-    # Add JavaScript for click handling
-    net.add_event_handler("click", """
-        function(params) {
-            var nodeId = params.nodes[0];
-            if (nodeId) {
-                // Send node ID to Streamlit via postMessage
-                window.parent.postMessage({
-                    type: 'streamlit:setComponentValue',
-                    nodeId: nodeId
-                }, '*');
-            }
-        }
-    """)
-
     return net
 
 
