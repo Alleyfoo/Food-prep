@@ -641,7 +641,6 @@ def main() -> None:
         tab_scout()
     with tab9:
         tab_taste_circle()
-        tab_scout()
 
 
 if __name__ == "__main__":
