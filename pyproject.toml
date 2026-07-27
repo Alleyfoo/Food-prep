@@ -30,7 +30,7 @@ foodprep = "foodprep.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-foodprep = ["data/*.yaml", "schema.sql", "ui/*.css"]
+foodprep = ["data/*.yaml", "schema.sql", "ui/*.css", "ui/taste_circle_component/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

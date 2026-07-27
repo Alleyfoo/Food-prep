@@ -5,10 +5,15 @@ Generates a force-directed graph for one ingredient showing:
 
 Rendered as self-contained HTML and embedded in Streamlit via
 ``st.components.v1.html()``.
+
+Also holds ``taste_circle_graph_data`` — the pure (Streamlit-free) data
+builder for the Taste Circle Map custom component, whose nodes/edges are
+rendered by ``ui/taste_circle_component/index.html``.
 """
 
 from __future__ import annotations
 
+import math
 import sqlite3
 from typing import Any
 
@@ -209,138 +214,180 @@ def build_scout_graph(conn: sqlite3.Connection,
     return net
 
 
-def build_taste_circle_graph(
+# ---------------------------------------------------------------------------
+# Taste Circle Map (custom click-driven component)
+# ---------------------------------------------------------------------------
+
+# (key, icon, display name, colour) — the 11 flavour dimensions of the circle.
+TASTE_DIMENSIONS: list[tuple[str, str, str, str]] = [
+    ("salty", "🧂", "Salty", "#1F6FC4"),
+    ("sour", "🍋", "Sour", "#A5640A"),
+    ("sweet", "🍯", "Sweet", "#0E7C5A"),
+    ("bitter", "🌿", "Bitter", "#B23B2E"),
+    ("umami", "🍄", "Umami", "#6B4C8A"),
+    ("pungent", "🌶️", "Pungent", "#B23B2E"),
+    ("aromatic", "🌸", "Aromatic", "#0E7C5A"),
+    ("nutty_toasted", "🥜", "Nutty/Toasted", "#A5640A"),
+    ("fresh_green", "🥬", "Fresh/Green", "#0E7C5A"),
+    ("fermented_funky", "🧀", "Fermented/Funky", "#6B4C8A"),
+    ("rich_fatty", "🧈", "Rich/Fatty", "#A5640A"),
+]
+
+_MAX_FILLER_NODES = 8   # most common fillers shown when a dimension expands
+_DIM_RADIUS = 280.0     # circle radius for dimension nodes
+_FILLER_RADIUS = 450.0  # radius of the filler fan around the expanded dimension
+
+
+def _node_color(color: str, border: str | None = None) -> dict[str, Any]:
+    border = border or color
+    return {
+        "background": color,
+        "border": border,
+        "hover": {"background": color, "border": "#1A1B16"},
+        "highlight": {"background": color, "border": "#1A1B16"},
+    }
+
+
+def taste_circle_graph_data(
     conn: sqlite3.Connection,
     component_name: str,
     locked_dimensions: set[str] | None = None,
     selections: dict[str, str] | None = None,
-    selected_dimension: str | None = None,
-) -> Network:
-    """Build a pyvis Network showing the Taste Circle for a component.
+    expanded_dimension: str | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Build node/edge data for the click-driven Taste Circle component.
 
-    Shows: component (center) → flavour dimensions → fillers
-    Dimensions are arranged in a circle around the component.
-    Locked dimensions show selected fillers.
-    Selected dimension expands to show available fillers.
+    Layout (physics off, fixed positions): the component sits at the centre,
+    the 11 flavour dimensions form a circle around it, and the expanded
+    dimension's fillers fan out on an outer arc next to it.
+
+    Node ``id`` schemes (click routing happens in the Streamlit tab):
+      ``comp:<component>`` · ``dim:<dimension>`` · ``filler:<dimension>:<name>``
+
+    Nodes carry a ``clickable`` flag — provided/empty dimensions and the
+    centre node are purely visual and report no clicks.
     """
-    net = Network(height="700px", width="100%", bgcolor="#F4F2EC",
-                  font_color="#1A1B16", directed=True)
-    
-    # Use hierarchical layout for circular arrangement
-    net.set_options("""
-    {
-      "layout": {
-        "hierarchical": {
-          "enabled": true,
-          "levelSeparation": 200,
-          "nodeSpacing": 150,
-          "treeSpacing": 200,
-          "blockShifting": true,
-          "edgeMinimization": true,
-          "parentCentralization": true,
-          "direction": "UD",
-          "sortMethod": "directed"
-        }
-      },
-      "physics": {
-        "enabled": false
-      },
-      "interaction": {
-        "hover": true,
-        "clickToUse": false
-      }
-    }
-    """)
+    locked = set(locked_dimensions or set())
+    selections = dict(selections or {})
+    chosen_fillers = set(selections.values())
 
-    locked = locked_dimensions or set()
-    selections = selections or {}
-
-    # Add component node at center
-    comp_id = f"comp:{component_name}"
-    _add_node(net, comp_id, component_name.replace("_", " "), "component",
-              size=40, title=f"Component: {component_name}")
-
-    # Get the component's state profile
     profile = query.component_state_profile(conn, component_name)
-    provided_tags = set(profile["flavour_tags"]) if profile else set()
-
-    # Get fillers grouped by dimension
+    provided = set(profile["flavour_tags"]) if profile else set()
     fillers_by_dim = query.taste_circle_fillers(conn, component_name, locked)
 
-    # Define flavour dimensions with colors and icons
-    dimensions = [
-        ("salty", "🧂 Salty", "#1F6FC4"),
-        ("sour", "🍋 Sour", "#A5640A"),
-        ("sweet", "🍯 Sweet", "#0E7C5A"),
-        ("bitter", "🌿 Bitter", "#B23B2E"),
-        ("umami", "🍄 Umami", "#6B4C8A"),
-        ("pungent", "🌶️ Pungent", "#B23B2E"),
-        ("aromatic", "🌸 Aromatic", "#0E7C5A"),
-        ("nutty_toasted", "🥜 Nutty/Toasted", "#A5640A"),
-        ("fresh_green", "🥬 Fresh/Green", "#0E7C5A"),
-        ("fermented_funky", "🧀 Fermented/Funky", "#6B4C8A"),
-        ("rich_fatty", "🧈 Rich/Fatty", "#A5640A"),
-    ]
+    nodes: list[dict[str, Any]] = []
+    edges: list[dict[str, Any]] = []
 
-    # Add dimension nodes in a circle
-    for dim_key, dim_label, dim_color in dimensions:
+    comp_id = f"comp:{component_name}"
+    nodes.append({
+        "id": comp_id,
+        "label": component_name.replace("_", " "),
+        "x": 0.0, "y": 0.0, "fixed": True,
+        "shape": "dot", "size": 30,
+        "color": _node_color("#6B4C8A", "#54396F"),
+        "font": {"size": 15, "color": "#1A1B16"},
+        "title": "Base component",
+        "clickable": False,
+    })
+
+    count = len(TASTE_DIMENSIONS)
+    for i, (dim_key, icon, dim_name, color) in enumerate(TASTE_DIMENSIONS):
+        angle = -math.pi / 2 + i * (2 * math.pi / count)  # start at top, clockwise
+        x = _DIM_RADIUS * math.cos(angle)
+        y = _DIM_RADIUS * math.sin(angle)
         dim_id = f"dim:{dim_key}"
-        
-        # Check if this dimension is provided by the component
-        is_provided = dim_key in provided_tags
-        is_locked = dim_key in locked
-        is_selected = dim_key == selected_dimension
-        has_fillers = dim_key in fillers_by_dim
+        title_name = f"{icon} {dim_name}"
+        edge: dict[str, Any] = {"from": comp_id, "to": dim_id, "width": 1.5}
 
-        if is_provided:
-            # Dimension already provided - show as filled
-            _add_node(net, dim_id, f"{dim_label}\n✅ provided", "dimension",
-                      size=25, color=dim_color, title=f"{dim_label} (provided by component)")
-            _add_edge(net, comp_id, dim_id, "provides", color=dim_color)
-        elif is_locked:
-            # Dimension locked - show selected filler
-            selected_filler = selections.get(dim_key, "")
-            _add_node(net, dim_id, f"{dim_label}\n🔒 {selected_filler.replace('_', ' ')}",
-                      "dimension", size=25, color=dim_color,
-                      title=f"{dim_label}: {selected_filler}")
-            _add_edge(net, comp_id, dim_id, "locked", color=dim_color)
-            
-            # Add the selected filler as a child node
-            filler_id = f"filler:{dim_key}:{selected_filler}"
-            _add_node(net, filler_id, selected_filler.replace("_", " "), "filler",
-                      size=15, color=dim_color, title=f"Selected: {selected_filler}")
-            _add_edge(net, dim_id, filler_id, "selected", color=dim_color)
-        elif is_selected and has_fillers:
-            # Dimension selected - expand to show all fillers
-            _add_node(net, dim_id, f"{dim_label}\n(click to select)",
-                      "dimension", size=30, color=dim_color,
-                      title=f"{dim_label}: click a filler to lock")
-            _add_edge(net, comp_id, dim_id, "needs", color=dim_color, dashes=True)
-            
-            # Add all available fillers as child nodes
-            fillers = fillers_by_dim[dim_key]
-            for i, filler in enumerate(fillers[:10]):  # Limit to 10 for readability
-                filler_name = filler["filler"]
-                filler_id = f"filler:{dim_key}:{filler_name}"
-                _add_node(net, filler_id, filler_name.replace("_", " "), "filler",
-                          size=12, color=dim_color,
-                          title=f"Click to lock: {filler_name}")
-                _add_edge(net, dim_id, filler_id, "option", color=dim_color, dashes=True)
-        elif has_fillers:
-            # Dimension available - show count of fillers
-            filler_count = len(fillers_by_dim[dim_key])
-            _add_node(net, dim_id, f"{dim_label}\n({filler_count} options)",
-                      "dimension", size=25, color=dim_color,
-                      title=f"{dim_label}: {filler_count} fillers available - click to expand")
-            _add_edge(net, comp_id, dim_id, "needs", color=dim_color, dashes=True)
+        node: dict[str, Any] = {"id": dim_id, "x": x, "y": y, "fixed": True}
+
+        if dim_key in provided:
+            node.update({
+                "label": f"{title_name}\n✓ provided",
+                "shape": "dot", "size": 20,
+                "color": _node_color(color),
+                "font": {"size": 12, "color": "#75796E"},
+                "title": f"{title_name} — already in the component",
+                "clickable": False,
+            })
+            edge.update({"color": {"color": color, "opacity": 0.8}, "width": 2})
+        elif dim_key in locked:
+            filler = selections.get(dim_key, "")
+            node.update({
+                "label": f"{title_name}\n🔒 {filler.replace('_', ' ')}",
+                "shape": "dot", "size": 26,
+                "color": _node_color(color, "#1A1B16"),
+                "borderWidth": 2.5,
+                "font": {"size": 13, "color": "#1A1B16"},
+                "title": f"{title_name}: {filler.replace('_', ' ')} — click to change",
+                "clickable": True,
+            })
+            edge.update({"color": {"color": color}, "width": 2.5})
+        elif dim_key in fillers_by_dim and fillers_by_dim[dim_key]:
+            fillers = [f for f in fillers_by_dim[dim_key]
+                       if f["filler"] not in chosen_fillers]
+            total = len(fillers)
+            if dim_key == expanded_dimension and total:
+                shown = fillers[:_MAX_FILLER_NODES]
+                node.update({
+                    "label": f"{title_name}\n{len(shown)} of {total}",
+                    "shape": "dot", "size": 28,
+                    "color": _node_color(color, "#1A1B16"),
+                    "borderWidth": 3,
+                    "font": {"size": 13, "color": "#1A1B16"},
+                    "title": f"{title_name} — click again to close",
+                    "clickable": True,
+                })
+                edge.update({"color": {"color": color}, "width": 2, "dashes": True})
+
+                k = len(shown)
+                spread = math.radians(min(110, 16 * k))
+                for j, f in enumerate(shown):
+                    a = angle if k == 1 else angle - spread / 2 + j * spread / (k - 1)
+                    fname = f["filler"]
+                    fid = f"filler:{dim_key}:{fname}"
+                    nodes.append({
+                        "id": fid,
+                        "label": fname.replace("_", " "),
+                        "x": _FILLER_RADIUS * math.cos(a),
+                        "y": _FILLER_RADIUS * math.sin(a),
+                        "fixed": True,
+                        "shape": "dot", "size": 12,
+                        "color": _node_color("#FFFFFF", color),
+                        "font": {"size": 12, "color": "#1A1B16"},
+                        "title": f"Click to choose {fname.replace('_', ' ')}",
+                        "clickable": True,
+                    })
+                    edges.append({
+                        "from": dim_id, "to": fid,
+                        "dashes": True, "width": 1.2,
+                        "color": {"color": color, "opacity": 0.55},
+                    })
+            else:
+                node.update({
+                    "label": f"{title_name}\n{total} options",
+                    "shape": "dot", "size": 24,
+                    "color": _node_color(color),
+                    "font": {"size": 13, "color": "#1A1B16"},
+                    "title": f"{title_name} — click to see options",
+                    "clickable": True,
+                })
+                edge.update({"color": {"color": "#D8D2C2"}})
         else:
-            # No fillers available
-            _add_node(net, dim_id, f"{dim_label}\n⚪ no options", "dimension",
-                      size=20, color="#9AA092",
-                      title=f"{dim_label}: no fillers available")
-            _add_edge(net, comp_id, dim_id, "missing", color="#9AA092", dashes=True)
+            node.update({
+                "label": f"{title_name}\n—",
+                "shape": "dot", "size": 16,
+                "color": _node_color("#C6C2B4", "#B4B0A2"),
+                "font": {"size": 12, "color": "#9AA092"},
+                "title": f"{title_name} — no fillers in the catalogue",
+                "clickable": False,
+            })
+            edge.update({"color": {"color": "#E2DDD0"}, "dashes": True})
 
-    return net
+        nodes.append(node)
+        edges.append(edge)
+
+    return {"nodes": nodes, "edges": edges}
 
 
 def graph_to_html(net: Network) -> str:

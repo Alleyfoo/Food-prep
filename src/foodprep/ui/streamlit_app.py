@@ -1,13 +1,16 @@
 """Food-prep — ingredient transformation graph UI (Streamlit).
 
-Seven tabs:
-  Tab 1 Ingredient Explorer  — branch_card / all_branch_cards
-  Tab 2 Map                  — interactive ingredient mindmap (pyvis)
-  Tab 3 Journeys             — ingredient_journeys
-  Tab 4 Component Explorer   — component_card + flavour_routes
-  Tab 5 Plate Balance        — plate_balance_detail
-  Tab 6 Filler Profiles      — filler_profile_detail
-  Tab 7 Scout                — generate_scout_hypotheses + trials
+Tabs:
+  Tab 1  Ingredient Explorer  — branch_card / all_branch_cards
+  Tab 2  Map                  — interactive ingredient mindmap (pyvis)
+  Tab 3  Scout Map            — Scout hypotheses graph (pyvis)
+  Tab 4  Journeys             — ingredient_journeys
+  Tab 5  Component Explorer   — component_card + flavour_routes
+  Tab 6  Plate Balance        — plate_balance_detail
+  Tab 7  Filler Profiles      — filler_profile_detail
+  Tab 8  Scout                — generate_scout_hypotheses + trials
+  Tab 9  Taste Circle         — flavour wheel builder (buttons)
+  Tab 10 Taste Circle Map     — click-driven circular flavour builder
 
 Run:  streamlit run app.py
 """
@@ -27,7 +30,11 @@ from foodprep.ui.render import (
     available_partition_html, branch_card_html,
     hypothesis_card_html, journey_card_html, route_card_html,
 )
-from foodprep.ui.graph import build_ingredient_graph, build_scout_graph, build_taste_circle_graph, graph_to_html
+from foodprep.ui.graph import (
+    TASTE_DIMENSIONS, build_ingredient_graph, build_scout_graph,
+    graph_to_html, taste_circle_graph_data,
+)
+from foodprep.ui.taste_circle import taste_circle_map
 
 _CSS_PATH = Path(__file__).with_name("design.css")
 
@@ -606,25 +613,32 @@ def generate_dish_name(
 
 
 def tab_taste_circle_map() -> None:
-    """Taste Circle Map tab — circular visualization of flavour dimensions."""
+    """Taste Circle Map tab — click-driven circular flavour builder.
+
+    The whole interaction happens on the circle itself (custom component):
+    click a dimension to expand its fillers, click a filler to lock it in,
+    click a locked dimension to change it, click blank canvas to close.
+    """
     st.markdown('<div class="section-title">Taste Circle Map <span class="count">'
-                'visual flavour wheel builder</span></div>',
+                'click the circle to build a balanced dish</span></div>',
                 unsafe_allow_html=True)
     st.markdown(
-        '<div class="hint">Select a component to see its flavour profile as a circle. '
-        'Click on a flavour dimension to expand it and see available fillers. '
-        'Click a filler to lock your choice and build a complete dish!</div>',
+        '<div class="hint">Click a flavour dimension to see what can fill it · '
+        'click an ingredient to lock it in · click a 🔒 dimension to change it. '
+        'Everything happens right on the circle.</div>',
         unsafe_allow_html=True)
 
-    # Initialize session state for the taste circle map
-    if "taste_circle_map_locked" not in st.session_state:
-        st.session_state.taste_circle_map_locked = set()
-    if "taste_circle_map_selections" not in st.session_state:
-        st.session_state.taste_circle_map_selections = {}
-    if "taste_circle_map_selected_dim" not in st.session_state:
-        st.session_state.taste_circle_map_selected_dim = None
-    if "taste_circle_map_last_click" not in st.session_state:
-        st.session_state.taste_circle_map_last_click = None
+    # Session state
+    if "tcm_locked" not in st.session_state:
+        st.session_state.tcm_locked = set()
+    if "tcm_selections" not in st.session_state:
+        st.session_state.tcm_selections = {}
+    if "tcm_expanded" not in st.session_state:
+        st.session_state.tcm_expanded = None
+    if "tcm_last_click" not in st.session_state:
+        st.session_state.tcm_last_click = None
+    if "tcm_component" not in st.session_state:
+        st.session_state.tcm_component = None
 
     # Component selector
     comps = query.components_list(CONN)
@@ -647,119 +661,89 @@ def tab_taste_circle_map() -> None:
         key="taste_circle_map_component",
     )
 
-    # Reset button
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        if st.button("🔄 Reset"):
-            st.session_state.taste_circle_map_locked = set()
-            st.session_state.taste_circle_map_selections = {}
-            st.session_state.taste_circle_map_selected_dim = None
-            st.session_state.taste_circle_map_last_click = None
-            st.rerun()
+    def _reset() -> None:
+        st.session_state.tcm_locked = set()
+        st.session_state.tcm_selections = {}
+        st.session_state.tcm_expanded = None
+        # Swallow the last graph click so it isn't re-processed afterwards.
+        st.session_state.tcm_last_click = st.session_state.get("tcm_graph")
 
-    # Process click events from the graph
-    # Note: This is a simplified approach. Full bidirectional communication
-    # would require a custom Streamlit component.
-    click_info = st.empty()
-    
-    # Build the circular graph
-    net = build_taste_circle_graph(
+    # Switching component starts a fresh circle.
+    if st.session_state.tcm_component != component:
+        _reset()
+        st.session_state.tcm_component = component
+
+    if st.button("🔄 Reset", key="tcm_reset"):
+        _reset()
+
+    locked: set[str] = st.session_state.tcm_locked
+    selections: dict[str, str] = st.session_state.tcm_selections
+
+    # Pre-click state — also used to validate incoming clicks.
+    profile = query.component_state_profile(CONN, component)
+    provided = set(profile["flavour_tags"]) if profile else set()
+    fillers_by_dim = query.taste_circle_fillers(CONN, component, locked)
+
+    # Handle a pending click from the graph BEFORE redrawing, so the new
+    # state is reflected in this same rerun.
+    click = st.session_state.get("tcm_graph")
+    if click and click != st.session_state.tcm_last_click:
+        st.session_state.tcm_last_click = click
+        click_id = click.get("id")
+        if click_id is None:
+            # Blank canvas click closes the pop-up.
+            st.session_state.tcm_expanded = None
+        elif click_id.startswith("dim:"):
+            dim = click_id[4:]
+            if dim in locked:
+                locked.remove(dim)
+                selections.pop(dim, None)
+                st.session_state.tcm_expanded = None
+            elif dim == st.session_state.tcm_expanded:
+                st.session_state.tcm_expanded = None
+            elif fillers_by_dim.get(dim):
+                st.session_state.tcm_expanded = dim
+        elif click_id.startswith("filler:"):
+            _prefix, dim, filler = click_id.split(":", 2)
+            valid = any(f["filler"] == filler for f in fillers_by_dim.get(dim, []))
+            if valid and filler not in selections.values():
+                locked.add(dim)
+                selections[dim] = filler
+                st.session_state.tcm_expanded = None
+
+    # Recompute after click handling: the graph queries its own fresh data,
+    # but the progress line below must reflect the post-click state too.
+    fillers_by_dim = query.taste_circle_fillers(CONN, component, locked)
+
+    # Draw the circle — it is both the state display and the click target.
+    data = taste_circle_graph_data(
         CONN,
         component,
-        locked_dimensions=st.session_state.taste_circle_map_locked,
-        selections=st.session_state.taste_circle_map_selections,
-        selected_dimension=st.session_state.taste_circle_map_selected_dim,
+        locked_dimensions=locked,
+        selections=selections,
+        expanded_dimension=st.session_state.tcm_expanded,
     )
-    
-    # Render the graph
-    html = graph_to_html(net)
-    components.html(html, height=720, scrolling=False)
+    taste_circle_map(nodes=data["nodes"], edges=data["edges"], height=640,
+                     key="tcm_graph")
 
-    # Show current state and manual selection interface
-    st.markdown("### Current Selections")
-    
-    # Get fillers grouped by dimension
-    fillers_by_dim = query.taste_circle_fillers(
-        CONN,
-        component,
-        locked_dimensions=st.session_state.taste_circle_map_locked,
-    )
-
-    # Define the flavour dimensions
-    dimensions = [
-        ("salty", "🧂 Salty"),
-        ("sour", "🍋 Sour"),
-        ("sweet", "🍯 Sweet"),
-        ("bitter", "🌿 Bitter"),
-        ("umami", "🍄 Umami"),
-        ("pungent", "🌶️ Pungent"),
-        ("aromatic", "🌸 Aromatic"),
-        ("nutty_toasted", "🥜 Nutty/Toasted"),
-        ("fresh_green", "🥬 Fresh/Green"),
-        ("fermented_funky", "🧀 Fermented/Funky"),
-        ("rich_fatty", "🧈 Rich/Fatty"),
+    # Progress + dish summary
+    fillable = [
+        dim for dim, _icon, _name, _color in TASTE_DIMENSIONS
+        if dim not in provided and (fillers_by_dim.get(dim) or dim in locked)
     ]
+    st.caption(f"{len(locked)} of {len(fillable)} open dimensions filled")
 
-    # Create columns for dimension selection
-    cols = st.columns(4)
-    for i, (dim_key, dim_label) in enumerate(dimensions):
-        col = cols[i % 4]
-        with col:
-            # Check if this dimension is provided or locked
-            profile = query.component_state_profile(CONN, component)
-            provided_tags = set(profile["flavour_tags"]) if profile else set()
-            is_provided = dim_key in provided_tags
-            is_locked = dim_key in st.session_state.taste_circle_map_locked
-            is_selected = dim_key == st.session_state.taste_circle_map_selected_dim
-
-            if is_provided:
-                st.markdown(f"**{dim_label}** ✅")
-            elif is_locked:
-                selection = st.session_state.taste_circle_map_selections.get(dim_key)
-                st.markdown(f"**{dim_label}** 🔒 `{selection}`")
-                if st.button(f"Unlock", key=f"unlock_map_{dim_key}"):
-                    st.session_state.taste_circle_map_locked.remove(dim_key)
-                    del st.session_state.taste_circle_map_selections[dim_key]
-                    st.rerun()
-            elif is_selected and dim_key in fillers_by_dim:
-                st.markdown(f"**{dim_label}** 👆")
-                fillers = fillers_by_dim[dim_key]
-                filler_names = [f["filler"] for f in fillers]
-
-                selected = st.selectbox(
-                    f"Choose for {dim_label}",
-                    ["(click to select)"] + filler_names,
-                    key=f"taste_circle_map_{dim_key}",
-                )
-
-                if selected != "(click to select)":
-                    if st.button(f"Lock {dim_label}", key=f"lock_map_{dim_key}"):
-                        st.session_state.taste_circle_map_locked.add(dim_key)
-                        st.session_state.taste_circle_map_selections[dim_key] = selected
-                        st.session_state.taste_circle_map_selected_dim = None
-                        st.rerun()
-            elif dim_key in fillers_by_dim:
-                if st.button(f"{dim_label}", key=f"select_map_{dim_key}"):
-                    st.session_state.taste_circle_map_selected_dim = dim_key
-                    st.rerun()
-            else:
-                st.markdown(f"**{dim_label}** ⚪")
-
-    # Display the final dish
     st.markdown("### Your Dish")
-    if st.session_state.taste_circle_map_selections:
-        dish_components = [component]
-        for dim, filler in st.session_state.taste_circle_map_selections.items():
-            dish_components.append(filler)
-
+    if selections:
+        dish_components = [component, *selections.values()]
         st.markdown("**Components:**")
         st.markdown(", ".join(f"`{c}`" for c in dish_components))
 
-        # Generate a dish name
-        dish_name = generate_dish_name(component, st.session_state.taste_circle_map_selections)
+        dish_name = generate_dish_name(component, selections)
         st.markdown(f"**Dish name:** {dish_name}")
     else:
-        st.info("Select items to fill the flavour dimensions and build your dish.")
+        st.info("Click a dimension on the circle, then click an ingredient "
+                "to start building your dish.")
 
 
 def main() -> None:
