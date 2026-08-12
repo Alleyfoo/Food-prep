@@ -32,7 +32,7 @@ from foodprep.ui.render import (
 )
 from foodprep.ui.graph import (
     TASTE_DIMENSIONS, build_ingredient_graph, build_scout_graph,
-    graph_to_html, taste_circle_graph_data,
+    graph_to_html, random_dish_selections, taste_circle_graph_data,
 )
 from foodprep.ui.taste_circle import taste_circle_map
 
@@ -623,9 +623,9 @@ def tab_taste_circle_map() -> None:
                 'click the circle to build a balanced dish</span></div>',
                 unsafe_allow_html=True)
     st.markdown(
-        '<div class="hint">Click a flavour dimension to see what can fill it · '
-        'click an ingredient to lock it in · click a 🔒 dimension to change it. '
-        'Everything happens right on the circle.</div>',
+        '<div class="hint">Browse components with ◀ ▶ · click a flavour dimension '
+        'to see what can fill it · click an ingredient to lock it in · '
+        'click a 🔒 dimension to change it · or press 🎲 for a random dish.</div>',
         unsafe_allow_html=True)
 
     # Session state
@@ -640,7 +640,7 @@ def tab_taste_circle_map() -> None:
     if "tcm_component" not in st.session_state:
         st.session_state.tcm_component = None
 
-    # Component selector
+    # Component list (only those that can anchor a taste circle)
     comps = query.components_list(CONN)
     state_comps = []
     for c in comps:
@@ -653,36 +653,67 @@ def tab_taste_circle_map() -> None:
                     unsafe_allow_html=True)
         return
 
-    default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
-    component = st.selectbox(
-        "Select a component to build around:",
-        state_comps,
-        index=state_comps.index(default),
-        key="taste_circle_map_component",
-    )
-
     def _reset() -> None:
-        st.session_state.tcm_locked = set()
-        st.session_state.tcm_selections = {}
+        # Clear in place: the Reset/random buttons are rendered after `locked`
+        # and `selections` are bound below, and those aliases must see it.
+        st.session_state.tcm_locked.clear()
+        st.session_state.tcm_selections.clear()
         st.session_state.tcm_expanded = None
         # Swallow the last graph click so it isn't re-processed afterwards.
         st.session_state.tcm_last_click = st.session_state.get("tcm_graph")
+
+    # Browse components with ◀ ▶ instead of a dropdown.
+    if st.session_state.tcm_component not in state_comps:
+        st.session_state.tcm_component = (
+            "roasted_broccoli_component"
+            if "roasted_broccoli_component" in state_comps
+            else state_comps[0]
+        )
+    idx = state_comps.index(st.session_state.tcm_component)
+
+    nav_prev, nav_name, nav_next = st.columns([1, 8, 1])
+    with nav_prev:
+        if st.button("◀", key="tcm_prev", help="Previous component"):
+            idx = (idx - 1) % len(state_comps)
+    # The name sits between the arrows but must show the post-click component,
+    # so reserve the slot now and fill it once both buttons have been read.
+    name_slot = nav_name.empty()
+    with nav_next:
+        if st.button("▶", key="tcm_next", help="Next component"):
+            idx = (idx + 1) % len(state_comps)
+
+    component = state_comps[idx]
+    pretty = component.replace("_component", "").replace("_", " ")
+    name_slot.markdown(
+        f'<div class="tcm-component-name">{pretty}'
+        f'<span class="tcm-component-pos">{idx + 1} / {len(state_comps)}</span>'
+        f'</div>',
+        unsafe_allow_html=True)
 
     # Switching component starts a fresh circle.
     if st.session_state.tcm_component != component:
         _reset()
         st.session_state.tcm_component = component
 
-    if st.button("🔄 Reset", key="tcm_reset"):
-        _reset()
-
     locked: set[str] = st.session_state.tcm_locked
     selections: dict[str, str] = st.session_state.tcm_selections
 
-    # Pre-click state — also used to validate incoming clicks.
+    # Pre-click state — also used to validate incoming clicks and random picks.
     profile = query.component_state_profile(CONN, component)
     provided = set(profile["flavour_tags"]) if profile else set()
     fillers_by_dim = query.taste_circle_fillers(CONN, component, locked)
+
+    act_reset, act_random, _spacer = st.columns([1, 1.6, 6])
+    with act_reset:
+        if st.button("🔄 Reset", key="tcm_reset"):
+            _reset()
+    with act_random:
+        if st.button("🎲 Surprise me", key="tcm_random",
+                     help="Fill every open dimension with a random valid pick"):
+            for dim, filler in random_dish_selections(fillers_by_dim, selections).items():
+                locked.add(dim)
+                selections[dim] = filler
+            st.session_state.tcm_expanded = None
 
     # Handle a pending click from the graph BEFORE redrawing, so the new
     # state is reflected in this same rerun.

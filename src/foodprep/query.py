@@ -507,13 +507,13 @@ INGREDIENT_FLAVOUR_DIMENSIONS = {
     # Pungent
     "garlic": ["pungent", "aromatic"],
     "onion": ["pungent", "sweet"],
-    "chile_flakes": ["pungent", "heat"],
-    "jalapeno": ["pungent", "heat"],
-    "horseradish": ["pungent", "heat"],
+    "chile_flakes": ["pungent"],
+    "jalapeno": ["pungent"],
+    "horseradish": ["pungent"],
     "mustard": ["pungent", "sour"],
-    "gochugaru": ["pungent", "heat"],
+    "gochugaru": ["pungent"],
     "smoked_paprika": ["pungent", "aromatic"],
-    "chili_crisp": ["pungent", "heat", "rich_fatty"],
+    "chili_crisp": ["pungent", "rich_fatty"],
     
     # Aromatic
     "basil": ["aromatic", "fresh_green"],

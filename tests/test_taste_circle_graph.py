@@ -1,13 +1,14 @@
 """Tests for the Taste Circle Map graph-data builder (pure, Streamlit-free)."""
 
 import math
+import random
 
 import pytest
 
 from foodprep import query
 from foodprep.ui.graph import (
-    TASTE_DIMENSIONS, _DIM_RADIUS, _FILLER_RADIUS, _MAX_FILLER_NODES,
-    taste_circle_graph_data,
+    TASTE_DIMENSIONS, _DIM_RADIUS, _FADED_FONT, _FILLER_RADIUS,
+    _MAX_FILLER_NODES, random_dish_selections, taste_circle_graph_data,
 )
 
 COMPONENT = "roasted_broccoli_component"
@@ -105,3 +106,79 @@ def test_locked_dimension_leaves_filler_pool(conn):
     assert "salty" in open_pool
     locked_pool = query.taste_circle_fillers(conn, COMPONENT, {"salty"})
     assert "salty" not in locked_pool
+
+
+# ---- fade-out on expansion -------------------------------------------------
+
+def test_expanded_dimension_fades_everything_else(conn):
+    data = taste_circle_graph_data(conn, COMPONENT, expanded_dimension="sour")
+    nodes = _by_id(data)
+
+    # centre and expanded dimension stay vivid
+    assert nodes[f"comp:{COMPONENT}"]["font"]["color"] != _FADED_FONT
+    assert nodes["dim:sour"]["font"]["color"] != _FADED_FONT
+
+    # every other dimension is faded
+    for dim_key, _icon, _name, _color in TASTE_DIMENSIONS:
+        if dim_key != "sour":
+            assert nodes[f"dim:{dim_key}"]["font"]["color"] == _FADED_FONT
+
+    # filler fan nodes stay vivid
+    fan = [n for n in data["nodes"] if n["id"].startswith("filler:sour:")]
+    assert fan
+    for n in fan:
+        assert n["font"]["color"] != _FADED_FONT
+
+
+def test_faded_dimensions_stay_clickable(conn):
+    data = taste_circle_graph_data(conn, COMPONENT, expanded_dimension="sour")
+    nodes = _by_id(data)
+    # available dims remain clickable so focus can move to them
+    assert nodes["dim:salty"]["clickable"] is True
+    # provided dims were never clickable and stay that way
+    assert nodes["dim:umami"]["clickable"] is False
+
+
+def test_no_expansion_no_fade(conn):
+    data = taste_circle_graph_data(conn, COMPONENT)
+    for n in data["nodes"]:
+        assert (n.get("font") or {}).get("color") != _FADED_FONT
+
+
+# ---- random dish -----------------------------------------------------------
+
+def test_random_dish_picks_one_per_open_dimension(conn):
+    pool = query.taste_circle_fillers(conn, COMPONENT)
+    picks = random_dish_selections(pool, rng=random.Random(42))
+    assert set(picks) == set(pool)  # every open dimension filled
+    for dim, filler in picks.items():
+        valid = [f["filler"] for f in pool[dim]]
+        assert filler in valid
+    # no filler used twice
+    assert len(set(picks.values())) == len(picks)
+
+
+def test_random_dish_skips_locked_dimensions(conn):
+    pool = query.taste_circle_fillers(conn, COMPONENT, {"salty"})
+    picks = random_dish_selections(pool, {"salty": "soy_sauce"},
+                                   rng=random.Random(7))
+    assert "salty" not in picks
+    assert "soy_sauce" not in picks.values()
+
+
+def test_random_dish_picks_from_most_common_slice(conn):
+    pool = query.taste_circle_fillers(conn, COMPONENT)
+    picks = random_dish_selections(pool, top_n=3, rng=random.Random(1))
+    for dim, filler in picks.items():
+        top = [f["filler"] for f in pool[dim][:3]]
+        assert filler in top
+
+
+def test_random_dish_never_reuses_a_contested_filler(conn):
+    pool = {
+        "sour": [{"filler": "lemon"}, {"filler": "vinegar"}],
+        "aromatic": [{"filler": "lemon"}, {"filler": "dill"}],
+    }
+    picks = random_dish_selections(pool, rng=random.Random(3))
+    assert set(picks) == {"sour", "aromatic"}
+    assert len(set(picks.values())) == 2

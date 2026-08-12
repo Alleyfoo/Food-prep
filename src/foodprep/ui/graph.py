@@ -14,6 +14,7 @@ rendered by ``ui/taste_circle_component/index.html``.
 from __future__ import annotations
 
 import math
+import random
 import sqlite3
 from typing import Any
 
@@ -233,9 +234,43 @@ TASTE_DIMENSIONS: list[tuple[str, str, str, str]] = [
     ("rich_fatty", "🧈", "Rich/Fatty", "#A5640A"),
 ]
 
-_MAX_FILLER_NODES = 8   # most common fillers shown when a dimension expands
+_MAX_FILLER_NODES = 14  # most common fillers shown when a dimension expands
 _DIM_RADIUS = 280.0     # circle radius for dimension nodes
-_FILLER_RADIUS = 450.0  # radius of the filler fan around the expanded dimension
+_FILLER_RADIUS = 470.0  # radius of the filler fan around the expanded dimension
+
+_BG = "#F4F2EC"         # app background; faded nodes blend toward it
+_FADED_FONT = "#B7B3A6"  # label colour for faded nodes
+_FADE_T = 0.72          # blend factor toward the background for faded nodes
+
+
+def _blend(hex_color: str, toward: str, t: float) -> str:
+    """Linear RGB blend of two '#RRGGBB' colours; t=1 gives `toward`."""
+    c1 = tuple(int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
+    c2 = tuple(int(toward[i:i + 2], 16) for i in (1, 3, 5))
+    mixed = tuple(round(a + (b - a) * t) for a, b in zip(c1, c2))
+    return "#{:02X}{:02X}{:02X}".format(*mixed)
+
+
+def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None) -> None:
+    """Visually fade a node (and its centre edge) into the background.
+
+    Keeps the node's ``clickable`` flag untouched: a faded-but-available
+    dimension can still be clicked to move the focus to it.
+    """
+    color = node["color"]
+    faded_bg = _blend(color["background"], _BG, _FADE_T)
+    faded_border = _blend(color["border"], _BG, _FADE_T)
+    node["color"] = {
+        "background": faded_bg, "border": faded_border,
+        "hover": {"background": faded_bg, "border": faded_border},
+        "highlight": {"background": faded_bg, "border": faded_border},
+    }
+    node["borderWidth"] = 1
+    node["font"] = {**node.get("font", {}), "color": _FADED_FONT}
+    if edge is not None:
+        base = (edge.get("color") or {}).get("color", "#D8D2C2")
+        edge["color"] = {"color": _blend(base, _BG, 0.6), "opacity": 0.5}
+        edge["width"] = 1
 
 
 def _node_color(color: str, border: str | None = None) -> dict[str, Any]:
@@ -341,7 +376,7 @@ def taste_circle_graph_data(
                 edge.update({"color": {"color": color}, "width": 2, "dashes": True})
 
                 k = len(shown)
-                spread = math.radians(min(110, 16 * k))
+                spread = math.radians(min(200, 16 * k))
                 for j, f in enumerate(shown):
                     a = angle if k == 1 else angle - spread / 2 + j * spread / (k - 1)
                     fname = f["filler"]
@@ -384,10 +419,45 @@ def taste_circle_graph_data(
             })
             edge.update({"color": {"color": "#E2DDD0"}, "dashes": True})
 
+        # When a dimension is expanded, fade everything else into the
+        # background so the filler fan owns the screen. Faded dimensions
+        # stay clickable — clicking one moves the focus there.
+        if expanded_dimension and dim_key != expanded_dimension:
+            _fade_node(node, edge)
+
         nodes.append(node)
         edges.append(edge)
 
     return {"nodes": nodes, "edges": edges}
+
+
+def random_dish_selections(
+    fillers_by_dim: dict[str, list[dict[str, Any]]],
+    selections: dict[str, str] | None = None,
+    *,
+    top_n: int = _MAX_FILLER_NODES,
+    rng: random.Random | None = None,
+) -> dict[str, str]:
+    """Pick one random valid filler per open flavour dimension.
+
+    Dimensions already locked (present in *selections*) are skipped, and a
+    filler already chosen — locked or freshly picked — is never reused.
+    Candidates come from the ``top_n`` most common options of each
+    dimension (the same slice the fan shows).
+    """
+    chooser = rng or random
+    chosen = set((selections or {}).values())
+    dims = [d for d in fillers_by_dim if not (selections and d in selections)]
+    chooser.shuffle(dims)
+    picks: dict[str, str] = {}
+    for dim in dims:
+        candidates = [f["filler"] for f in fillers_by_dim[dim][:top_n]
+                      if f["filler"] not in chosen]
+        if candidates:
+            pick = chooser.choice(candidates)
+            picks[dim] = pick
+            chosen.add(pick)
+    return picks
 
 
 def graph_to_html(net: Network) -> str:
