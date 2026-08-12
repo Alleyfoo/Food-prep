@@ -29,6 +29,42 @@ def conf_pill(conf: str) -> str:
     return f'<span class="card-conf {conf}">{_esc(conf)}</span>'
 
 
+def _initials(name: str) -> str:
+    """"roasted_broccoli_component" -> "RB"; "lemon" -> "L"."""
+    words = [w for w in name.replace("_component", "").replace("-", "_").split("_") if w]
+    if not words:
+        return "?"
+    if len(words) == 1:
+        return words[0][0]
+    return words[0][0] + words[1][0]
+
+
+def subject_disc_html(name: str, kind: str = "ingredient") -> str:
+    """The 200px disc at the head of a subject column.
+
+    No photography exists yet and the design must stand up without it, so
+    this is the typographic fallback: the subject's initials on its own
+    kind's hue. A photograph drops into the same slot later without the
+    layout moving.
+    """
+    return (f'<div class="subject-disc {_esc(kind)}">'
+            f'{_esc(_initials(name).upper())}</div>')
+
+
+def subject_column_html(name: str, kind: str = "ingredient",
+                        label: str = "", note: str = "") -> str:
+    """Label, disc, name and a line of context — the left rail of a screen."""
+    parts = []
+    if label:
+        parts.append(f'<div class="eyebrow">{_esc(label)}</div>')
+    parts.append(subject_disc_html(name, kind))
+    parts.append(f'<div class="subject-name">'
+                 f'{_esc(name.replace("_component", "").replace("_", " "))}</div>')
+    if note:
+        parts.append(f'<div class="subject-note">{_esc(note)}</div>')
+    return "".join(parts)
+
+
 def debug_block(title: str, payload) -> str:
     body = json.dumps(payload, indent=2, default=str, ensure_ascii=False)
     return (f'<details class="debug"><summary>{_esc(title)}</summary>'
@@ -46,7 +82,8 @@ def available_partition_html(part: dict) -> str:
         for g in part["available_now"]:
             roles = " ".join(chip(r, "missing") for r in g["roles"])
             groups.append(
-                f'<div class="chip-group"><span class="gl have">{_esc(g["filler"])}</span>{roles}</div>'
+                f'<div class="chip-group"><span class="gl have">'
+                f'{_esc(g["filler"].replace("_", " "))} — have it</span>{roles}</div>'
             )
         rows.append(f'<div class="row"><span class="lbl">Available now</span>'
                     f'<div>{"".join(groups)}</div></div>')
@@ -70,9 +107,13 @@ def available_partition_html(part: dict) -> str:
 
 
 def branch_card_html(d: dict, with_debug: bool = True,
-                     available: dict | None = None) -> str:
+                     available: dict | None = None,
+                     lead: bool = False) -> str:
+    """*lead* marks the top-ranked branch, which takes the accent border."""
     conf = d.get("confidence") or ""
-    card_cls = "scout" if conf == "experimental" else "cook"
+    card_cls = "scout" if conf == "experimental" else ""
+    if lead:
+        card_cls = (card_cls + " lead").strip()
     tags = d.get("tags") or []
     tag_chips = " ".join(
         chip(t["value"], tag_class(t.get("family", ""))) for t in tags
@@ -120,8 +161,13 @@ def branch_card_html(d: dict, with_debug: bool = True,
     return "".join(parts)
 
 
-def hypothesis_card_html(h: dict, with_debug: bool = False) -> str:
-    """Render one generated Scout hypothesis as a card."""
+def hypothesis_card_html(h: dict, with_debug: bool = False,
+                         lead: bool = False) -> str:
+    """Render one generated Scout hypothesis as a card.
+
+    *lead* marks the hypothesis being put forward, which takes the accent
+    border and reads first.
+    """
     candidate_class = h.get("candidate_class", "weak_hypothesis")
     novelty = h.get("novelty") or {}
     novelty_class = novelty.get("class", "not_checked")
@@ -145,7 +191,7 @@ def hypothesis_card_html(h: dict, with_debug: bool = False) -> str:
     mechanism = (h.get("mechanism") or "").replace("_", " ")
     shared_function = h.get("shared_function") or ""
 
-    parts = ['<div class="card hypothesis">']
+    parts = [f'<div class="card hypothesis{" lead elev-md" if lead else ""}">']
     parts.append(
         f'<div class="hyp-header">'
         f'<span class="hyp-candidate">{_esc(h.get("candidate", ""))}</span>'

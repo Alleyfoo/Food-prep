@@ -30,9 +30,41 @@ SELECTORS = {
 }
 
 
+#: Our own helpers that wrap a selector widget. The wrapper's own st.* call
+#: takes a variable key, so it is skipped; its call sites supply the literal.
+WRAPPERS = {"pill_radio": 2}   # name -> positional index of the key argument
+
+
+def _wrapper_body_lines(tree):
+    """Line numbers inside a wrapper's definition, whose st.* call we skip."""
+    lines = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name in WRAPPERS:
+            for inner in ast.walk(node):
+                if hasattr(inner, "lineno"):
+                    lines.add(inner.lineno)
+    return lines
+
+
 def _selector_calls():
     tree = ast.parse(APP.read_text(encoding="utf-8"))
+    skip = _wrapper_body_lines(tree)
+    # call sites of our wrappers count as keyed selectors
     for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id in WRAPPERS):
+            idx = WRAPPERS[node.func.id]
+            key = None
+            if len(node.args) > idx and isinstance(node.args[idx], ast.Constant):
+                key = node.args[idx].value
+            else:
+                kw = next((k for k in node.keywords if k.arg == "key"), None)
+                if kw is not None and isinstance(kw.value, ast.Constant):
+                    key = kw.value.value
+            yield node.func.id, key, node.lineno
+    for node in ast.walk(tree):
+        if getattr(node, "lineno", None) in skip:
+            continue
         if not isinstance(node, ast.Call):
             continue
         func = node.func

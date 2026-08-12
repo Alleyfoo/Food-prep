@@ -28,7 +28,7 @@ from foodprep.loader import build
 from foodprep import export, query
 from foodprep.ui.render import (
     _esc, chip, chips, conf_pill, debug_block, tag_class,
-    available_partition_html, branch_card_html,
+    available_partition_html, branch_card_html, subject_column_html,
     hypothesis_card_html, journey_card_html, route_card_html,
 )
 from foodprep.ui.graph import (
@@ -105,43 +105,61 @@ def available_selector() -> list[str]:
             help="Pick what's in your kitchen. Empty = show all curated fillers.")
 
 
-def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
-    st.markdown('<div class="section-title">Ingredient Explorer</div>',
-                unsafe_allow_html=True)
-    trees = query.tree_ingredients(CONN)
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        ingredient = st.selectbox("Ingredient", trees, key="explorer_ing",
-                                  index=trees.index("cabbage") if "cabbage" in trees else 0)
-    with col2:
-        mode = st.radio("Mode", ["Best branches", "Choose technique"],
-                        horizontal=True, key="explorer_mode")
+#: 300px subject column beside a 1fr answer column — the recurring layout.
+_SUBJECT_RATIO = [1, 2.6]
 
+
+def pill_radio(label: str, options: list[str], key: str) -> str:
+    """A horizontal radio wearing the design's pill styling."""
+    with st.container(key=f"{key}_pills"):
+        return st.radio(label, options, horizontal=True,
+                        label_visibility="collapsed", key=key)
+
+
+def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
+    trees = query.tree_ingredients(CONN)
     avail = available_items or None
-    techs = query.techniques_for_ingredient(CONN, ingredient)
-    if mode == "Choose technique":
-        tech = st.selectbox("Technique", techs, key="explorer_tech")
-        card = query.branch_card(CONN, ingredient, tech)
-        if card:
-            part = (query.available_filter(CONN, card["transformation_id"], avail)
-                    if avail else None)
-            _md(branch_card_html(card, available=part))
-            export_buttons(export.render_branch_markdown(card, part), "branch.md")
+    subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
+
+    with subject:
+        _md('<div class="eyebrow">Ingredient</div>')
+        ingredient = st.selectbox(
+            "Ingredient", trees, key="explorer_ing",
+            label_visibility="collapsed",
+            index=trees.index("cabbage") if "cabbage" in trees else 0)
+        techs = query.techniques_for_ingredient(CONN, ingredient)
+        _md(subject_column_html(
+            ingredient, "ingredient",
+            note=f"{len(techs)} ways to transform it, "
+                 f"ranked cooking before preservation."))
+        _md('<div class="eyebrow subject-block">Mode</div>')
+        mode = pill_radio("Mode", ["Best branches", "Choose technique"],
+                          "explorer_mode")
+
+    with answer:
+        if mode == "Choose technique":
+            tech = st.selectbox("Technique", techs, key="explorer_tech")
+            card = query.branch_card(CONN, ingredient, tech)
+            if card:
+                part = (query.available_filter(CONN, card["transformation_id"], avail)
+                        if avail else None)
+                _md(branch_card_html(card, available=part, lead=True))
+                export_buttons(export.render_branch_markdown(card, part), "branch.md")
+            else:
+                st.write(f"No transformation for {ingredient}/{tech}.")
         else:
-            st.write(f"No transformation for {ingredient}/{tech}.")
-    else:
-        cards = query.all_branch_cards(CONN, ingredient)
-        shown = cards[:5]
-        st.markdown(
-            f'<div class="eyebrow">Showing top {len(shown)} of {len(cards)} branches · '
-            f'ranked cooking-before-preservation</div>', unsafe_allow_html=True)
-        md_parts = []
-        for c in shown:
-            part = (query.available_filter(CONN, c["transformation_id"], avail)
-                    if avail else None)
-            _md(branch_card_html(c, available=part))
-            md_parts.append(export.render_branch_markdown(c, part))
-        export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
+            cards = query.all_branch_cards(CONN, ingredient)
+            shown = cards[:5]
+            _md(f'<div class="eyebrow">Showing top {len(shown)} of {len(cards)} '
+                f'branches · ranked cooking-before-preservation</div>')
+            md_parts = []
+            for i, c in enumerate(shown):
+                part = (query.available_filter(CONN, c["transformation_id"], avail)
+                        if avail else None)
+                # the top-ranked branch carries the accent border
+                _md(branch_card_html(c, available=part, lead=(i == 0)))
+                md_parts.append(export.render_branch_markdown(c, part))
+            export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
 
 
 def tab_map() -> None:
@@ -199,15 +217,19 @@ def tab_journeys() -> None:
 
 
 def tab_component_explorer(available_items: list[str] | None = None) -> None:
-    st.markdown('<div class="section-title">Component Explorer</div>',
-                unsafe_allow_html=True)
     comps = query.components_list(CONN)
     default = "roasted_tomato_component" if "roasted_tomato_component" in comps else comps[0]
-    comp = st.selectbox("Component", comps, index=comps.index(default),
-                        key="component_explorer_comp")
+    subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
+
+    with subject:
+        _md('<div class="eyebrow">Component — an after-state</div>')
+        comp = st.selectbox("Component", comps, index=comps.index(default),
+                            label_visibility="collapsed",
+                            key="component_explorer_comp")
     d = query.component_card(CONN, comp)
     if not d:
-        st.write("No component named", comp)
+        with answer:
+            st.write("No component named", comp)
         return
     producers = d.get("produced_by") or []
     prod_str = ", ".join(f"{p['ingredient']} + {p['technique']}" for p in producers) or "(no producing transformation)"
@@ -231,38 +253,37 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
             )
         moves_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
 
-    _md(f"""
-    <div class="card info">
-      <div class="card-head"><span class="card-tech">{_esc(d["name"])}</span>
-        <span class="card-comp">{_esc(d.get("kind") or "")}</span></div>
-      <div class="card-shift">came from: <b>{_esc(prod_str)}</b></div>
-      <div class="row"><span class="lbl">Storage</span><div class="val">
-        keeps {_esc(d.get("keeps_well") or "—")} ·
-        freezes: {"yes" if d.get("freezes_well") else "no"} ·
-        batch: {_esc(d.get("batch_prep_value") or "—")}</div></div>
-      <div class="row"><span class="lbl">Tags</span><div class="chips">{tag_chips or '<span class="chip" style="color:var(--ink-5)">—</span>'}</div></div>
-      {f'<div class="row"><span class="lbl">Risks</span><div class="chips">{"".join(chip(r,"risk") for r in risks)}</div></div>' if risks else ''}
-      {f'<div class="row"><span class="lbl">May need</span><div class="chips">{"".join(chip(r,"missing") for r in missing)}</div></div>' if missing else ''}
-      <div class="row"><span class="lbl">{"Next moves" if not part else "Next moves · what you have"}</span><div>{moves_html}</div></div>
-      <div class="row"><span class="lbl">Use in</span><div class="chips">{chips(d.get("uses") or [])}</div></div>
-      {debug_block("Show data rows", d)}
-    </div>
-    """)
-    export_buttons(export.render_component_markdown(d, part), "component.md")
+    with subject:
+        _md(subject_column_html(
+            comp, "component",
+            note="A component is a state you already have — you do not always "
+                 "start from raw. This one came from "
+                 f"{prod_str}."))
+        _md(f'<div class="eyebrow subject-block">Storage</div>'
+            f'<div class="subject-note">keeps {_esc(d.get("keeps_well") or "—")} · '
+            f'{"freezes well" if d.get("freezes_well") else "does not freeze"} · '
+            f'{_esc(d.get("batch_prep_value") or "—")} batch value</div>')
 
-    routes = query.flavour_routes_for_component(CONN, comp, available_items=avail)
-    if routes:
-        st.markdown(
-            f'<div class="section-title">Flavour Routes <span class="count">'
-            f'{len(routes)} direction{"s" if len(routes) != 1 else ""} from this state</span></div>',
-            unsafe_allow_html=True)
-        for r in routes:
-            _md(route_card_html(r))
+    with answer:
+        _md(f"""
+        <div class="card">
+          <div class="row"><span class="lbl">Tags</span><div class="chips">{tag_chips or '<span class="chip muted">—</span>'}</div></div>
+          {f'<div class="row"><span class="lbl">Risks</span><div class="chips">{"".join(chip(r,"risk") for r in risks)}</div></div>' if risks else ''}
+          {f'<div class="row"><span class="lbl">May need</span><div class="chips">{"".join(chip(r,"missing") for r in missing)}</div></div>' if missing else ''}
+          <div class="row"><span class="lbl">{"Next moves" if not part else "Next moves · what you have"}</span><div>{moves_html}</div></div>
+          <div class="row"><span class="lbl">Use in</span><div class="chips">{chips(d.get("uses") or [])}</div></div>
+          {debug_block("Show data rows", d)}
+        </div>
+        """)
+        export_buttons(export.render_component_markdown(d, part), "component.md")
 
-    st.markdown(
-        '<div class="hint">A component is an <b>after-state</b>. You do not always '
-        'start from raw cabbage/tomato/potato — pick the component you already have.</div>',
-        unsafe_allow_html=True)
+        routes = query.flavour_routes_for_component(CONN, comp, available_items=avail)
+        if routes:
+            _md(f'<div class="eyebrow">Flavour routes — '
+                f'{len(routes)} direction{"s" if len(routes) != 1 else ""} '
+                f'from this state</div>')
+            for r in routes:
+                _md(route_card_html(r))
 
 
 def tab_plate_balance(available_items: list[str] | None = None) -> None:
@@ -282,11 +303,11 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
 
     gap_n = len(r["target_gap"])
     more_n = len(r["flagged_more"])
-    h_cls = "k-warn" if r["leans_heavy"] else "k-ok"
+    h_cls = "k-warn k-heavy" if r["leans_heavy"] else "k-ok"
     _md(f"""
     <div class="kpis">
       <div class="kpi"><div class="lbl">Items</div><div class="val">{len(r['items'])}</div><div class="foot">on the plate</div></div>
-      <div class="kpi k-risk"><div class="lbl">Hard gaps</div><div class="val">{gap_n}</div><div class="foot">target roles missing</div></div>
+      <div class="kpi {'k-risk' if gap_n else ''}"><div class="lbl">Hard gaps</div><div class="val">{gap_n}</div><div class="foot">target roles missing</div></div>
       <div class="kpi k-warn"><div class="lbl">May want more</div><div class="val">{more_n}</div><div class="foot">soft flags</div></div>
       <div class="kpi {h_cls}"><div class="lbl">Heaviness</div><div class="val">{r['plate_heaviness'] if r['plate_heaviness'] is not None else '—'}</div><div class="foot">{r['heaviness_label'] or 'unknown'}</div></div>
     </div>
@@ -370,60 +391,63 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
 
 
 def tab_filler_profiles() -> None:
-    st.markdown('<div class="section-title">Filler Profiles <span class="count">the PIM tab</span></div>',
-                unsafe_allow_html=True)
     ings = query.ingredients_list(CONN)
     default = "lemon" if "lemon" in ings else ings[0]
-    name = st.selectbox("Filler", ings, index=ings.index(default),
-                        key="filler_profile_name")
-    d = query.filler_profile_detail(CONN, name)
-    if not d["found"]:
-        st.write(d["mode"])
-        return
-    mode_cls = {"cook": "cook", "scout": "scout", "both": "info", "none": "muted"}[d["mode_kind"]]
-    kind_label = {"full": "full ingredient (has a technique tree)",
-                  "both": "both (technique tree + filler)",
-                  "filler": "filler"}.get(d["kind"], d["kind"])
-    pair_rows = []
-    for p in d["pairings"][:8]:
-        tgt = f"{p['target']} {p['technique']}" if p.get("target") else "(general)"
-        pair_rows.append(
-            f'<div class="row"><span class="lbl">{_esc(p["role"])}</span><div class="val">'
-            f'{_esc(tgt)} <span class="chip {p["conf"]}">{_esc(p["conf"])}</span></div></div>'
-        )
-    _md(f"""
-    <div class="card {mode_cls}">
-      <div class="card-head"><span class="card-tech">{_esc(d["name"])}</span>
-        <span class="card-comp">{_esc(kind_label)}</span></div>
-      <div class="row"><span class="lbl">Roles</span><div class="chips">{chips(d["roles"])}</div></div>
-      <div class="row"><span class="lbl">Repairs</span><div class="chips">{chips(d["repairs"])}</div></div>
-      <div class="row"><span class="lbl">Avoid when</span><div class="chips">{chips(d["avoid_when"])}</div></div>
-      <div class="row"><span class="lbl">FI shop</span><div class="val">{_esc(d["availability"])}</div></div>
-      <div class="row"><span class="lbl">Mode</span><div class="val">{_esc(d["mode"])}</div></div>
-      {"".join(pair_rows) if pair_rows else '<div class="row"><span class="lbl">Pairings</span><div class="val" style="color:var(--ink-5)">none yet</div></div>'}
-      {debug_block("Show data rows", d)}
-    </div>
-    """)
-    if d["kind"] == "full":
-        st.markdown(
-            f'<div class="hint">{_esc(d["name"])} has a technique tree — see it in the '
-            '<b>Ingredient Explorer</b> tab.</div>', unsafe_allow_html=True)
+    subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
+
+    with subject:
+        _md('<div class="eyebrow">Filler</div>')
+        name = st.selectbox("Filler", ings, index=ings.index(default),
+                            label_visibility="collapsed",
+                            key="filler_profile_name")
+        d = query.filler_profile_detail(CONN, name)
+        if not d["found"]:
+            st.write(d["mode"])
+            return
+        kind_label = {"full": "both a filler and a full ingredient",
+                      "both": "both a filler and a full ingredient",
+                      "filler": "a filler — no technique tree of its own"}.get(
+                          d["kind"], d["kind"])
+        _md(subject_column_html(name, "filler", note=kind_label))
+        if d["kind"] in ("full", "both"):
+            _md('<div class="subject-block"></div>')
+            st.button(f"See {name}'s branches", key="filler_to_explorer",
+                      on_click=_goto_explorer, args=(name,))
+
+    with answer:
+        _md(f"""
+        <div class="card">
+          <div class="row"><span class="lbl">Roles</span><div class="chips">{chips(d["roles"], "flavour")}</div></div>
+          <div class="row"><span class="lbl">Repairs</span><div class="chips">{chips(d["repairs"], "have")}</div></div>
+          <div class="row"><span class="lbl">Avoid when</span><div class="chips">{chips(d["avoid_when"], "missing")}</div></div>
+          <div class="row"><span class="lbl">FI shop</span><div class="val">{_esc(d["availability"])}</div></div>
+          <div class="row"><span class="lbl">Mode</span><div class="val">{_esc(d["mode"])}</div></div>
+          {debug_block("Show data rows", d)}
+        </div>
+        """)
+        _md('<div class="eyebrow">Pairings</div>')
+        if d["pairings"]:
+            rows = "".join(
+                f'<tr><td>{_esc(p["role"])}</td>'
+                f'<td>{_esc((p["target"] + " " + p["technique"]) if p.get("target") else "(general)")}</td>'
+                f'<td>{conf_pill(p["conf"])}</td></tr>'
+                for p in d["pairings"][:8])
+            _md('<table class="table"><thead><tr><th>Role</th>'
+                '<th>Works best with</th><th>Confidence</th></tr></thead>'
+                f'<tbody>{rows}</tbody></table>')
+        else:
+            _md('<div class="hint">No pairings recorded yet.</div>')
+
+
+def _goto_explorer(name: str) -> None:
+    st.session_state["explorer_ing"] = name
+    st.session_state["active_tab"] = "Ingredient Explorer"
 
 
 def tab_scout() -> None:
     st.markdown('<div class="section-title">Scout <span class="count">'
                 'generated hypotheses from analogy rules</span></div>',
                 unsafe_allow_html=True)
-    _md("""
-    <div class="disclaimer">
-      <span class="eyebrow">Scout mode</span>
-      Hypotheses are generated from reusable analogy rules applied to transformed
-      states. They are <b>not classics</b> — they are role-compatible but uncommon
-      ideas. Taste a small amount before serving. Each hypothesis shows its
-      compatibility evidence, novelty status (if checked), and a test protocol.
-    </div>
-    """)
-
     comps = query.components_list(CONN)
     state_comps = []
     for c in comps:
@@ -437,31 +461,57 @@ def tab_scout() -> None:
         return
 
     default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
-    comp = st.selectbox("Transformed state", state_comps,
-                        index=state_comps.index(default),
-                        key="tab_scout_component_select")
+    subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
+
+    with subject:
+        _md('<div class="eyebrow">Transformed state</div>')
+        comp = st.selectbox("Transformed state", state_comps,
+                            index=state_comps.index(default),
+                            label_visibility="collapsed",
+                            key="tab_scout_component_select")
+        profile = query.component_state_profile(CONN, comp)
+        tags = (profile or {}).get("flavour_tags") or []
+        _md(subject_column_html(comp, "state"))
+        if tags:
+            _md(f'<div class="chips subject-block">'
+                f'{chips([t.replace("_", " ") for t in tags], "flavour")}</div>')
 
     hypotheses = query.generate_scout_hypotheses(CONN, comp)
-    if not hypotheses:
-        st.markdown(
-            f'<div class="hint">No generated hypotheses for <b>{_esc(comp)}</b>.</div>',
-            unsafe_allow_html=True)
-        return
-
     candidates = [h for h in hypotheses if h["candidate_class"] != "rejected"]
     rejected = [h for h in hypotheses if h["candidate_class"] == "rejected"]
 
-    st.markdown(
-        f'<div class="eyebrow">{len(candidates)} candidate{"s" if len(candidates) != 1 else ""} · '
-        f'{len(rejected)} rejected</div>', unsafe_allow_html=True)
+    with subject:
+        if hypotheses:
+            _md('<div class="eyebrow subject-block">Other candidates</div>'
+                + "".join(
+                    f'<div class="subject-note">{_esc(h["candidate"].replace("_", " "))}</div>'
+                    for h in candidates[1:])
+                + (f'<div class="subject-note" style="color:var(--neutral-700)">'
+                   f'{len(rejected)} rejected, with reasons</div>' if rejected else ""))
 
-    for h in candidates:
-        _md(hypothesis_card_html(h))
-
-    if rejected:
-        with st.expander(f"Show {len(rejected)} rejected hypotheses", expanded=False):
-            for h in rejected:
-                _md(hypothesis_card_html(h))
+    with answer:
+        _md("""
+        <div class="disclaimer">
+          <span class="eyebrow">Scout mode</span>
+          Hypotheses come from reusable analogy rules applied to transformed
+          states. They are <b>not classics</b> — they are role-compatible but
+          uncommon. Taste a small amount before serving.
+        </div>
+        """)
+        if not hypotheses:
+            _md(f'<div class="hint">No generated hypotheses for '
+                f'<b>{_esc(comp)}</b>.</div>')
+            return
+        _md(f'<div class="eyebrow">{len(candidates)} '
+            f'candidate{"s" if len(candidates) != 1 else ""} · '
+            f'{len(rejected)} rejected</div>')
+        for i, h in enumerate(candidates):
+            _md(hypothesis_card_html(h, lead=(i == 0)))
+        if rejected:
+            with st.expander(f"Show {len(rejected)} rejected hypotheses",
+                             expanded=False):
+                for h in rejected:
+                    _md(hypothesis_card_html(h))
 
 
 def tab_taste_circle() -> None:
@@ -935,7 +985,7 @@ def tab_rail() -> str:
     the value string character by character), which would cost us the smoke
     tests. CSS turns the radio into the handoff's pill row.
     """
-    with st.container(key="tab_rail"):
+    with st.container(key="tab_rail_pills"):
         active = st.radio(
             "Section", list(TABS), horizontal=True,
             label_visibility="collapsed", key="active_tab",
