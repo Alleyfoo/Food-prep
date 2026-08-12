@@ -1443,7 +1443,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: stone_fruit_for_tomato_in_cool_salad
   component: green_mango_slaw_component
@@ -1480,7 +1480,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: zaatar_for_basil_on_fresh_tomato
   component: green_mango_slaw_component
@@ -1635,7 +1635,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: warm_seed_for_nutmeg_on_root_mash
   component: mashed_rutabaga_component
@@ -2238,7 +2238,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: stone_fruit_for_tomato_in_cool_salad
   component: raw_rutabaga_slaw_component
@@ -2249,7 +2249,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: pomegranate_for_apple_on_raw_slaw
   component: raw_rutabaga_slaw_component
@@ -2591,7 +2591,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
   component: roasted_apricot_component
@@ -2639,7 +2639,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: anchovy_for_bacon_on_potato_soup
   component: roasted_broccoli_component
@@ -2847,7 +2847,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: anchovy_for_bacon_on_potato_soup
   component: roasted_cabbage_component
@@ -3371,7 +3371,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
   component: roasted_rutabaga_component
@@ -3408,7 +3408,7 @@ observations:
   contexts: null
   target_covered: true
   candidate_covered: true
-  result_class: not_observed
+  result_class: underpowered
   observed_at: '2026-08-12'
 - analogy_id: anchovy_for_bacon_on_potato_soup
   component: roasted_tomato_component

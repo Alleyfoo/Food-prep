@@ -138,3 +138,27 @@ def test_unresolvable_pairings_make_no_claim(fresh):
         """SELECT observed_count FROM novelty_observations
            WHERE result_class = 'insufficient_coverage'""").fetchall()
     assert rows, "over half of ours do not resolve; that should be visible"
+
+
+def test_absence_is_only_claimed_where_the_corpus_could_have_shown_it(fresh):
+    """Two rare ingredients failing to meet is not a discovery.
+
+    miso is in 0.23% of recipes and rutabaga in 0.14%, so 45k recipes expect
+    them to co-occur 0.15 times. Finding none is exactly what chance predicts.
+    Ten of the original eleven "not observed" findings were this.
+    """
+    from foodprep.corpus import MIN_EXPECTED_FOR_ABSENCE
+    assert MIN_EXPECTED_FOR_ABSENCE >= 1
+    classes = {r[0] for r in fresh.execute(
+        "SELECT DISTINCT result_class FROM novelty_observations")}
+    assert "underpowered" in classes, (
+        "rare-versus-rare pairings must be separated from real absences")
+
+
+def test_underpowered_is_not_reported_as_novel(fresh):
+    from foodprep.ui.render import claim_cards_html
+    html = claim_cards_html({"candidate_class": "scout_candidate",
+                             "novelty": {"class": "underpowered",
+                                         "observed_count": 0}})
+    assert "Too rare to tell" in html
+    assert "Not observed" not in html

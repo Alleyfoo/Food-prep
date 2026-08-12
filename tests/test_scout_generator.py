@@ -33,7 +33,7 @@ def test_roasted_broccoli_generates_analogy_candidates(conn):
         novelty = hypothesis["novelty"]
         assert novelty["class"] in {
             "not_observed", "rare", "uncommon", "established", "common",
-            "insufficient_coverage",
+            "insufficient_coverage", "underpowered",
         }
         if novelty["class"] == "not_observed":
             assert novelty["target_covered"] and novelty["candidate_covered"]

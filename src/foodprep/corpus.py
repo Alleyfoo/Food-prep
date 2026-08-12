@@ -162,11 +162,27 @@ def cooccurrence(entity_recipes: dict[int, set[int]],
     return len(shared), "\n".join(contexts)
 
 
-def novelty_class(observed_count: int, covered: bool) -> str:
-    """Transparent provisional classes based on distinct recipe occurrence."""
+#: Below this many expected co-occurrences, a zero is indistinguishable from
+#: chance. miso appears in 0.23% of recipes and rutabaga in 0.14%, so the two
+#: are expected to meet 0.15 times in 45k recipes — finding none is not a
+#: discovery. Absence is only evidence where the corpus had a real chance to
+#: show the pairing.
+MIN_EXPECTED_FOR_ABSENCE = 3.0
+
+
+def novelty_class(observed_count: int, covered: bool,
+                  expected_count: float | None = None) -> str:
+    """Transparent provisional classes based on distinct recipe occurrence.
+
+    *expected_count* is N x p(target) x p(candidate) — how often the pairing
+    would turn up by chance if the two were independent. Without enough of it
+    a zero cannot be called novel, only unmeasurable.
+    """
     if not covered:
         return "insufficient_coverage"
     if observed_count == 0:
+        if expected_count is not None and expected_count < MIN_EXPECTED_FOR_ABSENCE:
+            return "underpowered"
         return "not_observed"
     if observed_count == 1:
         return "rare"
@@ -218,7 +234,8 @@ def observe_hypotheses(
     target_covered = bool(target_entities) and any(
         entity_recipes.get(entity) for entity in target_entities
     )
-    summary = {"observed": 0, "not_observed": 0, "insufficient_coverage": 0}
+    summary = {"observed": 0, "not_observed": 0, "insufficient_coverage": 0,
+               "underpowered": 0}
     for hypothesis in generate_scout_hypotheses(conn, component_name):
         candidate_entities = resolve_novelty_entities(
             hypothesis["candidate"], name_index
@@ -228,11 +245,21 @@ def observe_hypotheses(
         )
         covered = target_covered and candidate_covered
         count, contexts = (0, "")
+        expected = None
         if covered:
             count, contexts = cooccurrence(
                 entity_recipes, recipe_titles, candidate_entities, target_entities
             )
-        result = novelty_class(count, covered)
+            # How often the two would meet by chance, so a zero can be judged.
+            target_recipes: set[int] = set()
+            for e in target_entities:
+                target_recipes |= entity_recipes.get(e, set())
+            candidate_recipes: set[int] = set()
+            for e in candidate_entities:
+                candidate_recipes |= entity_recipes.get(e, set())
+            n_recipes = len(recipe_titles) or 1
+            expected = len(target_recipes) * len(candidate_recipes) / n_recipes
+        result = novelty_class(count, covered, expected)
         context_count = count  # every CulinaryDB recipe id is one distinct context
         candidate_id = conn.execute(
             "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?",
@@ -261,6 +288,8 @@ def observe_hypotheses(
             summary["insufficient_coverage"] += 1
         elif result == "not_observed":
             summary["not_observed"] += 1
+        elif result == "underpowered":
+            summary["underpowered"] += 1
         else:
             summary["observed"] += 1
     conn.commit()

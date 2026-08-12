@@ -121,6 +121,7 @@ def test_a_dressing_outranks_a_cooking_medium(conn):
     ("uncommon", "Uncommon"),
     ("established", "Seen before"),
     ("common", "Seen before"),
+    ("underpowered", "Too rare to tell"),
     ("insufficient_coverage", "Cannot tell"),
     ("not_checked", "Not checked"),
 ])
@@ -139,7 +140,8 @@ def test_no_class_renders_as_seen_before_with_zero_occurrences():
     """The specific contradiction that slipped through."""
     from foodprep.ui.render import claim_cards_html
     for nclass in ("not_observed", "rare", "uncommon", "established",
-                   "common", "insufficient_coverage", "not_checked"):
+                   "common", "insufficient_coverage", "underpowered",
+                   "not_checked"):
         html = claim_cards_html({"candidate_class": "scout_candidate",
                                  "novelty": {"class": nclass, "observed_count": 0}})
         assert not ("Seen before" in html and "0 co-occurrences" in html)

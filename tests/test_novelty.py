@@ -28,11 +28,17 @@ def test_observation_records_corpus_scope_and_occurrence(conn, tmp_path):
     # rye_crumbs, tahini, rosemary, horseradish, miso, eggs, anchovy, dill, and other
     # candidates have no entity in the synthetic corpus, so they land honestly in
     # insufficient_coverage, not zero.
-    assert summary == {"observed": 1, "not_observed": 1, "insufficient_coverage": 15}
+    # A three-recipe corpus cannot support a novelty claim: the pairing would
+    # not be expected to appear even if everyone cooked it. That is what
+    # `underpowered` says, and saying it is the point.
+    assert summary == {"observed": 1, "not_observed": 0, "underpowered": 1,
+                       "insufficient_coverage": 15}
     by_candidate = {h["candidate"]: h for h in after}
     assert by_candidate["brown_butter"]["novelty"]["class"] == "rare"
     assert by_candidate["brown_butter"]["novelty"]["observed_count"] == 1
-    assert by_candidate["lingonberry_vinegar"]["novelty"]["class"] == "not_observed"
+    # Underpowered rather than not_observed: with this corpus the absence
+    # carries no information (see corpus.MIN_EXPECTED_FOR_ABSENCE).
+    assert by_candidate["lingonberry_vinegar"]["novelty"]["class"] == "underpowered"
     assert by_candidate["brown_butter"]["novelty"]["scope"] == "3 synthetic savoury recipes"
     assert {h["analogy_id"]: h["compatibility_score"] for h in after} == compatibility
 
@@ -85,7 +91,9 @@ def test_novelty_observations_survive_ontology_rebuild(conn, tmp_path):
     assert by_candidate["brown_butter"]["novelty"]["class"] == "rare"
     assert by_candidate["brown_butter"]["novelty"]["scope"] == "3 synthetic savoury recipes"
     assert by_candidate["brown_butter"]["novelty"]["search_date"] == "2026-07-12"
-    assert by_candidate["lingonberry_vinegar"]["novelty"]["class"] == "not_observed"
+    # Underpowered rather than not_observed: with this corpus the absence
+    # carries no information (see corpus.MIN_EXPECTED_FOR_ABSENCE).
+    assert by_candidate["lingonberry_vinegar"]["novelty"]["class"] == "underpowered"
     stored_corpus = conn.execute(
         "SELECT name, recipe_count FROM corpora WHERE corpus_id = 'culinarydb'"
     ).fetchone()
@@ -152,3 +160,16 @@ def test_novelty_cli_parser():
     assert args.component == "roasted_broccoli_component"
     assert args.corpus_id == "test"
     assert args.scope == "test recipes"
+
+
+def test_a_big_enough_corpus_can_still_claim_absence(tmp_path):
+    """The power gate must not make novelty unclaimable — only unclaimable
+    when the corpus had no real chance of showing the pairing."""
+    from foodprep.corpus import MIN_EXPECTED_FOR_ABSENCE, novelty_class
+    # plenty of expected co-occurrences, none observed -> a real finding
+    assert novelty_class(0, True, expected_count=MIN_EXPECTED_FOR_ABSENCE * 3) == "not_observed"
+    # too rare for the absence to mean anything
+    assert novelty_class(0, True, expected_count=0.15) == "underpowered"
+    # unchanged when nothing is known about the base rate
+    assert novelty_class(0, True) == "not_observed"
+    assert novelty_class(0, False, expected_count=99) == "insufficient_coverage"

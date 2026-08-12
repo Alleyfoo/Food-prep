@@ -237,6 +237,11 @@ def claim_cards_html(h: dict) -> str:
         n_title = "Seen before"
         n_body = (f"{count} recipes across {scope}. A count says how popular "
                   f"the ingredients are, not whether the pairing is good.")
+    elif nclass == "underpowered":
+        n_title = "Too rare to tell"
+        n_body = ("Both sides are uncommon enough that the corpus would not be "
+                  "expected to show this pairing even if cooks make it. "
+                  "Finding none proves nothing.")
     elif nclass == "insufficient_coverage":
         n_title = "Cannot tell"
         n_body = ("One side of this pairing is not in the corpus, so no claim "
