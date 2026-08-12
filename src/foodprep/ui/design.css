@@ -464,6 +464,17 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 }
 
 /* ============= HYPOTHESIS CARDS (Scout engine) ============= */
+.claim-pair {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.claim-pair .card { margin-bottom: 0; }
+.claim-title {
+  font-family: var(--heading); font-size: 28px; line-height: 1.15;
+  margin-bottom: var(--space-2);
+}
+.smallest-test { background: var(--surface-2); }
+
 .card.hypothesis {
   border-left-color: var(--purple);
 }
@@ -472,6 +483,8 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   margin-bottom: 6px;
 }
 .hyp-candidate {
+  font-family: var(--heading) !important; font-size: 32px !important;
+  line-height: 1.15 !important; text-transform: capitalize;
   font-size: 15px; font-weight: 600; color: var(--ink);
 }
 .hyp-class {
@@ -483,6 +496,8 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 .hyp-class.weak_hypothesis { color: var(--ink-4); background: var(--bg-2); }
 .hyp-class.rejected { color: var(--red); background: var(--red-tint); }
 .hyp-explanation {
+  font-size: 17px !important; line-height: 1.55 !important;
+  color: var(--ink) !important;
   font-size: 14px; color: var(--ink-3); line-height: 1.5;
   margin: 4px 0 8px; padding: 6px 10px;
   background: var(--surface-2); border-radius: var(--r-pill);
@@ -556,6 +571,25 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 .novelty-badge.not_checked { color: var(--ink-5); background: var(--bg-2); font-style: italic; }
 
 /* ============= JOURNEY CARDS ============= */
+.journey-chain {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--space-1); margin: var(--space-2) 0 var(--space-3);
+}
+.chain-arrow { color: var(--neutral-500); font-size: 15px; margin: 0 2px; }
+.tag {
+  display: inline-flex; align-items: center; font-size: 14px;
+  padding: 3px 12px; border-radius: var(--r-pill);
+  border: 1px solid transparent; white-space: nowrap;
+}
+.tag-accent   { background: var(--filler-100); color: var(--filler-800); }
+.tag-accent-2 { background: var(--ingredient-100); color: var(--ingredient-800); }
+.tag-neutral  { background: var(--neutral-100); color: var(--neutral-800); }
+.tag-outline  { border-color: var(--primary); color: var(--primary); }
+.card .card-kicker {
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  font-weight: 600; color: var(--primary); margin-bottom: var(--space-1);
+}
+
 .card.journey {
   border-left-color: var(--green-deep);
 }

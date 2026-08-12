@@ -29,7 +29,8 @@ from foodprep import export, query
 from foodprep.ui.render import (
     _esc, chip, chips, conf_pill, debug_block, tag_class,
     available_partition_html, branch_card_html, subject_column_html,
-    hypothesis_card_html, journey_card_html, route_card_html,
+    claim_cards_html, hypothesis_card_html, journey_card_html,
+    route_card_html, smallest_test_html, trial_history_html,
 )
 from foodprep.ui.graph import (
     TASTE_DIMENSIONS, build_ingredient_graph, build_scout_graph,
@@ -58,12 +59,12 @@ CONN = get_conn()
 
 
 def export_buttons(md: str, filename: str) -> None:
+    """Getting the data out stays; the inline preview and the raw-row dump
+    were scaffolding and are gone."""
     if not md:
         return
     st.download_button("Download .md", md, file_name=filename,
                        mime="text/markdown", key=f"dl_{filename}")
-    with st.expander("Markdown", expanded=False):
-        st.code(md, language="markdown")
 
 
 def topbar() -> None:
@@ -197,23 +198,25 @@ def tab_scout_map() -> None:
 
 
 def tab_journeys() -> None:
-    st.markdown('<div class="section-title">Journeys <span class="count">'
-                'complete Cook paths for an ingredient</span></div>',
-                unsafe_allow_html=True)
     trees = query.tree_ingredients(CONN)
-    ingredient = st.selectbox("Ingredient", trees, key="journey_ing",
-                              index=trees.index("broccoli") if "broccoli" in trees else 0)
-    journeys = query.ingredient_journeys(CONN, ingredient)
-    if not journeys:
-        st.markdown(
-            f'<div class="hint">No complete journeys modelled for <b>{_esc(ingredient)}</b> yet.</div>',
-            unsafe_allow_html=True)
-        return
-    st.markdown(
-        f'<div class="eyebrow">{len(journeys)} journey{"s" if len(journeys) != 1 else ""}</div>',
-        unsafe_allow_html=True)
-    for j in journeys:
-        _md(journey_card_html(j))
+    col, _pad = st.columns([2.4, 1], gap="large")
+    with col:
+        ingredient = st.selectbox(
+            "Ingredient", trees, key="journey_ing", label_visibility="collapsed",
+            index=trees.index("broccoli") if "broccoli" in trees else 0)
+        journeys = query.ingredient_journeys(CONN, ingredient)
+        if not journeys:
+            _md(f'<div class="hint">No complete journeys modelled for '
+                f'<b>{_esc(ingredient)}</b> yet.</div>')
+            return
+        _md(f'<div class="h2">{_esc(ingredient.capitalize())} — '
+            f'{len(journeys)} complete cook path'
+            f'{"s" if len(journeys) != 1 else ""}</div>'
+            f'<div class="hint">Each one reads left to right: preparation → '
+            f'transformation → sensory change → flavour route → correction → '
+            f'destination.</div>')
+        for i, j in enumerate(journeys, start=1):
+            _md(journey_card_html(j, index=i))
 
 
 def tab_component_explorer(available_items: list[str] | None = None) -> None:
@@ -272,7 +275,6 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
           {f'<div class="row"><span class="lbl">May need</span><div class="chips">{"".join(chip(r,"missing") for r in missing)}</div></div>' if missing else ''}
           <div class="row"><span class="lbl">{"Next moves" if not part else "Next moves · what you have"}</span><div>{moves_html}</div></div>
           <div class="row"><span class="lbl">Use in</span><div class="chips">{chips(d.get("uses") or [])}</div></div>
-          {debug_block("Show data rows", d)}
         </div>
         """)
         export_buttons(export.render_component_markdown(d, part), "component.md")
@@ -430,7 +432,6 @@ def tab_filler_profiles() -> None:
           <div class="row"><span class="lbl">Avoid when</span><div class="chips">{chips(d["avoid_when"], "missing")}</div></div>
           <div class="row"><span class="lbl">FI shop</span><div class="val">{_esc(d["availability"])}</div></div>
           <div class="row"><span class="lbl">Mode</span><div class="val">{_esc(d["mode"])}</div></div>
-          {debug_block("Show data rows", d)}
         </div>
         """)
         _md('<div class="eyebrow">Pairings</div>')
@@ -452,23 +453,23 @@ def _goto_explorer(name: str) -> None:
     st.session_state["active_tab"] = "Ingredient Explorer"
 
 
-def tab_scout() -> None:
-    st.markdown('<div class="section-title">Scout <span class="count">'
-                'generated hypotheses from analogy rules</span></div>',
-                unsafe_allow_html=True)
-    comps = query.components_list(CONN)
-    state_comps = []
-    for c in comps:
-        if query.component_state_profile(CONN, c) is not None:
-            state_comps.append(c)
+def _scout_step(n: int) -> None:
+    st.session_state.scout_index = st.session_state.get("scout_index", 0) + n
 
+
+def tab_scout(available_items: list[str] | None = None) -> None:
+    """Scout — one hypothesis at a time, with its two claims kept separate."""
+    on_hand = set(available_items or [])
+    comps = query.components_list(CONN)
+    state_comps = [c for c in comps
+                   if query.component_state_profile(CONN, c) is not None]
     if not state_comps:
-        st.markdown('<div class="hint">No components with state profiles found. '
-                    'Run <code>foodprep build</code> first.</div>',
-                    unsafe_allow_html=True)
+        _md('<div class="hint">No components with state profiles found. '
+            'Run <code>foodprep build</code> first.</div>')
         return
 
-    default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
+    default = ("roasted_broccoli_component"
+               if "roasted_broccoli_component" in state_comps else state_comps[0])
     subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
 
     with subject:
@@ -477,49 +478,91 @@ def tab_scout() -> None:
                             index=state_comps.index(default),
                             label_visibility="collapsed",
                             key="tab_scout_component_select")
-        profile = query.component_state_profile(CONN, comp)
-        tags = (profile or {}).get("flavour_tags") or []
-        _md(subject_column_html(comp, "state"))
-        if tags:
-            _md(f'<div class="chips subject-block">'
-                f'{chips([t.replace("_", " ") for t in tags], "flavour")}</div>')
 
     hypotheses = query.generate_scout_hypotheses(CONN, comp)
     candidates = [h for h in hypotheses if h["candidate_class"] != "rejected"]
     rejected = [h for h in hypotheses if h["candidate_class"] == "rejected"]
 
+    # Which hypothesis is on show. Changing state starts again at the first.
+    if st.session_state.get("scout_state") != comp:
+        st.session_state.scout_state = comp
+        st.session_state.scout_index = 0
+    idx = st.session_state.get("scout_index", 0) % max(1, len(candidates))
+    current = candidates[idx] if candidates else None
+
+    profile = query.component_state_profile(CONN, comp)
+    tags = (profile or {}).get("flavour_tags") or []
+    pretty = comp.replace("_component", "").replace("_", " ")
+
     with subject:
-        if hypotheses:
-            _md('<div class="eyebrow subject-block">Other candidates</div>'
-                + "".join(
-                    f'<div class="subject-note">{_esc(h["candidate"].replace("_", " "))}</div>'
-                    for h in candidates[1:])
+        _md(subject_column_html(comp, "state"))
+        if tags:
+            _md(f'<div class="chips">'
+                f'{chips([t.replace("_", " ") for t in tags], "flavour")}</div>')
+        # One candidate can arise from several analogy rules, so the same
+        # name would otherwise be listed two or three times.
+        seen: set[str] = {current["candidate"]} if current else set()
+        others: list[str] = []
+        for h in candidates:
+            if h["candidate"] not in seen:
+                seen.add(h["candidate"])
+                others.append(h["candidate"])
+        shown_others, extra = others[:6], max(0, len(others) - 6)
+        if shown_others or rejected:
+            _md('<div class="tcm-rule"></div>'
+                '<div class="eyebrow">Other candidates</div>'
+                + "".join(f'<div class="subject-note">'
+                          f'{_esc(o.replace("_", " "))}</div>'
+                          for o in shown_others)
+                + (f'<div class="subject-note">+ {extra} more</div>'
+                   if extra else "")
                 + (f'<div class="subject-note" style="color:var(--neutral-700)">'
-                   f'{len(rejected)} rejected, with reasons</div>' if rejected else ""))
+                   f'{len(rejected)} rejected, with reasons</div>'
+                   if rejected else ""))
 
     with answer:
-        _md("""
-        <div class="disclaimer">
-          <span class="eyebrow">Scout mode</span>
-          Hypotheses come from reusable analogy rules applied to transformed
-          states. They are <b>not classics</b> — they are role-compatible but
-          uncommon. Taste a small amount before serving.
-        </div>
-        """)
-        if not hypotheses:
+        _md('<div class="disclaimer">Hypotheses come from analogy rules applied '
+            'to transformed states. They are <b>not classics</b>. Taste a small '
+            'amount before serving.</div>')
+        if not current:
             _md(f'<div class="hint">No generated hypotheses for '
-                f'<b>{_esc(comp)}</b>.</div>')
+                f'<b>{_esc(pretty)}</b>.</div>')
             return
-        _md(f'<div class="eyebrow">{len(candidates)} '
-            f'candidate{"s" if len(candidates) != 1 else ""} · '
-            f'{len(rejected)} rejected</div>')
-        for i, h in enumerate(candidates):
-            _md(hypothesis_card_html(h, lead=(i == 0)))
+
+        h = dict(current)
+        h["pairing_title"] = f"{pretty.capitalize()} + {h['candidate'].replace('_', ' ')}"
+        if h["candidate"] in on_hand:
+            h["on_hand"] = h["candidate"]
+        _md(hypothesis_card_html(h))
+        _md(claim_cards_html(h))
+        _md(smallest_test_html(h))
+
+        act_record, act_next, _sp = st.columns([1.3, 1.2, 2])
+        with act_record:
+            st.button("Record a tasting", key="scout_record", type="primary")
+        with act_next:
+            st.button("Next hypothesis", key="scout_next",
+                      on_click=_scout_step, args=(1,),
+                      disabled=len(candidates) < 2)
+        if st.session_state.get("scout_record"):
+            # Tastings are an append-only record written through the CLI;
+            # the UI does not have a write path into the ontology.
+            _md('<div class="hint">Tastings are recorded through the CLI so the '
+                'append-only record stays the single source of truth:</div>')
+            st.code(f"foodprep record-tasting {comp} {h['candidate']}",
+                    language="bash")
+        _md(trial_history_html(h))
+
         if rejected:
             with st.expander(f"Show {len(rejected)} rejected hypotheses",
                              expanded=False):
-                for h in rejected:
-                    _md(hypothesis_card_html(h))
+                for r in rejected:
+                    rr = dict(r)
+                    rr["pairing_title"] = (
+                        f"{pretty.capitalize()} + {r['candidate'].replace('_', ' ')}")
+                    _md(hypothesis_card_html(rr, lead=False))
+                    if r.get("rejection_reason"):
+                        _md(f'<div class="hint">{_esc(r["rejection_reason"])}</div>')
 
 
 def _tc_lock(dim: str) -> None:
@@ -944,7 +987,7 @@ TABS: dict[str, Any] = {
 }
 _TABS_WITH_AVAILABLE = {
     "Ingredient Explorer", "Component Explorer", "Plate Balance",
-    "Taste Circle Map",
+    "Taste Circle Map", "Scout",
 }
 
 

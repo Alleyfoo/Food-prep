@@ -106,7 +106,7 @@ def available_partition_html(part: dict) -> str:
     return "".join(rows)
 
 
-def branch_card_html(d: dict, with_debug: bool = True,
+def branch_card_html(d: dict, with_debug: bool = False,
                      available: dict | None = None,
                      lead: bool = False) -> str:
     """*lead* marks the top-ranked branch, which takes the accent border."""
@@ -162,171 +162,175 @@ def branch_card_html(d: dict, with_debug: bool = True,
 
 
 def hypothesis_card_html(h: dict, with_debug: bool = False,
-                         lead: bool = False) -> str:
-    """Render one generated Scout hypothesis as a card.
+                         lead: bool = True) -> str:
+    """The hypothesis itself: what it is and why, and nothing else.
 
-    *lead* marks the hypothesis being put forward, which takes the accent
-    border and reads first.
+    Compatibility and novelty deliberately live in their own cards — they
+    are two separate claims and must never read as one score.
     """
-    candidate_class = h.get("candidate_class", "weak_hypothesis")
-    novelty = h.get("novelty") or {}
-    novelty_class = novelty.get("class", "not_checked")
-
-    novelty_badge = ""
-    if novelty_class == "not_checked":
-        novelty_badge = '<span class="novelty-badge not_checked">novelty not checked</span>'
-    elif novelty_class == "novel":
-        count = novelty.get("observed_count", 0)
-        scope = novelty.get("scope", "")
-        novelty_badge = f'<span class="novelty-badge novel">novel ({count} occurrences, {_esc(scope)})</span>'
-    else:
-        count = novelty.get("observed_count", 0)
-        scope = novelty.get("scope", "")
-        novelty_badge = f'<span class="novelty-badge seen">seen ({count}×, {_esc(scope)})</span>'
-
-    explanation = h.get("explanation") or ""
-    analogy = h.get("known_pairing") or ""
-    difference = h.get("meaningful_difference") or ""
-    risk = h.get("risk") or ""
-    mechanism = (h.get("mechanism") or "").replace("_", " ")
-    shared_function = h.get("shared_function") or ""
+    rules = []
+    mech = (h.get("mechanism") or "").replace("_", " ")
+    if mech:
+        rules.append(f'<span class="tag tag-neutral">{_esc(mech)}</span>')
+    if h.get("known_pairing"):
+        rules.append('<span class="tag tag-neutral">analogy substitution</span>')
+    if h.get("on_hand"):
+        rules.append(f'<span class="tag tag-accent-2">'
+                     f'{_esc(str(h["on_hand"]).replace("_", " "))} — have it</span>')
 
     parts = [f'<div class="card hypothesis{" lead elev-md" if lead else ""}">']
-    parts.append(
-        f'<div class="hyp-header">'
-        f'<span class="hyp-candidate">{_esc(h.get("candidate", ""))}</span>'
-        f'<span class="hyp-class {candidate_class}">{_esc(candidate_class.replace("_", " "))}</span>'
-        f'{novelty_badge}'
-        f'</div>'
-    )
-    if explanation:
-        parts.append(f'<div class="hyp-explanation">{_esc(explanation)}</div>')
-    parts.append(
-        f'<div class="hyp-meta">'
-        f'<div><span class="lbl">Analogy</span><div class="val">{_esc(analogy)}</div></div>'
-        f'<div><span class="lbl">Shared function</span><div class="val">{_esc(shared_function)}</div></div>'
-        f'<div><span class="lbl">Mechanism</span><div class="val">{_esc(mechanism)}</div></div>'
-        f'<div><span class="lbl">Difference</span><div class="val">{_esc(difference)}</div></div>'
-        f'<div><span class="lbl">Risk</span><div class="val">{_esc(risk)}</div></div>'
-        f'</div>'
-    )
-
-    protocol = h.get("protocol")
-    if protocol:
-        parts.append('<div class="protocol-block">')
-        parts.append('<h5>Smallest test protocol</h5>')
-        for key, label in [
-            ("smallest_test", "Smallest test"),
-            ("starting_ratio", "Starting ratio"),
-            ("success_condition", "Success if"),
-            ("likely_failure", "Likely failure"),
-            ("corrections", "Corrections"),
-            ("safety_note", "Safety"),
-        ]:
-            val = protocol.get(key) or ""
-            if val:
-                parts.append(
-                    f'<div class="protocol-row"><span class="lbl">{_esc(label)}</span>'
-                    f'<span class="val">{_esc(val)}</span></div>'
-                )
-        parts.append('</div>')
-
-    trials = h.get("trials") or []
-    if trials:
-        parts.append('<div class="trial-block">')
-        parts.append(f'<h5>Trial history ({len(trials)} recorded)</h5>')
-        for trial in trials:
-            verdict = trial.get("verdict", "")
-            verdict_cls = verdict if verdict in ("accept", "reject", "partial", "mixed") else "mixed"
-            parts.append(f'<div class="trial-row">')
-            parts.append(
-                f'<span class="lbl">{_esc(trial.get("tested_at", ""))}</span>'
-                f'<span class="val"><span class="trial-verdict {verdict_cls}">{_esc(verdict)}</span></span>'
-            )
-            parts.append('</div>')
-            for tkey, tlabel in [
-                ("preparation", "Prep"), ("ratio", "Ratio"),
-                ("temperature", "Temp"), ("observations", "Notes"),
-                ("failure_mode", "Failure"), ("successful_correction", "Fix"),
-            ]:
-                tval = trial.get(tkey)
-                if tval:
-                    parts.append(
-                        f'<div class="trial-row"><span class="lbl">{_esc(tlabel)}</span>'
-                        f'<span class="val">{_esc(tval)}</span></div>'
-                    )
-        parts.append('</div>')
-    else:
-        parts.append(
-            '<div class="trial-block"><h5>Trial history</h5>'
-            '<div class="trial-row"><span class="val" style="color:var(--ink-5);font-style:italic">'
-            'no tastings recorded yet</span></div></div>'
-        )
-
+    parts.append('<div class="card-kicker">Hypothesis</div>')
+    parts.append(f'<div class="hyp-candidate">'
+                 f'{_esc(h.get("pairing_title") or h.get("candidate", ""))}</div>')
+    if h.get("explanation"):
+        parts.append(f'<div class="hyp-explanation">{_esc(h["explanation"])}</div>')
+    if h.get("known_pairing"):
+        parts.append(f'<div class="hyp-explanation">The analogy is '
+                     f'{_esc(str(h["known_pairing"]).replace("_", " "))}.</div>')
+    if rules:
+        parts.append(f'<div class="journey-chain">{"".join(rules)}</div>')
     if with_debug:
         parts.append(debug_block("Show hypothesis data", h))
     parts.append('</div>')
     return "".join(parts)
 
 
-def journey_card_html(j: dict, with_debug: bool = False) -> str:
-    """Render one ingredient journey as a card."""
+def claim_cards_html(h: dict) -> str:
+    """Compatibility and novelty, side by side, as two separate claims."""
+    novelty = h.get("novelty") or {}
+    nclass = novelty.get("class", "not_checked")
+    count = novelty.get("observed_count", 0)
+    scope = novelty.get("scope", "the local corpus")
+    if nclass == "not_checked":
+        n_title, n_body = "Not checked", "Novelty has not been evaluated for this pairing."
+    elif nclass == "novel":
+        n_title = "Not observed"
+        n_body = (f"Zero co-occurrences in {scope}. "
+                  f"Absent evidence, not proof.")
+    else:
+        n_title = "Seen before"
+        n_body = f"{count} co-occurrence{'s' if count != 1 else ''} in {scope}."
+
+    compat = {"scout_candidate": "Plausible",
+              "weak_hypothesis": "Thin",
+              "rejected": "Rejected"}.get(h.get("candidate_class"), "Thin")
+    c_body = h.get("shared_function") or h.get("meaningful_difference") or ""
+
+    return (
+        '<div class="claim-pair">'
+        f'<div class="card"><div class="card-kicker">Compatibility</div>'
+        f'<div class="claim-title">{_esc(compat)}</div>'
+        f'<div class="card-body">{_esc(c_body)}</div></div>'
+        f'<div class="card"><div class="card-kicker">Novelty</div>'
+        f'<div class="claim-title">{_esc(n_title)}</div>'
+        f'<div class="card-body">{_esc(n_body)}</div></div>'
+        '</div>'
+    )
+
+
+def smallest_test_html(h: dict) -> str:
+    """The protocol as a label grid. Buttons are rendered by the caller."""
+    protocol = h.get("protocol") or {}
+    rows = []
+    for key, label in [
+        ("starting_ratio", "Ratio"),
+        ("success_condition", "Success"),
+        ("likely_failure", "Likely failure"),
+        ("corrections", "Correction"),
+        ("safety_note", "Safety"),
+    ]:
+        val = protocol.get(key)
+        if val:
+            rows.append(f'<div class="row"><span class="lbl">{_esc(label)}</span>'
+                        f'<div class="val">{_esc(val)}</div></div>')
+    if not rows:
+        rows.append('<div class="row"><span class="lbl">Protocol</span>'
+                    '<div class="val">No test protocol written for this rule '
+                    'yet.</div></div>')
+    return ('<div class="card smallest-test">'
+            '<div class="card-kicker">Smallest test</div>'
+            + "".join(rows) + '</div>')
+
+
+def trial_history_html(h: dict) -> str:
+    """Recorded tastings, read-only — the append-only record, never edited."""
+    trials = h.get("trials") or []
+    if not trials:
+        return ('<div class="card muted"><div class="card-kicker">Trial history</div>'
+                '<div class="card-body">No tastings recorded yet.</div></div>')
+    parts = ['<div class="card"><div class="card-kicker">'
+             f'Trial history · {len(trials)} recorded</div>']
+    for t in trials:
+        verdict = t.get("verdict", "")
+        vcls = verdict if verdict in ("accept", "reject", "partial", "mixed") else "mixed"
+        parts.append(f'<div class="row"><span class="lbl">'
+                     f'{_esc(t.get("tested_at", ""))}</span><div class="val">'
+                     f'<span class="trial-verdict {vcls}">{_esc(verdict)}</span> '
+                     f'{_esc(t.get("observations") or "")}</div></div>')
+    parts.append('</div>')
+    return "".join(parts)
+
+
+def journey_card_html(j: dict, with_debug: bool = False,
+                      index: int | None = None) -> str:
+    """One journey as its causal chain.
+
+    The chain is the point of the screen: ingredient → preparation →
+    transformation → sensory change → flavour route → correction →
+    destination. It reads as a row of tags rather than a label grid, so the
+    causality is visible at a glance instead of being reconstructed from
+    rows. Colour marks the kind of step: what you do (neutral), what it
+    becomes (accent), which direction it takes (sage).
+    """
     transitions = j.get("transitions") or []
     destinations = j.get("destinations") or []
-    additions = j.get("useful_additions") or []
 
-    path_parts = []
-    for i, t in enumerate(transitions):
-        if i > 0:
-            path_parts.append(f'<span class="journey-move">{_esc(t["move"].replace("_", " "))}</span>')
-        path_parts.append(f'<span class="journey-state">{_esc(t["to_state"].replace("_", " "))}</span>')
-    path_html = "".join(path_parts) if path_parts else (
-        f'<span class="journey-state">{_esc(j.get("output_state", "").replace("_", " "))}</span>'
-    )
+    def step(text: str, cls: str) -> str:
+        return f'<span class="tag {cls}">{_esc(text.replace("_", " "))}</span>'
+
+    chain: list[str] = []
+    prep = transitions[0]["move"] if transitions else ""
+    if prep:
+        chain.append(step(prep, "tag-neutral"))
+    if j.get("primary_transformation"):
+        chain.append(step(j["primary_transformation"], "tag-accent"))
+    if j.get("sensory_change"):
+        chain.append(step(j["sensory_change"], "tag-neutral"))
+    if j.get("flavour_direction"):
+        chain.append(step(j["flavour_direction"], "tag-accent-2"))
+    if j.get("correction"):
+        chain.append(step(j["correction"], "tag-neutral"))
+    for d in destinations[:2]:
+        chain.append(step(d, "tag-accent"))
+
+    arrow = '<span class="chain-arrow">&rarr;</span>'
+    chain_html = arrow.join(chain) if chain else ""
+
+    kicker = "Journey"
+    if index is not None:
+        kicker = f"Journey {index}"
+    if destinations:
+        kicker += f" · {destinations[0].replace('_', ' ')}"
+
+    body_bits = [j.get("why_choose") or "", j.get("becomes_possible") or ""]
+    body = " ".join(b for b in body_bits if b)
 
     parts = ['<div class="card journey">']
-    parts.append(
-        f'<div class="journey-title">{_esc(j.get("title", ""))}</div>'
-    )
-    parts.append(
-        f'<div class="journey-why">{_esc(j.get("why_choose", ""))}</div>'
-    )
-    parts.append(
-        f'<div class="row"><span class="lbl">Transform</span>'
-        f'<div class="val">{_esc((j.get("primary_transformation") or "").replace("_", " "))}</div></div>'
-    )
-    parts.append(
-        f'<div class="row"><span class="lbl">Change</span>'
-        f'<div class="val">{_esc(j.get("sensory_change", ""))}</div></div>'
-    )
-    parts.append(
-        f'<div class="row"><span class="lbl">Direction</span>'
-        f'<div class="val">{_esc(j.get("flavour_direction", ""))}</div></div>'
-    )
-    if additions:
+    parts.append(f'<div class="card-kicker">{_esc(kicker)}</div>')
+    parts.append(f'<div class="journey-title">{_esc(j.get("title", ""))}</div>')
+    if chain_html:
+        parts.append(f'<div class="journey-chain">{chain_html}</div>')
+    if body:
+        parts.append(f'<div class="card-body">{_esc(body)}</div>')
+    if j.get("useful_additions"):
         parts.append(
             f'<div class="row"><span class="lbl">Additions</span>'
-            f'<div class="chips">{chips([a.replace("_", " ") for a in additions])}</div></div>'
-        )
-    parts.append(
-        f'<div class="row"><span class="lbl">Unlocks</span>'
-        f'<div class="val">{_esc(j.get("becomes_possible", ""))}</div></div>'
-    )
-    if destinations:
-        parts.append(
-            f'<div class="row"><span class="lbl">Destinations</span>'
-            f'<div class="chips">{chips([d.replace("_", " ") for d in destinations])}</div></div>'
-        )
-    parts.append(
-        f'<div class="row"><span class="lbl">Watch for</span>'
-        f'<div class="val">{_esc(j.get("risks", ""))}</div></div>'
-    )
-    parts.append(
-        f'<div class="row"><span class="lbl">Correction</span>'
-        f'<div class="val">{_esc((j.get("correction") or "").replace("_", " "))}</div></div>'
-    )
-    if transitions:
-        parts.append('<div class="journey-path">' + path_html + '</div>')
+            f'<div class="chips">'
+            f'{chips([a.replace("_", " ") for a in j["useful_additions"]])}'
+            f'</div></div>')
+    if j.get("risks"):
+        parts.append(f'<div class="row"><span class="lbl">Watch for</span>'
+                     f'<div class="val">{_esc(j["risks"])}</div></div>')
     if with_debug:
         parts.append(debug_block("Show journey data", j))
     parts.append('</div>')
