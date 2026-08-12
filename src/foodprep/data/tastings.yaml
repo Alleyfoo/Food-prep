@@ -1,0 +1,30 @@
+# Recorded tastings — food someone actually cooked and ate.
+#
+# This file is append-only. A trial is an observation, not a claim that can be
+# revised later: if a second attempt disagrees, add a second trial rather than
+# editing the first. Rebuilds never touch what is here.
+#
+# A trial tests a Scout HYPOTHESIS, which is why `analogy_id` is required. A
+# pairing already in the Cook catalogue is not a hypothesis and has nothing to
+# test — corroborating one belongs in the observations of a trial it was
+# compared against, not in a trial of its own.
+#
+# Verdicts: works · promising · works_only_in_this_form · needs_adjustment ·
+#           dominated · clashes · texturally_wrong · inconclusive
+
+tastings:
+  - analogy_id: browned_fat_for_plain_fat_on_toasted_state
+    component: roasted_broccoli_component
+    candidate: brown_butter
+    tested_at: "2026-08-12"
+    preparation: >-
+      Cooked and eaten as a normal meal rather than as a controlled test,
+      alongside garlic butter on the same roasted broccoli.
+    ratio: not measured
+    temperature: not measured
+    verdict: works
+    observations: >-
+      Brown butter works on roasted broccoli — the hypothesis holds. Garlic
+      butter on the same state was clearly better, so brown butter is a real
+      option here but not the best one.
+    safety_confirmed: true

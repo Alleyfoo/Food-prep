@@ -69,6 +69,7 @@ def test_record_trial_is_append_only_and_complete(conn):
 
 
 def test_trial_requires_safety_confirmation(conn):
+    before = conn.execute("SELECT count(*) FROM tasting_trials").fetchone()[0]
     with pytest.raises(tasting.TastingError, match="safety_confirmed"):
         tasting.record_trial(
             conn, STATE, CANDIDATE,
@@ -76,7 +77,10 @@ def test_trial_requires_safety_confirmation(conn):
             temperature="warm", observations="not tested safely",
             safety_confirmed=False,
         )
-    assert conn.execute("SELECT count(*) FROM tasting_trials").fetchone()[0] == 0
+    # The table is not empty any more — data/tastings.yaml seeds the real
+    # recorded trials — so assert the failed attempt added nothing.
+    assert conn.execute(
+        "SELECT count(*) FROM tasting_trials").fetchone()[0] == before
 
 
 def test_trial_rejects_unknown_verdict(conn):
@@ -130,7 +134,11 @@ def test_scout_output_shows_read_only_trial_history(conn):
 
     tested = hypotheses[CANDIDATE]["trials"]
     assert [t["verdict"] for t in tested] == ["promising"]
-    assert hypotheses["brown_butter"]["trials"] == []
+    # brown_butter now carries a real recorded trial, so an untested
+    # candidate is the one that must show an empty history.
+    untested = next(name for name, h in hypotheses.items() if name != "brown_butter"
+                    and not h["trials"])
+    assert hypotheses[untested]["trials"] == []
     assert "trials: 1 recorded" in output
     assert "[2026-07-12] promising — 1 floret : 3 drops, warm: " \
            "Acid sharpened the browned edge." in output

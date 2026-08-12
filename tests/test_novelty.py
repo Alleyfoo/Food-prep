@@ -1,3 +1,5 @@
+import sqlite3
+
 from foodprep import corpus, query
 from foodprep.cli import build_parser
 from foodprep.loader import build
@@ -85,7 +87,13 @@ def test_novelty_observations_survive_ontology_rebuild(conn, tmp_path):
     assert stored_corpus["recipe_count"] == 3
 
 
-def test_orphaned_novelty_observations_are_dropped_not_restored(conn, tmp_path):
+def test_orphaned_novelty_observations_are_dropped_not_restored(tmp_path):
+    # Its own database, built without recorded tastings: this test strips the
+    # ontology down to nothing, and the loader deliberately refuses to drop a
+    # real kitchen result on the floor when its hypothesis disappears.
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    build(conn, tastings_path=None)
     _write_corpus(
         tmp_path,
         recipes=[(1, "Broccoli Brown Butter")],
@@ -100,7 +108,10 @@ def test_orphaned_novelty_observations_are_dropped_not_restored(conn, tmp_path):
     ).fetchone()[0] > 0
 
     # Rebuild without any Scout rules: every observation loses its analogy.
-    build(conn, scout_rules_path=tmp_path / "no_scout_rules.yaml")
+    # Recorded tastings are excluded too — they reference a rule by design,
+    # and the loader rightly refuses to drop one silently.
+    build(conn, scout_rules_path=tmp_path / "no_scout_rules.yaml",
+          tastings_path=None)
 
     assert conn.execute(
         "SELECT count(*) FROM novelty_observations"

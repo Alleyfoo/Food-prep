@@ -20,6 +20,11 @@ PROFILES_PATH = Path(__file__).with_name("data") / "component_profiles.yaml"
 DESTINATIONS_PATH = Path(__file__).with_name("data") / "destination_profiles.yaml"
 ROUTES_PATH = Path(__file__).with_name("data") / "flavour_routes.yaml"
 SCOUT_RULES_PATH = Path(__file__).with_name("data") / "scout_rules.yaml"
+#: Recorded kitchen results. Every other fact in this project lives in YAML;
+#: trials used to live only in the gitignored database, which meant the app
+#: (which builds in memory from YAML) never saw them and a fresh clone lost
+#: them. This is their durable home.
+TASTINGS_PATH = Path(__file__).with_name("data") / "tastings.yaml"
 
 CONFIDENCE_OK = {"high", "medium_high", "medium", "low", "experimental"}
 
@@ -131,7 +136,55 @@ def _preserve_tasting_trials(conn: sqlite3.Connection) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def _load_recorded_tastings(conn: sqlite3.Connection, data: dict) -> None:
+    """Load committed tasting trials from YAML.
+
+    A trial is an observation about food that someone actually cooked, so it
+    is append-only and never edited by a rebuild.
+    """
+    for trial in data.get("tastings") or []:
+        component = conn.execute(
+            "SELECT component_id FROM components WHERE name = ?",
+            (trial["component"],),
+        ).fetchone()
+        candidate = conn.execute(
+            "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?",
+            (trial["candidate"],),
+        ).fetchone()
+        analogy = conn.execute(
+            "SELECT 1 FROM analogy_rules WHERE analogy_id = ?",
+            (trial["analogy_id"],),
+        ).fetchone()
+        if component is None or candidate is None or analogy is None:
+            raise LoadError(
+                "recorded tasting references something the ontology no longer "
+                f"has: {trial['component']} + {trial['candidate']}"
+            )
+        conn.execute(
+            """INSERT INTO tasting_trials(
+                 analogy_id, component_id, candidate_ingredient_id,
+                 tested_at, preparation, ratio, temperature,
+                 supporting_ingredients, verdict, observations, failure_mode,
+                 successful_correction, safety_confirmed)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                trial["analogy_id"], component[0], candidate[0],
+                trial["tested_at"], trial["preparation"], trial["ratio"],
+                trial["temperature"], trial.get("supporting_ingredients"),
+                trial["verdict"], trial["observations"],
+                trial.get("failure_mode"), trial.get("successful_correction"),
+                1 if trial.get("safety_confirmed") else 0,
+            ),
+        )
+
+
 def _restore_tasting_trials(conn: sqlite3.Connection, trials: list[dict]) -> None:
+    committed = {
+        (r["analogy_id"], r["component_id"], r["candidate_ingredient_id"], r["tested_at"])
+        for r in conn.execute(
+            "SELECT analogy_id, component_id, candidate_ingredient_id, tested_at "
+            "FROM tasting_trials")
+    }
     for trial in trials:
         component = conn.execute(
             "SELECT component_id FROM components WHERE name = ?",
@@ -150,15 +203,18 @@ def _restore_tasting_trials(conn: sqlite3.Connection, trials: list[dict]) -> Non
                 "cannot restore tasting trial because its ontology reference "
                 f"was removed: {trial['component_name']} + {trial['candidate_name']}"
             )
+        if (trial["analogy_id"], component[0], candidate[0],
+                trial["tested_at"]) in committed:
+            continue
         conn.execute(
             """INSERT INTO tasting_trials(
-                 trial_id, analogy_id, component_id, candidate_ingredient_id,
+                 analogy_id, component_id, candidate_ingredient_id,
                  tested_at, preparation, ratio, temperature,
                  supporting_ingredients, verdict, observations, failure_mode,
                  successful_correction, safety_confirmed)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                trial["trial_id"], trial["analogy_id"], component[0], candidate[0],
+                trial["analogy_id"], component[0], candidate[0],
                 trial["tested_at"], trial["preparation"], trial["ratio"],
                 trial["temperature"], trial["supporting_ingredients"],
                 trial["verdict"], trial["observations"], trial["failure_mode"],
@@ -604,6 +660,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
           destinations_path: Path | str | None = DESTINATIONS_PATH,
           routes_path: Path | str | None = ROUTES_PATH,
           scout_rules_path: Path | str | None = SCOUT_RULES_PATH,
+          tastings_path: Path | str | None = TASTINGS_PATH,
           vocabulary_path: Path | str = VOCABULARY_PATH) -> None:
     """Rebuild schema and load the YAML ontology from scratch.
 
@@ -626,6 +683,11 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     if scout_rules_path and Path(scout_rules_path).exists():
         data = _deep_merge(data, load_yaml(scout_rules_path) or {})
     populate(conn, data, vocabulary)
+    if tastings_path and Path(tastings_path).exists():
+        _load_recorded_tastings(conn, load_yaml(tastings_path) or {})
+    # Trials recorded through the CLI into a local database are kept too, but
+    # only if they are not already in the YAML — otherwise a trial that has
+    # since been committed would be inserted twice.
     _restore_tasting_trials(conn, tasting_trials)
     _restore_novelty_evidence(conn, corpora, novelty_observations)
     conn.commit()
