@@ -109,12 +109,12 @@ def test_pantry_fats_pair_with_existing_states(conn):
            LEFT JOIN transformations t
              ON t.transformation_id = p.works_best_with_transformation_id
            LEFT JOIN ingredients ti ON ti.ingredient_id = t.ingredient_id
-           WHERE i.canonical_name IN ('ghee', 'garlic_butter')"""
+           WHERE i.canonical_name IN ('ghee', 'garlic_confit')"""
     ).fetchall()
 
     pairs = {(r["filler"], r["target"]) for r in rows}
     assert ("ghee", "broccoli") in pairs
     assert ("ghee", "kale") in pairs
-    assert ("garlic_butter", "broccoli") in pairs
-    assert ("garlic_butter", "rutabaga") in pairs
+    assert ("garlic_confit", "broccoli") in pairs
+    assert ("garlic_confit", "rutabaga") in pairs
     assert all(r["confidence"] != "experimental" for r in rows)

@@ -8,7 +8,7 @@ from foodprep import query
 def test_schema_populated(conn):
     assert conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] >= 30
     # 12 tomato + 4 onion + 9 potato + 8 cabbage + 5 broccoli + 4 rutabaga + 4 cucumber + 4 kale + 4 mango + 4 apricot = 58
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 58
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 60
     assert conn.execute("SELECT count(*) FROM roles").fetchone()[0] >= 12
     assert conn.execute("SELECT count(*) FROM pairings").fetchone()[0] >= 30
     assert conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] >= 5
@@ -586,7 +586,7 @@ def test_no_ontology_rot_round6(conn):
     assert conn.execute(
         "SELECT count(*) FROM pairings WHERE role_id IS NULL").fetchone()[0] == 0
     assert conn.execute(
-        "SELECT count(*) FROM transformations").fetchone()[0] == 58
+        "SELECT count(*) FROM transformations").fetchone()[0] == 60
     # every missing-role row points at a real role id
     assert conn.execute(
         "SELECT count(*) FROM transformation_missing_roles mr "

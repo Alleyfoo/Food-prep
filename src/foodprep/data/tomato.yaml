@@ -100,6 +100,7 @@ tags:
   - { family: flavour, value: sharp }
   - { family: flavour, value: sulfurous }
   - { family: flavour, value: vegetal }
+  - { family: flavour, value: nutty }
   - { family: texture, value: soft }
   - { family: texture, value: jammy }
   - { family: texture, value: chewy }
@@ -181,6 +182,11 @@ techniques:
   - { name: can,          is_modifier: 0, heat_type: wet,     moisture_change: none,  preservation_flag: 1 }
   - { name: saute,        is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
   - { name: caramelize,   is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  # Butter's two states act on the same part of it — the milk proteins.
+  # Browning cooks them; clarifying removes them. Opposite moves, which is
+  # why brown butter and ghee are not interchangeable fats.
+  - { name: brown,        is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
+  - { name: clarify,      is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 1 }
   # ---- potato techniques (third ingredient) ----
   - { name: boil,         is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
   - { name: mash,         is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
@@ -341,6 +347,9 @@ ingredients:
       - { region_code: FI, availability_class: occasional, seasonality_note: "fresh mid-late summer; canned year-round" }
   - { canonical_name: stock,      base_roles: "body\numami", default_availability_class: common }
   - canonical_name: butter
+    # both: it is a filler you add to things AND it owns a technique tree,
+    # because browning and clarifying make genuinely different foods.
+    kind: both
     base_roles: "fat"
     default_availability_class: very_common
     repairs: "dry\nbland\nroasted\nsaute_base\nsauce_body"
@@ -352,13 +361,13 @@ ingredients:
     repairs: "dry\nbland\nroasted\nsaute_base\nhigh_heat_frying"
     avoid_when: "already_heavy\ndairy_free"
     notes: "Butter with the water and milk solids removed: high smoke point, gently nutty, keeps for months. The fat for hot pans where butter would burn."
-  - canonical_name: garlic_butter
-    aliases: "valkosipulivoi"
+  - canonical_name: garlic_confit
+    aliases: "garlic butter\nvalkosipulikonfiitti\nvalkosipulivoi"
     base_roles: "fat\naromatic"
-    default_availability_class: common
+    default_availability_class: occasional
     repairs: "dry\nbland\nroasted\nsteamed"
     avoid_when: "already_heavy\ndairy_free\ndelicate_raw"
-    notes: "Fat and aromatic in one move; melts over hot vegetables. Established, not Scout — the flavour logic is garlic's, the carrier is butter's."
+    notes: "Whole garlic cloves slow-roasted about two hours in ghee. Not garlic butter: the fat is clarified, so there are no milk proteins to brown, and the garlic turns sweet and spreadable rather than sharp. Fat and aromatic in one move, and it keeps."
   - { canonical_name: black_pepper, aliases: "pepper", base_roles: "aromatic", default_availability_class: very_common }
   - { canonical_name: sea_salt,   aliases: "salt\nflaky salt", base_roles: "salt", default_availability_class: very_common }
   - { canonical_name: grilled_fish, base_roles: "protein",  default_availability_class: occasional }
@@ -447,6 +456,10 @@ ingredients:
     avoid_when: "already_spicy\ndelicate\ndairy_cream\nhigh_acid_raw"
 
 components:
+  # Butter's two states. Ghee keeps for months precisely because the milk
+  # proteins — the part that spoils — have been taken out.
+  - { name: brown_butter_component,            kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  - { name: ghee_component,                    kind: cooked,       keeps_well: long,   freezes_well: 1, batch_prep_value: very_high }
   - { name: fresh_tomato_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
   - { name: salted_drained_tomato_component,   kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
   - { name: tomato_salsa_component,            kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
@@ -825,6 +838,68 @@ transformations:
   # ---- onion transformations (second ingredient) ----
   # Co-occurrence evidence from CulinaryDB (17k onion recipes): garlic, tomato,
   # butter, parsley, cilantro, vinegar, thyme, beef, potato, beans, bread, cheese.
+  # ---- butter -----------------------------------------------------------
+  # Butter is a full ingredient because its states are genuinely different
+  # foods, not because it is a vegetable. Both transformations act on the
+  # milk proteins: browning cooks them, clarifying removes them. brown_butter
+  # and ghee also exist as filler ingredients — the same two-entry shape
+  # cabbage and sauerkraut already use — so pairings keep working.
+  - ingredient: butter
+    technique: brown
+    output_component: brown_butter_component
+    flavour_shift: "Nutty, toasted, deeper; the milk proteins brown"
+    texture_shift: "Liquid, with browned solids suspended"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: nutty,   polarity: gain }
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    state_profile:
+      provides: "fat"
+      flavour: "nutty_toasted
+rich_fatty
+umami"
+      texture: "liquid"
+      missing_risks: "acid
+salt"
+      heaviness_score: 4
+      dryness_score: 0
+      notes: "Butter cooked until its milk proteins brown. Not a separate ingredient you buy — any butter held on heat long enough gets here, which is why butter in a hot oven arrives browned whether or not you meant it."
+    missing_roles:
+      - { role: acid,   priority: high,   note: "lemon cuts the richness" }
+      - { role: salt,   priority: medium, note: "seasoning" }
+      - { role: crunch, priority: low,    note: "nuts echo the browning" }
+    uses: [pasta, eggs, condiment, grains]
+    evidence:
+      - { source: recipedb, scope: "beurre noisette over vegetables, fish and pasta" }
+
+  - ingredient: butter
+    technique: clarify
+    output_component: ghee_component
+    flavour_shift: "Clean, gently nutty; the milk proteins are removed"
+    texture_shift: "Clear liquid, no solids"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory,  polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    state_profile:
+      provides: "fat"
+      flavour: "rich_fatty
+nutty_toasted"
+      texture: "liquid"
+      missing_risks: "acid
+salt"
+      heaviness_score: 4
+      dryness_score: 0
+      notes: "Butter with the water and milk proteins separated out. Because the proteins are gone it cannot brown the way butter does, and it takes far more heat before it burns — the opposite move to browning, on the same part of the butter."
+    missing_roles:
+      - { role: acid,   priority: high,   note: "lemon cuts the richness" }
+      - { role: salt,   priority: medium, note: "seasoning" }
+      - { role: aromatic, priority: medium, note: "garlic, spices — ghee carries them without burning" }
+    uses: [pantry_base, eggs, rice, condiment]
+    evidence:
+      - { source: nchfp, scope: "clarified butter: water and milk solids removed" }
+
   - ingredient: onion
     technique: raw_assemble
     output_component: raw_onion_component
@@ -2990,9 +3065,9 @@ pairings:
   - { for_ingredient: rutabaga, filler: ghee,          role: fat, works_best_with: roast, context: "roasting fat for the long hot roast",  availability: common, confidence: high,        evidence: [recipedb] }
   - { for_ingredient: rutabaga, filler: ghee,          role: fat, works_best_with: mash,  context: "nutty mash enrichment",                availability: common, confidence: medium_high, evidence: [recipedb] }
   - { for_ingredient: kale,     filler: ghee,          role: fat, works_best_with: saute, context: "greens bloomed in ghee — saag grammar", availability: common, confidence: high,       evidence: [recipedb] }
-  - { for_ingredient: broccoli, filler: garlic_butter, role: fat, works_best_with: roast, context: "fat + aromatic in one move over browned florets", availability: common, confidence: high, evidence: [recipedb] }
-  - { for_ingredient: broccoli, filler: garlic_butter, role: fat, works_best_with: steam, context: "melts over the hot tender-crisp state", availability: common, confidence: high,       evidence: [recipedb] }
-  - { for_ingredient: rutabaga, filler: garlic_butter, role: fat, works_best_with: mash,  context: "garlic mash",                          availability: common, confidence: medium_high, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: garlic_confit, role: fat, works_best_with: roast, context: "fat + aromatic in one move over browned florets", availability: common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: garlic_confit, role: fat, works_best_with: steam, context: "melts over the hot tender-crisp state", availability: common, confidence: high,       evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: garlic_confit, role: fat, works_best_with: mash,  context: "garlic mash",                          availability: common, confidence: medium_high, evidence: [recipedb] }
 
   # ---- apricot pairings (tenth full ingredient) ----
   - { for_ingredient: apricot, filler: soft_cheese,  role: fat,      works_best_with: raw_assemble, context: "the classic partner",       availability: common,      confidence: high,   evidence: [recipedb] }

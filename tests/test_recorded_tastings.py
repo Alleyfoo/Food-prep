@@ -63,3 +63,48 @@ def test_every_trial_points_at_a_live_hypothesis(fresh):
            WHERE ar.analogy_id IS NULL"""
     ).fetchall()
     assert not orphans, "a trial references an analogy rule that no longer exists"
+
+
+def test_butter_states_are_states_not_separate_ingredients(fresh):
+    """Brown butter and ghee are things butter becomes, not things you buy.
+
+    Both act on the milk proteins — browning cooks them, clarifying removes
+    them — so they are opposite moves on one ingredient. Modelling them as
+    unrelated ingredients was the same category error the whole project
+    exists to avoid: it is why broccoli has states and butter did not.
+    """
+    techniques = {r[0] for r in fresh.execute(
+        """SELECT tech.name FROM transformations t
+           JOIN techniques tech ON tech.technique_id = t.technique_id
+           JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+           WHERE i.canonical_name = 'butter'""")}
+    assert techniques == {"brown", "clarify"}
+
+    for component in ("brown_butter_component", "ghee_component"):
+        row = fresh.execute(
+            "SELECT component_id FROM components WHERE name = ?", (component,)
+        ).fetchone()
+        assert row, f"{component} is not a modelled state"
+
+
+def test_ghee_keeps_longer_than_brown_butter(fresh):
+    """Because the part that spoils — the milk proteins — has been removed."""
+    keeps = dict(fresh.execute(
+        "SELECT name, keeps_well FROM components "
+        "WHERE name IN ('brown_butter_component', 'ghee_component')"))
+    assert keeps["ghee_component"] == "long"
+    assert keeps["brown_butter_component"] == "medium"
+
+
+def test_the_users_garlic_fat_is_confit_not_garlic_butter(fresh):
+    """It is cloves slow-roasted in ghee, which cannot brown — a different
+    food from butter creamed with garlic, and the trial compared against it."""
+    row = fresh.execute(
+        "SELECT notes, aliases FROM ingredients WHERE canonical_name = 'garlic_confit'"
+    ).fetchone()
+    assert row, "garlic_confit is missing"
+    assert "ghee" in row["notes"]
+    # the old name still resolves, so nothing that referenced it is orphaned
+    assert "garlic butter" in row["aliases"]
+    assert not fresh.execute(
+        "SELECT 1 FROM ingredients WHERE canonical_name = 'garlic_butter'").fetchone()

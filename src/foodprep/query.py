@@ -553,7 +553,7 @@ INGREDIENT_FLAVOUR_DIMENSIONS = {
     "olive_oil": ["rich_fatty"],
     "cream": ["rich_fatty"],
     "ghee": ["rich_fatty"],
-    "garlic_butter": ["rich_fatty", "pungent"],
+    "garlic_confit": ["rich_fatty", "aromatic"],  # slow-roasted: sweet, not sharp
     "mozzarella": ["rich_fatty"],
     "gruyere": ["rich_fatty", "umami"],
     "goat_cheese": ["rich_fatty", "sour"],

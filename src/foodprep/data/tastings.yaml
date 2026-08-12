@@ -19,12 +19,18 @@ tastings:
     tested_at: "2026-08-12"
     preparation: >-
       Cooked and eaten as a normal meal rather than as a controlled test,
-      alongside garlic butter on the same roasted broccoli.
+      alongside garlic confit on the same roasted broccoli.
     ratio: not measured
     temperature: not measured
+    supporting_ingredients: garlic_confit
     verdict: works
     observations: >-
       Brown butter works on roasted broccoli — the hypothesis holds. Garlic
-      butter on the same state was clearly better, so brown butter is a real
-      option here but not the best one.
+      confit on the same state was clearly better, so brown butter is a real
+      option here but not the best one. Clarified the same day: the thing it
+      lost to is garlic confit — cloves slow-roasted about two hours in ghee —
+      not garlic butter. Ghee has had its milk proteins removed, so unlike
+      butter it cannot brown; the two fats differ in what happened to the
+      proteins, not merely in seasoning. The verdict is unchanged, only the
+      identity of what it was compared against.
     safety_confirmed: true

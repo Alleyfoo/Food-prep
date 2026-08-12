@@ -3,6 +3,10 @@ from foodprep import query
 
 def test_journey_states_own_profiles_without_shadow_rows(conn):
     expected = {
+        # butter's states: browning cooks the milk proteins, clarifying
+        # removes them — two different foods, so two profiles
+        "brown_butter_component",
+        "ghee_component",
         "steamed_broccoli_component",
         "roasted_broccoli_component",
         "stir_fried_broccoli_component",
