@@ -659,23 +659,52 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   font-weight: 500 !important; margin-bottom: 4px !important;
 }
 [data-baseweb="select"] > div { background: var(--surface) !important; }
+/* ============= TASTE CIRCLE (grid + rail, shared with the map) ============= */
+.dim-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4); margin-bottom: var(--space-4);
+}
+.dim-card {
+  background: var(--surface); border: 1px solid transparent;
+  border-radius: var(--r-lg); padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-sm); min-height: 92px;
+}
+.dim-card .card-kicker {
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  font-weight: 600; color: var(--primary); margin-bottom: var(--space-1);
+}
+.dim-card .card-title {
+  font-family: var(--heading); font-size: 19px; line-height: 1.2;
+}
+.dim-card .card-body {
+  font-size: 15px; color: var(--neutral-800); margin-top: var(--space-1);
+}
+/* the state palette matches the circle: colour encodes state, not dimension */
+.dim-card.provided {
+  background: var(--ingredient-200); border-color: var(--ingredient-400);
+}
+.dim-card.provided .card-kicker { color: var(--ingredient-800); }
+.dim-card.locked { border: 2px solid var(--primary); }
+.dim-card.empty { opacity: .55; }
+.dim-card.empty .card-kicker { color: var(--neutral-700); }
+
 /* ============= TASTE CIRCLE MAP ============= */
 /* The rail is a read-out, never a second picker — no clickable chips here. */
-.tcm-rail-card {
+.rail-card {
   background: var(--surface); border-radius: var(--r-lg);
   padding: var(--space-4); margin-bottom: var(--space-4);
   box-shadow: var(--shadow-sm);
 }
-.tcm-rail-card .card-kicker {
+.rail-card .card-kicker {
   font-size: 14px; letter-spacing: .08em; text-transform: uppercase;
   color: var(--primary); font-weight: 600; margin-bottom: var(--space-2);
 }
-.tcm-rail-card .card-title {
+.rail-card .card-title {
   font-family: var(--heading); font-size: 19px; line-height: 1.2;
   margin-bottom: var(--space-2);
 }
-.tcm-rail-card .card-body { font-size: 15px; color: var(--neutral-800); margin: 0; }
-.tcm-rail-idle .card-kicker { color: var(--neutral-700); }
+.rail-card .card-body { font-size: 15px; color: var(--neutral-800); margin: 0; }
+.rail-idle .card-kicker { color: var(--neutral-700); }
 .tcm-rule { height: 1px; background: var(--line); margin: var(--space-3) 0; }
 .tcm-dish-row {
   display: flex; justify-content: space-between; gap: var(--space-3);

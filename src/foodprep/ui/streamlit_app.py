@@ -514,139 +514,141 @@ def tab_scout() -> None:
                     _md(hypothesis_card_html(h))
 
 
-def tab_taste_circle() -> None:
-    """Taste Circle tab — interactive flavour wheel builder."""
-    st.markdown('<div class="section-title">Taste Circle <span class="count">'
-                'build a balanced dish by filling flavour dimensions</span></div>',
-                unsafe_allow_html=True)
-    st.markdown(
-        '<div class="hint">Select a component, then choose items to fill each flavour '
-        'dimension (salty, sour, sweet, etc.). Once a dimension is filled, it locks '
-        'and you move to the next. Build a complete flavour profile!</div>',
-        unsafe_allow_html=True)
+def _tc_lock(dim: str) -> None:
+    """Selecting a filler locks its dimension — no separate Lock click."""
+    choice = st.session_state.get(f"taste_circle_{dim}")
+    if choice and choice != "(none)":
+        st.session_state.taste_circle_locked.add(dim)
+        st.session_state.taste_circle_selections[dim] = choice
 
-    # Initialize session state for the taste circle
+
+def _tc_unlock(dim: str) -> None:
+    st.session_state.taste_circle_locked.discard(dim)
+    st.session_state.taste_circle_selections.pop(dim, None)
+    st.session_state[f"taste_circle_{dim}"] = "(none)"
+
+
+def _tc_reset() -> None:
+    for dim in list(st.session_state.taste_circle_locked):
+        st.session_state[f"taste_circle_{dim}"] = "(none)"
+    st.session_state.taste_circle_locked.clear()
+    st.session_state.taste_circle_selections.clear()
+
+
+def _tc_surprise(component: str) -> None:
+    locked = st.session_state.taste_circle_locked
+    selections = st.session_state.taste_circle_selections
+    pool = query.taste_circle_fillers(CONN, component, locked)
+    for dim, filler in random_dish_selections(pool, selections).items():
+        locked.add(dim)
+        selections[dim] = filler
+
+
+def tab_taste_circle() -> None:
+    """Taste Circle — the same builder as the map, read as a card grid.
+
+    Eleven dimension cards in three columns; colour encodes state exactly as
+    it does on the circle (provided / locked / open / no fillers yet). The
+    right rail carries the dish and the two actions.
+    """
     if "taste_circle_locked" not in st.session_state:
         st.session_state.taste_circle_locked = set()
     if "taste_circle_selections" not in st.session_state:
         st.session_state.taste_circle_selections = {}
 
-    # Component selector
     comps = query.components_list(CONN)
-    state_comps = []
-    for c in comps:
-        if query.component_state_profile(CONN, c) is not None:
-            state_comps.append(c)
-
+    state_comps = [c for c in comps
+                   if query.component_state_profile(CONN, c) is not None]
     if not state_comps:
-        st.markdown('<div class="hint">No components with state profiles found. '
-                    'Run <code>foodprep build</code> first.</div>',
-                    unsafe_allow_html=True)
+        _md('<div class="hint">No components with state profiles found. '
+            'Run <code>foodprep build</code> first.</div>')
         return
 
-    default = "roasted_broccoli_component" if "roasted_broccoli_component" in state_comps else state_comps[0]
-    component = st.selectbox(
-        "Select a component to build around:",
-        state_comps,
-        index=state_comps.index(default),
-        key="taste_circle_component",
-    )
+    default = ("roasted_broccoli_component"
+               if "roasted_broccoli_component" in state_comps else state_comps[0])
+    grid, rail = st.columns([2.6, 1], gap="large")
 
-    # Reset button
-    if st.button("🔄 Reset Taste Circle"):
-        st.session_state.taste_circle_locked = set()
-        st.session_state.taste_circle_selections = {}
-        st.rerun()
+    with grid:
+        component = st.selectbox(
+            "Component", state_comps, index=state_comps.index(default),
+            label_visibility="collapsed", key="taste_circle_component")
 
-    # Get the component's state profile
-    profile = query.component_state_profile(CONN, component)
-    if profile is None:
-        st.warning("This component has no state profile. Cannot build taste circle.")
-        return
+        profile = query.component_state_profile(CONN, component)
+        provided = set((profile or {}).get("flavour_tags") or [])
+        locked: set[str] = st.session_state.taste_circle_locked
+        selections: dict[str, str] = st.session_state.taste_circle_selections
+        fillers_by_dim = query.taste_circle_fillers(CONN, component, locked)
 
-    # Display what the component already provides
-    st.markdown("### Component provides:")
-    provided_tags = profile.get("flavour_tags", [])
-    if provided_tags:
-        st.markdown(", ".join(f"`{tag}`" for tag in provided_tags))
-    else:
-        st.markdown("_No flavour tags provided_")
+        pretty = component.replace("_component", "").replace("_", " ")
+        _md(f'<div class="h2">Taste circle — {_esc(pretty)}</div>'
+            f'<div class="hint">Fill a dimension and it locks. '
+            f'{len(provided & {d for d, *_ in TASTE_DIMENSIONS})} are already '
+            f'provided by the state itself.</div>')
 
-    # Get fillers grouped by dimension
-    fillers_by_dim = query.taste_circle_fillers(
-        CONN,
-        component,
-        locked_dimensions=st.session_state.taste_circle_locked,
-    )
+        cols = st.columns(3)
+        for i, (dim_key, icon, dim_name, _hue) in enumerate(TASTE_DIMENSIONS):
+            with cols[i % 3]:
+                title = f"{icon} {dim_name}"
+                if dim_key in provided:
+                    _md(f'<div class="dim-card provided">'
+                        f'<div class="card-kicker">Provided</div>'
+                        f'<div class="card-title">{_esc(title)}</div></div>')
+                elif dim_key in locked:
+                    _md(f'<div class="dim-card locked">'
+                        f'<div class="card-kicker">Locked</div>'
+                        f'<div class="card-title">{_esc(title)}</div>'
+                        f'<div class="card-body">'
+                        f'{_esc(selections.get(dim_key, "").replace("_", " "))}'
+                        f'</div></div>')
+                    st.button("Change", key=f"unlock_{dim_key}",
+                              on_click=_tc_unlock, args=(dim_key,))
+                elif fillers_by_dim.get(dim_key):
+                    options = [f["filler"] for f in fillers_by_dim[dim_key]
+                               if f["filler"] not in set(selections.values())]
+                    preview = " · ".join(o.replace("_", " ") for o in options[:3])
+                    _md(f'<div class="dim-card">'
+                        f'<div class="card-kicker">{len(options)} '
+                        f'option{"" if len(options) == 1 else "s"}</div>'
+                        f'<div class="card-title">{_esc(title)}</div>'
+                        f'<div class="card-body">{_esc(preview)}</div></div>')
+                    st.selectbox(
+                        f"Choose for {dim_name}", ["(none)"] + options,
+                        key=f"taste_circle_{dim_key}",
+                        label_visibility="collapsed",
+                        on_change=_tc_lock, args=(dim_key,))
+                else:
+                    _md(f'<div class="dim-card empty">'
+                        f'<div class="card-kicker">No fillers yet</div>'
+                        f'<div class="card-title">{_esc(title)}</div></div>')
 
-    # Display the taste circle
-    st.markdown("### Taste Circle")
+    with rail:
+        fillable = [d for d, *_ in TASTE_DIMENSIONS
+                    if d not in provided and (fillers_by_dim.get(d) or d in locked)]
+        rows = [f'<div class="tcm-dish-row"><span>{_esc(pretty)}</span>'
+                f'<span class="tcm-dish-dim">base</span></div>']
+        names = {k: n for k, _i, n, _c in TASTE_DIMENSIONS}
+        for dim, filler in selections.items():
+            rows.append(f'<div class="tcm-dish-row">'
+                        f'<span>{_esc(filler.replace("_", " "))}</span>'
+                        f'<span class="tcm-dish-dim">'
+                        f'{_esc(names.get(dim, dim).lower())}</span></div>')
+        _md('<div class="rail-card"><div class="card-kicker">Your dish</div>'
+            + "".join(rows) + '<div class="tcm-rule"></div>'
+            f'<div class="card-body">{len(locked)} of {len(fillable)} open '
+            'dimensions filled. A plate does not need all eleven — only the '
+            'ones this destination asks for.</div></div>')
 
-    # Define the flavour dimensions to show
-    dimensions = [
-        ("salty", "🧂 Salty"),
-        ("sour", "🍋 Sour"),
-        ("sweet", "🍯 Sweet"),
-        ("bitter", "🌿 Bitter"),
-        ("umami", "🍄 Umami"),
-        ("pungent", "🌶️ Pungent"),
-        ("aromatic", "🌸 Aromatic"),
-        ("nutty_toasted", "🥜 Nutty/Toasted"),
-        ("fresh_green", "🥬 Fresh/Green"),
-        ("fermented_funky", "🧀 Fermented/Funky"),
-        ("rich_fatty", "🧈 Rich/Fatty"),
-    ]
+        act_random, act_reset = st.columns([1.4, 1])
+        with act_random:
+            st.button("Surprise me", key="tc_random", type="primary",
+                      on_click=_tc_surprise, args=(component,))
+        with act_reset:
+            st.button("Reset", key="tc_reset", on_click=_tc_reset)
 
-    # Create a grid layout for the taste circle
-    cols = st.columns(3)
-
-    for i, (dim_key, dim_label) in enumerate(dimensions):
-        col = cols[i % 3]
-
-        with col:
-            # Check if this dimension is provided or locked
-            is_provided = dim_key in provided_tags
-            is_locked = dim_key in st.session_state.taste_circle_locked
-
-            if is_provided:
-                st.markdown(f"**{dim_label}** ✅ _(provided)_")
-            elif is_locked:
-                selection = st.session_state.taste_circle_selections.get(dim_key)
-                st.markdown(f"**{dim_label}** 🔒 `{selection}`")
-            elif dim_key in fillers_by_dim:
-                st.markdown(f"**{dim_label}**")
-                fillers = fillers_by_dim[dim_key]
-                filler_names = [f["filler"] for f in fillers]
-
-                selected = st.selectbox(
-                    f"Choose for {dim_label}",
-                    ["(none)"] + filler_names,
-                    key=f"taste_circle_{dim_key}",
-                )
-
-                if selected != "(none)":
-                    if st.button(f"Lock {dim_label}", key=f"lock_{dim_key}"):
-                        st.session_state.taste_circle_locked.add(dim_key)
-                        st.session_state.taste_circle_selections[dim_key] = selected
-                        st.rerun()
-            else:
-                st.markdown(f"**{dim_label}** ⚪ _(no fillers available)_")
-
-    # Display the final dish
-    st.markdown("### Your Dish")
-    if st.session_state.taste_circle_selections:
-        dish_components = [component]
-        for dim, filler in st.session_state.taste_circle_selections.items():
-            dish_components.append(filler)
-
-        st.markdown("**Components:**")
-        st.markdown(", ".join(f"`{c}`" for c in dish_components))
-
-        # Generate a dish name
-        dish_name = generate_dish_name(component, st.session_state.taste_circle_selections)
-        st.markdown(f"**Dish name:** {dish_name}")
-    else:
-        st.info("Select items to fill the flavour dimensions and build your dish.")
+        if selections:
+            _md('<div class="rail-card"><div class="card-kicker">Dish name</div>'
+                f'<div class="tcm-dish-name">'
+                f'{_esc(generate_dish_name(component, selections))}</div></div>')
 
 
 def generate_dish_name(
@@ -846,14 +848,14 @@ def _taste_circle_rail(component: str, expanded: str | None,
                     f"{'is' if len(have) == 1 else 'are'} in your kitchen.")
         else:
             body = "None of these are in your kitchen right now."
-        _md(f'<div class="tcm-rail-card">'
+        _md(f'<div class="rail-card">'
             f'<div class="card-kicker">{icon} {label} — {len(options)} options</div>'
             f'<div class="card-title">What fits here</div>'
             f'<div class="card-body">{_esc(body)} Click a node on the circle '
             f'to lock it in — the circle re-reads, and what is still open '
             f'changes with it.</div></div>')
     else:
-        _md('<div class="tcm-rail-card tcm-rail-idle">'
+        _md('<div class="rail-card rail-idle">'
             '<div class="card-kicker">Nothing expanded</div>'
             '<div class="card-body">Click a dimension on the circle to see '
             'what can fill it.</div></div>')
@@ -870,7 +872,7 @@ def _taste_circle_rail(component: str, expanded: str | None,
                     f'{_esc(filler.replace("_", " "))}</span>'
                     f'<span class="tcm-dish-dim">{_esc(label.lower())}</span></div>')
 
-    _md('<div class="tcm-rail-card">'
+    _md('<div class="rail-card">'
         '<div class="card-kicker">Your dish</div>'
         + "".join(rows) +
         '<div class="tcm-rule"></div>'
@@ -887,7 +889,7 @@ def _taste_circle_rail(component: str, expanded: str | None,
         st.button("Reset", key="tcm_reset", on_click=_tcm_reset_cb)
 
     if selections:
-        _md(f'<div class="tcm-rail-card">'
+        _md(f'<div class="rail-card">'
             f'<div class="card-kicker">Dish name</div>'
             f'<div class="tcm-dish-name">'
             f'{_esc(generate_dish_name(component, selections))}</div></div>')
