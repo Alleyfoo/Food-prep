@@ -518,17 +518,18 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
 
     # ---- reusable flavour routes ----
     for route in data.get("flavour_routes", []):
-        confidence = vocabulary.require("confidence", route["confidence"]).id
+        # The scale is shared (high/medium/low); the claim is not.
+        attestation = vocabulary.require("confidence", route["attestation"]).id
         for dimension in _split_list(route["dimensions"]):
             vocabulary.require("flavours", dimension)
         conn.execute(
             "INSERT INTO flavour_routes(route_id, name, description, "
-            "flavour_dimensions, risks, cultural_context, confidence) "
+            "flavour_dimensions, risks, cultural_context, attestation) "
             "VALUES (?,?,?,?,?,?,?)",
             (
                 route["id"], route["name"], route["description"],
                 route["dimensions"], route["risks"], route.get("cultural_context"),
-                confidence,
+                attestation,
             ),
         )
         for state in route["states"]:
@@ -567,12 +568,12 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
             raise LoadError(f"unknown Scout mechanism: {rule['mechanism']!r}")
         for dimension in _split_list(rule["required_dimensions"]):
             vocabulary.require("flavours", dimension)
-        confidence = vocabulary.require("confidence", rule["confidence"]).id
+        inference = vocabulary.require("confidence", rule["inference_strength"]).id
         conn.execute(
             "INSERT INTO analogy_rules(analogy_id, known_pairing, "
             "source_ingredient_id, substitute_ingredient_id, mechanism, "
             "shared_function, meaningful_difference, expected_risk, "
-            "required_dimensions, explanation_template, confidence) "
+            "required_dimensions, explanation_template, inference_strength) "
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
             (
                 rule["id"], rule["known_pairing"],
@@ -581,7 +582,7 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 rule["mechanism"], rule["shared_function"],
                 rule["meaningful_difference"], rule["expected_risk"],
                 rule["required_dimensions"], rule["explanation_template"],
-                confidence,
+                inference,
             ),
         )
         protocol = rule.get("protocol")

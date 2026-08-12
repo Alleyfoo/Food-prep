@@ -678,7 +678,7 @@ def flavour_routes_for_component(
         JOIN flavour_route_states frs ON frs.route_id = fr.route_id
         JOIN components c ON c.component_id = frs.component_id
         WHERE c.name = ?
-        ORDER BY CASE fr.confidence WHEN 'high' THEN 3 WHEN 'medium_high' THEN 2
+        ORDER BY CASE fr.attestation WHEN 'high' THEN 3 WHEN 'medium_high' THEN 2
                                     WHEN 'medium' THEN 1 ELSE 0 END DESC,
                  fr.name
         """,
@@ -1007,7 +1007,7 @@ def generate_scout_hypotheses(
         JOIN ingredients src ON src.ingredient_id = ar.source_ingredient_id
         JOIN ingredients candidate
           ON candidate.ingredient_id = ar.substitute_ingredient_id
-        ORDER BY CASE ar.confidence WHEN 'high' THEN 4 WHEN 'medium_high' THEN 3
+        ORDER BY CASE ar.inference_strength WHEN 'high' THEN 4 WHEN 'medium_high' THEN 3
                                     WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END DESC,
                  ar.analogy_id
         """

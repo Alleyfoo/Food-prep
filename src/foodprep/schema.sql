@@ -214,7 +214,8 @@ CREATE TABLE flavour_routes (
     flavour_dimensions TEXT NOT NULL,
     risks            TEXT NOT NULL,
     cultural_context TEXT,
-    confidence       TEXT NOT NULL
+    -- How well attested this structure is, NOT how good the food will be.
+    attestation      TEXT NOT NULL
 );
 
 CREATE TABLE flavour_route_states (
@@ -251,7 +252,8 @@ CREATE TABLE analogy_rules (
     expected_risk         TEXT NOT NULL,
     required_dimensions   TEXT NOT NULL,
     explanation_template  TEXT NOT NULL,
-    confidence            TEXT NOT NULL
+    -- How sound the substitution reasoning is, NOT how good the result is.
+    inference_strength    TEXT NOT NULL
 );
 
 CREATE TABLE corpora (

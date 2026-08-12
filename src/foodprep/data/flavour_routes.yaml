@@ -5,7 +5,7 @@ flavour_routes:
     dimensions: "salty\numami\naromatic"
     risks: "Too much soy masks fresh green character; burnt garlic turns bitter."
     cultural_context: "A broad stir-fry structure, not a claim about one regional recipe."
-    confidence: high
+    attestation: high
     states:
       - {component: stir_fried_broccoli_component, reason: "High heat already provides browning; soy seasons and garlic adds aroma."}
       - {component: salted_cucumber_component, reason: "The drained concentrated pieces carry soy and raw garlic without going watery."}
@@ -22,7 +22,7 @@ flavour_routes:
     dimensions: "sour\nnutty_toasted\nrich_fatty"
     risks: "Excess acid can make broccoli metallic; too many nuts make the route heavy."
     cultural_context: "General browned-vegetable, sharp-condiment, and nut structure."
-    confidence: high
+    attestation: high
     states:
       - {component: roasted_broccoli_component, reason: "Acid balances concentration and walnut echoes toasted floret edges."}
       - {component: steamed_broccoli_component, reason: "Acid defines the moist mild state while walnut adds contrast."}
@@ -42,7 +42,7 @@ flavour_routes:
     dimensions: "sour\nrich_fatty\nfresh_green"
     risks: "A thick heavy coating can mute broccoli; add yogurt gradually and preserve acidity."
     cultural_context: "General yogurt-and-citrus dressing structure."
-    confidence: medium_high
+    attestation: medium_high
     states:
       - {component: steamed_broccoli_component, reason: "The moist tender-crisp state accepts a cool dressing after draining."}
       - {component: roasted_broccoli_component, reason: "Cool yogurt contrasts hot browned edges."}

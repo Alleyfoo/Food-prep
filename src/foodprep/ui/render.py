@@ -25,8 +25,16 @@ def chips(values, cls: str = "") -> str:
     return " ".join(chip(v, cls) for v in values)
 
 
-def conf_pill(conf: str) -> str:
-    return f'<span class="card-conf {conf}">{_esc(conf)}</span>'
+def conf_pill(conf: str, claim: str = "") -> str:
+    """A confidence pill.
+
+    *claim* names what is being claimed, because the same high/medium/low
+    scale carries different claims in different places: a pairing's
+    confidence, a route's attestation, an analogy's inference strength.
+    Without the word, "high" silently reads as "this tastes good".
+    """
+    label = f"{claim} {conf}".strip() if claim else conf
+    return f'<span class="card-conf {conf}">{_esc(label)}</span>'
 
 
 def _initials(name: str) -> str:
@@ -215,6 +223,9 @@ def claim_cards_html(h: dict) -> str:
               "weak_hypothesis": "Thin",
               "rejected": "Rejected"}.get(h.get("candidate_class"), "Thin")
     c_body = h.get("shared_function") or h.get("meaningful_difference") or ""
+    strength = (h.get("inference_strength") or "").replace("_", " ")
+    if strength:
+        c_body = f"{c_body} The substitution reasoning is {strength}."
 
     return (
         '<div class="claim-pair">'
@@ -343,7 +354,7 @@ def route_card_html(r: dict, with_debug: bool = False) -> str:
     available_elements = {e["ingredient"] for e in (r.get("available_elements") or [])}
     destinations = r.get("destinations") or []
     dimensions = r.get("flavour_dimensions") or []
-    conf = r.get("confidence") or ""
+    conf = r.get("attestation") or ""
 
     element_chips = []
     for e in elements:
@@ -363,7 +374,7 @@ def route_card_html(r: dict, with_debug: bool = False) -> str:
     parts.append(
         f'<div class="card-head"><span class="card-tech">{_esc(r.get("name", ""))}</span>'
         f'<span class="card-comp">{_esc(r.get("description", ""))}</span>'
-        f'{conf_pill(conf)}</div>'
+        f'{conf_pill(conf, "attested")}</div>'
     )
     if dimensions:
         parts.append(

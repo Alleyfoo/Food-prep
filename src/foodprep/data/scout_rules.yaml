@@ -10,7 +10,7 @@ analogy_rules:
     expected_risk: "The sweetness may make the tomato taste like dessert rather than a savoury dish."
     required_dimensions: "fresh_green\nsour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tomato slice : 1/4 teaspoon balsamic"
       smallest_test: "Drizzle balsamic on one tomato slice and taste."
@@ -29,7 +29,7 @@ analogy_rules:
     expected_risk: "The smoke may overwhelm the tomato's subtle sweetness."
     required_dimensions: "sweet\numami\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 roasted tomato halves : 1 pinch smoked salt"
       smallest_test: "Sprinkle smoked salt on three warm roasted tomato halves and taste."
@@ -48,7 +48,7 @@ analogy_rules:
     expected_risk: "The fermented note may make the sauce taste like soup rather than pasta sauce."
     required_dimensions: "umami\nsweet\nsour"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 cup sauce : 1 teaspoon thinned miso"
       smallest_test: "Thin miso with sauce liquid, stir into one cup of warm sauce."
@@ -67,7 +67,7 @@ analogy_rules:
     expected_risk: "The heat may overwhelm the tomato's subtle smokiness."
     required_dimensions: "sweet\nnutty_toasted\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 charred tomato pieces : 1/2 teaspoon chili crisp"
       smallest_test: "Drizzle chili crisp on three warm charred tomato pieces and taste."
@@ -86,7 +86,7 @@ analogy_rules:
     expected_risk: "The tartness may make the tomato taste too sour or like chutney."
     required_dimensions: "sweet\numami\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 roasted tomato halves : 1/2 teaspoon pomegranate molasses"
       smallest_test: "Drizzle pomegranate molasses on three warm roasted tomato halves and taste."
@@ -105,7 +105,7 @@ analogy_rules:
     expected_risk: "The blend may be too complex and muddy the clean tomato flavour."
     required_dimensions: "fresh_green\nsour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tomato slice : 1 pinch za'atar"
       smallest_test: "Sprinkle za'atar over one tomato slice and taste."
@@ -124,7 +124,7 @@ analogy_rules:
     expected_risk: "The sesame bitterness may clash with the tomato's bright acidity."
     required_dimensions: "fresh_green\nsour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tomato slice : 1/2 teaspoon thinned tahini"
       smallest_test: "Thin tahini with lemon juice, drizzle on one tomato slice."
@@ -143,7 +143,7 @@ analogy_rules:
     expected_risk: "The fish sauce may make the salsa smell and taste too strongly of fermented fish."
     required_dimensions: "fresh_green\nsour\npungent"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tablespoon salsa : 2 drops fish sauce"
       smallest_test: "Add fish sauce to one tablespoon of salsa and taste."
@@ -162,7 +162,7 @@ analogy_rules:
     expected_risk: "The pungency may overwhelm the soup's subtle tomato flavour."
     required_dimensions: "umami\nsweet\nsour"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 cup soup : 1/4 teaspoon grated horseradish"
       smallest_test: "Top one cup of warm tomato soup with grated horseradish."
@@ -181,7 +181,7 @@ analogy_rules:
     expected_risk: "The spice may overwhelm the tomato's delicate flavour."
     required_dimensions: "umami\nsweet\nsour"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 cup sauce : 1 crushed cardamom pod"
       smallest_test: "Crush one pod, stir into one cup of warm sauce, let sit 1 minute, taste."
@@ -201,7 +201,7 @@ analogy_rules:
     expected_risk: "The fruitiness may make the onion taste like a Middle Eastern salad rather than a sharp condiment."
     required_dimensions: "pungent\nfresh_green"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tablespoon raw onion : 1/4 teaspoon sumac"
       smallest_test: "Sprinkle sumac over one tablespoon of raw onion and taste."
@@ -220,7 +220,7 @@ analogy_rules:
     expected_risk: "The tartness may make the onion taste too sour or like chutney."
     required_dimensions: "sweet\nnutty_toasted\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 tablespoons caramelized onion : 1/2 teaspoon pomegranate molasses"
       smallest_test: "Drizzle pomegranate molasses on two tablespoons of warm caramelized onion and taste."
@@ -239,7 +239,7 @@ analogy_rules:
     expected_risk: "The fermented note may make the onion taste like soup rather than a base."
     required_dimensions: "sweet\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 tablespoons sauteed onion : 1/2 teaspoon thinned miso"
       smallest_test: "Thin miso with a drop of water, stir into two tablespoons of warm sauteed onion."
@@ -258,7 +258,7 @@ analogy_rules:
     expected_risk: "The sweetness may make the onion taste like kimchi rather than a European pickle."
     required_dimensions: "sour\nsweet\npungent"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tablespoon pickled onion : 1/4 teaspoon gochugaru"
       smallest_test: "Sprinkle gochugaru over one tablespoon of pickled onion and taste."
@@ -277,7 +277,7 @@ analogy_rules:
     expected_risk: "The sesame bitterness may clash with the onion's sweet caramelization."
     required_dimensions: "sweet\nnutty_toasted\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 tablespoons caramelized onion : 1/2 teaspoon thinned tahini"
       smallest_test: "Thin tahini with lemon juice, drizzle on two tablespoons of warm caramelized onion."
@@ -296,7 +296,7 @@ analogy_rules:
     expected_risk: "The egg may make the mash taste like breakfast or become gluey if over-mixed."
     required_dimensions: "sweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 tablespoons mash : 1 soft-boiled egg"
       smallest_test: "Fold one soft-boiled egg into two tablespoons of warm mash."
@@ -315,7 +315,7 @@ analogy_rules:
     expected_risk: "The yolk may make the crispy potato soggy if not eaten immediately."
     required_dimensions: "nutty_toasted\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 roasted potato pieces : 1 poached egg"
       smallest_test: "Place one poached egg on three warm roasted potato pieces."
@@ -334,7 +334,7 @@ analogy_rules:
     expected_risk: "The egg may make the hash taste like breakfast rather than a savoury dish."
     required_dimensions: "nutty_toasted\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 portion hash : 1 fried egg"
       smallest_test: "Top one portion of warm hash with a crispy fried egg."
@@ -353,7 +353,7 @@ analogy_rules:
     expected_risk: "The smoke may overwhelm the potato's subtle sweetness."
     required_dimensions: "nutty_toasted\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 fries : 1 pinch smoked salt"
       smallest_test: "Sprinkle smoked salt on three warm fries and taste."
@@ -372,7 +372,7 @@ analogy_rules:
     expected_risk: "The malt character may make the fries taste like fish and chips."
     required_dimensions: "nutty_toasted\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 fries : 1/4 teaspoon malt vinegar"
       smallest_test: "Drizzle malt vinegar on three warm fries and taste."
@@ -391,7 +391,7 @@ analogy_rules:
     expected_risk: "The pungency may overwhelm the potato's subtle earthiness."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 baked potato : 1/2 teaspoon grated horseradish"
       smallest_test: "Top one warm baked potato with grated horseradish and butter."
@@ -410,7 +410,7 @@ analogy_rules:
     expected_risk: "The fishiness may make the soup taste like chowder rather than potato soup."
     required_dimensions: "umami\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 cup soup : 1 anchovy fillet"
       smallest_test: "Melt one anchovy fillet into one cup of warm potato soup."
@@ -429,7 +429,7 @@ analogy_rules:
     expected_risk: "The capers may be too small and briny, making the salad taste like tapenade."
     required_dimensions: "sour\nsweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 tablespoons potato salad : 1 teaspoon capers"
       smallest_test: "Fold capers into two tablespoons of potato salad and taste."
@@ -448,7 +448,7 @@ analogy_rules:
     expected_risk: "The nuttiness may make the gratin taste too Swiss or Alpine."
     required_dimensions: "umami\nrich_fatty\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 portion gratin : 1 tablespoon grated gruyere"
       smallest_test: "Top one portion of gratin with grated gruyere and broil briefly."
@@ -467,7 +467,7 @@ analogy_rules:
     expected_risk: "The dill may make the potato taste like pickles or Scandinavian fish."
     required_dimensions: "umami\nsweet"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 boiled potatoes : 1 tablespoon chopped dill"
       smallest_test: "Toss warm boiled potatoes with chopped dill and butter."
@@ -487,7 +487,7 @@ analogy_rules:
     expected_risk: "The fermented note may clash with the cabbage's sulfurous character if overcooked."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 cabbage wedge : 1/2 teaspoon thinned miso"
       smallest_test: "Thin miso with melted butter, brush on one warm roasted wedge."
@@ -506,7 +506,7 @@ analogy_rules:
     expected_risk: "The pine character may make the cabbage taste medicinal or like gin."
     required_dimensions: "sweet\numami\nrich_fatty"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 forkful braised cabbage : 1 crushed juniper berry"
       smallest_test: "Crush one berry, fold into one forkful of warm braised cabbage."
@@ -525,7 +525,7 @@ analogy_rules:
     expected_risk: "The sweetness may make the sauerkraut taste like kimchi rather than European ferment."
     required_dimensions: "sour\nfermented_funky"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 forkful sauerkraut : 1/4 teaspoon gochugaru"
       smallest_test: "Sprinkle gochugaru over one forkful of sauerkraut, mix, taste."
@@ -544,7 +544,7 @@ analogy_rules:
     expected_risk: "The seeds may be too crunchy and the juice too thin compared to apple's body."
     required_dimensions: "fresh_green\npungent"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 forkful slaw : 5-6 pomegranate seeds"
       smallest_test: "Scatter seeds over one forkful of dressed slaw and taste."
@@ -563,7 +563,7 @@ analogy_rules:
     expected_risk: "The smoke may overwhelm the delicate fermentation character."
     required_dimensions: "sour\nfermented_funky"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 forkful sauerkraut : 1/8 teaspoon smoked paprika"
       smallest_test: "Sprinkle smoked paprika over one forkful of sauerkraut, mix, taste."
@@ -583,7 +583,7 @@ analogy_rules:
     expected_risk: "The berry character may make the broccoli taste jam-like or perfumed."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} as an acidic finish because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 small roasted floret : 3 drops lingonberry vinegar"
       smallest_test: "Dress one warm roasted floret with three drops; do not season the whole batch."
@@ -602,7 +602,7 @@ analogy_rules:
     expected_risk: "The combination may become heavy and mute broccoli's green character."
     required_dimensions: "nutty_toasted"
     explanation_template: "{candidate} may reinforce this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium_high
+    inference_strength: medium_high
     protocol:
       starting_ratio: "1 small roasted floret : 1/4 teaspoon brown butter"
       smallest_test: "Coat one warm floret lightly with brown butter and taste before dressing the batch."
@@ -621,7 +621,7 @@ analogy_rules:
     expected_risk: "The paste may coat too heavily and mute the bright green flavour."
     required_dimensions: "fresh_green\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 floret : 1/8 teaspoon thinned miso"
       smallest_test: "Thin miso with a drop of water, dab on one warm floret, taste."
@@ -640,7 +640,7 @@ analogy_rules:
     expected_risk: "The sesame bitterness may stack with the roasted bitterness and become harsh."
     required_dimensions: "nutty_toasted\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 floret : 1/4 teaspoon thinned tahini"
       smallest_test: "Thin tahini with lemon juice and water, drizzle on one warm floret."
@@ -660,7 +660,7 @@ analogy_rules:
     expected_risk: "The mash may turn dessert-like if the apricot's sweetness outweighs its acidity."
     required_dimensions: "sweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} against a rich sweet mash because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tablespoon warm rutabaga mash : 1 thin sliver of ripe apricot"
       smallest_test: "Fold one sliver of apricot into one spoonful of finished mash; do not add fruit to the pot."
@@ -679,7 +679,7 @@ analogy_rules:
     expected_risk: "The pungency may overwhelm the subtle roasted sweetness."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 cube roasted rutabaga : 1/8 teaspoon grated horseradish"
       smallest_test: "Top one warm cube with a small grating of fresh horseradish."
@@ -698,7 +698,7 @@ analogy_rules:
     expected_risk: "The anise character may clash with the buttery richness."
     required_dimensions: "sweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 tablespoon mash : 2-3 toasted caraway seeds"
       smallest_test: "Toast seeds lightly, crush, fold into one spoonful of mash."
@@ -718,7 +718,7 @@ analogy_rules:
     expected_risk: "Ripe mango may read tropical-sweet and lose the crunch the salad wanted from apple."
     required_dimensions: "fresh_green\nbitter"
     explanation_template: "{candidate} may replace {source} on massaged greens because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 ribbon of massaged kale : 1 small cube of firm mango"
       smallest_test: "Wrap one ribbon of dressed massaged kale around one cube of firm (not fully ripe) mango and taste."
@@ -737,7 +737,7 @@ analogy_rules:
     expected_risk: "The seeds may be too crunchy and the juice too thin compared to dried fruit's concentrated chew."
     required_dimensions: "fresh_green\nbitter"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 ribbon kale : 5-6 pomegranate seeds"
       smallest_test: "Scatter seeds over one ribbon of dressed kale and taste."
@@ -756,7 +756,7 @@ analogy_rules:
     expected_risk: "The heat may overwhelm the subtle toasted kale flavour."
     required_dimensions: "nutty_toasted\nbitter"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 kale chip : 2-3 flakes from chili crisp"
       smallest_test: "Scatter a few chili crisp flakes on one finished kale chip."
@@ -775,7 +775,7 @@ analogy_rules:
     expected_risk: "The paste may make the braise too thick or the fermented note too strong."
     required_dimensions: "umami\nbitter"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 forkful braised kale : 1/8 teaspoon thinned miso"
       smallest_test: "Thin miso with a drop of the braising liquid, stir into one forkful."
@@ -795,7 +795,7 @@ analogy_rules:
     expected_risk: "The salad may read as fruit salad instead of a savoury side."
     required_dimensions: "fresh_green\nsweet"
     explanation_template: "{candidate} may replace {source} in a cool salad because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "2 cucumber slices : 1 thin slice of ripe peach"
       smallest_test: "Salt one cucumber slice, top with a sliver of peach, and taste before mixing a bowl."
@@ -814,7 +814,7 @@ analogy_rules:
     expected_risk: "The blend may be too complex and muddy the clean cucumber flavour."
     required_dimensions: "fresh_green\nsalty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "3 cucumber slices : 1 pinch za'atar"
       smallest_test: "Sprinkle za'atar over salted cucumber slices and taste."
@@ -833,7 +833,7 @@ analogy_rules:
     expected_risk: "The dark fruit character may clash with the bright pickle acidity."
     required_dimensions: "sour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 pickle slice : 1 drop pomegranate molasses"
       smallest_test: "Dab one drop on a pickle slice and taste."
@@ -853,7 +853,7 @@ analogy_rules:
     expected_risk: "The berry aroma may clash with the tropical green-fruit character instead of framing it."
     required_dimensions: "sour\nfresh_green"
     explanation_template: "{candidate} may replace {source} on a sour slaw because {shared_function} The state contributes {matched_dimensions}."
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 forkful of undressed green mango shreds : 2 drops lingonberry vinegar"
       smallest_test: "Dress one forkful of shreds with two drops plus a pinch of salt; taste against a lime-dressed forkful."
@@ -872,7 +872,7 @@ analogy_rules:
     expected_risk: "The fish sauce may make the slaw smell and taste too strongly of fermented fish."
     required_dimensions: "sour\nfresh_green"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 forkful slaw : 2 drops fish sauce"
       smallest_test: "Dress one forkful with fish sauce and lime, taste."
@@ -891,7 +891,7 @@ analogy_rules:
     expected_risk: "The spice may overwhelm the mango's delicate perfume."
     required_dimensions: "sweet\nsour\nrich_fatty"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 tablespoon lassi : 1 crushed cardamom pod"
       smallest_test: "Crush one pod, stir into one spoonful of lassi, let sit 1 minute, taste."
@@ -911,7 +911,7 @@ analogy_rules:
     expected_risk: "Crumbs may sog on juicy fruit, or the rye bitterness may clash instead of echoing."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} on a browned sweet state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 roasted apricot half : 1 small pinch of toasted rye crumbs"
       smallest_test: "Scatter a pinch of freshly toasted rye crumbs on one warm roasted half; eat within a minute, before they sog."
@@ -930,7 +930,7 @@ analogy_rules:
     expected_risk: "The herb may make the fruit taste like a roast dinner rather than dessert."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 roasted apricot half : 1 small rosemary needle"
       smallest_test: "Chop one rosemary needle finely, scatter on one warm roasted half."
@@ -949,7 +949,7 @@ analogy_rules:
     expected_risk: "The cheese may overwhelm the delicate apricot flavour."
     required_dimensions: "sweet\nsour\naromatic"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
-    confidence: medium
+    inference_strength: medium
     protocol:
       starting_ratio: "1 apricot slice : 1 small crumble of goat cheese"
       smallest_test: "Top one slice of fresh apricot with a small crumble of cheese."
@@ -969,7 +969,7 @@ analogy_rules:
     expected_risk: "The soup may taste ashy or lose its fresh vegetable character."
     required_dimensions: "fermented_funky\nrich_fatty"
     explanation_template: "{candidate} is only plausible when {matched_dimensions} support the bridge: {shared_function}"
-    confidence: low
+    inference_strength: low
     protocol:
       starting_ratio: "1 tablespoon soup : 1/8 teaspoon smoked yogurt"
       smallest_test: "Stir smoked yogurt into one spoonful away from the main pot."
