@@ -218,16 +218,32 @@ def claim_cards_html(h: dict) -> str:
     novelty = h.get("novelty") or {}
     nclass = novelty.get("class", "not_checked")
     count = novelty.get("observed_count", 0)
-    scope = novelty.get("scope", "the local corpus")
-    if nclass == "not_checked":
-        n_title, n_body = "Not checked", "Novelty has not been evaluated for this pairing."
-    elif nclass == "novel":
+    scope = novelty.get("scope") or "the local corpus"
+
+    # These are corpus.novelty_class()'s own values. Absence is the claim
+    # worth trusting; a high count mostly means both ingredients are popular.
+    if nclass == "not_observed":
         n_title = "Not observed"
-        n_body = (f"Zero co-occurrences in {scope}. "
+        n_body = (f"Zero co-occurrences across {scope}. "
                   f"Absent evidence, not proof.")
-    else:
+    elif nclass == "rare":
+        n_title = "Almost unheard of"
+        n_body = (f"{count} recipe in {scope}. One co-occurrence is closer to "
+                  f"coincidence than to a tradition.")
+    elif nclass == "uncommon":
+        n_title = "Uncommon"
+        n_body = f"{count} recipes across {scope}."
+    elif nclass in ("established", "common"):
         n_title = "Seen before"
-        n_body = f"{count} co-occurrence{'s' if count != 1 else ''} in {scope}."
+        n_body = (f"{count} recipes across {scope}. A count says how popular "
+                  f"the ingredients are, not whether the pairing is good.")
+    elif nclass == "insufficient_coverage":
+        n_title = "Cannot tell"
+        n_body = ("One side of this pairing is not in the corpus, so no claim "
+                  "is made either way.")
+    else:
+        n_title = "Not checked"
+        n_body = "Novelty has not been measured for this pairing."
 
     compat = {"scout_candidate": "Plausible",
               "weak_hypothesis": "Thin",

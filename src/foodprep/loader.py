@@ -25,6 +25,12 @@ SCOUT_RULES_PATH = Path(__file__).with_name("data") / "scout_rules.yaml"
 #: (which builds in memory from YAML) never saw them and a fresh clone lost
 #: them. This is their durable home.
 TASTINGS_PATH = Path(__file__).with_name("data") / "tastings.yaml"
+#: Cached corpus measurements. Unlike tastings these are DERIVED — anyone
+#: with CulinaryDB can regenerate them with `foodprep novelty` — but the
+#: corpus is 45k recipes that do not ship with the app, so the app can only
+#: show novelty if the answers travel with it. Regenerate via
+#: scripts/observe_novelty.py; never hand-edit.
+NOVELTY_PATH = Path(__file__).with_name("data") / "novelty.yaml"
 
 CONFIDENCE_OK = {"high", "medium_high", "medium", "low", "experimental"}
 
@@ -134,6 +140,47 @@ def _preserve_tasting_trials(conn: sqlite3.Connection) -> list[dict]:
            ORDER BY tt.trial_id"""
     ).fetchall()
     return [dict(row) for row in rows]
+
+
+def _load_cached_novelty(conn: sqlite3.Connection, data: dict) -> None:
+    """Load cached corpus measurements.
+
+    These are machine-derived, so an observation whose ontology reference has
+    gone is DROPPED rather than raising — the opposite of a tasting, which is
+    irreplaceable and must never be silently lost.
+    """
+    for corpus_row in data.get("corpora") or []:
+        conn.execute(
+            "INSERT OR REPLACE INTO corpora(corpus_id, name, scope, source_path, "
+            "recipe_count, search_date) VALUES (?,?,?,?,?,?)",
+            (corpus_row["corpus_id"], corpus_row["name"], corpus_row["scope"],
+             corpus_row.get("source_path"), corpus_row["recipe_count"],
+             corpus_row["search_date"]),
+        )
+    for o in data.get("observations") or []:
+        component = conn.execute(
+            "SELECT component_id FROM components WHERE name = ?",
+            (o["component"],)).fetchone()
+        candidate = conn.execute(
+            "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?",
+            (o["candidate"],)).fetchone()
+        analogy = conn.execute(
+            "SELECT 1 FROM analogy_rules WHERE analogy_id = ?",
+            (o["analogy_id"],)).fetchone()
+        if component is None or candidate is None or analogy is None:
+            continue  # derived: regenerate rather than preserve
+        conn.execute(
+            """INSERT OR IGNORE INTO novelty_observations(
+                 analogy_id, component_id, candidate_ingredient_id, corpus_id,
+                 observed_count, context_count, contexts, target_covered,
+                 candidate_covered, result_class, observed_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (o["analogy_id"], component[0], candidate[0], o["corpus_id"],
+             o["observed_count"], o["context_count"], o.get("contexts"),
+             1 if o["target_covered"] else 0,
+             1 if o["candidate_covered"] else 0,
+             o["result_class"], o["observed_at"]),
+        )
 
 
 def _load_recorded_tastings(conn: sqlite3.Connection, data: dict) -> None:
@@ -252,9 +299,11 @@ def _restore_novelty_evidence(conn: sqlite3.Connection, corpora: list[dict],
     reproduced by rerunning `foodprep novelty`, so observations whose analogy,
     component or candidate no longer exist are dropped rather than raising.
     """
+    # data/novelty.yaml may already have loaded the same corpus and the same
+    # observations; a locally recomputed one must not collide with the cache.
     for corpus in corpora:
         conn.execute(
-            """INSERT INTO corpora(corpus_id, name, scope, source_path,
+            """INSERT OR REPLACE INTO corpora(corpus_id, name, scope, source_path,
                                    recipe_count, search_date)
                VALUES (?,?,?,?,?,?)""",
             (corpus["corpus_id"], corpus["name"], corpus["scope"],
@@ -277,7 +326,7 @@ def _restore_novelty_evidence(conn: sqlite3.Connection, corpora: list[dict],
         if component is None or candidate is None or analogy is None:
             continue
         conn.execute(
-            """INSERT INTO novelty_observations(
+            """INSERT OR REPLACE INTO novelty_observations(
                  observation_id, analogy_id, component_id,
                  candidate_ingredient_id, corpus_id, observed_count,
                  context_count, contexts, target_covered, candidate_covered,
@@ -664,6 +713,7 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
           routes_path: Path | str | None = ROUTES_PATH,
           scout_rules_path: Path | str | None = SCOUT_RULES_PATH,
           tastings_path: Path | str | None = TASTINGS_PATH,
+          novelty_path: Path | str | None = NOVELTY_PATH,
           vocabulary_path: Path | str = VOCABULARY_PATH) -> None:
     """Rebuild schema and load the YAML ontology from scratch.
 
@@ -688,6 +738,8 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     populate(conn, data, vocabulary)
     if tastings_path and Path(tastings_path).exists():
         _load_recorded_tastings(conn, load_yaml(tastings_path) or {})
+    if novelty_path and Path(novelty_path).exists():
+        _load_cached_novelty(conn, load_yaml(novelty_path) or {})
     # Trials recorded through the CLI into a local database are kept too, but
     # only if they are not already in the YAML — otherwise a trial that has
     # since been committed would be inserted twice.

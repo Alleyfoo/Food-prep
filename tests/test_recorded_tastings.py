@@ -108,3 +108,33 @@ def test_the_users_garlic_fat_is_confit_not_garlic_butter(fresh):
     assert "garlic butter" in row["aliases"]
     assert not fresh.execute(
         "SELECT 1 FROM ingredients WHERE canonical_name = 'garlic_butter'").fetchone()
+
+
+# ---- cached corpus measurements --------------------------------------------
+
+def test_novelty_survives_a_build_with_no_corpus_present(fresh):
+    """The corpus is ~46k recipes that do not ship with the app. Without the
+    cache every hypothesis would read 'novelty not checked'."""
+    n = fresh.execute("SELECT count(*) FROM novelty_observations").fetchone()[0]
+    assert n > 0
+    corpus_row = fresh.execute("SELECT name, recipe_count FROM corpora").fetchone()
+    assert corpus_row["recipe_count"] > 1000, "provenance must travel with the claim"
+
+
+def test_absence_is_the_claim_worth_trusting(fresh):
+    """A zero, for two ingredients the corpus knows, is a real finding."""
+    rows = fresh.execute(
+        """SELECT target_covered, candidate_covered FROM novelty_observations
+           WHERE result_class = 'not_observed'""").fetchall()
+    assert rows, "expected some genuinely unobserved pairings"
+    for r in rows:
+        assert r["target_covered"] and r["candidate_covered"], (
+            "'not observed' must never be claimed for something the corpus "
+            "cannot see — that is what insufficient_coverage is for")
+
+
+def test_unresolvable_pairings_make_no_claim(fresh):
+    rows = fresh.execute(
+        """SELECT observed_count FROM novelty_observations
+           WHERE result_class = 'insufficient_coverage'""").fetchall()
+    assert rows, "over half of ours do not resolve; that should be visible"

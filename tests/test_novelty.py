@@ -37,7 +37,12 @@ def test_observation_records_corpus_scope_and_occurrence(conn, tmp_path):
     assert {h["analogy_id"]: h["compatibility_score"] for h in after} == compatibility
 
 
-def test_absent_alias_is_insufficient_coverage_not_zero(conn, tmp_path):
+def test_absent_alias_is_insufficient_coverage_not_zero(tmp_path):
+    # Its own database: this measures a deliberately sparse corpus, and the
+    # cached real measurements would otherwise answer for it.
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    build(conn, novelty_path=None)
     _write_corpus(
         tmp_path,
         recipes=[(1, "Plain Broccoli")],

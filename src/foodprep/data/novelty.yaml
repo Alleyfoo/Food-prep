@@ -1,0 +1,4232 @@
+# Cached corpus measurements — GENERATED, do not hand-edit.
+#
+# Regenerate: py -3.11 scripts/observe_novelty.py <CulinaryDB dir>
+#
+# These are derived, unlike data/tastings.yaml: anyone with the corpus
+# can reproduce them. They are committed only because the corpus does
+# not ship with the app, so without this file every hypothesis reads
+# 'novelty not checked'.
+#
+# Absence is the claim worth trusting. A zero here means two ingredients
+# the corpus knows never appear in one recipe. A high count means little:
+# popular ingredients co-occur with everything.
+corpora:
+- corpus_id: culinarydb
+  name: CulinaryDB
+  scope: 45772 recipes in supplied CulinaryDB files
+  source_path: F:\download\google\CulinaryDB
+  recipe_count: 45772
+  search_date: '2026-08-12'
+observations:
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: apricot_compote_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: baked_potato_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: baked_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: baked_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: baked_potato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: baked_potato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: baked_potato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: baked_potato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: baked_potato_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 181
+  context_count: 181
+  contexts: 'Bacon-Rosemary-Red Bliss Hash
+
+    Crisp Potatoes with Salsa Verde Drizzle
+
+    Grilled Potato Salad'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: baked_potato_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: baked_potato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Ground Beef and Tahini
+
+    Pureed Peanut Butter and Vegetable Soup'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: braised_cabbage_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tart_stone_fruit_for_apple_on_sweet_root_mash
+  component: braised_cabbage_component
+  candidate: apricot
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: warm_seed_for_nutmeg_on_root_mash
+  component: braised_cabbage_component
+  candidate: caraway_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: braised_cabbage_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 36
+  context_count: 36
+  contexts: 'Mom''s Coleslaw
+
+    Vegetarian Borscht
+
+    Pirozhki'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_cheese_on_caramelized_onion
+  component: braised_cabbage_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: juniper_for_bacon_on_braised_cabbage
+  component: braised_cabbage_component
+  candidate: juniper_berries
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: braised_cabbage_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Raw Pad Thai
+
+    Garden of Good and Evil Bulgogi
+
+    Tofu Chanpuru'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: braised_kale_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: braised_kale_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Beer Braised Corned Beef with Red Potatoes and Carrots
+
+    My Version of My Friend Jon''s Polish Stir-Fry and Pierogis Pot Stickers with
+    Herbs and Sour Cream
+
+    Spicy and Creamy Vegetable Soup'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_soy_on_braised_greens
+  component: braised_kale_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 1
+  context_count: 1
+  contexts: Oven-Baked Beef Meatballs
+  target_covered: true
+  candidate_covered: true
+  result_class: rare
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: braised_kale_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 1
+  context_count: 1
+  contexts: Oven-Baked Beef Meatballs
+  target_covered: true
+  candidate_covered: true
+  result_class: rare
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: caramelized_onion_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: caramelized_onion_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: caramelized_onion_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: caramelized_onion_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 346
+  context_count: 346
+  contexts: 'Crusty Mustard-Dill Meat Loaf
+
+    Rotini with Peppers, Onions, and Feta
+
+    Persian New Year''s Soup with Beans, Noodles, and Herbs (Ash-e-reshteh)'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: caramelized_onion_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: caramelized_onion_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: caramelized_onion_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 91
+  context_count: 91
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Slow-Cooker Choucroute
+
+    Saucy Country-Style Oven Ribs'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: caramelized_onion_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 91
+  context_count: 91
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Slow-Cooker Choucroute
+
+    Saucy Country-Style Oven Ribs'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: caramelized_onion_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: caramelized_onion_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 34
+  context_count: 34
+  contexts: 'Deliciously Organic Carrot Spread
+
+    General Tso''s Chicken with Spiced Sesame Rice
+
+    Sake Pork Shabu Shabu'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: caramelized_onion_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 34
+  context_count: 34
+  contexts: 'Deliciously Organic Carrot Spread
+
+    General Tso''s Chicken with Spiced Sesame Rice
+
+    Sake Pork Shabu Shabu'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: caramelized_onion_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: caramelized_onion_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: caramelized_onion_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 535
+  context_count: 535
+  contexts: 'Veal Breast Milanese Hoagie
+
+    Meaty Mushroom Lasagna
+
+    Mirliton and Shrimp Dressing'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: caramelized_onion_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: caramelized_onion_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: caramelized_onion_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 29
+  context_count: 29
+  contexts: 'Lebanese Donair
+
+    Cauliflower "Shawarma"
+
+    Thai Noodle Salad'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: charred_tomato_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: charred_tomato_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: charred_tomato_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: charred_tomato_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: charred_tomato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: charred_tomato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: charred_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: charred_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: charred_tomato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: charred_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: charred_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: charred_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: charred_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: charred_tomato_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 266
+  context_count: 266
+  contexts: 'Raw Pasta Sauce
+
+    Cheese Strata with Ham and Tomatoes
+
+    Grandfather''s Cioppino'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: charred_tomato_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: charred_tomato_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: charred_tomato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 12
+  context_count: 12
+  contexts: 'Spicy Shrimp Baba Ghanoush Flatbread
+
+    Lebanese Donair
+
+    Ground Beef and Tahini'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: crisped_kale_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_crisped_greens
+  component: crisped_kale_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: dried_apricot_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: dried_tomato_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: dried_tomato_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: dried_tomato_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: dried_tomato_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: dried_tomato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: dried_tomato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: dried_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: dried_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: dried_tomato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: dried_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: dried_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: dried_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: dried_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: dried_tomato_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 266
+  context_count: 266
+  contexts: 'Raw Pasta Sauce
+
+    Cheese Strata with Ham and Tomatoes
+
+    Grandfather''s Cioppino'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: dried_tomato_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: dried_tomato_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: dried_tomato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 12
+  context_count: 12
+  contexts: 'Spicy Shrimp Baba Ghanoush Flatbread
+
+    Lebanese Donair
+
+    Ground Beef and Tahini'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: gochugaru_for_plain_chili_on_fermented_cabbage
+  component: fermented_cabbage_component
+  candidate: gochugaru
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_paprika_for_plain_paprika_on_fermented_cabbage
+  component: fermented_cabbage_component
+  candidate: smoked_paprika
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pungent_cheese_for_cream_on_fresh_stone_fruit
+  component: fresh_apricot_component
+  candidate: goat_cheese
+  corpus_id: culinarydb
+  observed_count: 5
+  context_count: 5
+  contexts: 'Saffron Couscous with Goat Cheese
+
+    Rotisserie Lamb Tacos with Apricot-Chipotle Baste
+
+    Stuffed Figs in a Blanket'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: fresh_apricot_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: balsamic_for_lemon_on_fresh_tomato
+  component: fresh_tomato_component
+  candidate: balsamic_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fish_sauce_for_salt_on_tropical_slaw
+  component: fresh_tomato_component
+  candidate: fish_sauce
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_berry_acid_for_lime_on_sour_slaw
+  component: fresh_tomato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: fresh_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: fresh_tomato_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 14
+  context_count: 14
+  contexts: 'Grilled Pork Chops with Fresh Nectarine Salsa
+
+    Fruity Chili
+
+    Grilled Giant Pork Chops with Sweet Peach Barbecue Sauce'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: fresh_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_mozzarella_on_fresh_tomato
+  component: fresh_tomato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 12
+  context_count: 12
+  contexts: 'Spicy Shrimp Baba Ghanoush Flatbread
+
+    Lebanese Donair
+
+    Ground Beef and Tahini'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: zaatar_for_basil_on_fresh_tomato
+  component: fresh_tomato_component
+  candidate: zaatar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tart_stone_fruit_for_apple_on_sweet_root_mash
+  component: fried_potato_component
+  candidate: apricot
+  corpus_id: culinarydb
+  observed_count: 6
+  context_count: 6
+  contexts: 'Lamb Stew with Turkish Flavors
+
+    Turkey in Baked Pumpkin
+
+    Moroccan Roasted Chicken'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: fried_potato_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: warm_seed_for_nutmeg_on_root_mash
+  component: fried_potato_component
+  candidate: caraway_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: fried_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: fried_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_cheese_on_caramelized_onion
+  component: fried_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: fried_potato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: fried_potato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: fried_potato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: malt_vinegar_for_plain_vinegar_on_fried_potato
+  component: fried_potato_component
+  candidate: malt_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: fried_potato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: fried_potato_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 181
+  context_count: 181
+  contexts: 'Bacon-Rosemary-Red Bliss Hash
+
+    Crisp Potatoes with Salsa Verde Drizzle
+
+    Grilled Potato Salad'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: fried_potato_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_fried_potato
+  component: fried_potato_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: fried_potato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Ground Beef and Tahini
+
+    Pureed Peanut Butter and Vegetable Soup'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: frozen_tomato_base
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: cardamom_for_basil_on_tomato_sauce
+  component: frozen_tomato_base
+  candidate: cardamom
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'roti lasagne
+
+    Lamb Tikka Masala
+
+    aaloo kofta'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: frozen_tomato_base
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_garlic_on_tomato_soup
+  component: frozen_tomato_base
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_anchovy_on_tomato_sauce
+  component: frozen_tomato_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: frozen_tomato_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: frozen_tomato_base
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: balsamic_for_lemon_on_fresh_tomato
+  component: green_mango_slaw_component
+  candidate: balsamic_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fish_sauce_for_salt_on_tropical_slaw
+  component: green_mango_slaw_component
+  candidate: fish_sauce
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_berry_acid_for_lime_on_sour_slaw
+  component: green_mango_slaw_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: green_mango_slaw_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: green_mango_slaw_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 9
+  context_count: 9
+  contexts: 'Pink Lemonade Champagne Punch
+
+    Hurricane Jessica
+
+    Salmon Tacos with Mango Salsa'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: green_mango_slaw_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_mozzarella_on_fresh_tomato
+  component: green_mango_slaw_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: zaatar_for_basil_on_fresh_tomato
+  component: green_mango_slaw_component
+  candidate: zaatar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tart_stone_fruit_for_apple_on_sweet_root_mash
+  component: mango_lassi_base
+  candidate: apricot
+  corpus_id: culinarydb
+  observed_count: 5
+  context_count: 5
+  contexts: 'Chicken Curry with Dried Apricots
+
+    Passionfruit Mousse Cake
+
+    Mango-Pineapple Tart with Macadamia Nut Crust'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: capers_for_pickles_on_potato_salad
+  component: mango_lassi_base
+  candidate: capers
+  corpus_id: culinarydb
+  observed_count: 1
+  context_count: 1
+  contexts: Crab Parfait
+  target_covered: true
+  candidate_covered: true
+  result_class: rare
+  observed_at: '2026-08-12'
+- analogy_id: warm_seed_for_nutmeg_on_root_mash
+  component: mango_lassi_base
+  candidate: caraway_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: warm_spice_for_plain_yogurt_in_fruit_lassi
+  component: mango_lassi_base
+  candidate: cardamom
+  corpus_id: culinarydb
+  observed_count: 30
+  context_count: 30
+  contexts: 'paneer palak bhujia
+
+    Hot and Sweet Pepper Curry Sauce with Chicken, Lamb or Beef
+
+    Sweet Mango Chutney'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_cheese_on_caramelized_onion
+  component: mango_lassi_base
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: mango_lassi_base
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: gochugaru_for_plain_chili_on_pickled_onion
+  component: mango_salsa_component
+  candidate: gochugaru
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: mango_salsa_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tart_stone_fruit_for_apple_on_sweet_root_mash
+  component: mashed_potato_component
+  candidate: apricot
+  corpus_id: culinarydb
+  observed_count: 6
+  context_count: 6
+  contexts: 'Lamb Stew with Turkish Flavors
+
+    Turkey in Baked Pumpkin
+
+    Moroccan Roasted Chicken'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: warm_seed_for_nutmeg_on_root_mash
+  component: mashed_potato_component
+  candidate: caraway_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_cheese_on_caramelized_onion
+  component: mashed_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tart_stone_fruit_for_apple_on_sweet_root_mash
+  component: mashed_rutabaga_component
+  candidate: apricot
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: warm_seed_for_nutmeg_on_root_mash
+  component: mashed_rutabaga_component
+  candidate: caraway_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_cheese_on_caramelized_onion
+  component: mashed_rutabaga_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tropical_fruit_for_apple_on_massaged_greens
+  component: massaged_kale_component
+  candidate: mango
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Mango-Salmon Tacos and Guava-Peanut Sauce
+
+    Summer Kale, Avocado, Mango, and Chickpea Salad with Citrus Poppy Seed Vinaigrette
+
+    Roasted Eggplant and Crispy Kale with Yogurt'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: jewel_seeds_for_dried_fruit_on_bitter_greens
+  component: massaged_kale_component
+  candidate: pomegranate_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pungent_cheese_for_cream_on_fresh_stone_fruit
+  component: pickled_cabbage_component
+  candidate: goat_cheese
+  corpus_id: culinarydb
+  observed_count: 1
+  context_count: 1
+  contexts: Fresh Tuna Sandwich
+  target_covered: true
+  candidate_covered: true
+  result_class: rare
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: pickled_cabbage_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: gochugaru_for_plain_chili_on_pickled_onion
+  component: pickled_onion_component
+  candidate: gochugaru
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: pickled_onion_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pungent_cheese_for_cream_on_fresh_stone_fruit
+  component: pickled_tomato_component
+  candidate: goat_cheese
+  corpus_id: culinarydb
+  observed_count: 99
+  context_count: 99
+  contexts: 'Tomato Basil Spaghettini
+
+    Spinach Linguine with Goat Cheese
+
+    Wolfgang''s Salad Tasting Plate: Black and Green Olive Tapenade'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: pickled_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: potato_gratin_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: gruyere_for_cheddar_on_potato_gratin
+  component: potato_gratin_component
+  candidate: gruyere
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: malt_vinegar_for_plain_vinegar_on_fried_potato
+  component: potato_gratin_component
+  candidate: malt_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_fried_potato
+  component: potato_gratin_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: potato_hash_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: potato_hash_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: potato_hash_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: potato_hash_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 119
+  context_count: 119
+  contexts: 'New Potato and Cucumber Salad with Fresh Herbs
+
+    Potato Pancakes with Pickle Juice
+
+    Falafels with Yogurt-Dill Sauce'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: potato_hash_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: potato_hash_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: potato_hash_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: potato_hash_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: potato_hash_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: potato_hash_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: potato_hash_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: potato_hash_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: potato_hash_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: potato_hash_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 181
+  context_count: 181
+  contexts: 'Bacon-Rosemary-Red Bliss Hash
+
+    Crisp Potatoes with Salsa Verde Drizzle
+
+    Grilled Potato Salad'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: potato_hash_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: potato_hash_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: potato_hash_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Ground Beef and Tahini
+
+    Pureed Peanut Butter and Vegetable Soup'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: tart_stone_fruit_for_apple_on_sweet_root_mash
+  component: potato_salad_component
+  candidate: apricot
+  corpus_id: culinarydb
+  observed_count: 6
+  context_count: 6
+  contexts: 'Lamb Stew with Turkish Flavors
+
+    Turkey in Baked Pumpkin
+
+    Moroccan Roasted Chicken'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: capers_for_pickles_on_potato_salad
+  component: potato_salad_component
+  candidate: capers
+  corpus_id: culinarydb
+  observed_count: 56
+  context_count: 56
+  contexts: 'Papas Rellenas with Picadillo de Pavo
+
+    My Tuna Salad Nicoise
+
+    Crisp Potatoes with Salsa Verde Drizzle'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: warm_seed_for_nutmeg_on_root_mash
+  component: potato_salad_component
+  candidate: caraway_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: warm_spice_for_plain_yogurt_in_fruit_lassi
+  component: potato_salad_component
+  candidate: cardamom
+  corpus_id: culinarydb
+  observed_count: 54
+  context_count: 54
+  contexts: 'Alicia''s Aloo Gobi
+
+    quick potato curry
+
+    North Indian Chicken Curry'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tahini_for_cheese_on_caramelized_onion
+  component: potato_salad_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: potato_salad_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: potato_soup_base
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: potato_soup_base
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 119
+  context_count: 119
+  contexts: 'New Potato and Cucumber Salad with Fresh Herbs
+
+    Potato Pancakes with Pickle Juice
+
+    Falafels with Yogurt-Dill Sauce'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: potato_soup_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pungent_cheese_for_cream_on_fresh_stone_fruit
+  component: quick_pickled_cucumber_component
+  candidate: goat_cheese
+  corpus_id: culinarydb
+  observed_count: 5
+  context_count: 5
+  contexts: 'Lamb Meatball Sliders
+
+    Chop Chop Bread Salad
+
+    Greek Hamburgers'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: quick_pickled_cucumber_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_for_apple_on_raw_slaw
+  component: raw_cabbage_slaw_component
+  candidate: pomegranate_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: sumac_for_vinegar_on_raw_onion
+  component: raw_cabbage_slaw_component
+  candidate: sumac
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: raw_cucumber_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Traditional Japanese Breakfast
+
+    Chilled Ramen with Soy Milk and Chili Oil
+
+    Thai Rice Curry with Herbed Chicken (Khao Mok Gai)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: raw_cucumber_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Skeleton Crudite
+
+    Peaches and Greens with Buttermilk Dressing'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_for_apple_on_raw_slaw
+  component: raw_onion_component
+  candidate: pomegranate_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: sumac_for_vinegar_on_raw_onion
+  component: raw_onion_component
+  candidate: sumac
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: raw_rutabaga_slaw_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: raw_rutabaga_slaw_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_for_apple_on_raw_slaw
+  component: raw_rutabaga_slaw_component
+  candidate: pomegranate_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: sumac_for_vinegar_on_raw_onion
+  component: raw_rutabaga_slaw_component
+  candidate: sumac
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: reduced_tomato_base
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: reduced_tomato_base
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: reduced_tomato_base
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: reduced_tomato_base
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: reduced_tomato_base
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: reduced_tomato_base
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: reduced_tomato_base
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: reduced_tomato_base
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: reduced_tomato_base
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: reduced_tomato_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: reduced_tomato_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: reduced_tomato_base
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: reduced_tomato_base
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: reduced_tomato_base
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 266
+  context_count: 266
+  contexts: 'Raw Pasta Sauce
+
+    Cheese Strata with Ham and Tomatoes
+
+    Grandfather''s Cioppino'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: reduced_tomato_base
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: reduced_tomato_base
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: reduced_tomato_base
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 12
+  context_count: 12
+  contexts: 'Spicy Shrimp Baba Ghanoush Flatbread
+
+    Lebanese Donair
+
+    Ground Beef and Tahini'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: pungent_cheese_for_cream_on_fresh_stone_fruit
+  component: ripe_mango_component
+  candidate: goat_cheese
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'George''s of Tybee Mixed Greens Tossed in Honey Vinaigrette
+
+    Crab and Goat Cheese Empanadas'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: ripe_mango_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: roasted_apricot_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: roasted_apricot_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: roasted_apricot_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: roasted_apricot_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Spiral Sliced Ham and Jezebel Sauce
+
+    Beer-Braised Pork Belly'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: roasted_apricot_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Spiral Sliced Ham and Jezebel Sauce
+
+    Beer-Braised Pork Belly'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: roasted_apricot_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: roasted_apricot_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: roasted_apricot_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: roasted_apricot_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roast Turkey with Gravy
+
+    Chicken Gloria
+
+    Sausage Links with Apricot-Mustard Glaze'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: roasted_apricot_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: roasted_apricot_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: roasted_broccoli_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: roasted_broccoli_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: roasted_broccoli_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: roasted_broccoli_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 6
+  context_count: 6
+  contexts: 'Chef Bevski''s Greek Salad
+
+    Porchetta Italiano
+
+    Vegetable Pizza Squares'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: roasted_broccoli_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: roasted_broccoli_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: roasted_broccoli_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Roasted Pork With Cajun Slaw
+
+    Salmon with Orecchiette, Caramelized Onions, and Horseradish Cream'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: roasted_broccoli_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Roasted Pork With Cajun Slaw
+
+    Salmon with Orecchiette, Caramelized Onions, and Horseradish Cream'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: roasted_broccoli_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: roasted_broccoli_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Steamed Vegetables with Ginger Miso Dressing
+
+    Miso Carbonara with Broccoli Rabe and Red-Pepper Flakes
+
+    Kangaroo Stir Fry'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: roasted_broccoli_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Steamed Vegetables with Ginger Miso Dressing
+
+    Miso Carbonara with Broccoli Rabe and Red-Pepper Flakes
+
+    Kangaroo Stir Fry'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: roasted_broccoli_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: roasted_broccoli_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: roasted_broccoli_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 10
+  context_count: 10
+  contexts: 'Portobello Burgers with Roasted Pepper Paste and Smoked Mozzarella
+
+    Garbanzo Minestrone
+
+    Veal Chops with Mixed Peppercorns on Lentils with Broccoli Rabe with Garlic and
+    Pecorino Romano Cheese'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: roasted_broccoli_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: roasted_broccoli_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: roasted_broccoli_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: roasted_cabbage_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: roasted_cabbage_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: roasted_cabbage_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: roasted_cabbage_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 36
+  context_count: 36
+  contexts: 'Mom''s Coleslaw
+
+    Vegetarian Borscht
+
+    Pirozhki'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: roasted_cabbage_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: roasted_cabbage_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: roasted_cabbage_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 14
+  context_count: 14
+  contexts: 'Bratwurst and Red Cabbage
+
+    Homemade Irish Corned Beef and Vegetables
+
+    Sarah''s Slow-Cooker Corned Beef and Cabbage'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: roasted_cabbage_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 14
+  context_count: 14
+  contexts: 'Bratwurst and Red Cabbage
+
+    Homemade Irish Corned Beef and Vegetables
+
+    Sarah''s Slow-Cooker Corned Beef and Cabbage'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: roasted_cabbage_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: roasted_cabbage_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Raw Pad Thai
+
+    Garden of Good and Evil Bulgogi
+
+    Tofu Chanpuru'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: roasted_cabbage_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Raw Pad Thai
+
+    Garden of Good and Evil Bulgogi
+
+    Tofu Chanpuru'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: roasted_cabbage_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: roasted_cabbage_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: roasted_cabbage_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 15
+  context_count: 15
+  contexts: 'Cabbage and White Bean Soup with Sausage
+
+    Majorcan-Style Vegetable and Bread Stew
+
+    Meat Filling for Agnolotti'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: roasted_cabbage_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: roasted_cabbage_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: roasted_cabbage_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Baked Falafel With Orange-Tahini Sauce
+
+    Thai Noodle Salad
+
+    Moroccan Chicken with Shredded Cabbage and Tahini Sauce on Pita'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: roasted_potato_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: roasted_potato_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: roasted_potato_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: roasted_potato_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 119
+  context_count: 119
+  contexts: 'New Potato and Cucumber Salad with Fresh Herbs
+
+    Potato Pancakes with Pickle Juice
+
+    Falafels with Yogurt-Dill Sauce'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: roasted_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: roasted_potato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: roasted_potato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: roasted_potato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 41
+  context_count: 41
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Baked Cod and Potatoes with Horseradish Cream Sauce
+
+    Horseradish-crusted Chinook Salmon with Braised Greens and Roasted New Potatoes'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: roasted_potato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: roasted_potato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: roasted_potato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Roasted Miso Salmon with Lemon and Cilantro with Rosemary Roasted Yukons
+
+    Rosemary Rack of Lamb with Roasted Potatoes and Carrots for Two
+
+    Traditional Japanese Breakfast'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: roasted_potato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: roasted_potato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: roasted_potato_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 181
+  context_count: 181
+  contexts: 'Bacon-Rosemary-Red Bliss Hash
+
+    Crisp Potatoes with Salsa Verde Drizzle
+
+    Grilled Potato Salad'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: roasted_potato_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: roasted_potato_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: roasted_potato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Ground Beef and Tahini
+
+    Pureed Peanut Butter and Vegetable Soup'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: roasted_rutabaga_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_crisped_greens
+  component: roasted_rutabaga_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: roasted_rutabaga_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: roasted_rutabaga_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: roasted_rutabaga_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Pot Roast and Vegetable Gravy
+
+    Pot-Au-Feu'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: roasted_rutabaga_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Homemade Irish Corned Beef and Vegetables
+
+    Pot Roast and Vegetable Gravy
+
+    Pot-Au-Feu'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: roasted_rutabaga_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: roasted_rutabaga_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: roasted_rutabaga_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 8
+  context_count: 8
+  contexts: 'Nonesuch Poele
+
+    JG''s Irish Lamb Stew
+
+    Herbed Lamb with Mint Shallot Sauce and Rutabaga Purée'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: roasted_rutabaga_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: roasted_rutabaga_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: true
+  result_class: not_observed
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: roasted_tomato_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: browned_fat_for_plain_fat_on_toasted_state
+  component: roasted_tomato_component
+  candidate: brown_butter
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: chili_oil_for_plain_oil_on_charred_tomato
+  component: roasted_tomato_component
+  candidate: chili_crisp
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: roasted_tomato_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fried_egg_for_bacon_on_potato_hash
+  component: roasted_tomato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: poached_egg_for_cheese_on_roasted_potato
+  component: roasted_tomato_component
+  candidate: eggs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_sour_cream_on_baked_potato
+  component: roasted_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: sharp_root_for_butter_on_roasted_root
+  component: roasted_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: tart_fruit_for_citrus_on_browned_vegetable
+  component: roasted_tomato_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: miso_butter_for_plain_fat_on_roasted_brassica
+  component: roasted_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: roasted_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_caramelized_onion
+  component: roasted_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_molasses_for_balsamic_on_roasted_tomato
+  component: roasted_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: woody_herb_for_honey_on_roasted_stone_fruit
+  component: roasted_tomato_component
+  candidate: rosemary
+  corpus_id: culinarydb
+  observed_count: 266
+  context_count: 266
+  contexts: 'Raw Pasta Sauce
+
+    Cheese Strata with Ham and Tomatoes
+
+    Grandfather''s Cioppino'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: toasted_grain_for_nut_on_browned_sweet_state
+  component: roasted_tomato_component
+  candidate: rye_crumbs
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: smoked_salt_for_plain_salt_on_roasted_tomato
+  component: roasted_tomato_component
+  candidate: smoked_salt
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: nut_paste_for_oil_on_roasted_crucifer
+  component: roasted_tomato_component
+  candidate: tahini
+  corpus_id: culinarydb
+  observed_count: 12
+  context_count: 12
+  contexts: 'Spicy Shrimp Baba Ghanoush Flatbread
+
+    Lebanese Donair
+
+    Ground Beef and Tahini'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: herb_blend_for_dill_on_salt_drained_cucumber
+  component: salted_cabbage_component
+  candidate: zaatar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: herb_blend_for_dill_on_salt_drained_cucumber
+  component: salted_cucumber_component
+  candidate: zaatar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: salted_drained_tomato_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: cardamom_for_basil_on_tomato_sauce
+  component: salted_drained_tomato_component
+  candidate: cardamom
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'roti lasagne
+
+    Lamb Tikka Masala
+
+    aaloo kofta'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: salted_drained_tomato_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_garlic_on_tomato_soup
+  component: salted_drained_tomato_component
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_anchovy_on_tomato_sauce
+  component: salted_drained_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: salted_drained_tomato_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: salted_drained_tomato_component
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: tropical_fruit_for_apple_on_massaged_greens
+  component: sauteed_kale_component
+  candidate: mango
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Mango-Salmon Tacos and Guava-Peanut Sauce
+
+    Summer Kale, Avocado, Mango, and Chickpea Salad with Citrus Poppy Seed Vinaigrette
+
+    Roasted Eggplant and Crispy Kale with Yogurt'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: jewel_seeds_for_dried_fruit_on_bitter_greens
+  component: sauteed_kale_component
+  candidate: pomegranate_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: sauteed_onion_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: sauteed_onion_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 346
+  context_count: 346
+  contexts: 'Crusty Mustard-Dill Meat Loaf
+
+    Rotini with Peppers, Onions, and Feta
+
+    Persian New Year''s Soup with Beans, Noodles, and Herbs (Ash-e-reshteh)'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: sauteed_onion_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 34
+  context_count: 34
+  contexts: 'Deliciously Organic Carrot Spread
+
+    General Tso''s Chicken with Spiced Sesame Rice
+
+    Sake Pork Shabu Shabu'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: steamed_broccoli_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Steamed Vegetables with Ginger Miso Dressing
+
+    Miso Carbonara with Broccoli Rabe and Red-Pepper Flakes
+
+    Kangaroo Stir Fry'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: steamed_broccoli_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Bone-In Pork Roast with Broccoli Rabe, Sweet Italian Sausage, and Roasted
+    Peaches
+
+    Skeleton Crudite'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: stir_fried_broccoli_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: stir_fried_broccoli_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 6
+  context_count: 6
+  contexts: 'Chef Bevski''s Greek Salad
+
+    Porchetta Italiano
+
+    Vegetable Pizza Squares'
+  target_covered: true
+  candidate_covered: true
+  result_class: established
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: stir_fried_broccoli_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Steamed Vegetables with Ginger Miso Dressing
+
+    Miso Carbonara with Broccoli Rabe and Red-Pepper Flakes
+
+    Kangaroo Stir Fry'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: stir_fried_broccoli_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 4
+  context_count: 4
+  contexts: 'Steamed Vegetables with Ginger Miso Dressing
+
+    Miso Carbonara with Broccoli Rabe and Red-Pepper Flakes
+
+    Kangaroo Stir Fry'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: stir_fried_broccoli_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 2
+  context_count: 2
+  contexts: 'Bone-In Pork Roast with Broccoli Rabe, Sweet Italian Sausage, and Roasted
+    Peaches
+
+    Skeleton Crudite'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: stir_fried_cabbage_component
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: stir_fried_cabbage_component
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 36
+  context_count: 36
+  contexts: 'Mom''s Coleslaw
+
+    Vegetarian Borscht
+
+    Pirozhki'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: fermented_paste_for_salt_on_steamed_green
+  component: stir_fried_cabbage_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Raw Pad Thai
+
+    Garden of Good and Evil Bulgogi
+
+    Tofu Chanpuru'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: stir_fried_cabbage_component
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Raw Pad Thai
+
+    Garden of Good and Evil Bulgogi
+
+    Tofu Chanpuru'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: stone_fruit_for_tomato_in_cool_salad
+  component: stir_fried_cabbage_component
+  candidate: peach
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Salmon Tacos with Mango Salsa
+
+    Tuna Fish Tacos
+
+    Thornehedge Peach Slaw'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: fish_sauce_for_salt_on_tomato_salsa
+  component: tomato_salsa_component
+  candidate: fish_sauce
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: fish_sauce_for_salt_on_tropical_slaw
+  component: tomato_salsa_component
+  candidate: fish_sauce
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: dark_berry_acid_for_lime_on_sour_slaw
+  component: tomato_salsa_component
+  candidate: lingonberry_vinegar
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: pomegranate_for_apple_on_raw_slaw
+  component: tomato_salsa_component
+  candidate: pomegranate_seeds
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: sumac_for_vinegar_on_raw_onion
+  component: tomato_salsa_component
+  candidate: sumac
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: tomato_sauce_base
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: cardamom_for_basil_on_tomato_sauce
+  component: tomato_sauce_base
+  candidate: cardamom
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'roti lasagne
+
+    Lamb Tikka Masala
+
+    aaloo kofta'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: tomato_sauce_base
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_garlic_on_tomato_soup
+  component: tomato_sauce_base
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_anchovy_on_tomato_sauce
+  component: tomato_sauce_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: tomato_sauce_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: tomato_sauce_base
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: anchovy_for_bacon_on_potato_soup
+  component: tomato_soup_base
+  candidate: anchovy
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'
+- analogy_id: cardamom_for_basil_on_tomato_sauce
+  component: tomato_soup_base
+  candidate: cardamom
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'roti lasagne
+
+    Lamb Tikka Masala
+
+    aaloo kofta'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: dill_oil_for_plain_oil_on_boiled_potato
+  component: tomato_soup_base
+  candidate: dill
+  corpus_id: culinarydb
+  observed_count: 138
+  context_count: 138
+  contexts: 'Sharon''s Scrumptious Souvlaki
+
+    Lamb Feta Peppers
+
+    Pork Gyros with Yogurt-Tomato Sauce, Red Onion, and Arugula'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: horseradish_for_garlic_on_tomato_soup
+  component: tomato_soup_base
+  candidate: horseradish
+  corpus_id: culinarydb
+  observed_count: 49
+  context_count: 49
+  contexts: 'Calabrese Antipasto
+
+    Mom''s Spicy Bloody Mary
+
+    Pitcher Of Bloody Marys'
+  target_covered: true
+  candidate_covered: true
+  result_class: common
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_anchovy_on_tomato_sauce
+  component: tomato_soup_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: miso_for_soy_on_sauteed_onion
+  component: tomato_soup_base
+  candidate: miso
+  corpus_id: culinarydb
+  observed_count: 3
+  context_count: 3
+  contexts: 'Tofu- and Walnut-Stuffed Mushrooms
+
+    Slow Cooker Jambalaya (Vegan)
+
+    Sinigang na Isda sa Miso (Fish Stew with Miso)'
+  target_covered: true
+  candidate_covered: true
+  result_class: uncommon
+  observed_at: '2026-08-12'
+- analogy_id: dark_syrup_for_sugar_on_pickled_cucumber
+  component: tomato_soup_base
+  candidate: pomegranate_molasses
+  corpus_id: culinarydb
+  observed_count: 0
+  context_count: 0
+  contexts: null
+  target_covered: true
+  candidate_covered: false
+  result_class: insufficient_coverage
+  observed_at: '2026-08-12'

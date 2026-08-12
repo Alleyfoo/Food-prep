@@ -111,3 +111,35 @@ def test_a_dressing_outranks_a_cooking_medium(conn):
     apps = [f["application"] for f in card["fillers_by_role"]["fat"]]
     assert apps[0] == "dressing"
     assert apps[-1] == "medium"
+
+
+# ---- the novelty card must say what the corpus actually found --------------
+
+@pytest.mark.parametrize("nclass,expected", [
+    ("not_observed", "Not observed"),
+    ("rare", "Almost unheard of"),
+    ("uncommon", "Uncommon"),
+    ("established", "Seen before"),
+    ("common", "Seen before"),
+    ("insufficient_coverage", "Cannot tell"),
+    ("not_checked", "Not checked"),
+])
+def test_every_corpus_class_gets_its_own_wording(nclass, expected):
+    """The card once tested for a class called "novel", which
+    corpus.novelty_class() never returns — so a genuinely unobserved pairing
+    fell through to the catch-all and rendered as
+    "Seen before — 0 co-occurrences"."""
+    from foodprep.ui.render import claim_cards_html
+    html = claim_cards_html({"candidate_class": "scout_candidate",
+                             "novelty": {"class": nclass, "observed_count": 0}})
+    assert expected in html
+
+
+def test_no_class_renders_as_seen_before_with_zero_occurrences():
+    """The specific contradiction that slipped through."""
+    from foodprep.ui.render import claim_cards_html
+    for nclass in ("not_observed", "rare", "uncommon", "established",
+                   "common", "insufficient_coverage", "not_checked"):
+        html = claim_cards_html({"candidate_class": "scout_candidate",
+                                 "novelty": {"class": nclass, "observed_count": 0}})
+        assert not ("Seen before" in html and "0 co-occurrences" in html)

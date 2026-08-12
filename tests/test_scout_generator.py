@@ -26,7 +26,17 @@ def test_roasted_broccoli_generates_analogy_candidates(conn):
         assert hypothesis["compatibility_score"] == 3
         assert hypothesis["compatibility_evidence"]
         assert hypothesis["risk"]
-        assert hypothesis["novelty"] == {"class": "not_checked", "scope": None}
+        # Novelty is measured against CulinaryDB and cached in
+        # data/novelty.yaml, so it is a real claim now rather than absent.
+        # What must hold: it stays SEPARATE from compatibility, and absence
+        # is never claimed for a pairing the corpus cannot see.
+        novelty = hypothesis["novelty"]
+        assert novelty["class"] in {
+            "not_observed", "rare", "uncommon", "established", "common",
+            "insufficient_coverage",
+        }
+        if novelty["class"] == "not_observed":
+            assert novelty["target_covered"] and novelty["candidate_covered"]
 
 
 def test_candidate_is_generated_not_stored_as_final_pairing(conn):
@@ -67,7 +77,9 @@ def test_generated_output_keeps_novelty_honest(conn):
 
     assert "Generated Scout hypotheses" in output
     assert "compatibility separate from novelty" in output
-    assert "novelty: not checked — no corpus claim yet" in output
+    # The corpus has been run, so the output carries a real novelty line.
+    # The claim that matters is that it is reported apart from compatibility.
+    assert "novelty:" in output
     assert "risk:" in output
 
 
