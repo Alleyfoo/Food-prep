@@ -284,6 +284,14 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
                 f'from this state</div>')
             for r in routes:
                 _md(route_card_html(r))
+        else:
+            # Most components have no routes modelled yet, so the section
+            # would otherwise vanish without saying why.
+            _md('<div class="eyebrow">Flavour routes</div>'
+                '<div class="card muted"><div class="card-body">No routes '
+                'modelled from this state yet. Routes are hand-curated — '
+                'absence here means nobody has written one, not that the '
+                'state leads nowhere.</div></div>')
 
 
 def tab_plate_balance(available_items: list[str] | None = None) -> None:
