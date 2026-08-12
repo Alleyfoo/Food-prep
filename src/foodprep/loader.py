@@ -453,18 +453,43 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
         conf = tr["confidence"]
         if conf not in CONFIDENCE_OK:
             raise LoadError(f"bad confidence {conf!r} in {tr['technique']}")
+        # `input_component` chains a state into another state; absent means
+        # this step starts from the raw ingredient.
+        input_id = (_component_id(conn, tr["input_component"])
+                    if tr.get("input_component") else None)
         conn.execute(
             "INSERT INTO transformations(ingredient_id, technique_id, "
             "output_component_id, flavour_shift, texture_shift, confidence, "
-            "risks, notes) VALUES (?,?,?,?,?,?,?,?)",
+            "risks, notes, input_component_id) VALUES (?,?,?,?,?,?,?,?,?)",
             (ing_id, tech_id, comp_id, tr.get("flavour_shift"),
-             tr.get("texture_shift"), conf, tr.get("risks"), tr.get("notes")),
+             tr.get("texture_shift"), conf, tr.get("risks"), tr.get("notes"),
+             input_id),
         )
+        # A technique may now appear twice for one ingredient with different
+        # starting states, so the lookup must include the input.
         tr_id = conn.execute(
             "SELECT transformation_id FROM transformations "
-            "WHERE ingredient_id = ? AND technique_id = ?",
-            (ing_id, tech_id),
+            "WHERE ingredient_id = ? AND technique_id = ? "
+            "AND COALESCE(input_component_id, 0) = COALESCE(?, 0)",
+            (ing_id, tech_id, input_id),
         ).fetchone()[0]
+
+        # Everything else that comes out of the step, and is also food.
+        for by in tr.get("byproducts", []) or []:
+            by_id = _component_id(conn, by["component"])
+            conn.execute(
+                "INSERT INTO transformation_byproducts(transformation_id, "
+                "component_id, note) VALUES (?,?,?)",
+                (tr_id, by_id, by.get("note")),
+            )
+            # A by-product is food, so it needs somewhere to go like any
+            # other state — otherwise it is just a thing we noticed.
+            for use in by.get("uses", []) or []:
+                conn.execute(
+                    "INSERT INTO component_uses(component_id, dish_context_id, "
+                    "strength) VALUES (?,?,?)",
+                    (by_id, _dish_id(conn, use), "primary"),
+                )
 
         state_profile = tr.get("state_profile")
         if state_profile:

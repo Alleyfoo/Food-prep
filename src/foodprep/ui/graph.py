@@ -120,6 +120,36 @@ def build_ingredient_graph(conn: sqlite3.Connection,
                       size=22, title=f"Component: {comp_name}")
         _add_edge(net, tech_id, comp_id, "produces", color=_EDGE_COLORS["technique"])
 
+        # A step that starts from another state rather than the raw
+        # ingredient (boiled potato -> smashed and roasted). Drawing the input
+        # is what makes a chain read as a chain instead of a second technique
+        # hanging off the root.
+        input_name = tr.get("input_component")
+        if input_name:
+            input_id = f"comp:{input_name}"
+            if input_id not in [n["id"] for n in net.nodes]:
+                _add_node(net, input_id, input_name.replace("_", " "),
+                          "component", size=22, title=f"Component: {input_name}")
+            _add_edge(net, input_id, tech_id, "then",
+                      color=_EDGE_COLORS["component"])
+
+        # Everything else the step yields, which is usually also food.
+        for by in query.byproducts_for_transformation(conn, tr["transformation_id"]):
+            by_id = f"comp:{by['component']}"
+            if by_id not in [n["id"] for n in net.nodes]:
+                _add_node(net, by_id, by["component"].replace("_", " "),
+                          "component", size=18,
+                          title=by.get("note") or f"Component: {by['component']}")
+            _add_edge(net, tech_id, by_id, "also yields",
+                      color=_EDGE_COLORS["technique"], dashes=True)
+            for use in query.dish_contexts_for_component(conn, by["component"]):
+                use_id = f"dest:{use}"
+                if use_id not in [n["id"] for n in net.nodes]:
+                    _add_node(net, use_id, use.replace("_", " "), "destination",
+                              size=12, title=f"Eaten as: {use.replace('_', ' ')}")
+                _add_edge(net, by_id, use_id, "used in",
+                          color=_EDGE_COLORS["destination"], dashes=True)
+
         card = query.branch_card(conn, ingredient, tech)
         if card:
             seen_fillers: set[str] = set()

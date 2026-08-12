@@ -111,6 +111,7 @@ tags:
   - { family: texture, value: tender_crisp }
   - { family: texture, value: less_watery }
   - { family: texture, value: spoonable }
+  - { family: texture, value: crisp }
   - { family: state,    value: roasted }
   - { family: state,    value: charred }
   - { family: state,    value: cooked }
@@ -187,6 +188,7 @@ techniques:
   # why brown butter and ghee are not interchangeable fats.
   - { name: brown,        is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
   - { name: clarify,      is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 1 }
+  - { name: smash_roast,  is_modifier: 0, heat_type: dry,     moisture_change: lose,  preservation_flag: 0 }
   # ---- potato techniques (third ingredient) ----
   - { name: boil,         is_modifier: 0, heat_type: wet,     moisture_change: gain,  preservation_flag: 0 }
   - { name: mash,         is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
@@ -479,6 +481,9 @@ components:
   - { name: pickled_onion_component,           kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: medium }
   # ---- potato components (third ingredient) ----
   - { name: boiled_potato_component,            kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  # A by-product and a chained state — the two shapes the model could not hold.
+  - { name: tomato_water_component,            kind: fresh,        keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
+  - { name: smashed_roasted_potato_component,  kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: medium }
   - { name: mashed_potato_component,            kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
   - { name: roasted_potato_component,           kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: high }
   - { name: fried_potato_component,             kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: low }
@@ -563,6 +568,12 @@ transformations:
     output_component: salted_drained_tomato_component
     flavour_shift: "More intense, sweeter, less bitter"
     texture_shift: "Less watery, firmer surface"
+    # The water that leaves is the whole mechanism, and it is food: clear,
+    # intensely tomato, and nothing like the flesh it came from.
+    byproducts:
+      - component: tomato_water_component
+        uses: [soup, chilled_soup, pantry_base]
+        note: "Salting draws out clear tomato water — sweet-savoury and intensely tomato, with none of the flesh's body. Use as a broth, a poaching liquid, or the base of a cold soup."
     confidence: high
     tags_after:
       - { family: flavour, value: concentrated, polarity: gain }
@@ -844,6 +855,36 @@ transformations:
   # milk proteins: browning cooks them, clarifying removes them. brown_butter
   # and ghee also exist as filler ingredients — the same two-entry shape
   # cabbage and sauerkraut already use — so pairings keep working.
+  # Smashed potatoes: boiled first, then flattened and roasted. The input is
+  # a STATE, not the raw ingredient — the step is impossible from raw, and
+  # it is a second roast that the old one-roast-per-ingredient rule forbade.
+  - ingredient: potato
+    technique: smash_roast
+    input_component: boiled_potato_component
+    output_component: smashed_roasted_potato_component
+    flavour_shift: "Nutty and browned outside, still soft within"
+    texture_shift: "Crisp craggy edges over a fluffy interior"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: nutty,   polarity: gain }
+      - { family: texture, value: crisp,   polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    state_profile:
+      provides: "carb\ncrunch"
+      flavour: "nutty_toasted\numami"
+      texture: "crisp\nsoft"
+      missing_risks: "acid\nherb"
+      heaviness_score: 6
+      dryness_score: 3
+      notes: "Boiled, flattened, then roasted hard. The boil is what makes the inside fluffy and the crushed surface is what makes the edges crisp — neither is reachable by roasting a raw potato."
+    missing_roles:
+      - { role: acid,  priority: high,   note: "vinegar or lemon cuts the fat" }
+      - { role: herb,  priority: medium, note: "rosemary, chives" }
+      - { role: fat,   priority: low,    note: "already roasted in fat" }
+    uses: [hash, bowl, fries]
+    evidence:
+      - { source: recipedb, scope: "smashed potatoes: parboiled, crushed, roasted" }
+
   - ingredient: butter
     technique: brown
     output_component: brown_butter_component
@@ -856,12 +897,9 @@ transformations:
       - { family: state,   value: cooked,  polarity: gain }
     state_profile:
       provides: "fat"
-      flavour: "nutty_toasted
-rich_fatty
-umami"
+      flavour: "nutty_toasted\nrich_fatty\numami"
       texture: "liquid"
-      missing_risks: "acid
-salt"
+      missing_risks: "acid\nsalt"
       heaviness_score: 4
       dryness_score: 0
       notes: "Butter cooked until its milk proteins brown. Not a separate ingredient you buy — any butter held on heat long enough gets here, which is why butter in a hot oven arrives browned whether or not you meant it."
@@ -884,11 +922,9 @@ salt"
       - { family: state,   value: cooked,  polarity: gain }
     state_profile:
       provides: "fat"
-      flavour: "rich_fatty
-nutty_toasted"
+      flavour: "rich_fatty\nnutty_toasted"
       texture: "liquid"
-      missing_risks: "acid
-salt"
+      missing_risks: "acid\nsalt"
       heaviness_score: 4
       dryness_score: 0
       notes: "Butter with the water and milk proteins separated out. Because the proteins are gone it cannot brown the way butter does, and it takes far more heat before it burns — the opposite move to browning, on the same part of the butter."

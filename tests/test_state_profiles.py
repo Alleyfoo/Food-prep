@@ -6,6 +6,8 @@ def test_journey_states_own_profiles_without_shadow_rows(conn):
         # butter's states: browning cooks the milk proteins, clarifying
         # removes them — two different foods, so two profiles
         "brown_butter_component",
+        # boiled, flattened, roasted — a state reached from another state
+        "smashed_roasted_potato_component",
         "ghee_component",
         "steamed_broccoli_component",
         "roasted_broccoli_component",

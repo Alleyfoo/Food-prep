@@ -92,8 +92,30 @@ CREATE TABLE transformations (
     confidence            TEXT NOT NULL,    -- high | medium_high | medium | low | experimental
     risks                 TEXT,             -- newline-separated caveats (harsh_when_raw, sulfurous_if_overcooked, ...) — a RISK, not a missing role
     notes                 TEXT,
-    UNIQUE (ingredient_id, technique_id)
+    -- What this transformation starts FROM. NULL means the raw ingredient.
+    -- Set it to chain a state into another state: boiled potato -> smashed
+    -- and roasted. Without it every transformation began at raw, so a second
+    -- roast of an already-roasted thing had nowhere to live.
+    input_component_id    INTEGER REFERENCES components(component_id)
 );
+
+-- One transformation, one primary output — but often something else comes out
+-- with it, and it is usually food. Clarifying butter yields ghee AND browned
+-- milk solids; salting a tomato yields firm flesh AND tomato water; separating
+-- broccoli yields florets AND stems. Discarding the second output was how the
+-- model came to treat brown butter as an ingredient you buy.
+CREATE TABLE transformation_byproducts (
+    transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),
+    component_id      INTEGER NOT NULL REFERENCES components(component_id),
+    note              TEXT,
+    PRIMARY KEY (transformation_id, component_id)
+);
+
+-- Replaces UNIQUE (ingredient_id, technique_id): the same technique may now
+-- apply to different starting states. COALESCE because SQLite treats NULLs as
+-- distinct, which would otherwise allow two raw-input duplicates.
+CREATE UNIQUE INDEX transformations_unique_step
+    ON transformations (ingredient_id, technique_id, COALESCE(input_component_id, 0));
 
 CREATE TABLE transformation_tags (
     transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),

@@ -51,11 +51,13 @@ def transformation_by_technique(
         """
         SELECT t.transformation_id, tech.name AS technique,
                c.name AS component, t.flavour_shift, t.texture_shift,
-               t.confidence, c.component_id
+               t.confidence, c.component_id,
+               inp.name AS input_component
         FROM transformations t
         JOIN ingredients i  ON i.ingredient_id = t.ingredient_id
         JOIN techniques tech ON tech.technique_id = t.technique_id
         JOIN components c   ON c.component_id = t.output_component_id
+        LEFT JOIN components inp ON inp.component_id = t.input_component_id
         WHERE i.canonical_name = ? AND tech.name = ?
         """,
         (ingredient, technique),
@@ -1755,6 +1757,32 @@ def answer(conn: sqlite3.Connection, prompt: str) -> str:
 # ---- UI handles (read-only structured views for the Streamlit slice) ------
 # These return dicts/lists so the UI can render cards/chips instead of parsing
 # the string renders above. They add NO ontology — just handles on the engine.
+
+def byproducts_for_transformation(conn: sqlite3.Connection,
+                                  transformation_id: int) -> list[dict[str, Any]]:
+    """The other things a step yields — tomato water, browned milk solids."""
+    return [dict(r) for r in conn.execute(
+        """SELECT c.name AS component, tb.note
+           FROM transformation_byproducts tb
+           JOIN components c ON c.component_id = tb.component_id
+           WHERE tb.transformation_id = ?
+           ORDER BY c.name""", (transformation_id,))]
+
+
+def dish_contexts_for_component(conn: sqlite3.Connection,
+                                component_name: str) -> list[str]:
+    """Dish contexts a component is eaten in, looked up BY NAME.
+
+    Distinct from `component_uses`, which takes a component_id — naming this
+    one the same silently shadowed that function and emptied every card's
+    "Use in" row.
+    """
+    return [r[0] for r in conn.execute(
+        """SELECT dc.name FROM component_uses cu
+           JOIN components c ON c.component_id = cu.component_id
+           JOIN dish_contexts dc ON dc.dish_context_id = cu.dish_context_id
+           WHERE c.name = ? ORDER BY dc.name""", (component_name,))]
+
 
 def tree_ingredients(conn: sqlite3.Connection) -> list[str]:
     """Ingredients that own a technique tree (kind full or both, >=1

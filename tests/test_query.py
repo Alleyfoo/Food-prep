@@ -8,7 +8,7 @@ from foodprep import query
 def test_schema_populated(conn):
     assert conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] >= 30
     # 12 tomato + 4 onion + 9 potato + 8 cabbage + 5 broccoli + 4 rutabaga + 4 cucumber + 4 kale + 4 mango + 4 apricot = 58
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 60
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 61
     assert conn.execute("SELECT count(*) FROM roles").fetchone()[0] >= 12
     assert conn.execute("SELECT count(*) FROM pairings").fetchone()[0] >= 30
     assert conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] >= 5
@@ -64,8 +64,10 @@ def test_ingredient_detection_onion(conn):
 def test_potato_transformations_loaded(conn):
     rows = query.transformations_for_ingredient(conn, "potato")
     techs = {r["technique"] for r in rows}
+    # smash_roast starts from boiled potato rather than from raw — the first
+    # transformation in the ontology whose input is another state.
     assert {"boil", "mash", "roast", "fry", "gratin", "bake", "soup",
-            "salad", "hash"} == techs
+            "salad", "hash", "smash_roast"} == techs
 
 
 def test_potato_kind_is_both(conn):
@@ -586,7 +588,7 @@ def test_no_ontology_rot_round6(conn):
     assert conn.execute(
         "SELECT count(*) FROM pairings WHERE role_id IS NULL").fetchone()[0] == 0
     assert conn.execute(
-        "SELECT count(*) FROM transformations").fetchone()[0] == 60
+        "SELECT count(*) FROM transformations").fetchone()[0] == 61
     # every missing-role row points at a real role id
     assert conn.execute(
         "SELECT count(*) FROM transformation_missing_roles mr "
