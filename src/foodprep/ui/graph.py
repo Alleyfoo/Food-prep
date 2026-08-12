@@ -265,13 +265,39 @@ TASTE_DIMENSIONS: list[tuple[str, str, str, str]] = [
     ("rich_fatty", "🧈", "Rich/Fatty", "#A5640A"),
 ]
 
-_MAX_FILLER_NODES = 14  # most common fillers shown when a dimension expands
-_DIM_RADIUS = 280.0     # circle radius for dimension nodes
-_FILLER_RADIUS = 470.0  # radius of the filler fan around the expanded dimension
+# ---- Taste Circle Map geometry and states (design addendum 2) --------------
+#
+# Colour here encodes STATE, not dimension: the eleven dimensions are one hue
+# (the primary) in provided / open / expanded / locked / thin states. Size
+# encodes how many options fit. See ADDENDUM-2-taste-circle-map.md.
 
-_BG = "#F4F2EC"         # app background; faded nodes blend toward it
+_MAX_FILLER_NODES = 14   # hard cap on one fan page; usually fit decides first
+_DIM_RX = 257.0          # dimension ellipse, horizontal radius
+_DIM_RY = 215.0          # dimension ellipse, vertical radius
+_FAN_RADIUS_MIN = 110.0  # fan arc radius from the dimension node's centre
+_FAN_RADIUS_MAX = 240.0  # beyond this the whole graph zooms out illegibly
+_FAN_SPREAD = math.radians(120)  # ±60° around the ray through the dimension
+_MORE_SUFFIX = "__more"  # filler:<dim>:__more pages the fan
+
+_PILL_PAD = 26.0     # horizontal padding inside a filler pill
+_PILL_CHAR = 7.1     # ~14px Figtree, per character
+_PILL_GAP = 12.0     # clear space between neighbouring pills on the arc
+_PILL_RADIUS = 14.0  # corner radius == half the pill height
+
+_DISC_MIN = 40.0   # one option
+_DISC_MAX = 64.0   # twenty or more
+_DISC_CAP = 20
+
+# State palette — the 100–900 ramps in design.css.
+_PRIMARY = {200: "#F9E4D0", 300: "#ECCAAA", 400: "#D7A676",
+            500: "#B37736", 600: "#925A14", 700: "#6F4102", 800: "#4B2A00",
+            100: "#FFF3E8"}
+_POSITIVE = {200: "#D3F0E2", 500: "#359B76", 700: "#035C41"}
+_NEUTRAL = {200: "#ECE8DE", 400: "#D2CDBE", 600: "#9AA092"}
+
+_BG = "#F4F2EC"          # app background; faded nodes blend toward it
 _FADED_FONT = "#B7B3A6"  # label colour for faded nodes
-_FADE_T = 0.72          # blend factor toward the background for faded nodes
+_FADE_T = 0.55           # 45% opacity over the ground == 55% blend into it
 
 
 def _blend(hex_color: str, toward: str, t: float) -> str:
@@ -282,8 +308,51 @@ def _blend(hex_color: str, toward: str, t: float) -> str:
     return "#{:02X}{:02X}{:02X}".format(*mixed)
 
 
+def _disc_size(options: int) -> float:
+    """vis node radius. Disc DIAMETER encodes option count: 40px → 64px."""
+    t = min(1.0, max(0.0, (options - 1) / (_DISC_CAP - 1)))
+    return (_DISC_MIN + (_DISC_MAX - _DISC_MIN) * t) / 2
+
+
+def _pill_extent(text: str) -> float:
+    """Arc length one filler pill occupies, gap included."""
+    return len(text) * _PILL_CHAR + _PILL_PAD + _PILL_GAP
+
+
+def _fan_page(names: list[str], start: int) -> int:
+    """How many fillers fit on one arc-page starting at *start*.
+
+    The addendum fixes the arc at 110px and the page at fourteen, but those
+    two cannot both hold: fourteen labelled pills need roughly ten times the
+    arc 110px provides, and letting the radius grow that far zooms the whole
+    graph to a fifth of its size — the labels become unreadable, which is a
+    worse failure than paging. The addendum's own priority settles it
+    ("a fan that overlaps its neighbours is worse than paging"), so the arc
+    is capped at a legible radius and the page is whatever fits on it.
+    """
+    budget = _FAN_RADIUS_MAX * _FAN_SPREAD
+    used = 0.0
+    count = 0
+    for name in names[start:start + _MAX_FILLER_NODES]:
+        extent = _pill_extent(name)
+        if count and used + extent > budget:
+            break
+        used += extent
+        count += 1
+    return max(1, count)
+
+
+def _fan_radius(labels: list[str]) -> float:
+    """Arc radius that seats this page's pills without self-overlap."""
+    if len(labels) < 2:
+        return _FAN_RADIUS_MIN
+    extent = sum(_pill_extent(text) for text in labels)
+    return min(_FAN_RADIUS_MAX,
+               max(_FAN_RADIUS_MIN, extent / _FAN_SPREAD))
+
+
 def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None) -> None:
-    """Visually fade a node (and its centre edge) into the background.
+    """Drop an unfocused dimension to 45% opacity over the ground.
 
     Keeps the node's ``clickable`` flag untouched: a faded-but-available
     dimension can still be clicked to move the focus to it.
@@ -299,8 +368,7 @@ def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None) -> None:
     node["borderWidth"] = 1
     node["font"] = {**node.get("font", {}), "color": _FADED_FONT}
     if edge is not None:
-        base = (edge.get("color") or {}).get("color", "#D8D2C2")
-        edge["color"] = {"color": _blend(base, _BG, 0.6), "opacity": 0.5}
+        edge["color"] = {"color": _PRIMARY[100]}
         edge["width"] = 1
 
 
@@ -320,6 +388,8 @@ def taste_circle_graph_data(
     locked_dimensions: set[str] | None = None,
     selections: dict[str, str] | None = None,
     expanded_dimension: str | None = None,
+    available: set[str] | None = None,
+    page: int = 0,
 ) -> dict[str, list[dict[str, Any]]]:
     """Build node/edge data for the click-driven Taste Circle component.
 
@@ -344,23 +414,28 @@ def taste_circle_graph_data(
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
 
+    on_hand = set(available or set())
+
     comp_id = f"comp:{component_name}"
     nodes.append({
         "id": comp_id,
-        "label": component_name.replace("_", " "),
+        "label": f"{component_name.replace('_', ' ')}\ncomponent",
         "x": 0.0, "y": 0.0, "fixed": True,
-        "shape": "dot", "size": 30,
-        "color": _node_color("#6B4C8A", "#54396F"),
-        "font": {"size": 15, "color": "#1A1B16"},
+        "shape": "circle", "widthConstraint": {"minimum": 108},
+        "color": _node_color("#FFFFFF", "#1A1B16"),
+        "borderWidth": 2,
+        "font": {"size": 19, "color": "#1A1B16"},
         "title": "Base component",
         "clickable": False,
     })
 
     count = len(TASTE_DIMENSIONS)
-    for i, (dim_key, icon, dim_name, color) in enumerate(TASTE_DIMENSIONS):
+    for i, (dim_key, icon, dim_name, _hue) in enumerate(TASTE_DIMENSIONS):
+        # Computed, never hand-placed, so a twelfth dimension just works.
         angle = -math.pi / 2 + i * (2 * math.pi / count)  # start at top, clockwise
-        x = _DIM_RADIUS * math.cos(angle)
-        y = _DIM_RADIUS * math.sin(angle)
+        x = _DIM_RX * math.cos(angle)
+        y = _DIM_RY * math.sin(angle)
+        ray = math.atan2(y, x)  # ellipse: the ray differs from the parameter
         dim_id = f"dim:{dim_key}"
         title_name = f"{icon} {dim_name}"
         edge: dict[str, Any] = {"from": comp_id, "to": dim_id, "width": 1.5}
@@ -369,90 +444,129 @@ def taste_circle_graph_data(
 
         if dim_key in provided:
             node.update({
-                "label": f"{title_name}\n✓ provided",
-                "shape": "dot", "size": 20,
-                "color": _node_color(color),
-                "font": {"size": 12, "color": "#75796E"},
+                "label": f"{title_name}\nprovided",
+                "shape": "dot", "size": _disc_size(1),
+                "color": _node_color(_POSITIVE[500], _POSITIVE[700]),
+                "borderWidth": 2,
+                "font": {"size": 14, "color": _POSITIVE[700]},
                 "title": f"{title_name} — already in the component",
                 "clickable": False,
             })
-            edge.update({"color": {"color": color, "opacity": 0.8}, "width": 2})
+            edge.update({"color": {"color": _POSITIVE[500]}, "width": 3})
         elif dim_key in locked:
             filler = selections.get(dim_key, "")
             node.update({
                 "label": f"{title_name}\n🔒 {filler.replace('_', ' ')}",
-                "shape": "dot", "size": 26,
-                "color": _node_color(color, "#1A1B16"),
+                "shape": "dot", "size": _disc_size(6),
+                "color": _node_color(_PRIMARY[600], _PRIMARY[800]),
                 "borderWidth": 2.5,
-                "font": {"size": 13, "color": "#1A1B16"},
+                "font": {"size": 14, "color": "#1A1B16"},
                 "title": f"{title_name}: {filler.replace('_', ' ')} — click to change",
                 "clickable": True,
             })
-            edge.update({"color": {"color": color}, "width": 2.5})
+            edge.update({"color": {"color": _PRIMARY[500]}, "width": 3})
         elif dim_key in fillers_by_dim and fillers_by_dim[dim_key]:
             fillers = [f for f in fillers_by_dim[dim_key]
                        if f["filler"] not in chosen_fillers]
             total = len(fillers)
             if dim_key == expanded_dimension and total:
-                shown = fillers[:_MAX_FILLER_NODES]
+                # Pages vary in size — each holds whatever fits the arc — so
+                # walk them rather than assuming a fixed stride.
+                names = [f["filler"].replace("_", " ") for f in fillers]
+                offsets: list[int] = []
+                cursor = 0
+                while cursor < total:
+                    offsets.append(cursor)
+                    cursor += _fan_page(names, cursor)
+                page = page % len(offsets)
+                start = offsets[page]
+                shown = fillers[start:start + _fan_page(names, start)]
+                remaining = total - (start + len(shown))
+
                 node.update({
                     "label": f"{title_name}\n{len(shown)} of {total}",
-                    "shape": "dot", "size": 28,
-                    "color": _node_color(color, "#1A1B16"),
+                    "shape": "dot", "size": _disc_size(total),
+                    "color": _node_color(_PRIMARY[500], _PRIMARY[700]),
                     "borderWidth": 3,
-                    "font": {"size": 13, "color": "#1A1B16"},
+                    "font": {"size": 14, "color": "#1A1B16"},
                     "title": f"{title_name} — click again to close",
                     "clickable": True,
                 })
-                edge.update({"color": {"color": color}, "width": 2, "dashes": True})
+                edge.update({"color": {"color": _PRIMARY[500]}, "width": 3})
 
-                k = len(shown)
-                spread = math.radians(min(200, 16 * k))
-                for j, f in enumerate(shown):
-                    a = angle if k == 1 else angle - spread / 2 + j * spread / (k - 1)
-                    fname = f["filler"]
+                labels = [f["filler"].replace("_", " ") for f in shown]
+                if remaining > 0:
+                    labels.append(f"+ {remaining} more")
+                radius = _fan_radius(labels)
+                k = len(labels)
+                for j, text in enumerate(labels):
+                    a = (ray if k == 1
+                         else ray - _FAN_SPREAD / 2 + j * _FAN_SPREAD / (k - 1))
+                    is_more = remaining > 0 and j == k - 1
+                    fname = _MORE_SUFFIX if is_more else shown[j]["filler"]
                     fid = f"filler:{dim_key}:{fname}"
+                    if is_more:
+                        fill, border = _NEUTRAL[200], _NEUTRAL[400]
+                        title = f"Show the next {min(remaining, _MAX_FILLER_NODES)}"
+                    elif fname in on_hand:
+                        # "available now" has to read at a glance
+                        fill, border = _POSITIVE[200], _POSITIVE[500]
+                        title = f"{text} — in your kitchen. Click to choose it."
+                    else:
+                        fill, border = _PRIMARY[200], _PRIMARY[300]
+                        title = f"Click to choose {text}"
                     nodes.append({
                         "id": fid,
-                        "label": fname.replace("_", " "),
-                        "x": _FILLER_RADIUS * math.cos(a),
-                        "y": _FILLER_RADIUS * math.sin(a),
+                        "label": text,
+                        "x": x + radius * math.cos(a),
+                        "y": y + radius * math.sin(a),
                         "fixed": True,
-                        "shape": "dot", "size": 12,
-                        "color": _node_color("#FFFFFF", color),
-                        "font": {"size": 12, "color": "#1A1B16"},
-                        "title": f"Click to choose {fname.replace('_', ' ')}",
+                        "shape": "box",
+                        # Half the pill's height gives a true pill. NOT 999:
+                        # vis folds the corner radius into the node's bounding
+                        # box, so a CSS-style "very large" value reports a
+                        # ~2000px node and fit() zooms the graph to a fifth.
+                        "shapeProperties": {"borderRadius": _PILL_RADIUS},
+                        "margin": {"top": 5, "bottom": 5, "left": 13, "right": 13},
+                        "color": _node_color(fill, border),
+                        "borderWidth": 1,
+                        "font": {"size": 14, "color": "#1A1B16"},
+                        "title": title,
                         "clickable": True,
                     })
                     edges.append({
                         "from": dim_id, "to": fid,
-                        "dashes": True, "width": 1.2,
-                        "color": {"color": color, "opacity": 0.55},
+                        "width": 1.5, "color": {"color": _PRIMARY[300]},
                     })
             else:
+                plural = "option" if total == 1 else "options"
                 node.update({
-                    "label": f"{title_name}\n{total} options",
-                    "shape": "dot", "size": 24,
-                    "color": _node_color(color),
-                    "font": {"size": 13, "color": "#1A1B16"},
+                    "label": f"{title_name}\n{total} {plural}",
+                    "shape": "dot", "size": _disc_size(total),
+                    "color": _node_color(_PRIMARY[200], _PRIMARY[400]),
+                    "borderWidth": 2,
+                    "font": {"size": 14, "color": "#1A1B16"},
                     "title": f"{title_name} — click to see options",
                     "clickable": True,
                 })
-                edge.update({"color": {"color": "#D8D2C2"}})
+                edge.update({"color": {"color": _NEUTRAL[400]}})
         else:
+            # Keep the node: "we have nothing here" is information the
+            # curator needs to see, so it is never hidden.
             node.update({
-                "label": f"{title_name}\n—",
-                "shape": "dot", "size": 16,
-                "color": _node_color("#C6C2B4", "#B4B0A2"),
-                "font": {"size": 12, "color": "#9AA092"},
+                "label": f"{title_name}\nno fillers yet",
+                "shape": "dot", "size": _disc_size(1),
+                "color": _node_color(_NEUTRAL[200], _NEUTRAL[400]),
+                "borderWidth": 1,
+                "font": {"size": 14, "color": _NEUTRAL[600]},
                 "title": f"{title_name} — no fillers in the catalogue",
                 "clickable": False,
             })
-            edge.update({"color": {"color": "#E2DDD0"}, "dashes": True})
+            edge.update({"color": {"color": _NEUTRAL[400]}, "dashes": True})
 
-        # When a dimension is expanded, fade everything else into the
-        # background so the filler fan owns the screen. Faded dimensions
-        # stay clickable — clicking one moves the focus there.
+        # While a dimension is expanded, every other one drops to 45% so the
+        # fan is unambiguously the active region. Faded dimensions stay
+        # clickable — clicking one moves the focus there.
         if expanded_dimension and dim_key != expanded_dimension:
             _fade_node(node, edge)
 

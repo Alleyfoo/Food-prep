@@ -18,6 +18,8 @@
   with event.data.args holding the keyword args passed from Python.
 -->
 <script src="./vis-network.min.js"></script>
+<!-- The component renders in its own iframe, out of reach of design.css. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">
 <style>
   html, body {
     margin: 0;
@@ -74,8 +76,8 @@
     nodes: {
       shape: "dot",
       font: {
-        size: 13,
-        face: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+        size: 14,
+        face: 'Figtree, system-ui, -apple-system, "Segoe UI", sans-serif',
         color: "#1A1B16"
       },
       borderWidth: 1.5

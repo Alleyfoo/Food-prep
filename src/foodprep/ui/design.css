@@ -593,6 +593,42 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 }
 [data-baseweb="select"] > div { background: var(--surface) !important; }
 /* ============= TASTE CIRCLE MAP ============= */
+/* The rail is a read-out, never a second picker — no clickable chips here. */
+.tcm-rail-card {
+  background: var(--surface); border-radius: var(--r-lg);
+  padding: var(--space-4); margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+.tcm-rail-card .card-kicker {
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--primary); font-weight: 600; margin-bottom: var(--space-2);
+}
+.tcm-rail-card .card-title {
+  font-family: var(--heading); font-size: 19px; line-height: 1.2;
+  margin-bottom: var(--space-2);
+}
+.tcm-rail-card .card-body { font-size: 15px; color: var(--neutral-800); margin: 0; }
+.tcm-rail-idle .card-kicker { color: var(--neutral-700); }
+.tcm-rule { height: 1px; background: var(--line); margin: var(--space-3) 0; }
+.tcm-dish-row {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  font-size: 16px; line-height: 1.6;
+}
+.tcm-dish-dim { color: var(--neutral-700); font-size: 15px; }
+.tcm-dish-name { font-family: var(--heading); font-size: 22px; line-height: 1.2; }
+
+.tcm-legend {
+  display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center;
+  font-size: 14px; color: var(--neutral-700); margin-top: var(--space-2);
+}
+.tcm-legend span { display: flex; align-items: center; gap: 8px; }
+.tcm-legend .sw { width: 16px; height: 16px; border-radius: var(--r-pill); }
+.tcm-legend .sw-provided { background: var(--ingredient-500); }
+.tcm-legend .sw-open {
+  background: var(--filler-200); border: 2px solid var(--filler-400);
+}
+.tcm-legend .sw-thin { background: var(--neutral-200); border: 1px solid var(--neutral-400); }
+
 .tcm-component-name {
   text-align: center;
   font-size: 1.15rem;
