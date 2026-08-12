@@ -137,6 +137,17 @@ def build_ingredient_graph(conn: sqlite3.Connection,
                     _add_edge(net, comp_id, filler_id, role,
                               color=_EDGE_COLORS["filler"], dashes=True)
 
+        # Where this state actually gets eaten. Only route destinations were
+        # drawn before, so a state with no route — raw broccoli, which lists
+        # bowl/dip/salad/sandwich — appeared to lead nowhere.
+        for use in (card.get("uses") if card else []) or []:
+            use_id = f"dest:{use}"
+            if use_id not in [n["id"] for n in net.nodes]:
+                _add_node(net, use_id, use.replace("_", " "), "destination",
+                          size=12, title=f"Eaten as: {use.replace('_', ' ')}")
+            _add_edge(net, comp_id, use_id, "used in",
+                      color=_EDGE_COLORS["destination"], dashes=True)
+
         routes = query.flavour_routes_for_component(conn, comp_name)
         for route in routes:
             route_id = f"route:{route['route_id']}"
@@ -154,14 +165,24 @@ def build_ingredient_graph(conn: sqlite3.Connection,
                               title=f"Destination: {dest}")
                 _add_edge(net, route_id, dest_id, "", color=_EDGE_COLORS["destination"])
 
-    journeys = query.ingredient_journeys(conn, ingredient)
-    for j in journeys:
+    # Journey destinations, joined to the state the journey produces. These
+    # used to be added as free-floating nodes with no edges at all.
+    for j in query.ingredient_journeys(conn, ingredient):
+        tr = query.transformation_by_technique(
+            conn, j["primary_transformation"], ingredient)
+        comp_name = (tr or {}).get("output_component") or (tr or {}).get("component")
+        if not comp_name:
+            continue
+        comp_id = f"comp:{comp_name}"
         for dest in (j.get("destinations") or []):
             dest_id = f"dest:{dest}"
             if dest_id not in [n["id"] for n in net.nodes]:
                 _add_node(net, dest_id, dest.replace("_", " "),
                           "destination", size=12,
-                          title=f"Destination: {dest}")
+                          title=f"Destination: {dest.replace('_', ' ')}")
+            if comp_id in [n["id"] for n in net.nodes]:
+                _add_edge(net, comp_id, dest_id, "becomes",
+                          color=_EDGE_COLORS["destination"], dashes=True)
 
     net.show_buttons(filter_=["physics"])
     return net

@@ -67,3 +67,33 @@ def test_graph_html_carries_the_font(conn):
     html = graph_to_html(build_ingredient_graph(conn, "broccoli"))
     assert "Figtree" in html
     assert html.count("fonts.googleapis.com") >= 1
+
+
+# ---- the map must not hide or strand data ----------------------------------
+
+def test_no_orphan_nodes(net):
+    """Journey destinations used to be drawn with no edges at all — nodes
+    floating in the canvas, connected to nothing."""
+    ids = {n["id"] for n in net.nodes}
+    linked = {e["from"] for e in net.edges} | {e["to"] for e in net.edges}
+    assert not (ids - linked), f"nodes drawn but connected to nothing: {sorted(ids - linked)}"
+
+
+def test_a_state_with_no_route_still_shows_where_it_is_eaten(conn):
+    """Destinations only ever arrived via routes, so raw broccoli — which has
+    no route but does list bowl/dip/salad/sandwich — appeared to lead
+    nowhere. The data was there; the map dropped it."""
+    net = build_ingredient_graph(conn, "broccoli")
+    raw = "comp:raw_broccoli_component"
+    dests = {e["to"].removeprefix("dest:") for e in net.edges
+             if e["from"] == raw and e["to"].startswith("dest:")}
+    assert "salad" in dests, "raw broccoli is eaten in salad and must say so"
+    assert {"bowl", "dip", "sandwich"} <= dests
+
+
+def test_every_component_shows_at_least_one_destination(conn):
+    """A state that leads nowhere is either bad data or a hidden edge."""
+    net = build_ingredient_graph(conn, "broccoli")
+    comps = {n["id"] for n in net.nodes if n["id"].startswith("comp:")}
+    reached = {e["from"] for e in net.edges if e["to"].startswith("dest:")}
+    assert comps <= reached, f"states leading nowhere: {sorted(comps - reached)}"
