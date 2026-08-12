@@ -18,6 +18,15 @@
 [data-testid="stVerticalBlock"] { gap: 0 !important; }
 [data-testid="stHorizontalBlock"] { gap: 10px !important; }
 
+/* Streamlit hangs margin-bottom:-1rem on every markdown container to cancel
+   the 1rem margin of a trailing <p>. Our custom HTML ends in <div>s, which
+   have no such margin, so the -1rem eats 16px out of whatever comes next —
+   the availability heading sat behind its own multiselect. Cancel it only
+   for blocks that do NOT end in a paragraph, leaving real markdown alone. */
+[data-testid="stMarkdownContainer"]:not(:has(> p:last-child)) {
+  margin-bottom: 0 !important;
+}
+
 /* ---- tab rail: an st.radio wearing the handoff's pill row ---- */
 .st-key-tab_rail [role="radiogroup"] {
   gap: var(--space-2) !important; flex-wrap: wrap;
