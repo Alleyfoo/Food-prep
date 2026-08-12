@@ -132,10 +132,20 @@ def branch_card_html(d: dict, with_debug: bool = False,
     miss_chips = " ".join(chip(r, "missing") for r in missing)
     try_groups = []
     for role, fillers in (d.get("fillers_by_role") or {}).items():
-        names = [f["filler"] for f in fillers[:3]] or ["(no curated filler)"]
+        shown = fillers[:3]
+        if shown:
+            # A cooking medium is dimmed: what you roast IN is usually
+            # imperceptible, and it should not read like a dish idea sitting
+            # next to something you actually taste.
+            chip_html = " ".join(
+                chip(f["filler"],
+                     "filler medium" if f.get("application") == "medium" else "filler")
+                for f in shown)
+        else:
+            chip_html = chip("(no curated filler)", "muted")
         try_groups.append(
             f'<div class="chip-group"><span class="gl">{_esc(role)}</span>'
-            + " ".join(chip(n, "filler") for n in names) + "</div>"
+            + chip_html + "</div>"
         )
     try_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
     partition_html = available_partition_html(available) if available else ""

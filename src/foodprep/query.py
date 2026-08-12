@@ -91,7 +91,8 @@ def fillers_for_transformation(
     rows = conn.execute(
         """
         SELECT p.pairing_id, ing.canonical_name AS filler, r.role_name AS role,
-               p.common_context, p.availability_class, p.confidence
+               p.common_context, p.availability_class, p.confidence,
+               p.application
         FROM pairings p
         JOIN ingredients ing ON ing.ingredient_id = p.ingredient_id
         JOIN roles r         ON r.role_id = p.role_id
@@ -100,8 +101,14 @@ def fillers_for_transformation(
         (transformation_id,),
     ).fetchall()
     out = [dict(r) for r in rows if include_experimental or r["confidence"] != "experimental"]
-    out.sort(key=lambda d: (-_rank(d["confidence"]), d["filler"]))
+    out.sort(key=lambda d: (_APPLICATION_ORDER.get(d["application"], 1),
+                            -_rank(d["confidence"]), d["filler"]))
     return out
+
+
+#: What you dress a finished state with is where the perceptible difference
+#: lives; what you cooked it in usually is not. Order suggestions accordingly.
+_APPLICATION_ORDER = {"dressing": 0, "finish": 1, "unspecified": 1, "medium": 2}
 
 
 def fillers_by_role(

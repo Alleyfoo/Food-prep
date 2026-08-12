@@ -462,6 +462,7 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
             )
 
     # ---- pairings ----
+    vocabulary = vocabulary or load_vocabulary()
     # for_ingredient names which ingredient's transformation the pairing targets;
     # default is default_ing. works_best_with is a technique name on that ingredient.
     for p in data.get("pairings", []):
@@ -477,13 +478,15 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
             ).fetchone()
             if row is not None:
                 wbtr_id = row[0]
+        application = p.get("application", "unspecified")
+        vocabulary.require("applications", application)
         conn.execute(
             "INSERT INTO pairings(ingredient_id, role_id, "
             "works_best_with_transformation_id, common_context, "
-            "availability_class, confidence, curated_role_fit, notes) "
-            "VALUES (?,?,?,?,?,?,?,?)",
+            "availability_class, application, confidence, curated_role_fit, notes) "
+            "VALUES (?,?,?,?,?,?,?,?,?)",
             (filler_id, role_id, wbtr_id, p.get("context"),
-             p.get("availability"), p.get("confidence"),
+             p.get("availability"), application, p.get("confidence"),
              p.get("curated_role_fit"), p.get("notes")),
         )
         pair_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]

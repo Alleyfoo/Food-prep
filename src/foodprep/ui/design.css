@@ -349,6 +349,11 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 .chip.risk    { color: var(--destination-900); background: var(--destination-300); font-weight: 600; }
 .chip.missing { color: var(--primary); border-color: var(--primary); background: transparent; }
 .chip.filler  { color: var(--neutral-800); background: var(--neutral-100); }
+/* what you cooked it IN, not what you dressed it with — usually imperceptible */
+.chip.filler.medium {
+  color: var(--neutral-700); background: transparent;
+  border: 1px dashed var(--line-2);
+}
 .chip.have    { color: var(--ingredient-800); background: var(--ingredient-100); }
 .chip.role    { color: var(--ink); background: var(--neutral-200); font-weight: 500; }
 .chip.muted   { color: var(--neutral-700); background: var(--neutral-100); font-style: italic; }

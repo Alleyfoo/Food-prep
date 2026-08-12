@@ -122,6 +122,11 @@ CREATE TABLE pairings (
     works_best_with_transformation_id INTEGER REFERENCES transformations(transformation_id),
     common_context                   TEXT,
     availability_class               TEXT,
+    application                      TEXT NOT NULL DEFAULT 'unspecified',
+                                                   -- WHEN the filler meets the food: medium | dressing | finish.
+                                                   -- A cooking medium is often imperceptible; a dressing is the dish.
+                                                   -- Storing them in one bucket made olive oil and garlic confit
+                                                   -- look like interchangeable fats.
     confidence                       TEXT,        -- curated final truth (high/medium/...) — the engine's truth
     curated_role_fit                 TEXT,        -- hand judgement of whether corpus co-occurrence actually supports
                                                    -- THIS role (e.g. "garlic+onion co-occur hugely but garlic fills

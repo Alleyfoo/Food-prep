@@ -70,3 +70,44 @@ def test_hypotheses_carry_inference_strength(conn):
 def test_the_pill_names_the_claim(claim, expected):
     # "high" on its own reads as "this tastes good"; the word prevents that.
     assert expected in conf_pill("high", claim)
+
+
+# ---- when a filler meets the food ------------------------------------------
+
+def test_a_pairing_records_when_the_filler_meets_the_food(conn):
+    """The fat you roast in and the confit you dress with are not the same
+    kind of claim. Stored in one bucket they looked interchangeable."""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(pairings)")}
+    assert "application" in cols
+
+
+def test_unclassified_pairings_say_so_rather_than_guessing(conn):
+    """`unspecified` is honest. Inferring from heat_type is not: you do not
+    steam broccoli in butter or boil a potato in it, yet both are heat."""
+    values = {r[0] for r in conn.execute("SELECT DISTINCT application FROM pairings")}
+    assert values <= {"medium", "dressing", "finish", "unspecified"}
+    assert "unspecified" in values, "the honest default should still be in use"
+
+
+def test_butter_on_steamed_broccoli_is_a_dressing_not_a_medium(conn):
+    row = conn.execute(
+        """SELECT p.application FROM pairings p
+           JOIN ingredients i ON i.ingredient_id = p.ingredient_id
+           JOIN transformations t ON t.transformation_id = p.works_best_with_transformation_id
+           JOIN techniques tech ON tech.technique_id = t.technique_id
+           JOIN ingredients ing ON ing.ingredient_id = t.ingredient_id
+           WHERE i.canonical_name = 'butter' AND ing.canonical_name = 'broccoli'
+             AND tech.name = 'steam'"""
+    ).fetchone()
+    assert row and row[0] == "dressing"
+
+
+def test_a_dressing_outranks_a_cooking_medium(conn):
+    """What you dress the finished state with is the dish; what you cooked it
+    in usually cannot be tasted, so it must not lead the list."""
+    from foodprep import query
+    card = next(b for b in query.all_branch_cards(conn, "broccoli")
+                if b["technique"] == "roast")
+    apps = [f["application"] for f in card["fillers_by_role"]["fat"]]
+    assert apps[0] == "dressing"
+    assert apps[-1] == "medium"

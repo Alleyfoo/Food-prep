@@ -16,6 +16,8 @@ def test_project_vocabulary_has_shared_cook_scout_categories():
 
     assert set(vocabulary.categories) == {
         "preparations",
+        # when a filler meets the food: medium / dressing / finish
+        "applications",
         "transformation_categories",
         "flavours",
         "textures",

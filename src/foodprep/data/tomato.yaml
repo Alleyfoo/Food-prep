@@ -2734,10 +2734,10 @@ journeys:
 # role targets the missing role; works_best_with names a technique.
 pairings:
   - { filler: olive_oil,    role: fat,       works_best_with: raw_assemble, context: caprese/panzanella/pasta, availability: very_common, confidence: high, evidence: [caprese, pomodoro] }
-  - { filler: olive_oil,    role: fat,       works_best_with: roast,        context: roasted component,        availability: very_common, confidence: high, evidence: [roast_culinary] }
-  - { filler: olive_oil,    role: fat,       works_best_with: simmer,       context: pasta sauce,              availability: very_common, confidence: high, evidence: [pomodoro] }
-  - { filler: olive_oil,    role: fat,       works_best_with: char,         context: smoky salsa/sauce,        availability: very_common, confidence: high, evidence: [roast_culinary] }
-  - { filler: olive_oil,    role: fat,       works_best_with: dry,          context: oil-packed dried tomato,  availability: very_common, confidence: medium, evidence: [nchfp] }
+  - { filler: olive_oil,    role: fat, application: medium,       works_best_with: roast,        context: roasted component,        availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: olive_oil,    role: fat, application: medium,       works_best_with: simmer,       context: pasta sauce,              availability: very_common, confidence: high, evidence: [pomodoro] }
+  - { filler: olive_oil,    role: fat, application: medium,       works_best_with: char,         context: smoky salsa/sauce,        availability: very_common, confidence: high, evidence: [roast_culinary] }
+  - { filler: olive_oil,    role: fat, application: medium,       works_best_with: dry,          context: oil-packed dried tomato,  availability: very_common, confidence: medium, evidence: [nchfp] }
   - { filler: sea_salt,     role: salt,      works_best_with: raw_assemble, context: seasoning,                availability: very_common, confidence: high, evidence: [caprese] }
   - { filler: sea_salt,     role: salt,      works_best_with: roast,        context: flaky salt finish,        availability: very_common, confidence: high, evidence: [roast_culinary] }
   - { filler: basil,        role: herb,      works_best_with: raw_assemble, context: caprese,                   availability: common, confidence: high, evidence: [caprese] }
@@ -2791,7 +2791,7 @@ pairings:
   - { filler: greens,       role: mild_base, works_best_with: dry,          context: dried tomato salad,        availability: very_common, confidence: medium, evidence: [roast_culinary] }
   - { filler: stock,        role: hydration, works_best_with: reduce,       context: dilute concentrate,        availability: common, confidence: high, evidence: [pomodoro] }
   - { filler: stock,        role: body,      works_best_with: soup,         context: soup base,                 availability: common, confidence: high, evidence: [pappa] }
-  - { filler: butter,       role: fat,       works_best_with: simmer,       context: rounded sauce,             availability: very_common, confidence: medium, evidence: [pomodoro] }
+  - { filler: butter,       role: fat, application: medium,       works_best_with: simmer,       context: rounded sauce,             availability: very_common, confidence: medium, evidence: [pomodoro] }
   - { filler: pasta_water,  role: hydration, works_best_with: reduce,       context: emulsify concentrated,     availability: very_common, confidence: medium, evidence: [pomodoro] }
   - { filler: grilled_fish, role: protein,   works_best_with: pickle,       context: pickled tomato condiment,  availability: occasional, confidence: low, evidence: [nchfp] }
   - { filler: tofu,         role: protein,   works_best_with: pickle,       context: pickled tomato + tofu,     availability: common, confidence: low, evidence: [nchfp] }
@@ -2803,7 +2803,7 @@ pairings:
   - { filler: smoked_yogurt,     role: cream,   works_best_with: char,   context: "smoky cooled sauce",   availability: occasional, confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; plausible with charred tomato" }
   - { filler: lingonberry_vinegar, role: acid,  works_best_with: roast,  context: "berry-bright finish", availability: common, confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry brightness; experimental" }
   - { filler: sumac,            role: acid,    works_best_with: char,   context: "Middle-Eastern lift",  availability: occasional, confidence: experimental, evidence: [], notes: "sumac: tangy acid + umami; plausible with charred tomato" }
-  - { filler: brown_butter,      role: fat,     works_best_with: reduce,  context: "nutty concentrate",    availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; plausible cutting concentrated tomato" }
+  - { filler: brown_butter,      role: fat, application: dressing,     works_best_with: reduce,  context: "nutty concentrate",    availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; plausible cutting concentrated tomato" }
   - { filler: walnut,          role: crunch,  works_best_with: dry,    context: "dried tomato + nut",   availability: common, confidence: experimental, evidence: [], notes: "walnut: crunch + fat; plausible with dried tomato" }
   - { filler: orange_zest,      role: aromatic, works_best_with: roast,  context: "citrus lift",          availability: common, confidence: experimental, evidence: [], notes: "orange zest: aromatic acid; experimental with roasted tomato" }
   - { filler: miso,            role: umami,   works_best_with: simmer,  context: "cross-cuisine depth",  availability: occasional, confidence: experimental, evidence: [], notes: "miso: umami; plausible enriching tomato sauce" }
@@ -2815,8 +2815,8 @@ pairings:
   - { for_ingredient: onion, filler: parsley,    role: herb,    works_best_with: raw_assemble, context: "fresh finish",        availability: common, confidence: high, evidence: [recipedb] }
   - { for_ingredient: onion, filler: cilantro,   role: herb,    works_best_with: raw_assemble, context: "pico/salsa",          availability: occasional, confidence: medium, evidence: [pico] }
   - { for_ingredient: onion, filler: cucumber,   role: crunch,  works_best_with: raw_assemble, context: "salad crunch",        availability: very_common, confidence: medium, evidence: [recipedb] }
-  - { for_ingredient: onion, filler: olive_oil,  role: fat,     works_best_with: saute,        context: "sweat onion",         availability: very_common, confidence: high, evidence: [recipedb] }
-  - { for_ingredient: onion, filler: butter,     role: fat,     works_best_with: saute,        context: "rich base",           availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: olive_oil,  role: fat, application: medium,     works_best_with: saute,        context: "sweat onion",         availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: onion, filler: butter,     role: fat, application: medium,     works_best_with: saute,        context: "rich base",           availability: very_common, confidence: high, evidence: [recipedb] }
   - { for_ingredient: onion, filler: garlic,     role: aromatic, works_best_with: saute,      context: "aromatic base",        availability: very_common, confidence: high, evidence: [recipedb], curated_role_fit: "strong — garlic is genuinely the aromatic base, so the huge co-occurrence is real fit" }
   - { for_ingredient: onion, filler: thyme,      role: herb,    works_best_with: saute,        context: "savory herb",         availability: common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: onion, filler: tomato,     role: acid,    works_best_with: saute,        context: "build sauce",         availability: very_common, confidence: high, evidence: [pomodoro], curated_role_fit: "strong — tomato + onion co-occur massively and tomato does supply acid once a sauce forms" }
@@ -2836,7 +2836,7 @@ pairings:
   - { for_ingredient: onion, filler: potato,     role: mild_base, works_best_with: pickle,    context: "potato host",         availability: very_common, confidence: medium, evidence: [recipedb] }
   # ---- potato pairings (for_ingredient: potato; CulinaryDB co-occurrence) ----
   # boil
-  - { for_ingredient: potato, filler: butter,    role: fat,     works_best_with: boil,    context: "buttered boiled potato", availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: butter,    role: fat, application: dressing,     works_best_with: boil,    context: "buttered boiled potato", availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: sea_salt,  role: salt,    works_best_with: boil,    context: "seasoning",             availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: dill,      role: herb,    works_best_with: boil,    context: "Nordic dill potato",    availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: vinegar,   role: acid,    works_best_with: boil,    context: "German potato",        availability: very_common, confidence: medium, evidence: [recipedb] }
@@ -2848,7 +2848,7 @@ pairings:
   - { for_ingredient: potato, filler: eggs,       role: protein, works_best_with: mash,    context: "mash + egg",            availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: potato, filler: soft_cheese, role: protein, works_best_with: mash,  context: "mash + cheese",        availability: common,      confidence: medium, evidence: [recipedb] }
   # roast
-  - { for_ingredient: potato, filler: olive_oil, role: fat,      works_best_with: roast,   context: "crisp roast",          availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: potato, filler: olive_oil, role: fat, application: medium,      works_best_with: roast,   context: "crisp roast",          availability: very_common, confidence: high,   evidence: [roast_culinary] }
   - { for_ingredient: potato, filler: rosemary,   role: herb,     works_best_with: roast,   context: "roast herb",           availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: garlic,     role: aromatic, works_best_with: roast,   context: "roast aromatics",      availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: lemon,      role: acid,     works_best_with: roast,   context: "sharpen",              availability: very_common, confidence: medium, evidence: [roast_culinary] }
@@ -2865,7 +2865,7 @@ pairings:
   - { for_ingredient: potato, filler: greens,     role: herb,    works_best_with: gratin,  context: "fresh side",           availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: potato, filler: bacon,      role: protein, works_best_with: gratin,  context: "if main",              availability: common,      confidence: low,    evidence: [recipedb] }
   # bake
-  - { for_ingredient: potato, filler: butter,    role: fat,      works_best_with: bake,    context: "buttered baked potato", availability: very_common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: potato, filler: butter,    role: fat, application: dressing,      works_best_with: bake,    context: "buttered baked potato", availability: very_common, confidence: high, evidence: [recipedb] }
   - { for_ingredient: potato, filler: cream,      role: cream,   works_best_with: bake,    context: "sour cream",           availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: gruyere,    role: protein, works_best_with: bake,    context: "loaded baked potato",  availability: occasional,  confidence: medium, evidence: [recipedb] }
   - { for_ingredient: potato, filler: bacon,      role: protein, works_best_with: bake,    context: "loaded baked potato",  availability: common,      confidence: medium, evidence: [recipedb] }
@@ -2885,7 +2885,7 @@ pairings:
   - { for_ingredient: potato, filler: capers,    role: acid,    works_best_with: salad,   context: "briny crunch",         availability: occasional,  confidence: medium, evidence: [recipedb] }
   - { for_ingredient: potato, filler: eggs,      role: protein, works_best_with: salad,   context: "make it a meal",       availability: very_common, confidence: medium, evidence: [recipedb] }
   # hash
-  - { for_ingredient: potato, filler: butter,    role: fat,     works_best_with: hash,    context: "crisp in butter",      availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: potato, filler: butter,    role: fat, application: medium,     works_best_with: hash,    context: "crisp in butter",      availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: onion,     role: aromatic, works_best_with: hash,   context: "hash base",            availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: eggs,      role: protein, works_best_with: hash,    context: "egg on top",           availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: potato, filler: sea_salt,  role: salt,    works_best_with: hash,    context: "seasoning",            availability: very_common, confidence: high,   evidence: [recipedb] }
@@ -2930,7 +2930,7 @@ pairings:
   - { for_ingredient: cabbage, filler: fresh_herbs, role: herb,  works_best_with: stir_fry,   context: "scallion/green finish", availability: common,    confidence: low,     evidence: [recipedb] }
   # roast — sweet charred edges
   - { for_ingredient: cabbage, filler: lemon,      role: acid,    works_best_with: roast,      context: "sharpen",             availability: very_common, confidence: medium,  evidence: [roast_culinary] }
-  - { for_ingredient: cabbage, filler: olive_oil,  role: fat,     works_best_with: roast,      context: "roast in oil",        availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: cabbage, filler: olive_oil,  role: fat, application: medium,     works_best_with: roast,      context: "roast in oil",        availability: very_common, confidence: high,   evidence: [roast_culinary] }
   - { for_ingredient: cabbage, filler: sea_salt,   role: salt,    works_best_with: roast,      context: "seasoning",           availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: cabbage, filler: dill,        role: herb,    works_best_with: roast,      context: "freshness",           availability: common,      confidence: medium,  evidence: [recipedb] }
   - { for_ingredient: cabbage, filler: eggs,        role: protein, works_best_with: roast,     context: "roast + egg",          availability: very_common, confidence: medium,  evidence: [recipedb] }
@@ -2968,13 +2968,13 @@ pairings:
   - { for_ingredient: broccoli, filler: eggs,       role: protein, works_best_with: raw_assemble, context: "egg salad / meal",  availability: very_common, confidence: medium, evidence: [recipedb] }
   # steam — bright tender-crisp, needs richness + lift (the new food state)
   - { for_ingredient: broccoli, filler: sea_salt,   role: salt,    works_best_with: steam,   context: "seasoning",          availability: very_common, confidence: high,   evidence: [steam_culinary] }
-  - { for_ingredient: broccoli, filler: butter,    role: fat,     works_best_with: steam,   context: "buttered steamed",   availability: very_common, confidence: high,   evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: butter,    role: fat, application: dressing,     works_best_with: steam,   context: "buttered steamed",   availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: broccoli, filler: lemon,      role: acid,    works_best_with: steam,   context: "lift",              availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: broccoli, filler: parmesan,   role: protein, works_best_with: steam,   context: "cheese over steamed", availability: common,      confidence: medium, evidence: [recipedb] }
   - { for_ingredient: broccoli, filler: tofu,       role: protein, works_best_with: steam,   context: "steamed + tofu",     availability: common,      confidence: low,    evidence: [recipedb] }
   - { for_ingredient: broccoli, filler: rice,       role: carb,    works_best_with: steam,   context: "rice host",         availability: very_common, confidence: high,   evidence: [recipedb] }
   # roast — nutty charred edges
-  - { for_ingredient: broccoli, filler: olive_oil,  role: fat,     works_best_with: roast,  context: "roast in oil",       availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: broccoli, filler: olive_oil,  role: fat, application: medium,     works_best_with: roast,  context: "roast in oil",       availability: very_common, confidence: high,   evidence: [roast_culinary] }
   - { for_ingredient: broccoli, filler: sea_salt,   role: salt,    works_best_with: roast,  context: "flaky salt finish",  availability: very_common, confidence: high,   evidence: [roast_culinary] }
   - { for_ingredient: broccoli, filler: lemon,      role: acid,    works_best_with: roast,  context: "sharpen",           availability: very_common, confidence: medium, evidence: [roast_culinary] }
   - { for_ingredient: broccoli, filler: parsley,    role: herb,    works_best_with: roast,  context: "fresh finish",       availability: common,      confidence: medium, evidence: [recipedb] }
@@ -2995,7 +2995,7 @@ pairings:
   # ---- experimental / scout pairings for broccoli (Nordic-plausible, not classic) ----
   - { for_ingredient: broccoli, filler: lingonberry_vinegar, role: acid,   works_best_with: steam, context: "Nordic berry-bright steamed", availability: common,      confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry; experimental with steamed broccoli" }
   - { for_ingredient: broccoli, filler: walnut,             role: crunch, works_best_with: steam, context: "nut crunch over steamed",     availability: common,      confidence: experimental, evidence: [], notes: "walnut: crunch + fat; experimental with steamed broccoli" }
-  - { for_ingredient: broccoli, filler: brown_butter,        role: fat,    works_best_with: roast, context: "nutty brown butter",        availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; experimental with roasted broccoli" }
+  - { for_ingredient: broccoli, filler: brown_butter,        role: fat, application: dressing,    works_best_with: roast, context: "nutty brown butter",        availability: very_common, confidence: experimental, evidence: [], notes: "brown butter: nutty fat; experimental with roasted broccoli" }
   - { for_ingredient: broccoli, filler: smoked_yogurt,      role: cream,  works_best_with: soup,  context: "smoky green soup",          availability: occasional,  confidence: experimental, evidence: [], notes: "smoked yogurt: fat + smoke + acid; experimental with broccoli soup" }
 
   # ---- rutabaga pairings (sixth full ingredient) ----
@@ -3004,7 +3004,7 @@ pairings:
   - { for_ingredient: rutabaga, filler: black_pepper, role: aromatic, works_best_with: mash,     context: "grounds the sweetness",    availability: very_common, confidence: high,   evidence: [nordic_root] }
   - { for_ingredient: rutabaga, filler: eggs,         role: protein,  works_best_with: mash,     context: "sets the baked casserole", availability: very_common, confidence: high,   evidence: [nordic_root] }
   - { for_ingredient: rutabaga, filler: sea_salt,     role: salt,     works_best_with: roast,    context: "seasoning vs sweetness",   availability: very_common, confidence: high,   evidence: [roast_culinary] }
-  - { for_ingredient: rutabaga, filler: olive_oil,    role: fat,      works_best_with: roast,    context: "browning medium",          availability: very_common, confidence: high,   evidence: [roast_culinary] }
+  - { for_ingredient: rutabaga, filler: olive_oil,    role: fat, application: medium,      works_best_with: roast,    context: "browning medium",          availability: very_common, confidence: high,   evidence: [roast_culinary] }
   - { for_ingredient: rutabaga, filler: thyme,        role: herb,     works_best_with: roast,    context: "woody herb for roots",     availability: common,      confidence: medium, evidence: [recipedb] }
   - { for_ingredient: rutabaga, filler: lemon,        role: acid,     works_best_with: roast,    context: "sharp finish",             availability: very_common, confidence: medium, evidence: [roast_culinary] }
   - { for_ingredient: rutabaga, filler: vinegar,      role: acid,     works_best_with: raw_slaw, context: "mellows raw pungency",     availability: very_common, confidence: high,   evidence: [recipedb] }
@@ -3035,7 +3035,7 @@ pairings:
   - { for_ingredient: kale, filler: parmesan,     role: umami,    works_best_with: massage, context: "kale caesar direction",    availability: common,      confidence: high,   evidence: [recipedb] }
   - { for_ingredient: kale, filler: apple,        role: crunch,   works_best_with: massage, context: "sweet-tart crunch vs chew", availability: very_common, confidence: high,  evidence: [recipedb] }
   - { for_ingredient: kale, filler: walnut,       role: crunch,   works_best_with: massage, context: "toasted crunch",           availability: common,      confidence: medium, evidence: [recipedb] }
-  - { for_ingredient: kale, filler: olive_oil,    role: fat,      works_best_with: bake,    context: "thin coat before the oven", availability: very_common, confidence: high,  evidence: [recipedb] }
+  - { for_ingredient: kale, filler: olive_oil,    role: fat, application: medium,      works_best_with: bake,    context: "thin coat before the oven", availability: very_common, confidence: high,  evidence: [recipedb] }
   - { for_ingredient: kale, filler: sea_salt,     role: salt,     works_best_with: bake,    context: "chips are flat unsalted",  availability: very_common, confidence: high,   evidence: [recipedb] }
   - { for_ingredient: kale, filler: chile_flakes, role: heat,     works_best_with: bake,    context: "spiced chips",             availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: kale, filler: garlic,       role: aromatic, works_best_with: saute,   context: "in after the wilt",        availability: very_common, confidence: high,   evidence: [recipedb] }
@@ -3061,13 +3061,13 @@ pairings:
   - { for_ingredient: mango, filler: sea_salt,     role: salt,     works_best_with: blend,        context: "salted lassi",           availability: very_common, confidence: high,   evidence: [recipedb] }
 
   # ---- pantry fats across existing states (user's actual pantry) ----
-  - { for_ingredient: broccoli, filler: ghee,          role: fat, works_best_with: roast, context: "high smoke point — butter flavour that survives the oven", availability: common, confidence: high, evidence: [recipedb] }
-  - { for_ingredient: rutabaga, filler: ghee,          role: fat, works_best_with: roast, context: "roasting fat for the long hot roast",  availability: common, confidence: high,        evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: ghee,          role: fat, application: medium, works_best_with: roast, context: "high smoke point — butter flavour that survives the oven", availability: common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: ghee,          role: fat, application: medium, works_best_with: roast, context: "roasting fat for the long hot roast",  availability: common, confidence: high,        evidence: [recipedb] }
   - { for_ingredient: rutabaga, filler: ghee,          role: fat, works_best_with: mash,  context: "nutty mash enrichment",                availability: common, confidence: medium_high, evidence: [recipedb] }
-  - { for_ingredient: kale,     filler: ghee,          role: fat, works_best_with: saute, context: "greens bloomed in ghee — saag grammar", availability: common, confidence: high,       evidence: [recipedb] }
-  - { for_ingredient: broccoli, filler: garlic_confit, role: fat, works_best_with: roast, context: "fat + aromatic in one move over browned florets", availability: common, confidence: high, evidence: [recipedb] }
-  - { for_ingredient: broccoli, filler: garlic_confit, role: fat, works_best_with: steam, context: "melts over the hot tender-crisp state", availability: common, confidence: high,       evidence: [recipedb] }
-  - { for_ingredient: rutabaga, filler: garlic_confit, role: fat, works_best_with: mash,  context: "garlic mash",                          availability: common, confidence: medium_high, evidence: [recipedb] }
+  - { for_ingredient: kale,     filler: ghee,          role: fat, application: medium, works_best_with: saute, context: "greens bloomed in ghee — saag grammar", availability: common, confidence: high,       evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: garlic_confit, role: fat, application: dressing, works_best_with: roast, context: "fat + aromatic in one move over browned florets", availability: common, confidence: high, evidence: [recipedb] }
+  - { for_ingredient: broccoli, filler: garlic_confit, role: fat, application: dressing, works_best_with: steam, context: "melts over the hot tender-crisp state", availability: common, confidence: high,       evidence: [recipedb] }
+  - { for_ingredient: rutabaga, filler: garlic_confit, role: fat, application: dressing, works_best_with: mash,  context: "garlic mash",                          availability: common, confidence: medium_high, evidence: [recipedb] }
 
   # ---- apricot pairings (tenth full ingredient) ----
   - { for_ingredient: apricot, filler: soft_cheese,  role: fat,      works_best_with: raw_assemble, context: "the classic partner",       availability: common,      confidence: high,   evidence: [recipedb] }

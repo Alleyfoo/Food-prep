@@ -11,6 +11,15 @@ preparations:
   - {id: peeled, name: Peeled, definition: Outer skin or layer removed.}
   - {id: scored, name: Scored, definition: Surface cut shallowly to alter heat or seasoning penetration.}
 
+# When a filler meets the food. The distinction matters because it tracks
+# whether anyone can taste the choice: what you roast IN is often
+# imperceptible, what you dress the finished state WITH is the dish.
+applications:
+  - {id: medium, name: Cooking medium, definition: Present during the transformation — the fat you roast in, the liquid you braise in. Frequently imperceptible in the result.}
+  - {id: dressing, name: Dressing, definition: Applied to the finished state. Where most of the perceptible difference lives.}
+  - {id: finish, name: Finish, definition: Added last and barely worked in — flaky salt, torn herbs, a squeeze of acid.}
+  - {id: unspecified, name: Unspecified, definition: Not yet classified. Honest default; never guess a pairing into medium or dressing.}
+
 transformation_categories:
   - {id: preparation_modifier, name: Preparation modifier, definition: Changes physical form without creating a new cooked state.}
   - {id: primary_state_change, name: Primary state change, definition: Produces a materially different culinary state.}
