@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -75,7 +76,7 @@ def topbar() -> None:
         <div class="brand-mark">if</div>
         <div>
           <div class="brand-title">Ingredient Foundry</div>
-          <div class="brand-sub">a local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move</div>
+          <div class="brand-sub">A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.</div>
         </div>
       </div>
       <div class="topbar-spacer"></div>
@@ -88,14 +89,20 @@ def topbar() -> None:
 
 def available_selector() -> list[str]:
     ings = query.ingredients_list(CONN)
-    st.markdown('<div class="avail-strip"><span class="avail-label">'
-                'What do I have right now?</span>'
-                '<span class="avail-hint">filters Ingredient / Component / Plate '
-                'suggestions into Available now · Missing but useful · No match</span>'
-                '</div>', unsafe_allow_html=True)
-    return st.multiselect("Available ingredients", ings,
-                          placeholder="e.g. lemon, yogurt, pickles, bread, eggs, beans",
-                          help="Pick what's in your kitchen. Empty = show all curated fillers.")
+    # The strip is one surface block with the multiselect inside it, so the
+    # container carries the styling (`.st-key-avail_strip`) rather than a
+    # wrapper div — Streamlit widgets cannot be nested inside raw markup.
+    with st.container(key="avail_strip"):
+        _md('<div class="avail-head">'
+            '<span class="avail-title">What do I have right now?</span>'
+            '<span class="avail-hint">filters suggestions into available now · '
+            'missing but useful · no match</span>'
+            '</div>')
+        return st.multiselect(
+            "Available ingredients", ings, key="available_items",
+            label_visibility="collapsed",
+            placeholder="e.g. lemon, yogurt, pickles, bread, eggs, beans",
+            help="Pick what's in your kitchen. Empty = show all curated fillers.")
 
 
 def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
@@ -104,15 +111,16 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
     trees = query.tree_ingredients(CONN)
     col1, col2 = st.columns([1, 1])
     with col1:
-        ingredient = st.selectbox("Ingredient", trees,
+        ingredient = st.selectbox("Ingredient", trees, key="explorer_ing",
                                   index=trees.index("cabbage") if "cabbage" in trees else 0)
     with col2:
-        mode = st.radio("Mode", ["Best branches", "Choose technique"], horizontal=True)
+        mode = st.radio("Mode", ["Best branches", "Choose technique"],
+                        horizontal=True, key="explorer_mode")
 
     avail = available_items or None
     techs = query.techniques_for_ingredient(CONN, ingredient)
     if mode == "Choose technique":
-        tech = st.selectbox("Technique", techs)
+        tech = st.selectbox("Technique", techs, key="explorer_tech")
         card = query.branch_card(CONN, ingredient, tech)
         if card:
             part = (query.available_filter(CONN, card["transformation_id"], avail)
@@ -195,7 +203,8 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
                 unsafe_allow_html=True)
     comps = query.components_list(CONN)
     default = "roasted_tomato_component" if "roasted_tomato_component" in comps else comps[0]
-    comp = st.selectbox("Component", comps, index=comps.index(default))
+    comp = st.selectbox("Component", comps, index=comps.index(default),
+                        key="component_explorer_comp")
     d = query.component_card(CONN, comp)
     if not d:
         st.write("No component named", comp)
@@ -260,7 +269,7 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Plate Balance <span class="count">Cook mode — no experimental pairings</span></div>',
                 unsafe_allow_html=True)
     profiles = query.profiles_list(CONN)
-    picked = st.multiselect("Plate items", profiles,
+    picked = st.multiselect("Plate items", profiles, key="plate_items",
                             default=["mashed_potatoes", "chickpea_patty"])
     if not picked:
         st.markdown('<div class="hint">Pick one or more plate items to see what the plate '
@@ -365,7 +374,8 @@ def tab_filler_profiles() -> None:
                 unsafe_allow_html=True)
     ings = query.ingredients_list(CONN)
     default = "lemon" if "lemon" in ings else ings[0]
-    name = st.selectbox("Filler", ings, index=ings.index(default))
+    name = st.selectbox("Filler", ings, index=ings.index(default),
+                        key="filler_profile_name")
     d = query.filler_profile_detail(CONN, name)
     if not d["found"]:
         st.write(d["mode"])
@@ -777,6 +787,59 @@ def tab_taste_circle_map() -> None:
                 "to start building your dish.")
 
 
+#: Tab label -> renderer. Order is the handoff's and is unchanged. Renderers
+#: taking the availability list are called with it; the rest take nothing.
+TABS: dict[str, Any] = {
+    "Ingredient Explorer": tab_ingredient_explorer,
+    "Map": tab_map,
+    "Scout Map": tab_scout_map,
+    "Journeys": tab_journeys,
+    "Component Explorer": tab_component_explorer,
+    "Plate Balance": tab_plate_balance,
+    "Filler Profiles": tab_filler_profiles,
+    "Scout": tab_scout,
+    "Taste Circle": tab_taste_circle,
+    "Taste Circle Map": tab_taste_circle_map,
+}
+_TABS_WITH_AVAILABLE = {
+    "Ingredient Explorer", "Component Explorer", "Plate Balance",
+}
+
+
+def _persist_widget_state() -> None:
+    """Keep widget values alive across tab switches.
+
+    ``st.tabs`` rendered all ten tabs every run, so every widget stayed
+    instantiated. The pill rail renders only the active tab, and Streamlit
+    garbage-collects the state of any widget it did not draw — a selection
+    would be lost the moment you looked at another tab. Re-assigning each key
+    to itself marks it as set and survives the sweep. Button and component
+    keys reject assignment; they are transient by nature, so skip them.
+    """
+    for key in list(st.session_state.keys()):
+        try:
+            st.session_state[key] = st.session_state[key]
+        except Exception:
+            pass
+
+
+def tab_rail() -> str:
+    """The ten tabs as a wrapping row of pills; returns the active label.
+
+    A radio, not ``st.pills``: pills cannot be deselected back to a valid
+    state, and AppTest cannot serialize a single-select pill group (it walks
+    the value string character by character), which would cost us the smoke
+    tests. CSS turns the radio into the handoff's pill row.
+    """
+    with st.container(key="tab_rail"):
+        active = st.radio(
+            "Section", list(TABS), horizontal=True,
+            label_visibility="collapsed", key="active_tab",
+        )
+    _md('<div class="tab-rule"></div>')
+    return active
+
+
 def main() -> None:
     if not st.session_state.get("_page_configured"):
         st.set_page_config(
@@ -789,32 +852,15 @@ def main() -> None:
     if _CSS_PATH.exists():
         st.markdown(f"<style>{_CSS_PATH.read_text(encoding='utf-8')}</style>",
                     unsafe_allow_html=True)
+    _persist_widget_state()
     topbar()
     available_items = available_selector()
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
-        "Ingredient Explorer", "Map", "Scout Map", "Journeys", "Component Explorer",
-        "Plate Balance", "Filler Profiles", "Scout", "Taste Circle", "Taste Circle Map",
-    ])
-    with tab1:
-        tab_ingredient_explorer(available_items)
-    with tab2:
-        tab_map()
-    with tab3:
-        tab_scout_map()
-    with tab4:
-        tab_journeys()
-    with tab5:
-        tab_component_explorer(available_items)
-    with tab6:
-        tab_plate_balance(available_items)
-    with tab7:
-        tab_filler_profiles()
-    with tab8:
-        tab_scout()
-    with tab9:
-        tab_taste_circle()
-    with tab10:
-        tab_taste_circle_map()
+    active = tab_rail()
+    render = TABS[active]
+    if active in _TABS_WITH_AVAILABLE:
+        render(available_items)
+    else:
+        render()
 
 
 if __name__ == "__main__":

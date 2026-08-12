@@ -19,7 +19,7 @@ dev = [
     "pytest>=7.0",
 ]
 gui = [
-    "streamlit>=1.30",
+    "streamlit>=1.39",
     "pyvis>=0.3",
 ]
 
