@@ -244,8 +244,20 @@ def claim_cards_html(h: dict) -> str:
                   "Finding none proves nothing.")
     elif nclass == "insufficient_coverage":
         n_title = "Cannot tell"
-        n_body = ("One side of this pairing is not in the corpus, so no claim "
-                  "is made either way.")
+        corpus_name = novelty.get("corpus_name") or "the corpus"
+        missing = [
+            name for name, covered in (
+                ((h.get("candidate") or "").replace("_", " "),
+                 novelty.get("candidate_covered")),
+                ((h.get("state_ingredient") or "").replace("_", " "),
+                 novelty.get("target_covered")),
+            ) if name and covered is False
+        ]
+        who = (" and ".join(missing).capitalize() if missing
+               else "One side of this pairing")
+        verb = "are" if len(missing) > 1 else "is"
+        n_body = (f"{who} {verb} not in {corpus_name}, so it cannot say "
+                  "whether cooks put these together. No claim either way.")
     else:
         n_title = "Not checked"
         n_body = "Novelty has not been measured for this pairing."

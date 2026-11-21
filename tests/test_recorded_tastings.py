@@ -126,7 +126,9 @@ def test_absence_is_the_claim_worth_trusting(fresh):
     rows = fresh.execute(
         """SELECT target_covered, candidate_covered FROM novelty_observations
            WHERE result_class = 'not_observed'""").fetchall()
-    assert rows, "expected some genuinely unobserved pairings"
+    # The one real absence (apricot on braised cabbage) left with the rule
+    # that produced it once Scout rules were scoped to their wording, so the
+    # cache may hold none. The invariant is what any such row must satisfy.
     for r in rows:
         assert r["target_covered"] and r["candidate_covered"], (
             "'not observed' must never be claimed for something the corpus "
@@ -137,7 +139,7 @@ def test_unresolvable_pairings_make_no_claim(fresh):
     rows = fresh.execute(
         """SELECT observed_count FROM novelty_observations
            WHERE result_class = 'insufficient_coverage'""").fetchall()
-    assert rows, "over half of ours do not resolve; that should be visible"
+    assert rows, "some candidates (chili crisp, lingonberry vinegar) are not in the corpus; that should be visible"
 
 
 def test_absence_is_only_claimed_where_the_corpus_could_have_shown_it(fresh):

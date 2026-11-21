@@ -1162,6 +1162,7 @@ def generate_scout_hypotheses(
             evidence.append("analogy: " + hypothesis["shared_function"])
         hypothesis.update({
             "state": component_name,
+            "state_ingredient": scope["ingredient"],
             "required_dimensions": required,
             "matched_dimensions": matched,
             "compatibility_evidence": evidence,

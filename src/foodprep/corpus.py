@@ -25,6 +25,7 @@ CulinaryDB files expected in the given directory:
 from __future__ import annotations
 
 import csv
+import re
 import sqlite3
 from datetime import date
 from pathlib import Path
@@ -62,6 +63,59 @@ def _norm(name: str) -> str:
     return " ".join(name.lower().split())
 
 
+def _synonym_variants(raw: str) -> list[str]:
+    """Readable names for one CulinaryDB synonym.
+
+    Synonyms are ``;``-separated and written head-first: ``cheese-gruyere`` is
+    gruyere cheese, ``vinegar-cider`` cider vinegar, and ``=`` joins one word
+    (``hazel=nut``). Splitting on ``,`` alone indexed "bread; bun" as a single
+    unusable key, so every entity with two synonyms was half invisible.
+    """
+    raw = raw.strip().strip("#").strip()
+    if not raw:
+        return []
+    joined = raw.replace("=", " ")
+    variants = [_norm(joined.replace("-", " "))]
+    if "-" in joined:
+        head, _, rest = joined.partition("-")
+        variants.append(_norm(f"{rest.replace('-', ' ')} {head}"))
+    return variants
+
+
+def _singular_forms(name: str) -> list[str]:
+    """``eggs`` -> ``egg``, ``juniper berries`` -> ``juniper berry``."""
+    words = name.split()
+    last = words[-1] if words else ""
+    forms = []
+    if last.endswith("ies") and len(last) > 4:
+        forms.append(last[:-3] + "y")
+    if last.endswith("es") and len(last) > 3:
+        forms.append(last[:-2])
+    if last.endswith("s") and not last.endswith("ss") and len(last) > 2:
+        forms.append(last[:-1])
+    return [" ".join(words[:-1] + [f]) for f in forms]
+
+
+ORIGINAL_PREFIX = "original:"
+
+
+def _original_name(raw: str) -> str:
+    """A recipe's own ingredient wording, reduced to lowercase words."""
+    return " ".join(re.sub(r"[^a-z]+", " ", raw.lower()).split())
+
+
+#: The same food under the corpus's name — identity, never a broader family.
+#: brown_butter is NOT butter and smoked_salt is NOT salt: mapping them would
+#: let butter's 12,000 recipes vouch for a pairing nobody has measured.
+#: Add an entry only when a cook would buy the corpus item to make ours.
+NOVELTY_IDENTITY: dict[str, str] = {
+    "caraway_seeds": "caraway",         # the spice is the seed
+    "pomegranate_seeds": "pomegranate", # recipes say pomegranate, mean arils
+    "gruyere": "gruyere cheese",
+    "rye_crumbs": "rye bread",          # crumbs are toasted rye bread
+}
+
+
 def load_corpus(dir_path: Path | str) -> tuple[dict[int, set[int]], dict[int, str], dict[str, int]]:
     """Read CulinaryDB into:
       entity_recipes: entity id -> set of recipe ids containing it
@@ -86,12 +140,13 @@ def load_corpus(dir_path: Path | str) -> tuple[dict[int, set[int]], dict[int, st
             except (ValueError, KeyError):
                 continue
             for field in ("Aliased Ingredient Name", "Ingredient Synonyms"):
-                for raw in (r.get(field) or "").split(","):
-                    raw = raw.strip()
-                    if raw:
-                        name_index.setdefault(_norm(raw), eid)
+                for raw in re.split(r"[;,]", r.get(field) or ""):
+                    for variant in _synonym_variants(raw):
+                        name_index.setdefault(variant, eid)
 
     entity_recipes: dict[int, set[int]] = {}
+    used_as: dict[str, dict[int, int]] = {}  # recipe-file name -> entity -> uses
+    originals: dict[str, int] = {}             # cook's wording -> pseudo-entity
     with open(dir_path / "04_Recipe-Ingredients_Aliases.csv", encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
             try:
@@ -100,10 +155,40 @@ def load_corpus(dir_path: Path | str) -> tuple[dict[int, set[int]], dict[int, st
             except (ValueError, KeyError):
                 continue
             entity_recipes.setdefault(eid, set()).add(rid)
+            # The cook's own wording survives in "Original Ingredient Name"
+            # even when CulinaryDB files it under a general entity (balsamic
+            # vinegar -> vinegar). Keep it as its own pseudo-entity, with a
+            # negative id, so a specific candidate can be measured by what
+            # recipes actually said instead of by its broad family.
+            original = _original_name(r.get("Original Ingredient Name") or "")
+            if original:
+                if original not in originals:
+                    originals[original] = -(len(originals) + 1)
+                entity_recipes.setdefault(originals[original], set()).add(rid)
             # file 04 names are lowercase aliases — index them too for coverage
             raw = (r.get("Aliased Ingredient Name") or "").strip()
-            if raw and _norm(raw) not in name_index:
-                name_index[_norm(raw)] = eid
+            if raw:
+                counts = used_as.setdefault(_norm(raw), {})
+                counts[eid] = counts.get(eid, 0) + 1
+                if _norm(raw) not in name_index:
+                    name_index[_norm(raw)] = eid
+
+    # The ingredient list and the recipe links sometimes disagree: "anchovy"
+    # is entity 720 in 02_Ingredients, but all 241 recipes link it as 2073,
+    # so 720 has no recipes and anchovy looked absent from the corpus. When
+    # an indexed entity is never used and the recipes use the same name for
+    # another entity, follow the recipes.
+    for name, eid in list(name_index.items()):
+        if entity_recipes.get(eid) or name not in used_as:
+            continue
+        used = max(used_as[name].items(), key=lambda item: item[1])[0]
+        if entity_recipes.get(used):
+            name_index[name] = used
+
+    # Original wordings go in under a prefix: they are only for the strict
+    # novelty fallback, never for the broad lookups pairings use.
+    for original, pseudo in originals.items():
+        name_index[ORIGINAL_PREFIX + original] = pseudo
 
     return entity_recipes, recipe_titles, name_index
 
@@ -134,8 +219,24 @@ def resolve_novelty_entities(canonical: str,
     brown_butter -> butter) must not establish corpus coverage for a more
     specific Scout candidate.
     """
-    entity = name_index.get(_norm(canonical.replace("_", " ")))
-    return [entity] if entity is not None else []
+    name = _norm(canonical.replace("_", " "))
+    candidates = [name, *_singular_forms(name)]
+    if canonical in NOVELTY_IDENTITY:
+        candidates.append(_norm(NOVELTY_IDENTITY[canonical]))
+    for candidate in candidates:
+        entity = name_index.get(candidate)
+        if entity is not None:
+            return [entity]
+    # Fall back to what cooks wrote: every original wording that contains the
+    # name as whole words ("aged balsamic vinegar" counts for balsamic
+    # vinegar; "vinegar" alone does not).
+    phrases = [f" {c} " for c in candidates]
+    found = [
+        entity for key, entity in name_index.items()
+        if key.startswith(ORIGINAL_PREFIX)
+        and any(p in f" {key[len(ORIGINAL_PREFIX):]} " for p in phrases)
+    ]
+    return sorted(set(found))
 
 
 def cooccurrence(entity_recipes: dict[int, set[int]],
