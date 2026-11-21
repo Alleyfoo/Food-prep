@@ -749,6 +749,12 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 }
 [data-baseweb="select"] > div,
 :is([data-testid="stSelectbox"], [data-testid="stMultiSelect"]) [data-rac][role="group"] { background: var(--surface) !important; }
+/* Text fields (the Scout tasting form) match the selects instead of falling
+   back to the theme's beige. Inner input too: Streamlit paints both. */
+:is([data-testid="stTextInput"], [data-testid="stTextArea"], [data-testid="stDateInput"])
+  :is([data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="base-input"], input, textarea) {
+  background: var(--surface) !important;
+}
 /* ============= TASTE CIRCLE (grid + rail, shared with the map) ============= */
 .dim-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);

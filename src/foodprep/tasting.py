@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 from .query import generate_scout_hypotheses
 
@@ -23,6 +27,57 @@ VERDICTS = {
 
 class TastingError(ValueError):
     pass
+
+
+#: Overrides where trials are appended. Tests point it at a temporary copy;
+#: a hosted app can point it somewhere durable, because an installed package
+#: directory is not.
+TASTINGS_ENV = "FOODPREP_TASTINGS_PATH"
+
+
+def tastings_path() -> Path:
+    """The append-only tastings file: $FOODPREP_TASTINGS_PATH, else the repo's."""
+    from .loader import TASTINGS_PATH
+    override = os.environ.get(TASTINGS_ENV)
+    return Path(override) if override else Path(TASTINGS_PATH)
+
+
+def append_trial_yaml(path: Path | str, trial: dict[str, Any]) -> None:
+    """Append one trial to tastings.yaml. Never rewrites what is there.
+
+    The new block is checked first: the whole file plus the block must parse
+    with the loader's strict YAML (no duplicate keys), the block must come back
+    as exactly this trial, and an identical (hypothesis, state, time) trial
+    must not already exist. Only then is the file opened, in append mode.
+    """
+    from .loader import load_yaml  # strict loader; local import avoids a cycle
+
+    path = Path(path)
+    existing = path.read_text(encoding="utf-8") if path.exists() else "tastings:\n"
+    if "tastings:" not in existing:
+        raise TastingError(f"{path} has no `tastings:` list to append to")
+    body = yaml.safe_dump([trial], sort_keys=False, allow_unicode=True, width=78)
+    block = "\n" + "".join("  " + line if line.strip() else line
+                           for line in body.splitlines(keepends=True))
+    prefix = "" if existing.endswith("\n") else "\n"
+
+    probe = path.with_name(path.name + ".probe")
+    try:
+        probe.write_text(existing + prefix + block, encoding="utf-8")
+        parsed = (load_yaml(probe) or {}).get("tastings") or []
+    except Exception as exc:  # noqa: BLE001 - any parse failure blocks the write
+        raise TastingError(f"the new trial would not parse cleanly: {exc}") from exc
+    finally:
+        probe.unlink(missing_ok=True)
+    if not parsed or parsed[-1] != trial:
+        raise TastingError("the new trial did not round-trip; nothing was written")
+    key = (trial["analogy_id"], trial["component"], trial["tested_at"])
+    if any((t.get("analogy_id"), t.get("component"), t.get("tested_at")) == key
+           for t in parsed[:-1]):
+        raise TastingError("this trial is already recorded")
+
+    with open(path, "a", encoding="utf-8", newline="\n") as fh:
+        fh.write(prefix + block)
 
 
 def _hypothesis(conn: sqlite3.Connection, component_name: str,
@@ -67,8 +122,15 @@ def record_trial(
     successful_correction: str | None = None,
     safety_confirmed: bool = False,
     tested_at: str | None = None,
+    yaml_path: Path | str | None = None,
 ) -> dict[str, Any]:
-    """Append one kitchen observation without modifying hypothesis evidence."""
+    """Append one kitchen observation without modifying hypothesis evidence.
+
+    With *yaml_path*, the trial is also appended to that tastings file — the
+    durable record the app builds from. Without it, it lives only in *conn*.
+    The file is written first: the database is rebuilt from it, never the
+    other way round.
+    """
     if verdict not in VERDICTS:
         raise TastingError(f"unknown tasting verdict: {verdict!r}")
     if not safety_confirmed:
@@ -90,6 +152,26 @@ def record_trial(
         "SELECT ingredient_id FROM ingredients WHERE canonical_name = ?", (candidate,)
     ).fetchone()[0]
     timestamp = tested_at or datetime.now(timezone.utc).isoformat()
+    if yaml_path is not None:
+        record = {
+            "analogy_id": hypothesis["analogy_id"],
+            "component": component_name,
+            "candidate": candidate,
+            "tested_at": timestamp,
+            "preparation": preparation.strip(),
+            "ratio": ratio.strip(),
+            "temperature": temperature.strip(),
+            "supporting_ingredients": (supporting_ingredients.strip()
+                                       if supporting_ingredients else None),
+            "verdict": verdict,
+            "observations": observations.strip(),
+            "failure_mode": failure_mode.strip() if failure_mode else None,
+            "successful_correction": (successful_correction.strip()
+                                      if successful_correction else None),
+            "safety_confirmed": True,
+        }
+        append_trial_yaml(yaml_path, {k: v for k, v in record.items()
+                                      if v is not None})
     conn.execute(
         """INSERT INTO tasting_trials(
              analogy_id, component_id, candidate_ingredient_id, tested_at,

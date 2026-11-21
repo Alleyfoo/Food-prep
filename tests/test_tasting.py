@@ -164,3 +164,92 @@ def test_trials_survive_ontology_rebuild(conn):
     assert restored["observations"] == "Worth another test."
     assert restored["state"] == STATE
     assert restored["candidate"] == CANDIDATE
+
+
+# ---- the durable record: tastings.yaml, appended, never rewritten ----------
+
+def _copy_of_tastings(tmp_path):
+    import shutil
+    from foodprep.loader import TASTINGS_PATH
+    copy = tmp_path / "tastings.yaml"
+    shutil.copy(TASTINGS_PATH, copy)
+    return copy
+
+
+def _record(conn, path, **overrides):
+    fields = dict(verdict="promising", preparation="one warm piece",
+                  ratio="3 drops", temperature="warm",
+                  observations="sharp: 'bright' # still text",
+                  safety_confirmed=True, yaml_path=path)
+    fields.update(overrides)
+    return tasting.record_trial(conn, STATE, CANDIDATE, **fields)
+
+
+def test_yaml_append_keeps_every_existing_byte(conn, tmp_path):
+    path = _copy_of_tastings(tmp_path)
+    before = path.read_bytes()
+    _record(conn, path)
+    after = path.read_bytes()
+    assert after.startswith(before) and len(after) > len(before)
+
+
+def test_yaml_append_round_trips_through_a_rebuild(conn, tmp_path):
+    import sqlite3
+    path = _copy_of_tastings(tmp_path)
+    trial = _record(conn, path)
+    rebuilt = sqlite3.connect(":memory:")
+    rebuilt.row_factory = sqlite3.Row
+    build(rebuilt, tastings_path=path)
+    obs = [r[0] for r in rebuilt.execute(
+        "SELECT observations FROM tasting_trials WHERE tested_at = ?",
+        (trial["tested_at"],))]
+    assert obs == ["sharp: 'bright' # still text"]
+
+
+def test_duplicate_trial_is_refused_and_nothing_is_written(conn, tmp_path):
+    path = _copy_of_tastings(tmp_path)
+    first = _record(conn, path, tested_at="2026-11-21")
+    size = path.stat().st_size
+    with pytest.raises(tasting.TastingError, match="already recorded"):
+        _record(conn, path, tested_at=first["tested_at"])
+    assert path.stat().st_size == size
+
+
+def test_invalid_trial_writes_nothing(conn, tmp_path):
+    path = _copy_of_tastings(tmp_path)
+    before = path.read_bytes()
+    with pytest.raises(tasting.TastingError):
+        _record(conn, path, safety_confirmed=False)
+    assert path.read_bytes() == before
+
+
+def test_cli_records_into_tastings_yaml_by_default(conn, tmp_path, monkeypatch):
+    from foodprep import cli
+    path = _copy_of_tastings(tmp_path)
+    db = tmp_path / "fp.sqlite"
+    monkeypatch.setenv(tasting.TASTINGS_ENV, str(path))
+    assert cli.main(["--db", str(db), "build"]) == 0
+    before = path.read_bytes()
+    args = ["--db", str(db), "record-tasting", STATE, CANDIDATE,
+            "--verdict", "works", "--preparation", "p", "--ratio", "r",
+            "--temperature", "t", "--observations", "o", "--safety-confirmed"]
+    assert cli.main(args) == 0
+    assert len(path.read_bytes()) > len(before)
+    grown = path.read_bytes()
+    assert cli.main(args + ["--db-only"]) == 0
+    assert path.read_bytes() == grown
+
+
+def test_build_reads_the_file_the_app_appends_to(tmp_path, monkeypatch):
+    import sqlite3
+    path = _copy_of_tastings(tmp_path)
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    build(conn)
+    _record(conn, path, tested_at="2026-11-22")
+    monkeypatch.setenv(tasting.TASTINGS_ENV, str(path))
+    fresh = sqlite3.connect(":memory:")
+    fresh.row_factory = sqlite3.Row
+    build(fresh)                      # default path -> follows the override
+    dates = {r[0] for r in fresh.execute("SELECT tested_at FROM tasting_trials")}
+    assert "2026-11-22" in dates

@@ -100,14 +100,3 @@ def test_availability_strip_hides_on_reference_tabs_and_keeps_its_picks():
     assert all(m.key != "available_items" for m in at.multiselect)
     _radio(at, "active_section").set_value("Cook").run()
     assert next(m for m in at.multiselect if m.key == "available_items").value == ["lemon"]
-
-
-def test_record_tasting_hint_is_a_complete_command():
-    at = _app()
-    _radio(at, "active_section").set_value("Experiment").run()
-    at.button(key="scout_record").click().run()
-    assert not at.exception, at.exception
-    command = at.code[0].value
-    for flag in ("--verdict", "--preparation", "--ratio", "--temperature",
-                 "--observations", "--safety-confirmed"):
-        assert flag in command, flag

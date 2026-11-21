@@ -80,6 +80,14 @@ asks what is in the kitchen right now.
 | ![Component Explorer](docs/screenshots/cook_component_explorer.png) | ![Plate Balance](docs/screenshots/cook_plate_balance.png) |
 | ![Map](docs/screenshots/explore_map.png) | ![Journeys](docs/screenshots/explore_journeys.png) |
 
+**Recording a tasting.** Under each Scout hypothesis, *Record a tasting* opens
+a short form (verdict, what you did, ratio, temperature, what you tasted, and a
+safety confirmation). Saving **appends** the trial to
+`src/foodprep/data/tastings.yaml`, the file the app rebuilds from, and never
+edits what is already there. Commit that file to keep the record. On a hosted
+deployment, where the package folder is not durable, set
+`FOODPREP_TASTINGS_PATH` to a file that is; the app then reads and writes there.
+
 Screenshots are reproducible: `python scripts/capture_screenshots.py` (needs
 Playwright with Chromium or a system Chrome). Re-run it after any UI change.
 
@@ -94,9 +102,8 @@ foodprep journey broccoli                        # complete cook paths
 foodprep plate "mashed potatoes and chickpea patty"
 foodprep hypotheses roasted_broccoli_component   # Scout, with novelty and protocol
 foodprep protocol roasted_broccoli_component brown_butter
-foodprep record-tasting roasted_broccoli_component brown_butter \
-  --verdict works --preparation "tossed while warm" --ratio "1 floret : 1/4 tsp" \
-  --temperature warm --observations "nutty, not greasy" --safety-confirmed
+foodprep record-tasting roasted_broccoli_component brown_butter --verdict works --preparation "tossed while warm" --ratio "1 floret : 1/4 tsp" --temperature warm --observations "nutty, not greasy" --safety-confirmed
+                                                 # appends to tastings.yaml; --db-only to skip
 foodprep demo                                    # five flows in about a minute
 ```
 
@@ -191,8 +198,6 @@ opening.
   anchovy: 157 recipes" counts every tomato recipe that contains anchovy.
   Counts carry no lift over base rate, so a high count mostly means both
   ingredients are popular.
-- **Tastings are recorded through the CLI.** The app has no write path into
-  the append-only record, by design so far.
 - **Streamlit is pinned to `>=1.50,<1.68`** (`requirements.txt` and
   `pyproject.toml`, kept equal by a test). Both ends are tested. Before raising
   the cap, run the suite **and look at the app**: 1.67 changed widget markup,

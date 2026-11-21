@@ -840,6 +840,11 @@ def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
     # Validate the shared Cook/Scout language before making destructive schema
     # changes, so a bad vocabulary cannot wipe an existing local database.
     vocabulary = load_vocabulary(vocabulary_path)
+    if tastings_path == TASTINGS_PATH:
+        # Read from wherever the app appends (FOODPREP_TASTINGS_PATH), or a
+        # trial saved from the app would vanish on the next start.
+        from .tasting import tastings_path as _active_tastings_path
+        tastings_path = _active_tastings_path()
     tasting_trials = _preserve_tasting_trials(conn)
     corpora, novelty_observations = _preserve_novelty_evidence(conn)
     rebuild(conn)

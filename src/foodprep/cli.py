@@ -143,11 +143,15 @@ def cmd_record_tasting(args: argparse.Namespace) -> int:
             failure_mode=args.failure_mode,
             successful_correction=args.successful_correction,
             safety_confirmed=args.safety_confirmed,
+            # tastings.yaml is the durable record the app reads; a trial kept
+            # only in the local database never reached the app.
+            yaml_path=None if args.db_only else tasting.tastings_path(),
         )
     except tasting.TastingError as exc:
         print(str(exc))
         return 1
-    print(f"Recorded tasting trial {result['trial_id']}: {result['verdict']}")
+    where = "database only" if args.db_only else str(tasting.tastings_path())
+    print(f"Recorded tasting trial {result['trial_id']}: {result['verdict']} ({where})")
     return 0
 
 
@@ -315,6 +319,8 @@ def build_parser() -> argparse.ArgumentParser:
     prec.add_argument("--successful-correction", default=None)
     prec.add_argument("--safety-confirmed", action="store_true", required=True,
                      help="confirm ingredients were safely prepared; not preservation advice")
+    prec.add_argument("--db-only", action="store_true",
+                     help="record in the local database only, not in tastings.yaml")
     prec.set_defaults(func=cmd_record_tasting)
 
     ppl = sub.add_parser("plate",

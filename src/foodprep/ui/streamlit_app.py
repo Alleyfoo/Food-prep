@@ -12,13 +12,14 @@ Run:  streamlit run app.py
 from __future__ import annotations
 
 import sqlite3
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 import streamlit as st
 
 from foodprep.loader import build
-from foodprep import export, query
+from foodprep import export, query, tasting
 from foodprep.ui.render import (
     _esc, _readable, chip, chips, conf_pill, debug_block, tag_class,
     available_partition_html, branch_card_html, subject_column_html,
@@ -555,33 +556,12 @@ def tab_scout(available_items: list[str] | None = None) -> None:
         _md(claim_cards_html(h))
         _md(smallest_test_html(h))
 
-        act_record, act_next, _sp = st.columns([1.3, 1.2, 2])
-        with act_record:
-            # It shows how; it does not record (usability pass, finding 8).
-            st.button("How to record a tasting", key="scout_record")
-        with act_next:
+        _act_next, _sp = st.columns([1.2, 3.3])
+        with _act_next:
             st.button("Next hypothesis", key="scout_next",
                       on_click=_scout_step, args=(1,),
                       disabled=len(candidates) < 2)
-        if st.session_state.get("scout_record"):
-            # Tastings are an append-only record written through the CLI;
-            # the UI does not have a write path into the ontology.
-            _md('<div class="hint">Tastings are recorded through the CLI so the '
-                'append-only record stays the single source of truth. Run this '
-                'in a terminal in the project folder, after changing the '
-                'quoted parts to what actually happened:</div>')
-            # One line: `\` continuations only work in bash, and this user's
-            # Windows terminal is PowerShell (usability pass, finding 3).
-            ratio = (h.get("protocol") or {}).get("starting_ratio") or "not measured"
-            st.code(
-                f"foodprep record-tasting {comp} {h['candidate']} "
-                f"--verdict works --preparation \"what you did\" "
-                f"--ratio \"{ratio}\" --temperature warm "
-                f"--observations \"what you tasted\" --safety-confirmed",
-                language="bash")
-            _md('<div class="hint">Verdicts: works · promising · '
-                'works_only_in_this_form · needs_adjustment · dominated · '
-                'clashes · texturally_wrong · inconclusive.</div>')
+        _tasting_form(comp, h)
         _md(trial_history_html(h))
 
         if rejected:
@@ -611,6 +591,104 @@ def _tcm_init(state_comps: list[str]) -> None:
         st.session_state.tcm_component = (
             "roasted_broccoli_component"
             if "roasted_broccoli_component" in state_comps else state_comps[0])
+
+
+#: Verdicts in the order a cook reaches for them, with readable labels.
+_VERDICT_LABELS = {
+    "works": "Works",
+    "promising": "Promising",
+    "works_only_in_this_form": "Works only in this form",
+    "needs_adjustment": "Needs adjustment",
+    "dominated": "Dominated",
+    "clashes": "Clashes",
+    "texturally_wrong": "Texturally wrong",
+    "inconclusive": "Inconclusive",
+}
+_TASTING_TEXT = ("tasting_preparation", "tasting_ratio", "tasting_temperature",
+                 "tasting_observations", "tasting_supporting",
+                 "tasting_failure", "tasting_correction")
+
+
+def _tasting_reset(ratio: str) -> None:
+    for key in _TASTING_TEXT:
+        st.session_state[key] = ""
+    st.session_state.tasting_ratio = ratio
+    st.session_state.tasting_verdict = "works"
+    st.session_state.tasting_date = date.today()
+    st.session_state.tasting_safety = False
+
+
+def _tasting_save(comp: str, candidate: str, ratio_default: str) -> None:
+    """Form callback: append the trial, then clear the form for the next one."""
+    ss = st.session_state
+    path = tasting.tastings_path()
+    try:
+        tasting.record_trial(
+            CONN, comp, candidate,
+            verdict=ss.tasting_verdict,
+            preparation=ss.tasting_preparation, ratio=ss.tasting_ratio,
+            temperature=ss.tasting_temperature,
+            observations=ss.tasting_observations,
+            supporting_ingredients=ss.tasting_supporting or None,
+            failure_mode=ss.tasting_failure or None,
+            successful_correction=ss.tasting_correction or None,
+            safety_confirmed=ss.tasting_safety,
+            tested_at=ss.tasting_date.isoformat(),
+            yaml_path=path,
+        )
+    except tasting.TastingError as exc:
+        # Keep everything typed; only say what is wrong.
+        ss.tasting_flash = ("error", str(exc).capitalize() + ".")
+        return
+    ss.tasting_flash = ("ok", f"Saved to {path}. Commit that file to keep the "
+                              "record — it is the one the app rebuilds from.")
+    _tasting_reset(ratio_default)
+
+
+def _tasting_form(comp: str, h: dict) -> None:
+    """Record a tasting from the app. Appends to tastings.yaml, never edits it.
+
+    It used to be a terminal command only, which made the last step of the
+    loop impossible for anyone without a terminal (usability pass, T5).
+    """
+    candidate = h["candidate"]
+    ratio = (h.get("protocol") or {}).get("starting_ratio") or ""
+    # A different hypothesis starts a fresh draft with its own ratio.
+    if st.session_state.get("tasting_target") != (comp, candidate):
+        st.session_state.tasting_target = (comp, candidate)
+        _tasting_reset(ratio)
+
+    flash = st.session_state.pop("tasting_flash", None)
+    if flash:
+        kind, message = flash
+        (st.success if kind == "ok" else st.error)(message)
+
+    with st.expander("Record a tasting", expanded=bool(flash and flash[0] == "error")):
+        _md('<div class="hint">One observation per attempt. The record is '
+            'append-only: if a later try disagrees, record that too rather '
+            'than changing this one.</div>')
+        with st.form(key="tasting_form", border=False):
+            left, right = st.columns(2)
+            with left:
+                st.selectbox("Verdict", list(_VERDICT_LABELS),
+                             format_func=_VERDICT_LABELS.get, key="tasting_verdict")
+                st.text_input("What you did", key="tasting_preparation",
+                              placeholder="e.g. tossed one warm piece, tasted at once")
+                st.text_input("Ratio", key="tasting_ratio")
+            with right:
+                st.date_input("Tasted on", key="tasting_date")
+                st.text_input("Temperature", key="tasting_temperature",
+                              placeholder="e.g. warm, room temperature")
+                st.text_input("Also on the plate (optional)", key="tasting_supporting")
+            st.text_area("What you tasted", key="tasting_observations",
+                         placeholder="What happened, in your own words.")
+            st.text_input("What went wrong (optional)", key="tasting_failure")
+            st.text_input("What fixed it (optional)", key="tasting_correction")
+            st.checkbox("Everything was safely prepared and cooked through",
+                        key="tasting_safety")
+            st.form_submit_button("Save tasting", type="primary",
+                                  on_click=_tasting_save,
+                                  args=(comp, candidate, ratio))
 
 
 def _tc_lock(dim: str) -> None:
@@ -1047,6 +1125,10 @@ _STICKY_WIDGETS = frozenset({
     "filler_profile_name",
     "tab_scout_component_select",
     "taste_circle_component",
+    # the Scout tasting form: a half-written observation survives a tab switch
+    "tasting_verdict", "tasting_date", "tasting_preparation", "tasting_ratio",
+    "tasting_temperature", "tasting_supporting", "tasting_observations",
+    "tasting_failure", "tasting_correction", "tasting_safety",
 })
 
 #: Widgets keyed dynamically (one per flavour dimension in Taste Circle)

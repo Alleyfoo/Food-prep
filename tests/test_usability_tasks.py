@@ -93,15 +93,66 @@ def test_t4_something_new_for_roasted_cabbage():
     assert f"Roasted cabbage + {target}" in _page(at)
 
 
-def test_t5_record_command_survives_powershell():
-    at = _app()
-    _radio(at, "active_section").set_value("Experiment").run()
-    at.button(key="scout_record").click().run()
-    command = at.code[0].value
-    # Finding 3: one line, no bash-only "\" continuations.
-    assert "\n" not in command and "\\" not in command
-    assert command.startswith("foodprep record-tasting roasted_broccoli_component ")
-    assert at.button(key="scout_record").label == "How to record a tasting"
+def test_t5_record_a_tasting_from_the_app(tmp_path, monkeypatch):
+    """T5 used to need a terminal; now the form appends to tastings.yaml."""
+    import shutil
+    import streamlit as st
+    from foodprep import loader, tasting
+
+    real = Path(loader.TASTINGS_PATH)
+    before_real = real.read_bytes()
+    copy = tmp_path / "tastings.yaml"
+    shutil.copy(real, copy)
+    monkeypatch.setenv(tasting.TASTINGS_ENV, str(copy))
+    try:
+        at = _app()
+        _radio(at, "active_section").set_value("Experiment").run()
+        _select(at, "tab_scout_component_select").set_value(
+            "roasted_cabbage_component").run()
+        text = {t.key: t for t in at.text_input}
+        # The protocol's starting ratio is prefilled.
+        assert text["tasting_ratio"].value.startswith("1 small piece of roasted cabbage")
+        text["tasting_preparation"].input("tossed one warm piece")
+        text["tasting_temperature"].input("warm")
+        next(a for a in at.text_area if a.key == "tasting_observations").input(
+            "nutty, not greasy")
+        next(c for c in at.checkbox if c.key == "tasting_safety").check()
+        at.button(key="FormSubmitter:tasting_form-Save tasting").click().run()
+        assert not at.exception, at.exception
+
+        assert any("Saved to" in s.value for s in at.success)
+        added = copy.read_text(encoding="utf-8")[len(before_real.decode("utf-8")):]
+        assert "component: roasted_cabbage_component" in added
+        assert "observations: nutty, not greasy" in added
+        # The trial shows on the card straight away...
+        assert "nutty, not greasy" in _page(at)
+        # ...the form is cleared for the next one...
+        assert {t.key: t for t in at.text_input}["tasting_preparation"].value == ""
+        # ...and the real record was never touched.
+        assert real.read_bytes() == before_real
+    finally:
+        st.cache_resource.clear()   # the trial went into the cached database
+
+
+def test_t5_refused_tasting_keeps_what_was_typed(tmp_path, monkeypatch):
+    import shutil
+    import streamlit as st
+    from foodprep import loader, tasting
+
+    copy = tmp_path / "tastings.yaml"
+    shutil.copy(loader.TASTINGS_PATH, copy)
+    monkeypatch.setenv(tasting.TASTINGS_ENV, str(copy))
+    try:
+        at = _app()
+        _radio(at, "active_section").set_value("Experiment").run()
+        text = {t.key: t for t in at.text_input}
+        text["tasting_preparation"].input("tossed warm")
+        at.button(key="FormSubmitter:tasting_form-Save tasting").click().run()
+        assert any("safety" in e.value.lower() for e in at.error)
+        assert {t.key: t for t in at.text_input}["tasting_preparation"].value == "tossed warm"
+        assert copy.read_bytes() == Path(loader.TASTINGS_PATH).read_bytes()
+    finally:
+        st.cache_resource.clear()
 
 
 def test_scores_outside_zero_to_five_are_refused():

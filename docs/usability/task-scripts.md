@@ -74,9 +74,11 @@ one piece).
 **Situation:** "You tried brown butter on roasted broccoli and it worked.
 Record that."
 
-**Success:** they reach the record-tasting command and understand it has to be
-run in a terminal.
+**Success:** the trial appears in the card's trial history, saved from the
+*Record a tasting* form.
 
 **Watch for:**
-- Is a terminal command an acceptable step for this person at all?
-- Do they understand which parts of the command to change?
+- Do they find *Record a tasting* under the hypothesis?
+- Do they understand the verdict words, and what "append-only" means for a
+  second, disagreeing attempt?
+- Do they tick the safety confirmation without reading it?
