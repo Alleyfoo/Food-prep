@@ -996,8 +996,11 @@ def classify_scout_candidate(compatibility_evidence: list[str],
 
 def state_label(component_name: str) -> str:
     """How a state reads in a sentence: roasted_broccoli_component -> roasted broccoli."""
-    cleaned = component_name.replace("_component", " ").replace("_base", " ")
-    return " ".join(cleaned.replace("_", " ").split())
+    for suffix in ("_component", "_base"):
+        if component_name.endswith(suffix):
+            component_name = component_name[: -len(suffix)]
+            break
+    return " ".join(component_name.replace("_", " ").split())
 
 
 def _state_scope(conn: sqlite3.Connection, component_name: str) -> dict[str, Any]:

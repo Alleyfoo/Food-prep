@@ -116,7 +116,7 @@ def build_ingredient_graph(conn: sqlite3.Connection,
 
         comp_id = f"comp:{comp_name}"
         if comp_id not in [n["id"] for n in net.nodes]:
-            _add_node(net, comp_id, comp_name.replace("_", " "), "component",
+            _add_node(net, comp_id, query.state_label(comp_name), "component",
                       size=22, title=f"Component: {comp_name}")
         _add_edge(net, tech_id, comp_id, "produces", color=_EDGE_COLORS["technique"])
 
@@ -128,7 +128,7 @@ def build_ingredient_graph(conn: sqlite3.Connection,
         if input_name:
             input_id = f"comp:{input_name}"
             if input_id not in [n["id"] for n in net.nodes]:
-                _add_node(net, input_id, input_name.replace("_", " "),
+                _add_node(net, input_id, query.state_label(input_name),
                           "component", size=22, title=f"Component: {input_name}")
             _add_edge(net, input_id, tech_id, "then",
                       color=_EDGE_COLORS["component"])
@@ -137,7 +137,7 @@ def build_ingredient_graph(conn: sqlite3.Connection,
         for by in query.byproducts_for_transformation(conn, tr["transformation_id"]):
             by_id = f"comp:{by['component']}"
             if by_id not in [n["id"] for n in net.nodes]:
-                _add_node(net, by_id, by["component"].replace("_", " "),
+                _add_node(net, by_id, query.state_label(by["component"]),
                           "component", size=18,
                           title=by.get("note") or f"Component: {by['component']}")
             _add_edge(net, tech_id, by_id, "also yields",
@@ -251,7 +251,7 @@ def build_scout_graph(conn: sqlite3.Connection,
 
         comp_id = f"comp:{comp_name}"
         if comp_id not in [n["id"] for n in net.nodes]:
-            _add_node(net, comp_id, comp_name.replace("_", " "), "component",
+            _add_node(net, comp_id, query.state_label(comp_name), "component",
                       size=22, title=f"Component: {comp_name}")
         _add_edge(net, tech_id, comp_id, "produces", color=_EDGE_COLORS["technique"])
 
@@ -470,7 +470,7 @@ def taste_circle_graph_data(
     comp_id = f"comp:{component_name}"
     nodes.append({
         "id": comp_id,
-        "label": f"{component_name.replace('_', ' ')}\ncomponent",
+        "label": query.state_label(component_name),
         "x": 0.0, "y": 0.0, "fixed": True,
         "shape": "circle", "widthConstraint": {"minimum": 108},
         "color": _node_color("#FFFFFF", "#1A1B16"),

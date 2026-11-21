@@ -1,16 +1,10 @@
 """Food-prep — ingredient transformation graph UI (Streamlit).
 
-Tabs:
-  Tab 1  Ingredient Explorer  — branch_card / all_branch_cards
-  Tab 2  Map                  — interactive ingredient mindmap (pyvis)
-  Tab 3  Scout Map            — Scout hypotheses graph (pyvis)
-  Tab 4  Journeys             — ingredient_journeys
-  Tab 5  Component Explorer   — component_card + flavour_routes
-  Tab 6  Plate Balance        — plate_balance_detail
-  Tab 7  Filler Profiles      — filler_profile_detail
-  Tab 8  Scout                — generate_scout_hypotheses + trials
-  Tab 9  Taste Circle         — flavour wheel builder (buttons)
-  Tab 10 Taste Circle Map     — click-driven circular flavour builder
+Navigation is two levels — a section, then a tab inside it (see SECTIONS):
+  Cook        Ingredient Explorer · Component Explorer · Plate Balance ·
+              Taste Circle (Circle | Cards views, one shared dish)
+  Explore     Map (Cook paths | Scout ideas) · Journeys · Filler Profiles
+  Experiment  Scout
 
 Run:  streamlit run app.py
 """
@@ -27,7 +21,7 @@ import streamlit.components.v1 as components
 from foodprep.loader import build
 from foodprep import export, query
 from foodprep.ui.render import (
-    _esc, chip, chips, conf_pill, debug_block, tag_class,
+    _esc, _readable, chip, chips, conf_pill, debug_block, tag_class,
     available_partition_html, branch_card_html, subject_column_html,
     claim_cards_html, hypothesis_card_html, journey_card_html,
     route_card_html, smallest_test_html, trial_history_html,
@@ -44,6 +38,11 @@ _CSS_PATH = Path(__file__).with_name("design.css")
 def _md(markup: str) -> None:
     cleaned = "\n".join(line.lstrip() for line in markup.splitlines())
     st.markdown(cleaned.strip(), unsafe_allow_html=True)
+
+
+def _pretty(name: str) -> str:
+    """What a cook reads: roasted_broccoli_component -> roasted broccoli."""
+    return _readable(name)
 
 
 @st.cache_resource
@@ -101,7 +100,7 @@ def available_selector() -> list[str]:
             '</div>')
         return st.multiselect(
             "Available ingredients", ings, key="available_items",
-            label_visibility="collapsed",
+            label_visibility="collapsed", format_func=_pretty,
             placeholder="e.g. lemon, yogurt, pickles, bread, eggs, beans",
             help="Pick what's in your kitchen. Empty = show all curated fillers.")
 
@@ -126,8 +125,9 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
         _md('<div class="eyebrow">Ingredient</div>')
         ingredient = st.selectbox(
             "Ingredient", trees, key="explorer_ing",
-            label_visibility="collapsed",
-            index=trees.index("cabbage") if "cabbage" in trees else 0)
+            label_visibility="collapsed", format_func=_pretty,
+            # Broccoli is the pilot and on the shopping list; cabbage is not.
+            index=trees.index("broccoli") if "broccoli" in trees else 0)
         techs = query.techniques_for_ingredient(CONN, ingredient)
         _md(subject_column_html(
             ingredient, "ingredient",
@@ -139,7 +139,8 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
 
     with answer:
         if mode == "Choose technique":
-            tech = st.selectbox("Technique", techs, key="explorer_tech")
+            tech = st.selectbox("Technique", techs, key="explorer_tech",
+                                format_func=_pretty)
             card = query.branch_card(CONN, ingredient, tech)
             if card:
                 part = (query.available_filter(CONN, card["transformation_id"], avail)
@@ -164,37 +165,31 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
 
 
 def tab_map() -> None:
-    st.markdown('<div class="section-title">Map <span class="count">'
-                'interactive ingredient mindmap</span></div>',
-                unsafe_allow_html=True)
-    st.markdown(
-        '<div class="hint">Select an ingredient to see its transformation tree: '
-        'how it can be cooked, what components it becomes, what fillers pair with it, '
-        'and what flavour routes it opens. Drag nodes to explore.</div>',
-        unsafe_allow_html=True)
-    trees = query.tree_ingredients(CONN)
-    ingredient = st.selectbox("Ingredient", trees, key="map_ing",
-                              index=trees.index("broccoli") if "broccoli" in trees else 0)
-    net = build_ingredient_graph(CONN, ingredient)
-    html = graph_to_html(net)
-    components.html(html, height=620, scrolling=False)
+    """One graph tab, two readings of the same ingredient.
 
-
-def tab_scout_map() -> None:
-    st.markdown('<div class="section-title">Scout Map <span class="count">'
-                'generated hypotheses from analogy rules</span></div>',
-                unsafe_allow_html=True)
-    st.markdown(
-        '<div class="hint">Select an ingredient to see Scout hypotheses for its '
-        'transformed states. Diamond nodes = scout_candidate (3+ compatibility evidence), '
-        'dot nodes = weak_hypothesis. Drag nodes to explore.</div>',
-        unsafe_allow_html=True)
+    Cook paths is the transformation tree; Scout ideas is the same tree with
+    generated hypotheses hanging off each state. They used to be two tabs with
+    two ingredient pickers that drifted apart.
+    """
     trees = query.tree_ingredients(CONN)
-    ingredient = st.selectbox("Ingredient", trees, key="scout_map_ing",
-                              index=trees.index("broccoli") if "broccoli" in trees else 0)
-    net = build_scout_graph(CONN, ingredient)
-    html = graph_to_html(net)
-    components.html(html, height=620, scrolling=False)
+    pick, view_col = st.columns([1, 1.4], gap="large")
+    with pick:
+        ingredient = st.selectbox(
+            "Ingredient", trees, key="map_ing", format_func=_pretty,
+            label_visibility="collapsed",
+            index=trees.index("broccoli") if "broccoli" in trees else 0)
+    with view_col:
+        view = pill_radio("View", ["Cook paths", "Scout ideas"], "map_view")
+    if view == "Scout ideas":
+        _md('<div class="hint">Generated hypotheses for each transformed state. '
+            'Diamonds have three lines of compatibility evidence; dots are '
+            'thinner. Untested — see Scout before cooking any of them.</div>')
+        net = build_scout_graph(CONN, ingredient)
+    else:
+        _md('<div class="hint">How it can be cooked, what each state becomes, '
+            'what pairs with it and where it goes. Drag nodes to explore.</div>')
+        net = build_ingredient_graph(CONN, ingredient)
+    components.html(graph_to_html(net), height=620, scrolling=False)
 
 
 def tab_journeys() -> None:
@@ -203,6 +198,7 @@ def tab_journeys() -> None:
     with col:
         ingredient = st.selectbox(
             "Ingredient", trees, key="journey_ing", label_visibility="collapsed",
+            format_func=_pretty,
             index=trees.index("broccoli") if "broccoli" in trees else 0)
         journeys = query.ingredient_journeys(CONN, ingredient)
         if not journeys:
@@ -227,7 +223,7 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
     with subject:
         _md('<div class="eyebrow">Component — an after-state</div>')
         comp = st.selectbox("Component", comps, index=comps.index(default),
-                            label_visibility="collapsed",
+                            label_visibility="collapsed", format_func=_pretty,
                             key="component_explorer_comp")
     d = query.component_card(CONN, comp)
     if not d:
@@ -235,7 +231,7 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
             st.write("No component named", comp)
         return
     producers = d.get("produced_by") or []
-    prod_str = ", ".join(f"{p['ingredient']} + {p['technique']}" for p in producers) or "(no producing transformation)"
+    prod_str = ", ".join(f"{_pretty(p['ingredient'])} + {_pretty(p['technique'])}" for p in producers) or "(no producing transformation)"
     tags = d.get("tags") or []
     tag_chips = " ".join(chip(t["value"], tag_class(t.get("family", ""))) for t in tags)
     risks = d.get("risks") or []
@@ -301,6 +297,7 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
                 unsafe_allow_html=True)
     profiles = query.profiles_list(CONN)
     picked = st.multiselect("Plate items", profiles, key="plate_items",
+                            format_func=_pretty,
                             default=["mashed_potatoes", "chickpea_patty"])
     if not picked:
         st.markdown('<div class="hint">Pick one or more plate items to see what the plate '
@@ -396,9 +393,6 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
 
     export_buttons(export.render_plate_markdown(r), "plate.md")
 
-    with st.expander("Debug — raw plate_balance_detail", expanded=False):
-        st.json(r)
-
 
 def tab_filler_profiles() -> None:
     ings = query.ingredients_list(CONN)
@@ -408,7 +402,7 @@ def tab_filler_profiles() -> None:
     with subject:
         _md('<div class="eyebrow">Filler</div>')
         name = st.selectbox("Filler", ings, index=ings.index(default),
-                            label_visibility="collapsed",
+                            label_visibility="collapsed", format_func=_pretty,
                             key="filler_profile_name")
         d = query.filler_profile_detail(CONN, name)
         if not d["found"]:
@@ -421,7 +415,7 @@ def tab_filler_profiles() -> None:
         _md(subject_column_html(name, "filler", note=kind_label))
         if d["kind"] in ("full", "both"):
             _md('<div class="subject-block"></div>')
-            st.button(f"See {name}'s branches", key="filler_to_explorer",
+            st.button(f"See {_pretty(name)}'s branches", key="filler_to_explorer",
                       on_click=_goto_explorer, args=(name,))
 
     with answer:
@@ -438,7 +432,7 @@ def tab_filler_profiles() -> None:
         if d["pairings"]:
             rows = "".join(
                 f'<tr><td>{_esc(p["role"])}</td>'
-                f'<td>{_esc((p["target"] + " " + p["technique"]) if p.get("target") else "(general)")}</td>'
+                f'<td>{_esc(_pretty(p["target"] + " " + p["technique"]) if p.get("target") else "(general)")}</td>'
                 f'<td>{conf_pill(p["conf"])}</td></tr>'
                 for p in d["pairings"][:8])
             _md('<table class="table"><thead><tr><th>Role</th>'
@@ -450,6 +444,7 @@ def tab_filler_profiles() -> None:
 
 def _goto_explorer(name: str) -> None:
     st.session_state["explorer_ing"] = name
+    st.session_state["active_section"] = "Cook"
     st.session_state["active_tab"] = "Ingredient Explorer"
 
 
@@ -476,7 +471,7 @@ def tab_scout(available_items: list[str] | None = None) -> None:
         _md('<div class="eyebrow">Transformed state</div>')
         comp = st.selectbox("Transformed state", state_comps,
                             index=state_comps.index(default),
-                            label_visibility="collapsed",
+                            label_visibility="collapsed", format_func=_pretty,
                             key="tab_scout_component_select")
 
     hypotheses = query.generate_scout_hypotheses(CONN, comp)
@@ -565,48 +560,61 @@ def tab_scout(available_items: list[str] | None = None) -> None:
                         _md(f'<div class="hint">{_esc(r["rejection_reason"])}</div>')
 
 
+# The Circle and Cards views of Taste Circle build ONE dish. Both read and
+# write the tcm_* state; Cards' per-dimension pickers are only an input.
+
+def _tcm_init(state_comps: list[str]) -> None:
+    defaults = {"tcm_locked": set, "tcm_selections": dict}
+    for key, factory in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = factory()
+    for key in ("tcm_expanded", "tcm_last_click"):
+        st.session_state.setdefault(key, None)
+    st.session_state.setdefault("tcm_page", 0)
+    if st.session_state.get("tcm_component") not in state_comps:
+        st.session_state.tcm_component = (
+            "roasted_broccoli_component"
+            if "roasted_broccoli_component" in state_comps else state_comps[0])
+
+
 def _tc_lock(dim: str) -> None:
     """Selecting a filler locks its dimension — no separate Lock click."""
     choice = st.session_state.get(f"taste_circle_{dim}")
     if choice and choice != "(none)":
-        st.session_state.taste_circle_locked.add(dim)
-        st.session_state.taste_circle_selections[dim] = choice
+        st.session_state.tcm_locked.add(dim)
+        st.session_state.tcm_selections[dim] = choice
 
 
 def _tc_unlock(dim: str) -> None:
-    st.session_state.taste_circle_locked.discard(dim)
-    st.session_state.taste_circle_selections.pop(dim, None)
+    st.session_state.tcm_locked.discard(dim)
+    st.session_state.tcm_selections.pop(dim, None)
     st.session_state[f"taste_circle_{dim}"] = "(none)"
 
 
-def _tc_reset() -> None:
-    for dim in list(st.session_state.taste_circle_locked):
-        st.session_state[f"taste_circle_{dim}"] = "(none)"
-    st.session_state.taste_circle_locked.clear()
-    st.session_state.taste_circle_selections.clear()
+def _tc_component_changed() -> None:
+    st.session_state.tcm_component = st.session_state.taste_circle_component
+    _tcm_reset_cb()
 
 
-def _tc_surprise(component: str) -> None:
-    locked = st.session_state.taste_circle_locked
-    selections = st.session_state.taste_circle_selections
-    pool = query.taste_circle_fillers(CONN, component, locked)
-    for dim, filler in random_dish_selections(pool, selections).items():
-        locked.add(dim)
-        selections[dim] = filler
+def tab_taste_circle(available_items: list[str] | None = None) -> None:
+    """Taste Circle — one dish, two ways to build it.
+
+    Circle is the click-driven map; Cards is the same dish as a grid of
+    eleven dimension cards with a picker each. They used to be two tabs with
+    two separate dishes, so a filler chosen in one was missing from the other.
+    """
+    view = pill_radio("View", ["Circle", "Cards"], "tc_view")
+    if view == "Cards":
+        _taste_circle_cards()
+    else:
+        tab_taste_circle_map(available_items)
 
 
-def tab_taste_circle() -> None:
-    """Taste Circle — the same builder as the map, read as a card grid.
-
-    Eleven dimension cards in three columns; colour encodes state exactly as
+def _taste_circle_cards() -> None:
+    """Eleven dimension cards in three columns; colour encodes state exactly as
     it does on the circle (provided / locked / open / no fillers yet). The
     right rail carries the dish and the two actions.
     """
-    if "taste_circle_locked" not in st.session_state:
-        st.session_state.taste_circle_locked = set()
-    if "taste_circle_selections" not in st.session_state:
-        st.session_state.taste_circle_selections = {}
-
     comps = query.components_list(CONN)
     state_comps = [c for c in comps
                    if query.component_state_profile(CONN, c) is not None]
@@ -615,19 +623,22 @@ def tab_taste_circle() -> None:
             'Run <code>foodprep build</code> first.</div>')
         return
 
-    default = ("roasted_broccoli_component"
-               if "roasted_broccoli_component" in state_comps else state_comps[0])
+    _tcm_init(state_comps)
+    # Mirror the shared component into this view's picker before it is drawn,
+    # so the Circle's arrows and this selectbox always agree.
+    st.session_state.taste_circle_component = st.session_state.tcm_component
     grid, rail = st.columns([2.6, 1], gap="large")
 
     with grid:
         component = st.selectbox(
-            "Component", state_comps, index=state_comps.index(default),
-            label_visibility="collapsed", key="taste_circle_component")
+            "Component", state_comps, format_func=_pretty,
+            label_visibility="collapsed", key="taste_circle_component",
+            on_change=_tc_component_changed)
 
         profile = query.component_state_profile(CONN, component)
         provided = set((profile or {}).get("flavour_tags") or [])
-        locked: set[str] = st.session_state.taste_circle_locked
-        selections: dict[str, str] = st.session_state.taste_circle_selections
+        locked: set[str] = st.session_state.tcm_locked
+        selections: dict[str, str] = st.session_state.tcm_selections
         fillers_by_dim = query.taste_circle_fillers(CONN, component, locked)
 
         pretty = component.replace("_component", "").replace("_", " ")
@@ -657,6 +668,11 @@ def tab_taste_circle() -> None:
                     options = [f["filler"] for f in fillers_by_dim[dim_key]
                                if f["filler"] not in set(selections.values())]
                     preview = " · ".join(o.replace("_", " ") for o in options[:3])
+                    # A dimension unlocked from the Circle view leaves this
+                    # picker holding its old choice; clear it before drawing.
+                    picker = f"taste_circle_{dim_key}"
+                    if st.session_state.get(picker, "(none)") != "(none)":
+                        st.session_state[picker] = "(none)"
                     _md(f'<div class="dim-card">'
                         f'<div class="card-kicker">{len(options)} '
                         f'option{"" if len(options) == 1 else "s"}</div>'
@@ -664,7 +680,7 @@ def tab_taste_circle() -> None:
                         f'<div class="card-body">{_esc(preview)}</div></div>')
                     st.selectbox(
                         f"Choose for {dim_name}", ["(none)"] + options,
-                        key=f"taste_circle_{dim_key}",
+                        key=f"taste_circle_{dim_key}", format_func=_pretty,
                         label_visibility="collapsed",
                         on_change=_tc_lock, args=(dim_key,))
                 else:
@@ -692,9 +708,9 @@ def tab_taste_circle() -> None:
         act_random, act_reset = st.columns([1.4, 1])
         with act_random:
             st.button("Surprise me", key="tc_random", type="primary",
-                      on_click=_tc_surprise, args=(component,))
+                      on_click=_tcm_surprise, args=(component,))
         with act_reset:
-            st.button("Reset", key="tc_reset", on_click=_tc_reset)
+            st.button("Reset", key="tc_reset", on_click=_tcm_reset_cb)
 
         if selections:
             _md('<div class="rail-card"><div class="card-kicker">Dish name</div>'
@@ -730,28 +746,14 @@ TCM_MORE = "__more"
 
 
 def tab_taste_circle_map(available_items: list[str] | None = None) -> None:
-    """Taste Circle Map tab — click-driven circular flavour builder.
+    """Taste Circle, Circle view — click-driven circular flavour builder.
 
     The interaction happens ON the circle (custom component): click a
     dimension to fan out its fillers, click a filler node to lock it in,
     click a locked dimension to change it, click blank canvas to close.
     The right rail is a read-out, never a picker — that distinction is what
-    keeps this tab different from Taste Circle.
+    keeps this view different from Cards.
     """
-    # Session state
-    if "tcm_locked" not in st.session_state:
-        st.session_state.tcm_locked = set()
-    if "tcm_selections" not in st.session_state:
-        st.session_state.tcm_selections = {}
-    if "tcm_expanded" not in st.session_state:
-        st.session_state.tcm_expanded = None
-    if "tcm_last_click" not in st.session_state:
-        st.session_state.tcm_last_click = None
-    if "tcm_component" not in st.session_state:
-        st.session_state.tcm_component = None
-    if "tcm_page" not in st.session_state:
-        st.session_state.tcm_page = 0
-
     # Component list (only those that can anchor a taste circle)
     comps = query.components_list(CONN)
     state_comps = []
@@ -775,12 +777,7 @@ def tab_taste_circle_map(available_items: list[str] | None = None) -> None:
         # Swallow the last graph click so it isn't re-processed afterwards.
         st.session_state.tcm_last_click = st.session_state.get("tcm_graph")
 
-    if st.session_state.tcm_component not in state_comps:
-        st.session_state.tcm_component = (
-            "roasted_broccoli_component"
-            if "roasted_broccoli_component" in state_comps
-            else state_comps[0]
-        )
+    _tcm_init(state_comps)
 
     on_hand = set(available_items or [])
     canvas, rail = st.columns([2.6, 1], gap="large")
@@ -799,7 +796,7 @@ def tab_taste_circle_map(available_items: list[str] | None = None) -> None:
                 idx = (idx + 1) % len(state_comps)
 
         component = state_comps[idx]
-        pretty = component.replace("_component", "").replace("_", " ")
+        pretty = _pretty(component)
         name_slot.markdown(
             f'<div class="tcm-component-name">{pretty}'
             f'<span class="tcm-component-pos">{idx + 1} / {len(state_comps)}</span>'
@@ -971,23 +968,30 @@ def _tcm_surprise(component: str) -> None:
     st.session_state.tcm_page = 0
 
 
-#: Tab label -> renderer. Order is the handoff's and is unchanged. Renderers
-#: taking the availability list are called with it; the rest take nothing.
+#: Tab label -> renderer. Renderers taking the availability list are called
+#: with it; the rest take nothing.
 TABS: dict[str, Any] = {
     "Ingredient Explorer": tab_ingredient_explorer,
-    "Map": tab_map,
-    "Scout Map": tab_scout_map,
-    "Journeys": tab_journeys,
     "Component Explorer": tab_component_explorer,
     "Plate Balance": tab_plate_balance,
+    "Taste Circle": tab_taste_circle,
+    "Map": tab_map,
+    "Journeys": tab_journeys,
     "Filler Profiles": tab_filler_profiles,
     "Scout": tab_scout,
-    "Taste Circle": tab_taste_circle,
-    "Taste Circle Map": tab_taste_circle_map,
+}
+#: What a cook is trying to do, then where. Cook answers "what do I make",
+#: Explore is reference, Experiment is untested ideas — kept apart on purpose
+#: so a Scout hypothesis never sits next to a Cook suggestion.
+SECTIONS: dict[str, list[str]] = {
+    "Cook": ["Ingredient Explorer", "Component Explorer", "Plate Balance",
+             "Taste Circle"],
+    "Explore": ["Map", "Journeys", "Filler Profiles"],
+    "Experiment": ["Scout"],
 }
 _TABS_WITH_AVAILABLE = {
     "Ingredient Explorer", "Component Explorer", "Plate Balance",
-    "Taste Circle Map", "Scout",
+    "Taste Circle", "Scout",
 }
 
 
@@ -999,8 +1003,9 @@ _TABS_WITH_AVAILABLE = {
 _STICKY_WIDGETS = frozenset({
     "active_tab",
     "available_items",
+    "active_section",
     "explorer_ing", "explorer_mode", "explorer_tech",
-    "map_ing", "scout_map_ing", "journey_ing",
+    "map_ing", "map_view", "journey_ing", "tc_view",
     "component_explorer_comp",
     "plate_items",
     "filler_profile_name",
@@ -1030,19 +1035,49 @@ def _persist_widget_state() -> None:
         st.session_state[key] = st.session_state[key]
 
 
-def tab_rail() -> str:
-    """The ten tabs as a wrapping row of pills; returns the active label.
+def _section_changed() -> None:
+    """Land on the section's first tab, not on a stale tab from another one."""
+    tabs = SECTIONS[st.session_state.active_section]
+    if st.session_state.get("active_tab") not in tabs:
+        st.session_state.active_tab = tabs[0]
 
-    A radio, not ``st.pills``: pills cannot be deselected back to a valid
+
+def tab_rail() -> str:
+    """Section pills, then the section's tabs; returns the active tab label.
+
+    Radios, not ``st.pills``: pills cannot be deselected back to a valid
     state, and AppTest cannot serialize a single-select pill group (it walks
     the value string character by character), which would cost us the smoke
-    tests. CSS turns the radio into the handoff's pill row.
+    tests. CSS turns the radios into the handoff's pill rows.
     """
-    with st.container(key="tab_rail_pills"):
-        active = st.radio(
-            "Section", list(TABS), horizontal=True,
-            label_visibility="collapsed", key="active_tab",
-        )
+    # A tab saved from an older layout (e.g. "Scout Map") or set by a
+    # jump button decides the section, and must exist before widgets draw.
+    if st.session_state.get("active_tab") not in TABS:
+        st.session_state.pop("active_tab", None)
+    section = st.session_state.get("active_section")
+    tab = st.session_state.get("active_tab")
+    if tab and (section not in SECTIONS or tab not in SECTIONS[section]):
+        st.session_state.active_section = next(
+            name for name, tabs in SECTIONS.items() if tab in tabs)
+    elif section not in SECTIONS:
+        st.session_state.active_section = "Cook"
+
+    with st.container(key="section_rail_pills"):
+        section = st.radio(
+            "Section", list(SECTIONS), horizontal=True,
+            label_visibility="collapsed", key="active_section",
+            on_change=_section_changed)
+    tabs = SECTIONS[section]
+    if st.session_state.get("active_tab") not in tabs:
+        st.session_state.active_tab = tabs[0]
+    if len(tabs) > 1:
+        with st.container(key="tab_rail_pills"):
+            active = st.radio(
+                "Tab", tabs, horizontal=True,
+                label_visibility="collapsed", key="active_tab",
+            )
+    else:
+        active = tabs[0]
     _md('<div class="tab-rule"></div>')
     return active
 
@@ -1061,10 +1096,16 @@ def main() -> None:
                     unsafe_allow_html=True)
     _persist_widget_state()
     topbar()
-    available_items = available_selector()
+    # The strip sits above the rail but only belongs on tabs that use it, and
+    # which tab is active is known only once the rail has run — so reserve
+    # its slot first and fill it afterwards. The selection itself is sticky,
+    # so it survives a visit to a tab that hides the strip.
+    strip = st.container()
     active = tab_rail()
     render = TABS[active]
     if active in _TABS_WITH_AVAILABLE:
+        with strip:
+            available_items = available_selector()
         render(available_items)
     else:
         render()

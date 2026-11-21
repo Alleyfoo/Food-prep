@@ -15,8 +15,18 @@ def _esc(s) -> str:
     return html.escape(str(s) if s is not None else "")
 
 
+def _readable(value) -> str:
+    """Ids are for the database; chips are for cooks: mild_base -> mild base."""
+    text = str(value) if value is not None else ""
+    # Only the _component suffix goes: "_base" is also a role (mild_base),
+    # and "tomato sauce base" reads fine.
+    if text.endswith("_component"):
+        text = text[: -len("_component")]
+    return text.replace("_", " ")
+
+
 def chip(value, cls: str = "") -> str:
-    return f'<span class="chip {cls}">{_esc(value)}</span>'
+    return f'<span class="chip {cls}">{_esc(_readable(value))}</span>'
 
 
 def chips(values, cls: str = "") -> str:
@@ -144,7 +154,7 @@ def branch_card_html(d: dict, with_debug: bool = False,
         else:
             chip_html = chip("(no curated filler)", "muted")
         try_groups.append(
-            f'<div class="chip-group"><span class="gl">{_esc(role)}</span>'
+            f'<div class="chip-group"><span class="gl">{_esc(_readable(role))}</span>'
             + chip_html + "</div>"
         )
     try_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
@@ -157,8 +167,8 @@ def branch_card_html(d: dict, with_debug: bool = False,
 
     parts = [f'<div class="card {card_cls}">']
     parts.append(
-        f'<div class="card-head"><span class="card-tech">{_esc(d["technique"])}</span>'
-        f'<span class="card-comp">{_esc(d.get("component") or "")}</span>'
+        f'<div class="card-head"><span class="card-tech">{_esc(_readable(d["technique"]))}</span>'
+        f'<span class="card-comp">{_esc(_readable(d.get("component") or ""))}</span>'
         f'{conf_pill(conf)}</div>'
     )
     parts.append(shift)
