@@ -544,8 +544,21 @@ def tab_scout(available_items: list[str] | None = None) -> None:
             # the UI does not have a write path into the ontology.
             _md('<div class="hint">Tastings are recorded through the CLI so the '
                 'append-only record stays the single source of truth:</div>')
-            st.code(f"foodprep record-tasting {comp} {h['candidate']}",
-                    language="bash")
+            # Every required flag is in the template: the bare two-argument
+            # form this used to print fails if pasted as-is.
+            ratio = (h.get("protocol") or {}).get("starting_ratio") or "not measured"
+            st.code(
+                f"foodprep record-tasting {comp} {h['candidate']} \\\n"
+                f"  --verdict works \\\n"
+                f"  --preparation \"what you did\" \\\n"
+                f"  --ratio \"{ratio}\" \\\n"
+                f"  --temperature \"warm\" \\\n"
+                f"  --observations \"what you tasted\" \\\n"
+                f"  --safety-confirmed",
+                language="bash")
+            _md('<div class="hint">Verdicts: works · promising · '
+                'works_only_in_this_form · needs_adjustment · dominated · '
+                'clashes · texturally_wrong · inconclusive.</div>')
         _md(trial_history_html(h))
 
         if rejected:

@@ -1,8 +1,11 @@
 """Capture screenshots of each Streamlit tab for the README.
 
 Boots `streamlit run app.py` headless, opens it in a headless browser via
-Playwright, clicks through the five tabs, and saves a full-page PNG of each
-into docs/screenshots/. Reproducible:  python scripts/capture_screenshots.py
+Playwright, picks each section and tab from the pill rails, and saves a PNG of
+each into docs/screenshots/. Reproducible:  python scripts/capture_screenshots.py
+
+The rails are styled radios, not ``role="tab"`` elements (they stopped being
+tabs when the pill rail replaced ``st.tabs``), so they are clicked by label.
 
 Requires Playwright + a Chromium or system Google Chrome. Falls back to the
 system Chrome (channel="chrome") if a Playwright-managed chromium is missing.
@@ -11,6 +14,7 @@ system Chrome (channel="chrome") if a Playwright-managed chromium is missing.
 from __future__ import annotations
 
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -22,13 +26,22 @@ OUT = ROOT / "docs" / "screenshots"
 PORT = 8521
 URL = f"http://localhost:{PORT}"
 
-TABS = [
-    ("Ingredient Explorer", "tab1_ingredient_explorer.png"),
-    ("Component Explorer", "tab2_component_explorer.png"),
-    ("Plate Balance", "tab3_plate_balance.png"),
-    ("Filler Profiles", "tab4_filler_profiles.png"),
-    ("Scout", "tab5_scout.png"),
+#: (section, tab, file). A single-tab section has no tab rail to click.
+SHOTS = [
+    ("Cook", "Ingredient Explorer", "cook_ingredient_explorer.png"),
+    ("Cook", "Component Explorer", "cook_component_explorer.png"),
+    ("Cook", "Plate Balance", "cook_plate_balance.png"),
+    ("Cook", "Taste Circle", "cook_taste_circle.png"),
+    ("Explore", "Map", "explore_map.png"),
+    ("Explore", "Journeys", "explore_journeys.png"),
+    ("Experiment", "Scout", "experiment_scout.png"),
 ]
+
+
+def _pill(page, rail: str, label: str):
+    """The pill with exactly this label in one rail (Explorer != Ingredient Explorer)."""
+    return page.locator(f".st-key-{rail} label").filter(
+        has_text=re.compile(rf"^\s*{re.escape(label)}\s*$"))
 
 
 def _wait_for_port(host: str, port: int, timeout: float = 30.0) -> bool:
@@ -73,22 +86,22 @@ def main() -> int:
             if browser is None:
                 return 2
             page = browser.new_page(viewport={"width": 1320, "height": 1000},
-                                    device_scale_factor=2)
+                                    device_scale_factor=1.5)
             page.goto(URL, wait_until="networkidle", timeout=30000)
             # wait for the topbar to render
             page.wait_for_selector("text=Ingredient Foundry", timeout=20000)
             time.sleep(1.5)
 
-            for title, fname in TABS:
-                page.get_by_role("tab", name=title).click()
-                # wait for that tab's section title to appear, then settle
-                try:
-                    page.wait_for_selector(f"text={title}", timeout=10000)
-                except Exception:
-                    pass
+            for section, tab, fname in SHOTS:
+                _pill(page, "section_rail_pills", section).click()
                 time.sleep(2.0)
+                tab_pill = _pill(page, "tab_rail_pills", tab)
+                if tab_pill.count():
+                    tab_pill.click()
+                # graphs and the taste circle draw after the script finishes
+                time.sleep(4.0)
                 out_path = OUT / fname
-                page.screenshot(path=str(out_path), full_page=True)
+                page.screenshot(path=str(out_path))
                 print(f"  saved {out_path.relative_to(ROOT)}")
             browser.close()
     finally:

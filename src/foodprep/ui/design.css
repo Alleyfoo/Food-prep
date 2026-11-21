@@ -55,6 +55,9 @@
 /* Two-level navigation: the section rail is the louder of the two, and the
    tab rail under it marks its choice with a tint rather than a fill, so the
    two never read as one long row of equal pills. */
+/* Breathing room above the rail when the availability strip is hidden
+   (reference tabs); the strip's own margin covers it otherwise. */
+.st-key-section_rail_pills { margin-top: var(--space-4); }
 .st-key-section_rail_pills [role="radiogroup"] > label p {
   font-size: 16px !important; font-weight: 600 !important;
 }
