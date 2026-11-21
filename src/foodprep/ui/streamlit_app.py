@@ -161,7 +161,9 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
             if card:
                 part = (query.available_filter(CONN, card["transformation_id"], avail)
                         if avail else None)
-                _md(branch_card_html(card, available=part, lead=True))
+                routes = (query.flavour_routes_for_component(
+                    CONN, card["component"], available_items=avail) if avail else None)
+                _md(branch_card_html(card, available=part, lead=True, routes=routes))
                 export_buttons(export.render_branch_markdown(card, part), "branch.md")
             else:
                 st.write(f"No transformation for {ingredient}/{tech}.")
@@ -174,8 +176,10 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
             for i, c in enumerate(shown):
                 part = (query.available_filter(CONN, c["transformation_id"], avail)
                         if avail else None)
+                routes = (query.flavour_routes_for_component(
+                    CONN, c["component"], available_items=avail) if avail else None)
                 # the top-ranked branch carries the accent border
-                _md(branch_card_html(c, available=part, lead=(i == 0)))
+                _md(branch_card_html(c, available=part, lead=(i == 0), routes=routes))
                 md_parts.append(export.render_branch_markdown(c, part))
             export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
 
@@ -238,7 +242,7 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
     subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
 
     with subject:
-        _md('<div class="eyebrow">Component — an after-state</div>')
+        _md('<div class="eyebrow">Something you already cooked</div>')
         _seed("component_explorer_comp", comps, default)
         comp = st.selectbox("Component", comps,
                             label_visibility="collapsed", format_func=_pretty,
@@ -329,13 +333,14 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
 
     gap_n = len(r["target_gap"])
     more_n = len(r["flagged_more"])
-    h_cls = "k-warn k-heavy" if r["leans_heavy"] else "k-ok"
+    h_cls = ("k-warn k-heavy" if r["leans_heavy"]
+             else "k-warn" if r["avoid_more_richness"] else "k-ok")
     _md(f"""
     <div class="kpis">
       <div class="kpi"><div class="lbl">Items</div><div class="val">{len(r['items'])}</div><div class="foot">on the plate</div></div>
       <div class="kpi {'k-risk' if gap_n else ''}"><div class="lbl">Hard gaps</div><div class="val">{gap_n}</div><div class="foot">target roles missing</div></div>
       <div class="kpi k-warn"><div class="lbl">May want more</div><div class="val">{more_n}</div><div class="foot">soft flags</div></div>
-      <div class="kpi {h_cls}"><div class="lbl">Heaviness</div><div class="val">{r['plate_heaviness'] if r['plate_heaviness'] is not None else '—'}</div><div class="foot">{r['heaviness_label'] or 'unknown'}</div></div>
+      <div class="kpi {h_cls}"><div class="lbl">Heaviness</div><div class="val">{r['heaviness_avg'] if r['heaviness_avg'] is not None else '—'}<span class="kpi-scale"> / 5</span></div><div class="foot">{r['heaviness_label'] or 'unknown'} · average per item</div></div>
     </div>
     """)
 
@@ -396,7 +401,7 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
     if r["leans_dry"]:
         warn_lines.append('<div class="filler-line">leans dry — favour sauce / hydration / cream.</div>')
     avoid = []
-    if r["leans_heavy"]:
+    if r["avoid_more_richness"]:
         avoid.append("more fat / cream")
     if r["leans_dry"]:
         avoid.append("more dry items")
@@ -472,6 +477,10 @@ def _scout_step(n: int) -> None:
     st.session_state.scout_index = st.session_state.get("scout_index", 0) + n
 
 
+def _scout_goto(index: int) -> None:
+    st.session_state.scout_index = index
+
+
 def tab_scout(available_items: list[str] | None = None) -> None:
     """Scout — one hypothesis at a time, with its two claims kept separate."""
     on_hand = set(available_items or [])
@@ -514,26 +523,20 @@ def tab_scout(available_items: list[str] | None = None) -> None:
         if tags:
             _md(f'<div class="chips">'
                 f'{chips([t.replace("_", " ") for t in tags], "flavour")}</div>')
-        # One candidate can arise from several analogy rules, so the same
-        # name would otherwise be listed two or three times.
-        seen: set[str] = {current["candidate"]} if current else set()
-        others: list[str] = []
-        for h in candidates:
-            if h["candidate"] not in seen:
-                seen.add(h["candidate"])
-                others.append(h["candidate"])
-        shown_others, extra = others[:6], max(0, len(others) - 6)
-        if shown_others or rejected:
+        # Each other candidate is a button straight to its hypothesis; a plain
+        # list meant pressing "Next" blind (usability pass, finding 7).
+        others = [(i, h["candidate"]) for i, h in enumerate(candidates)
+                  if i != idx]
+        if others or rejected:
             _md('<div class="tcm-rule"></div>'
-                '<div class="eyebrow">Other candidates</div>'
-                + "".join(f'<div class="subject-note">'
-                          f'{_esc(o.replace("_", " "))}</div>'
-                          for o in shown_others)
-                + (f'<div class="subject-note">+ {extra} more</div>'
-                   if extra else "")
-                + (f'<div class="subject-note" style="color:var(--neutral-700)">'
-                   f'{len(rejected)} rejected, with reasons</div>'
-                   if rejected else ""))
+                '<div class="eyebrow">Other candidates</div>')
+            with st.container(key="scout_others"):
+                for i, name in others:
+                    st.button(_pretty(name), key=f"scout_jump_{i}",
+                              type="tertiary", on_click=_scout_goto, args=(i,))
+            if rejected:
+                _md(f'<div class="subject-note" style="color:var(--neutral-700)">'
+                    f'{len(rejected)} rejected, with reasons</div>')
 
     with answer:
         _md('<div class="disclaimer">Hypotheses come from analogy rules applied '
@@ -554,7 +557,8 @@ def tab_scout(available_items: list[str] | None = None) -> None:
 
         act_record, act_next, _sp = st.columns([1.3, 1.2, 2])
         with act_record:
-            st.button("Record a tasting", key="scout_record", type="primary")
+            # It shows how; it does not record (usability pass, finding 8).
+            st.button("How to record a tasting", key="scout_record")
         with act_next:
             st.button("Next hypothesis", key="scout_next",
                       on_click=_scout_step, args=(1,),
@@ -563,18 +567,17 @@ def tab_scout(available_items: list[str] | None = None) -> None:
             # Tastings are an append-only record written through the CLI;
             # the UI does not have a write path into the ontology.
             _md('<div class="hint">Tastings are recorded through the CLI so the '
-                'append-only record stays the single source of truth:</div>')
-            # Every required flag is in the template: the bare two-argument
-            # form this used to print fails if pasted as-is.
+                'append-only record stays the single source of truth. Run this '
+                'in a terminal in the project folder, after changing the '
+                'quoted parts to what actually happened:</div>')
+            # One line: `\` continuations only work in bash, and this user's
+            # Windows terminal is PowerShell (usability pass, finding 3).
             ratio = (h.get("protocol") or {}).get("starting_ratio") or "not measured"
             st.code(
-                f"foodprep record-tasting {comp} {h['candidate']} \\\n"
-                f"  --verdict works \\\n"
-                f"  --preparation \"what you did\" \\\n"
-                f"  --ratio \"{ratio}\" \\\n"
-                f"  --temperature \"warm\" \\\n"
-                f"  --observations \"what you tasted\" \\\n"
-                f"  --safety-confirmed",
+                f"foodprep record-tasting {comp} {h['candidate']} "
+                f"--verdict works --preparation \"what you did\" "
+                f"--ratio \"{ratio}\" --temperature warm "
+                f"--observations \"what you tasted\" --safety-confirmed",
                 language="bash")
             _md('<div class="hint">Verdicts: works · promising · '
                 'works_only_in_this_form · needs_adjustment · dominated · '

@@ -1519,6 +1519,11 @@ def plate_balance_detail(conn: sqlite3.Connection, text: str,
         "heaviness_label": _heaviness_label(h_avg) if h_avg is not None else None,
         "dryness_label": _dryness_label(d_avg) if d_avg is not None else None,
         "leans_heavy": bool(h_avg is not None and h_avg >= 4),
+        # Average on the 0-5 scale. A "rich" plate (>= 3) already should not
+        # get more fat or cream; waiting for "heavy" (>= 4) left the classic
+        # stodgy plate without that advice (usability pass 2026-11-21).
+        "heaviness_avg": round(h_avg, 1) if h_avg is not None else None,
+        "avoid_more_richness": bool(h_avg is not None and h_avg >= 3),
         "leans_dry": bool(d_avg is not None and d_avg >= 3.5),
         "suggested_fillers": suggested,
         "no_profile": no_profile,
@@ -1587,7 +1592,7 @@ def plate_balance(conn: sqlite3.Connection, text: str,
     lines.append("  provided roles: " + (", ".join(prov_disp) if prov_disp else "(none)"))
 
     if r["plate_heaviness"] is not None:
-        lines.append(f"  plate heaviness: {r['plate_heaviness']}  ({r['heaviness_label']})")
+        lines.append(f"  plate heaviness: {r['heaviness_avg']} / 5 per item  ({r['heaviness_label']})")
     else:
         lines.append("  plate heaviness: unknown (no profiled items)")
     if r["plate_dryness"] is not None:
@@ -1597,6 +1602,8 @@ def plate_balance(conn: sqlite3.Connection, text: str,
 
     if r["leans_heavy"]:
         lines.append("  leans heavy — favor acid/herb/crunch; avoid more fat/cream.")
+    elif r["avoid_more_richness"]:
+        lines.append("  already rich — avoid more fat/cream.")
     if r["leans_dry"]:
         lines.append("  leans dry — favor sauce/hydration/cream.")
 

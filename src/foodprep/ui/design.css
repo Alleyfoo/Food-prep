@@ -100,6 +100,17 @@
 [data-testid="stBaseButton-primary"]:hover {
   background: var(--filler-800) !important; border-color: var(--filler-800) !important;
 }
+/* Scout's "other candidates": a list you can click, so it reads as a list
+   (the subject-note style it replaced), with a link affordance on hover. */
+.st-key-scout_others { gap: 0 !important; }
+.st-key-scout_others [data-testid="stBaseButton-tertiary"] {
+  font-family: var(--sans) !important; font-size: 16px !important;
+  color: var(--neutral-800) !important; padding: 2px 0 !important;
+  min-height: 0 !important; justify-content: flex-start;
+}
+.st-key-scout_others [data-testid="stBaseButton-tertiary"]:hover {
+  color: var(--primary) !important; text-decoration: underline;
+}
 
 :root {
   /* ---------------------------------------------------------------
@@ -431,6 +442,10 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   color: var(--ink); margin-top: var(--space-2);
 }
 .kpi .foot { font-size: 14px; color: var(--neutral-700); margin-top: var(--space-2); }
+/* the scale beside a number ("/ 5") is body type: Caprasimo never goes small */
+.kpi .val .kpi-scale {
+  font-family: var(--sans); font-size: 16px; color: var(--neutral-700);
+}
 .kpi.k-ok .val { color: var(--positive); }
 .kpi.k-warn .val { color: var(--primary); }
 /* a live hard gap is the one number on this row that must be answered */

@@ -467,7 +467,8 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
              cp.get("flavour", cp.get("flavour_tags")),
              cp.get("texture", cp.get("texture_tags")),
              cp.get("missing_risks"),
-             cp.get("heaviness_score"), cp.get("dryness_score"), cp.get("notes")),
+             _score(cp, "heaviness_score", cp["name"]),
+             _score(cp, "dryness_score", cp["name"]), cp.get("notes")),
         )
 
     default_ing = data.get("default_ingredient", "tomato")
@@ -541,8 +542,9 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                     comp_id, state_profile.get("provides"),
                     state_profile.get("flavour"), state_profile.get("texture"),
                     state_profile.get("missing_risks"),
-                    state_profile.get("heaviness_score"),
-                    state_profile.get("dryness_score"), state_profile.get("notes"),
+                    _score(state_profile, "heaviness_score", tr["output_component"]),
+                    _score(state_profile, "dryness_score", tr["output_component"]),
+                    state_profile.get("notes"),
                     form,
                 ),
             )
@@ -796,6 +798,17 @@ def _as_list(value) -> list[str]:
     if isinstance(value, str):
         return _split_list(value)
     return [str(v).strip() for v in value if str(v).strip()]
+
+
+def _score(record: dict, field: str, owner: str) -> int | None:
+    """A 0-5 subjective score, or None. Anything else is an authoring slip
+    (smashed potato once scored a 6 on heaviness and outweighed gratin)."""
+    value = record.get(field)
+    if value is None:
+        return None
+    if not isinstance(value, int) or not 0 <= value <= 5:
+        raise LoadError(f"{owner}: {field} must be an integer 0-5, got {value!r}")
+    return value
 
 
 def _serving_form(vocabulary, technique: str, override: str | None) -> str:

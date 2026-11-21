@@ -43,7 +43,7 @@ def conf_pill(conf: str, claim: str = "") -> str:
     confidence, a route's attestation, an analogy's inference strength.
     Without the word, "high" silently reads as "this tastes good".
     """
-    label = f"{claim} {conf}".strip() if claim else conf
+    label = f"{claim} {_readable(conf)}".strip() if claim else _readable(conf)
     return f'<span class="card-conf {conf}">{_esc(label)}</span>'
 
 
@@ -119,15 +119,45 @@ def available_partition_html(part: dict) -> str:
                     f'<div>{"".join(groups)}</div></div>')
     no_match = list(part.get("unknown_items") or []) + list(part.get("no_match_known") or [])
     if no_match:
-        rows.append(f'<div class="row"><span class="lbl">No match here</span>'
+        # "No match" read as "does not go with this"; it means nobody has
+        # recorded the pairing (usability pass 2026-11-21, finding 4).
+        rows.append(f'<div class="row"><span class="lbl">Not paired here yet</span>'
                     f'<div class="chips">{"".join(chip(n, "muted") for n in no_match)}</div></div>')
     return "".join(rows)
 
 
+def routes_with_what_you_have_html(routes: list[dict]) -> str:
+    """Routes from this state that use something on hand, as one card row.
+
+    The availability partition reads single-filler pairings only, so garlic
+    showed as "not paired" on broccoli while broccoli's own soy-and-garlic
+    route used it (usability pass 2026-11-21, finding 1).
+    """
+    lines = []
+    for r in routes:
+        have = [e["ingredient"] for e in r.get("available_elements") or []]
+        if not have:
+            continue
+        need = [e["ingredient"] for e in r.get("elements") or []
+                if e["ingredient"] not in have]
+        need_html = (f' <span class="none">· also needs '
+                     f'{_esc(", ".join(_readable(n) for n in need))}</span>'
+                     if need else "")
+        lines.append(
+            f'<div class="chip-group"><span class="gl have">{_esc(r["name"])}</span>'
+            + " ".join(chip(h, "have") for h in have) + need_html + "</div>")
+    if not lines:
+        return ""
+    return (f'<div class="row"><span class="lbl">Routes with what you have</span>'
+            f'<div>{"".join(lines)}</div></div>')
+
+
 def branch_card_html(d: dict, with_debug: bool = False,
                      available: dict | None = None,
-                     lead: bool = False) -> str:
-    """*lead* marks the top-ranked branch, which takes the accent border."""
+                     lead: bool = False,
+                     routes: list[dict] | None = None) -> str:
+    """*lead* marks the top-ranked branch, which takes the accent border.
+    *routes* (with availability) adds the routes that use what is on hand."""
     conf = d.get("confidence") or ""
     card_cls = "scout" if conf == "experimental" else ""
     if lead:
@@ -158,6 +188,14 @@ def branch_card_html(d: dict, with_debug: bool = False,
             + chip_html + "</div>"
         )
     try_html = "".join(try_groups) or '<span class="chip" style="color:var(--ink-5)">—</span>'
+    if available and routes:
+        # Something a route from this state uses is not "unpaired" here.
+        in_routes = {e["ingredient"] for r in routes
+                     for e in r.get("available_elements") or []}
+        available = dict(available)
+        for key in ("unknown_items", "no_match_known"):
+            available[key] = [n for n in available.get(key) or []
+                              if n not in in_routes]
     partition_html = available_partition_html(available) if available else ""
     uses = d.get("uses") or []
 
@@ -179,6 +217,8 @@ def branch_card_html(d: dict, with_debug: bool = False,
         parts.append(f'<div class="row"><span class="lbl">Missing</span><div class="chips">{miss_chips}</div></div>')
     if partition_html:
         parts.append(partition_html)
+        if routes:
+            parts.append(routes_with_what_you_have_html(routes))
     else:
         parts.append(f'<div class="row"><span class="lbl">Try</span><div>{try_html}</div></div>')
     if uses:
@@ -213,7 +253,9 @@ def hypothesis_card_html(h: dict, with_debug: bool = False,
     if h.get("explanation"):
         parts.append(f'<div class="hyp-explanation">{_esc(h["explanation"])}</div>')
     if h.get("known_pairing"):
-        parts.append(f'<div class="hyp-explanation">The analogy is '
+        # "The analogy is roasted broccoli…" on a cabbage card read like a
+        # mistake; it is the known pairing the rule reasons from.
+        parts.append(f'<div class="hyp-explanation">Reasoned from a known pairing: '
                      f'{_esc(str(h["known_pairing"]).replace("_", " "))}.</div>')
     if rules:
         parts.append(f'<div class="journey-chain">{"".join(rules)}</div>')
@@ -249,9 +291,11 @@ def claim_cards_html(h: dict) -> str:
                   f"the ingredients are, not whether the pairing is good.")
     elif nclass == "underpowered":
         n_title = "Too rare to tell"
-        n_body = ("Both sides are uncommon enough that the corpus would not be "
-                  "expected to show this pairing even if cooks make it. "
-                  "Finding none proves nothing.")
+        # Not "both sides are uncommon": with roasted cabbage only the
+        # candidate is rare. What holds is the joint expectation.
+        n_body = ("Together these are rare enough that the corpus would not "
+                  "be expected to hold even three recipes with both, even if "
+                  "cooks pair them. Finding none proves nothing.")
     elif nclass == "insufficient_coverage":
         n_title = "Cannot tell"
         corpus_name = novelty.get("corpus_name") or "the corpus"

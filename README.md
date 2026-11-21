@@ -207,6 +207,12 @@ pip install -e ".[dev,gui]"
 pytest -q            # ~300 tests, about 3 minutes
 ```
 
+Usability is checked with five task scripts in
+[docs/usability/task-scripts.md](docs/usability/task-scripts.md); run them with
+someone new to the app. Each is also automated in
+`tests/test_usability_tasks.py`, which proves the answer is reachable but not
+that a person can find it.
+
 `tests/test_app_navigation.py` drives the real app headlessly through
 Streamlit's AppTest; add a case there for any new tab. Any new input widget
 needs an explicit `key=` and an entry in `_STICKY_WIDGETS`, because only the

@@ -883,7 +883,7 @@ transformations:
       flavour: "nutty_toasted\numami"
       texture: "crisp\nsoft"
       missing_risks: "acid\nherb"
-      heaviness_score: 6
+      heaviness_score: 3
       dryness_score: 3
       notes: "Boiled, flattened, then roasted hard. The boil is what makes the inside fluffy and the crushed surface is what makes the edges crisp — neither is reachable by roasting a raw potato."
     missing_roles:
