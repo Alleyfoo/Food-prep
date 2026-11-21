@@ -2,7 +2,10 @@
 # Cloud runs `pip install -r requirements.txt` from the repo root, so this is
 # what makes `import foodprep` (src-layout) resolve on the container. Without
 # it the install is intermittent and the app crash-loops on startup.
-streamlit>=1.39
+# Pinned to the minor version the app and its AppTest suite run on. Widen
+# only after running `pytest` (tests/test_app_navigation.py drives the app)
+# against the newer release.
+streamlit>=1.50,<1.51
 PyYAML>=6.0
 pyvis>=0.3
 .

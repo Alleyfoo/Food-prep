@@ -13,6 +13,7 @@ rendered by ``ui/taste_circle_component/index.html``.
 
 from __future__ import annotations
 
+import json
 import math
 import random
 import sqlite3
@@ -47,12 +48,6 @@ _EDGE_COLORS = {
 }
 
 _FONT_FACE = "Figtree, system-ui, sans-serif"
-#: pyvis emits standalone HTML in an iframe, so the app's stylesheet — and its
-#: @import — does not reach it. Ship the font link with the graph itself.
-_FONT_LINK = (
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
-    'family=Figtree:wght@400;500;600&display=swap">'
-)
 
 _UNIVERSAL_FILLERS = {
     "sea_salt", "olive_oil", "lemon", "black_pepper",
@@ -656,12 +651,15 @@ def random_dish_selections(
     return picks
 
 
-def graph_to_html(net: Network) -> str:
-    """Serialize a pyvis Network to self-contained HTML.
+def graph_data(net: Network) -> dict[str, Any]:
+    """A pyvis Network as plain data for the vis-network component.
 
-    The graph renders inside its own iframe, out of reach of the app's
-    stylesheet, so the body font is linked into the document itself —
-    otherwise vis.js measures labels in a fallback face.
+    pyvis stays the builder (its node/edge API is what the map code speaks),
+    but its HTML template is no longer used: the map renders through the same
+    no-build custom component as the Taste Circle, instead of
+    ``components.html``, and the component's page already links the font.
     """
-    html = net.generate_html(notebook=False)
-    return html.replace("<head>", f"<head>{_FONT_LINK}", 1)
+    options = json.loads(net.options.to_json())
+    # pyvis turns on vis's physics-configurator panel; the map never shows it.
+    options.pop("configure", None)
+    return {"nodes": list(net.nodes), "edges": list(net.edges), "options": options}

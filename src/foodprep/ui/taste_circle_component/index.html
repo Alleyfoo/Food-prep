@@ -3,9 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <!--
-  Taste Circle Map — custom Streamlit component (no build step).
+  vis-network graph — custom Streamlit component (no build step).
 
-  Renders the flavour-dimension circle with vis-network (vendored locally,
+  Draws two things: the Taste Circle (fixed layout, clicks reported back)
+  and the Map (force-directed, read-only; it passes its own `options` and
+  `report_clicks: false`). One component because each component directory
+  serves a single index.html, and the vendored renderer is not small.
+
+  Renders with vis-network (vendored locally,
   same 9.1.2 build pyvis uses) and reports node clicks back to Streamlit
   using the component v1 postMessage protocol, implemented inline so the
   component has zero CDN dependencies.
@@ -85,20 +90,25 @@
     edges: { smooth: false, width: 1.5 }
   };
 
+  var reportClicks = true;
+
   function onRender(data) {
     var args = data.args || {};
     var height = args.height || 640;
+    var options = args.options || OPTIONS;
+    reportClicks = args.report_clicks !== false;
     container.style.height = height + "px";
 
     nodeSet = new vis.DataSet(args.nodes || []);
     var graphData = { nodes: nodeSet, edges: new vis.DataSet(args.edges || []) };
 
     if (!network) {
-      network = new vis.Network(container, graphData, OPTIONS);
+      network = new vis.Network(container, graphData, options);
       // Test/debug hook: lets e2e tests resolve node pixel positions.
       window.__tasteCircle = network;
 
       network.on("click", function (params) {
+        if (!reportClicks) { return; }
         if (params.nodes.length > 0) {
           var node = nodeSet.get(params.nodes[0]);
           if (node && node.clickable === false) { return; }
@@ -110,11 +120,12 @@
       });
       network.on("hoverNode", function (params) {
         var node = nodeSet.get(params.node);
-        container.style.cursor = (node && node.clickable === false) ? "default" : "pointer";
+        container.style.cursor = (!reportClicks || (node && node.clickable === false))
+          ? "grab" : "pointer";
       });
       network.on("blurNode", function () { container.style.cursor = "default"; });
     } else {
-      network.setOptions(OPTIONS);
+      network.setOptions(options);
       network.setData(graphData);
     }
     network.fit({ animation: false });

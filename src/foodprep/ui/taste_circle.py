@@ -1,4 +1,9 @@
-"""Streamlit wrapper for the Taste Circle Map custom component.
+"""Streamlit wrappers for the vis-network custom component.
+
+Two callers: the Taste Circle (clicks reported back) and the Map
+(``network_graph``, read-only, force-directed). The Map used to go through
+``components.html`` with pyvis's own HTML page; now both share this one
+component.
 
 The frontend (``taste_circle_component/index.html``) is a static, no-build
 component: it renders the circle with a vendored vis-network build and posts
@@ -38,6 +43,22 @@ def taste_circle_map(
     return _taste_circle(
         nodes=nodes,
         edges=edges,
+        height=height,
+        key=key,
+        default=None,
+    )
+
+
+def network_graph(data: dict[str, Any], *, height: int = 620, key: str) -> None:
+    """Render a read-only force-directed graph from ``graph.graph_data``.
+
+    Clicks are not reported, so moving nodes around never reruns the app.
+    """
+    _taste_circle(
+        nodes=data["nodes"],
+        edges=data["edges"],
+        options=data["options"],
+        report_clicks=False,
         height=height,
         key=key,
         default=None,

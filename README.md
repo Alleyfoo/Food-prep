@@ -193,9 +193,9 @@ opening.
   ingredients are popular.
 - **Tastings are recorded through the CLI.** The app has no write path into
   the append-only record, by design so far.
-- **The Map tab uses `components.html`**, which Streamlit has deprecated, and
-  `streamlit>=1.39` has no upper bound. It works on 1.50; pin the version or
-  move the Map to the custom component that Taste Circle uses.
+- **Streamlit is pinned to 1.50.x** (`requirements.txt` and `pyproject.toml`,
+  kept equal by a test). Newer releases are untested here; widen the pin only
+  after the suite passes on one.
 - **The app builds its database once per process.** Restart `streamlit run`
   after editing YAML.
 

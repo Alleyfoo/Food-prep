@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 from foodprep.loader import build
 from foodprep import export, query
@@ -28,9 +27,9 @@ from foodprep.ui.render import (
 )
 from foodprep.ui.graph import (
     TASTE_DIMENSIONS, build_ingredient_graph, build_scout_graph,
-    graph_to_html, random_dish_selections, taste_circle_graph_data,
+    graph_data, random_dish_selections, taste_circle_graph_data,
 )
-from foodprep.ui.taste_circle import taste_circle_map
+from foodprep.ui.taste_circle import network_graph, taste_circle_map
 
 _CSS_PATH = Path(__file__).with_name("design.css")
 
@@ -38,6 +37,23 @@ _CSS_PATH = Path(__file__).with_name("design.css")
 def _md(markup: str) -> None:
     cleaned = "\n".join(line.lstrip() for line in markup.splitlines())
     st.markdown(cleaned.strip(), unsafe_allow_html=True)
+
+
+def _seed(key: str, options: list, preferred) -> None:
+    """Give a sticky selector its starting value through session state.
+
+    Passing ``index=``/``default=`` as well as re-assigning the key each run
+    (see _persist_widget_state) makes Streamlit warn that the widget "was
+    created with a default value but also had its value set via the Session
+    State API". So the default goes in once, here, and never as an argument.
+    A stored value that is no longer an option is replaced.
+    """
+    current = st.session_state.get(key)
+    if isinstance(preferred, list):
+        if current is None or not all(v in options for v in current):
+            st.session_state[key] = [v for v in preferred if v in options]
+    elif current not in options:
+        st.session_state[key] = preferred if preferred in options else options[0]
 
 
 def _pretty(name: str) -> str:
@@ -123,11 +139,11 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
 
     with subject:
         _md('<div class="eyebrow">Ingredient</div>')
+        # Broccoli is the pilot and on the shopping list; cabbage is not.
+        _seed("explorer_ing", trees, "broccoli")
         ingredient = st.selectbox(
             "Ingredient", trees, key="explorer_ing",
-            label_visibility="collapsed", format_func=_pretty,
-            # Broccoli is the pilot and on the shopping list; cabbage is not.
-            index=trees.index("broccoli") if "broccoli" in trees else 0)
+            label_visibility="collapsed", format_func=_pretty)
         techs = query.techniques_for_ingredient(CONN, ingredient)
         _md(subject_column_html(
             ingredient, "ingredient",
@@ -174,10 +190,10 @@ def tab_map() -> None:
     trees = query.tree_ingredients(CONN)
     pick, view_col = st.columns([1, 1.4], gap="large")
     with pick:
+        _seed("map_ing", trees, "broccoli")
         ingredient = st.selectbox(
             "Ingredient", trees, key="map_ing", format_func=_pretty,
-            label_visibility="collapsed",
-            index=trees.index("broccoli") if "broccoli" in trees else 0)
+            label_visibility="collapsed")
     with view_col:
         view = pill_radio("View", ["Cook paths", "Scout ideas"], "map_view")
     if view == "Scout ideas":
@@ -189,17 +205,18 @@ def tab_map() -> None:
         _md('<div class="hint">How it can be cooked, what each state becomes, '
             'what pairs with it and where it goes. Drag nodes to explore.</div>')
         net = build_ingredient_graph(CONN, ingredient)
-    components.html(graph_to_html(net), height=620, scrolling=False)
+    network_graph(graph_data(net), height=620,
+                  key=f"map_graph_{view}_{ingredient}")
 
 
 def tab_journeys() -> None:
     trees = query.tree_ingredients(CONN)
     col, _pad = st.columns([2.4, 1], gap="large")
     with col:
+        _seed("journey_ing", trees, "broccoli")
         ingredient = st.selectbox(
             "Ingredient", trees, key="journey_ing", label_visibility="collapsed",
-            format_func=_pretty,
-            index=trees.index("broccoli") if "broccoli" in trees else 0)
+            format_func=_pretty)
         journeys = query.ingredient_journeys(CONN, ingredient)
         if not journeys:
             _md(f'<div class="hint">No complete journeys modelled for '
@@ -222,7 +239,8 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
 
     with subject:
         _md('<div class="eyebrow">Component — an after-state</div>')
-        comp = st.selectbox("Component", comps, index=comps.index(default),
+        _seed("component_explorer_comp", comps, default)
+        comp = st.selectbox("Component", comps,
                             label_visibility="collapsed", format_func=_pretty,
                             key="component_explorer_comp")
     d = query.component_card(CONN, comp)
@@ -296,9 +314,10 @@ def tab_plate_balance(available_items: list[str] | None = None) -> None:
     st.markdown('<div class="section-title">Plate Balance <span class="count">Cook mode — no experimental pairings</span></div>',
                 unsafe_allow_html=True)
     profiles = query.profiles_list(CONN)
+    if "plate_items" not in st.session_state:
+        _seed("plate_items", profiles, ["mashed_potatoes", "chickpea_patty"])
     picked = st.multiselect("Plate items", profiles, key="plate_items",
-                            format_func=_pretty,
-                            default=["mashed_potatoes", "chickpea_patty"])
+                            format_func=_pretty)
     if not picked:
         st.markdown('<div class="hint">Pick one or more plate items to see what the plate '
                     'has, what it lacks, and what to add.</div>', unsafe_allow_html=True)
@@ -401,7 +420,8 @@ def tab_filler_profiles() -> None:
 
     with subject:
         _md('<div class="eyebrow">Filler</div>')
-        name = st.selectbox("Filler", ings, index=ings.index(default),
+        _seed("filler_profile_name", ings, default)
+        name = st.selectbox("Filler", ings,
                             label_visibility="collapsed", format_func=_pretty,
                             key="filler_profile_name")
         d = query.filler_profile_detail(CONN, name)
@@ -469,8 +489,8 @@ def tab_scout(available_items: list[str] | None = None) -> None:
 
     with subject:
         _md('<div class="eyebrow">Transformed state</div>')
+        _seed("tab_scout_component_select", state_comps, default)
         comp = st.selectbox("Transformed state", state_comps,
-                            index=state_comps.index(default),
                             label_visibility="collapsed", format_func=_pretty,
                             key="tab_scout_component_select")
 

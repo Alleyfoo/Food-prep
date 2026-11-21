@@ -15,7 +15,7 @@ import pytest
 
 from foodprep.ui.graph import (
     _COLORS, _EDGE_COLORS, _FONT_FACE, build_ingredient_graph,
-    build_scout_graph, graph_to_html,
+    build_scout_graph, graph_data,
 )
 
 #: vis.js's own group palette — the tell that our colours were dropped.
@@ -62,11 +62,13 @@ def test_scout_graph_is_styled_too(conn):
         assert node["font"]["face"] == _FONT_FACE
 
 
-def test_graph_html_carries_the_font(conn):
-    # The graph renders in its own iframe, beyond the app stylesheet's reach.
-    html = graph_to_html(build_ingredient_graph(conn, "broccoli"))
-    assert "Figtree" in html
-    assert html.count("fonts.googleapis.com") >= 1
+def test_graph_data_is_plain_and_keeps_physics(conn):
+    # The map renders through the vis-network component, not pyvis's HTML.
+    data = graph_data(build_ingredient_graph(conn, "broccoli"))
+    assert data["nodes"] and data["edges"]
+    assert "configure" not in data["options"]
+    assert data["options"]["physics"]["barnesHut"]["gravitationalConstant"] == -3000
+    assert all(e.get("arrows") == "to" for e in data["edges"])
 
 
 # ---- the map must not hide or strand data ----------------------------------
