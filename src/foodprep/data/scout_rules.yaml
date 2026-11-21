@@ -11,6 +11,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nsour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 tomato slice : 1/4 teaspoon balsamic"
       smallest_test: "Drizzle balsamic on one tomato slice and taste."
@@ -30,6 +32,8 @@ analogy_rules:
     required_dimensions: "sweet\numami\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "3 roasted tomato halves : 1 pinch smoked salt"
       smallest_test: "Sprinkle smoked salt on three warm roasted tomato halves and taste."
@@ -49,6 +53,8 @@ analogy_rules:
     required_dimensions: "umami\nsweet\nsour"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [spoonable]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 cup sauce : 1 teaspoon thinned miso"
       smallest_test: "Thin miso with sauce liquid, stir into one cup of warm sauce."
@@ -68,6 +74,8 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "3 charred tomato pieces : 1/2 teaspoon chili crisp"
       smallest_test: "Drizzle chili crisp on three warm charred tomato pieces and taste."
@@ -87,6 +95,8 @@ analogy_rules:
     required_dimensions: "sweet\numami\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "3 roasted tomato halves : 1/2 teaspoon pomegranate molasses"
       smallest_test: "Drizzle pomegranate molasses on three warm roasted tomato halves and taste."
@@ -106,6 +116,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nsour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 tomato slice : 1 pinch za'atar"
       smallest_test: "Sprinkle za'atar over one tomato slice and taste."
@@ -125,6 +137,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nsour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 tomato slice : 1/2 teaspoon thinned tahini"
       smallest_test: "Thin tahini with lemon juice, drizzle on one tomato slice."
@@ -144,6 +158,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nsour\npungent"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [spoonable]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 tablespoon salsa : 2 drops fish sauce"
       smallest_test: "Add fish sauce to one tablespoon of salsa and taste."
@@ -163,6 +179,8 @@ analogy_rules:
     required_dimensions: "umami\nsweet\nsour"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [soup]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 cup soup : 1/4 teaspoon grated horseradish"
       smallest_test: "Top one cup of warm tomato soup with grated horseradish."
@@ -182,6 +200,8 @@ analogy_rules:
     required_dimensions: "umami\nsweet\nsour"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [spoonable]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "1 cup sauce : 1 crushed cardamom pod"
       smallest_test: "Crush one pod, stir into one cup of warm sauce, let sit 1 minute, taste."
@@ -202,6 +222,8 @@ analogy_rules:
     required_dimensions: "pungent\nfresh_green"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [allium]
     protocol:
       starting_ratio: "1 tablespoon raw onion : 1/4 teaspoon sumac"
       smallest_test: "Sprinkle sumac over one tablespoon of raw onion and taste."
@@ -221,6 +243,8 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [spoonable]
+    families: [allium]
     protocol:
       starting_ratio: "2 tablespoons caramelized onion : 1/2 teaspoon pomegranate molasses"
       smallest_test: "Drizzle pomegranate molasses on two tablespoons of warm caramelized onion and taste."
@@ -240,6 +264,8 @@ analogy_rules:
     required_dimensions: "sweet\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [allium]
     protocol:
       starting_ratio: "2 tablespoons sauteed onion : 1/2 teaspoon thinned miso"
       smallest_test: "Thin miso with a drop of water, stir into two tablespoons of warm sauteed onion."
@@ -259,6 +285,8 @@ analogy_rules:
     required_dimensions: "sour\nsweet\npungent"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [pickle]
+    families: [allium]
     protocol:
       starting_ratio: "1 tablespoon pickled onion : 1/4 teaspoon gochugaru"
       smallest_test: "Sprinkle gochugaru over one tablespoon of pickled onion and taste."
@@ -278,6 +306,8 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted\numami"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [spoonable]
+    families: [allium]
     protocol:
       starting_ratio: "2 tablespoons caramelized onion : 1/2 teaspoon thinned tahini"
       smallest_test: "Thin tahini with lemon juice, drizzle on two tablespoons of warm caramelized onion."
@@ -287,6 +317,7 @@ analogy_rules:
       safety_note: "Use fresh tahini without rancidity and fully cooked onions."
 
   # === POTATO ===
+  - id: soft_egg_for_butter_on_mashed_potato
     known_pairing: "mashed potatoes with butter"
     source_ingredient: butter
     substitute_ingredient: eggs
@@ -297,32 +328,36 @@ analogy_rules:
     required_dimensions: "sweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [mash]
+    families: [root_tuber]
     protocol:
       starting_ratio: "2 tablespoons mash : 1 soft-boiled egg"
       smallest_test: "Fold one soft-boiled egg into two tablespoons of warm mash."
       success_condition: "Egg adds silky richness without making it taste like breakfast."
       likely_failure: "Egg makes the mash gluey or tastes too much like scrambled eggs."
       corrections: "Use less egg; add more butter; finish with chives."
-      safety_note: "Use fresh eggs and fully cooked potatoes."
+      safety_note: "Use fresh eggs and fully cooked mash."
 
   - id: poached_egg_for_cheese_on_roasted_potato
     known_pairing: "roasted potatoes with cheese"
     source_ingredient: parmesan
     substitute_ingredient: eggs
     mechanism: texture_contrast
-    shared_function: "Both add richness, while a poached egg's runny yolk acts as a sauce for the crispy potato."
+    shared_function: "Both add richness, while a poached egg's runny yolk dresses the crisp browned pieces."
     meaningful_difference: "Egg adds liquid richness and protein rather than salty umami."
-    expected_risk: "The yolk may make the crispy potato soggy if not eaten immediately."
+    expected_risk: "The yolk may make the crisp pieces soggy if not eaten immediately."
     required_dimensions: "nutty_toasted\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [root_tuber, brassica]
     protocol:
-      starting_ratio: "3 roasted potato pieces : 1 poached egg"
-      smallest_test: "Place one poached egg on three warm roasted potato pieces."
-      success_condition: "Runny yolk acts as sauce without making the potato soggy."
+      starting_ratio: "3 pieces of {state} : 1 poached egg"
+      smallest_test: "Place one poached egg on three warm pieces of {state}."
+      success_condition: "Runny yolk acts as sauce without making the pieces soggy."
       likely_failure: "Yolk makes the crispy exterior soft or the egg dominates."
       corrections: "Use less yolk; add more acid; serve immediately."
-      safety_note: "Use fresh eggs and fully cooked potatoes."
+      safety_note: "Use fresh eggs and fully cooked vegetables."
 
   - id: fried_egg_for_bacon_on_potato_hash
     known_pairing: "potato hash with bacon"
@@ -335,6 +370,7 @@ analogy_rules:
     required_dimensions: "nutty_toasted\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [potato_hash_component]
     protocol:
       starting_ratio: "1 portion hash : 1 fried egg"
       smallest_test: "Top one portion of warm hash with a crispy fried egg."
@@ -354,6 +390,7 @@ analogy_rules:
     required_dimensions: "nutty_toasted\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [fried_potato_component]
     protocol:
       starting_ratio: "3 fries : 1 pinch smoked salt"
       smallest_test: "Sprinkle smoked salt on three warm fries and taste."
@@ -373,6 +410,7 @@ analogy_rules:
     required_dimensions: "nutty_toasted\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [fried_potato_component]
     protocol:
       starting_ratio: "3 fries : 1/4 teaspoon malt vinegar"
       smallest_test: "Drizzle malt vinegar on three warm fries and taste."
@@ -392,6 +430,7 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [baked_potato_component]
     protocol:
       starting_ratio: "1 baked potato : 1/2 teaspoon grated horseradish"
       smallest_test: "Top one warm baked potato with grated horseradish and butter."
@@ -407,16 +446,17 @@ analogy_rules:
     mechanism: flavour_reinforcement
     shared_function: "Both add umami depth, while anchovy adds fermented complexity that echoes the soup's savoury base."
     meaningful_difference: "Anchovy is fishy and fermented rather than smoky and fatty."
-    expected_risk: "The fishiness may make the soup taste like chowder rather than potato soup."
+    expected_risk: "The fishiness may make the soup taste like chowder."
     required_dimensions: "umami\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [soup]
     protocol:
       starting_ratio: "1 cup soup : 1 anchovy fillet"
-      smallest_test: "Melt one anchovy fillet into one cup of warm potato soup."
+      smallest_test: "Melt one anchovy fillet into one cup of warm {state}."
       success_condition: "Umami depth adds complexity without making it taste like chowder."
       likely_failure: "Anchovy dominates or the soup tastes fishy."
-      corrections: "Use less anchovy; add more cream; balance with fresh herbs."
+      corrections: "Use less anchovy; add a spoon of cream; balance with fresh herbs."
       safety_note: "Use commercial anchovy fillets and fully cooked soup."
 
   - id: capers_for_pickles_on_potato_salad
@@ -430,6 +470,7 @@ analogy_rules:
     required_dimensions: "sour\nsweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [potato_salad_component]
     protocol:
       starting_ratio: "2 tablespoons potato salad : 1 teaspoon capers"
       smallest_test: "Fold capers into two tablespoons of potato salad and taste."
@@ -449,6 +490,7 @@ analogy_rules:
     required_dimensions: "umami\nrich_fatty\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [baked_dish]
     protocol:
       starting_ratio: "1 portion gratin : 1 tablespoon grated gruyere"
       smallest_test: "Top one portion of gratin with grated gruyere and broil briefly."
@@ -465,9 +507,10 @@ analogy_rules:
     shared_function: "Both add richness, while dill adds fresh herbal aroma that echoes Nordic potato traditions."
     meaningful_difference: "Dill is fresh and herbal rather than rich and fatty."
     expected_risk: "The dill may make the potato taste like pickles or Scandinavian fish."
-    required_dimensions: "umami\nsweet"
+    required_dimensions: "sweet"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [boiled_potato_component]
     protocol:
       starting_ratio: "2 boiled potatoes : 1 tablespoon chopped dill"
       smallest_test: "Toss warm boiled potatoes with chopped dill and butter."
@@ -484,17 +527,19 @@ analogy_rules:
     mechanism: flavour_reinforcement
     shared_function: "Both provide fat and richness, while miso adds fermented umami that echoes the roasted sweetness."
     meaningful_difference: "Miso is saltier, more fermented, and less creamy than butter."
-    expected_risk: "The fermented note may clash with the cabbage's sulfurous character if overcooked."
+    expected_risk: "The fermented note may clash with brassica sulfur if the {state} is overcooked."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [brassica]
     protocol:
-      starting_ratio: "1 cabbage wedge : 1/2 teaspoon thinned miso"
-      smallest_test: "Thin miso with melted butter, brush on one warm roasted wedge."
+      starting_ratio: "1 piece of {state} : 1/2 teaspoon thinned miso"
+      smallest_test: "Thin miso with melted butter, brush on one warm piece of {state}."
       success_condition: "Fermented umami deepens the roasted sweetness without overwhelming."
-      likely_failure: "Miso makes the cabbage taste like soup or the ferment clashes with sulfur."
+      likely_failure: "Miso flattens the browning or the ferment clashes with sulfur."
       corrections: "Use less miso; add more butter; finish with lemon."
-      safety_note: "Use refrigerated commercial miso and fully cooked cabbage."
+      safety_note: "Use refrigerated commercial miso and fully cooked vegetables."
 
   - id: juniper_for_bacon_on_braised_cabbage
     known_pairing: "braised cabbage with bacon"
@@ -507,6 +552,8 @@ analogy_rules:
     required_dimensions: "sweet\numami\nrich_fatty"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [cooked_pieces]
+    families: [brassica]
     protocol:
       starting_ratio: "1 forkful braised cabbage : 1 crushed juniper berry"
       smallest_test: "Crush one berry, fold into one forkful of warm braised cabbage."
@@ -526,6 +573,8 @@ analogy_rules:
     required_dimensions: "sour\nfermented_funky"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [pickle]
+    families: [brassica]
     protocol:
       starting_ratio: "1 forkful sauerkraut : 1/4 teaspoon gochugaru"
       smallest_test: "Sprinkle gochugaru over one forkful of sauerkraut, mix, taste."
@@ -539,19 +588,21 @@ analogy_rules:
     source_ingredient: apple
     substitute_ingredient: pomegranate_seeds
     mechanism: texture_contrast
-    shared_function: "Both add sweet-tart bursts that interrupt the sharp raw cabbage."
+    shared_function: "Both add sweet-tart bursts that interrupt a sharp raw slaw."
     meaningful_difference: "Pomegranate is juicier and more floral, with crunchy seeds instead of crisp fruit."
     expected_risk: "The seeds may be too crunchy and the juice too thin compared to apple's body."
     required_dimensions: "fresh_green\npungent"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [brassica, root_tuber]
     protocol:
       starting_ratio: "1 forkful slaw : 5-6 pomegranate seeds"
       smallest_test: "Scatter seeds over one forkful of dressed slaw and taste."
-      success_condition: "Juicy sweet-tart bursts brighten the sharp cabbage without making it watery."
+      success_condition: "Juicy sweet-tart bursts brighten the sharp slaw without making it watery."
       likely_failure: "Seeds are too crunchy or the juice dilutes the dressing."
       corrections: "Use fewer seeds; crush some to release juice; add more acid to the dressing."
-      safety_note: "Use fresh pomegranate and washed cabbage."
+      safety_note: "Use fresh pomegranate and washed vegetables."
 
   - id: smoked_paprika_for_plain_paprika_on_fermented_cabbage
     known_pairing: "sauerkraut with paprika"
@@ -564,6 +615,8 @@ analogy_rules:
     required_dimensions: "sour\nfermented_funky"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [pickle]
+    families: [brassica]
     protocol:
       starting_ratio: "1 forkful sauerkraut : 1/8 teaspoon smoked paprika"
       smallest_test: "Sprinkle smoked paprika over one forkful of sauerkraut, mix, taste."
@@ -580,17 +633,19 @@ analogy_rules:
     mechanism: analogue_substitution
     shared_function: "Both act as sharp acidic finishes that can balance browned sweetness."
     meaningful_difference: "Lingonberry vinegar adds dark berry aroma and a stronger risk of reading as sweet fruit."
-    expected_risk: "The berry character may make the broccoli taste jam-like or perfumed."
+    expected_risk: "The berry character may make the {state} taste jam-like or perfumed."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} as an acidic finish because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [brassica, root_tuber]
     protocol:
-      starting_ratio: "1 small roasted floret : 3 drops lingonberry vinegar"
-      smallest_test: "Dress one warm roasted floret with three drops; do not season the whole batch."
-      success_condition: "Acidity sharpens the browned broccoli without the berry aroma reading as jam or dessert."
-      likely_failure: "Fruit aroma dominates or makes the broccoli seem sweet."
+      starting_ratio: "1 small piece of {state} : 3 drops lingonberry vinegar"
+      smallest_test: "Dress one warm piece with three drops; do not season the whole batch."
+      success_condition: "Acidity sharpens the {state} without the berry aroma reading as jam or dessert."
+      likely_failure: "Fruit aroma dominates or makes the {state} seem sweet."
       corrections: "Increase salt; dilute with plain vinegar; reduce the lingonberry vinegar to one drop."
-      safety_note: "Use commercially prepared vinegar and fully cooked broccoli; this is a flavour test, not preservation guidance."
+      safety_note: "Use commercially prepared vinegar and fully cooked vegetables; this is a flavour test, not preservation guidance."
 
   - id: browned_fat_for_plain_fat_on_toasted_state
     known_pairing: "roasted broccoli with olive oil"
@@ -599,17 +654,19 @@ analogy_rules:
     mechanism: flavour_reinforcement
     shared_function: "Both provide fat, while browned butter also reinforces toasted aromas."
     meaningful_difference: "Brown butter is richer and less fresh than olive oil."
-    expected_risk: "The combination may become heavy and mute broccoli's green character."
+    expected_risk: "The combination may become heavy and mute the {state}'s own character."
     required_dimensions: "nutty_toasted"
     explanation_template: "{candidate} may reinforce this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium_high
+    forms: [cooked_pieces]
+    families: [brassica, root_tuber, leafy_green, fruit_vegetable]
     protocol:
-      starting_ratio: "1 small roasted floret : 1/4 teaspoon brown butter"
-      smallest_test: "Coat one warm floret lightly with brown butter and taste before dressing the batch."
-      success_condition: "Nutty aroma reinforces browning while the broccoli remains recognizable and not greasy."
-      likely_failure: "Fat coats the palate and suppresses green character."
+      starting_ratio: "1 small piece of {state} : 1/4 teaspoon brown butter"
+      smallest_test: "Coat one warm piece lightly with brown butter and taste before dressing the batch."
+      success_condition: "Nutty aroma reinforces browning while the {state} remains recognizable and not greasy."
+      likely_failure: "Fat coats the palate and suppresses the vegetable's own character."
       corrections: "Use half as much butter; add one drop lemon; finish with salt rather than more fat."
-      safety_note: "Use freshly prepared brown butter without burned milk solids and fully cooked broccoli."
+      safety_note: "Use freshly prepared brown butter without burned milk solids and fully cooked vegetables."
 
   - id: fermented_paste_for_salt_on_steamed_green
     known_pairing: "steamed broccoli with soy sauce"
@@ -622,13 +679,15 @@ analogy_rules:
     required_dimensions: "fresh_green\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [brassica]
     protocol:
-      starting_ratio: "1 floret : 1/8 teaspoon thinned miso"
-      smallest_test: "Thin miso with a drop of water, dab on one warm floret, taste."
+      starting_ratio: "1 piece of {state} : 1/8 teaspoon thinned miso"
+      smallest_test: "Thin miso with a drop of water, dab on one warm piece, taste."
       success_condition: "Umami deepens the green character without overwhelming it."
-      likely_failure: "Paste coats too thickly and the broccoli tastes like miso soup."
+      likely_failure: "Paste coats too thickly and the {state} tastes only of miso."
       corrections: "Thin with more water; add a drop of rice vinegar; use white miso instead of red."
-      safety_note: "Use refrigerated commercial miso and fully cooked broccoli."
+      safety_note: "Use refrigerated commercial miso and fully cooked vegetables."
 
   - id: nut_paste_for_oil_on_roasted_crucifer
     known_pairing: "roasted broccoli with olive oil and lemon"
@@ -641,13 +700,15 @@ analogy_rules:
     required_dimensions: "nutty_toasted\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [brassica, root_tuber]
     protocol:
-      starting_ratio: "1 floret : 1/4 teaspoon thinned tahini"
-      smallest_test: "Thin tahini with lemon juice and water, drizzle on one warm floret."
+      starting_ratio: "1 piece of {state} : 1/4 teaspoon thinned tahini"
+      smallest_test: "Thin tahini with lemon juice and water, drizzle on one warm piece."
       success_condition: "Creamy nuttiness echoes the roasted character without becoming bitter."
       likely_failure: "Sesame bitterness dominates or the texture is too thick and pasty."
       corrections: "Add more lemon; thin with water; use a lighter tahini; add a pinch of salt."
-      safety_note: "Use fresh tahini without rancidity and fully cooked broccoli."
+      safety_note: "Use fresh tahini without rancidity and fully cooked vegetables."
 
   # === RUTABAGA ===
   - id: tart_stone_fruit_for_apple_on_sweet_root_mash
@@ -661,8 +722,10 @@ analogy_rules:
     required_dimensions: "sweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} against a rich sweet mash because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [mash]
+    families: [root_tuber]
     protocol:
-      starting_ratio: "1 tablespoon warm rutabaga mash : 1 thin sliver of ripe apricot"
+      starting_ratio: "1 tablespoon warm {state} : 1 thin sliver of ripe apricot"
       smallest_test: "Fold one sliver of apricot into one spoonful of finished mash; do not add fruit to the pot."
       success_condition: "Fruit acidity lightens the buttery sweetness without the spoonful reading as dessert."
       likely_failure: "Apricot sweetness stacks on the mash and the spoonful turns jammy."
@@ -680,13 +743,15 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [root_tuber]
     protocol:
-      starting_ratio: "1 cube roasted rutabaga : 1/8 teaspoon grated horseradish"
-      smallest_test: "Top one warm cube with a small grating of fresh horseradish."
+      starting_ratio: "1 piece of {state} : 1/8 teaspoon grated horseradish"
+      smallest_test: "Top one warm piece with a small grating of fresh horseradish."
       success_condition: "Sharp pungency cuts the sweetness and adds complexity without burning."
-      likely_failure: "Horseradish dominates and the rutabaga disappears."
+      likely_failure: "Horseradish dominates and the {state} disappears."
       corrections: "Use less horseradish; add a dot of cream; balance with salt."
-      safety_note: "Use fresh horseradish root and fully cooked rutabaga."
+      safety_note: "Use fresh horseradish root and fully cooked vegetables."
 
   - id: warm_seed_for_nutmeg_on_root_mash
     known_pairing: "rutabaga mash with nutmeg"
@@ -699,6 +764,8 @@ analogy_rules:
     required_dimensions: "sweet\nrich_fatty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [mash]
+    families: [root_tuber]
     protocol:
       starting_ratio: "1 tablespoon mash : 2-3 toasted caraway seeds"
       smallest_test: "Toast seeds lightly, crush, fold into one spoonful of mash."
@@ -719,6 +786,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nbitter"
     explanation_template: "{candidate} may replace {source} on massaged greens because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [leafy_green]
     protocol:
       starting_ratio: "1 ribbon of massaged kale : 1 small cube of firm mango"
       smallest_test: "Wrap one ribbon of dressed massaged kale around one cube of firm (not fully ripe) mango and taste."
@@ -738,6 +807,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nbitter"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [leafy_green]
     protocol:
       starting_ratio: "1 ribbon kale : 5-6 pomegranate seeds"
       smallest_test: "Scatter seeds over one ribbon of dressed kale and taste."
@@ -757,6 +828,7 @@ analogy_rules:
     required_dimensions: "nutty_toasted\nbitter"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [crisped_kale_component]
     protocol:
       starting_ratio: "1 kale chip : 2-3 flakes from chili crisp"
       smallest_test: "Scatter a few chili crisp flakes on one finished kale chip."
@@ -776,11 +848,13 @@ analogy_rules:
     required_dimensions: "umami\nbitter"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [leafy_green]
     protocol:
       starting_ratio: "1 forkful braised kale : 1/8 teaspoon thinned miso"
       smallest_test: "Thin miso with a drop of the braising liquid, stir into one forkful."
       success_condition: "Fermented umami deepens the savoury character without overwhelming."
-      likely_failure: "Miso makes the braise too thick or tastes like miso soup."
+      likely_failure: "Miso makes the braise too thick or tastes only of miso."
       corrections: "Thin with more liquid; use white miso; add a drop of vinegar."
       safety_note: "Use refrigerated commercial miso and fully cooked kale."
 
@@ -796,6 +870,7 @@ analogy_rules:
     required_dimensions: "fresh_green\nsweet"
     explanation_template: "{candidate} may replace {source} in a cool salad because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    states: [raw_cucumber_component]
     protocol:
       starting_ratio: "2 cucumber slices : 1 thin slice of ripe peach"
       smallest_test: "Salt one cucumber slice, top with a sliver of peach, and taste before mixing a bowl."
@@ -815,6 +890,8 @@ analogy_rules:
     required_dimensions: "fresh_green\nsalty"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [fruit_vegetable]
     protocol:
       starting_ratio: "3 cucumber slices : 1 pinch za'atar"
       smallest_test: "Sprinkle za'atar over salted cucumber slices and taste."
@@ -834,13 +911,14 @@ analogy_rules:
     required_dimensions: "sour\nsweet"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [pickle]
     protocol:
-      starting_ratio: "1 pickle slice : 1 drop pomegranate molasses"
-      smallest_test: "Dab one drop on a pickle slice and taste."
+      starting_ratio: "1 piece of {state} : 1 drop pomegranate molasses"
+      smallest_test: "Dab one drop on one piece of {state} and taste."
       success_condition: "Dark fruit sweetness adds complexity without muddying the bright acid."
       likely_failure: "Molasses dominates and the pickle tastes like chutney."
       corrections: "Use less molasses; add more vinegar; balance with salt."
-      safety_note: "Use commercial pomegranate molasses and properly pickled cucumber."
+      safety_note: "Use commercial pomegranate molasses and properly pickled vegetables."
 
   # === MANGO ===
   - id: dark_berry_acid_for_lime_on_sour_slaw
@@ -854,6 +932,8 @@ analogy_rules:
     required_dimensions: "sour\nfresh_green"
     explanation_template: "{candidate} may replace {source} on a sour slaw because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: low
+    forms: [raw_salad]
+    families: [sweet_fruit]
     protocol:
       starting_ratio: "1 forkful of undressed green mango shreds : 2 drops lingonberry vinegar"
       smallest_test: "Dress one forkful of shreds with two drops plus a pinch of salt; taste against a lime-dressed forkful."
@@ -873,6 +953,8 @@ analogy_rules:
     required_dimensions: "sour\nfresh_green"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [sweet_fruit]
     protocol:
       starting_ratio: "1 forkful slaw : 2 drops fish sauce"
       smallest_test: "Dress one forkful with fish sauce and lime, taste."
@@ -892,6 +974,7 @@ analogy_rules:
     required_dimensions: "sweet\nsour\nrich_fatty"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [drink]
     protocol:
       starting_ratio: "1 tablespoon lassi : 1 crushed cardamom pod"
       smallest_test: "Crush one pod, stir into one spoonful of lassi, let sit 1 minute, taste."
@@ -908,17 +991,19 @@ analogy_rules:
     mechanism: flavour_reinforcement
     shared_function: "Both add toasted crunch that echoes browning on a sweet caramelised surface."
     meaningful_difference: "Rye crumbs bring dark grain bitterness and go soggy faster than nuts."
-    expected_risk: "Crumbs may sog on juicy fruit, or the rye bitterness may clash instead of echoing."
+    expected_risk: "Crumbs may sog on a juicy surface, or the rye bitterness may clash instead of echoing."
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may replace {source} on a browned sweet state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [sweet_fruit, root_tuber, brassica]
     protocol:
-      starting_ratio: "1 roasted apricot half : 1 small pinch of toasted rye crumbs"
-      smallest_test: "Scatter a pinch of freshly toasted rye crumbs on one warm roasted half; eat within a minute, before they sog."
-      success_condition: "The dark grain crunch reads as an echo of the browned fruit, not as bread on fruit."
-      likely_failure: "Crumbs sog in the juice or the rye bitterness fights the fruit."
-      corrections: "Toast the crumbs darker and drier; add a pinch of salt; serve the crumbs under the fruit instead of on top."
-      safety_note: "Use fully toasted crumbs from ordinary bread and washed ripe fruit; this is a flavour test, not preservation guidance."
+      starting_ratio: "1 piece of {state} : 1 small pinch of toasted rye crumbs"
+      smallest_test: "Scatter a pinch of freshly toasted rye crumbs on one warm piece; eat within a minute, before they sog."
+      success_condition: "The dark grain crunch reads as an echo of the browning, not as bread scattered on top."
+      likely_failure: "Crumbs sog in the juice or the rye bitterness fights the {state}."
+      corrections: "Toast the crumbs darker and drier; add a pinch of salt; serve the crumbs underneath instead of on top."
+      safety_note: "Use fully toasted crumbs from ordinary bread and fully cooked produce; this is a flavour test, not preservation guidance."
 
   - id: woody_herb_for_honey_on_roasted_stone_fruit
     known_pairing: "roasted apricots with honey"
@@ -931,6 +1016,8 @@ analogy_rules:
     required_dimensions: "sweet\nnutty_toasted"
     explanation_template: "{candidate} may complement this state because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [cooked_pieces]
+    families: [sweet_fruit]
     protocol:
       starting_ratio: "1 roasted apricot half : 1 small rosemary needle"
       smallest_test: "Chop one rosemary needle finely, scatter on one warm roasted half."
@@ -946,15 +1033,17 @@ analogy_rules:
     mechanism: texture_contrast
     shared_function: "Both add richness, while goat cheese's tang cuts the fruit's sweetness."
     meaningful_difference: "Goat cheese is tangy and crumbly rather than smooth and neutral."
-    expected_risk: "The cheese may overwhelm the delicate apricot flavour."
+    expected_risk: "The cheese may overwhelm the delicate {state}."
     required_dimensions: "sweet\nsour\naromatic"
     explanation_template: "{candidate} may replace {source} because {shared_function} The state contributes {matched_dimensions}."
     inference_strength: medium
+    forms: [raw_salad]
+    families: [sweet_fruit]
     protocol:
-      starting_ratio: "1 apricot slice : 1 small crumble of goat cheese"
-      smallest_test: "Top one slice of fresh apricot with a small crumble of cheese."
+      starting_ratio: "1 slice of {state} : 1 small crumble of goat cheese"
+      smallest_test: "Top one slice of {state} with a small crumble of cheese."
       success_condition: "Tangy richness balances the sweet-tart fruit without dominating."
-      likely_failure: "Goat cheese is too strong and the apricot disappears."
+      likely_failure: "Goat cheese is too strong and the {state} disappears."
       corrections: "Use less cheese; add a drizzle of honey; use a milder cheese."
       safety_note: "Use fresh pasteurized goat cheese and washed ripe fruit."
 
@@ -970,6 +1059,7 @@ analogy_rules:
     required_dimensions: "fermented_funky\nrich_fatty"
     explanation_template: "{candidate} is only plausible when {matched_dimensions} support the bridge: {shared_function}"
     inference_strength: low
+    forms: [soup]
     protocol:
       starting_ratio: "1 tablespoon soup : 1/8 teaspoon smoked yogurt"
       smallest_test: "Stir smoked yogurt into one spoonful away from the main pot."

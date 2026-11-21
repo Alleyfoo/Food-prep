@@ -22,6 +22,7 @@ CREATE TABLE ingredients (
     base_roles               TEXT,            -- newline-separated role names
     default_availability_class TEXT,          -- very_common | common | ...
     kind                     TEXT NOT NULL DEFAULT 'filler',  -- full | filler | both
+    family                   TEXT,            -- ingredient_families vocabulary id (state owners)
     repairs                  TEXT,            -- newline-separated plate conditions this filler repairs (heavy, fatty, roasted, ...)
     avoid_when               TEXT,            -- newline-separated plate conditions where this filler is wrong (already_high_acid, delicate, ...)
     notes                    TEXT
@@ -280,7 +281,13 @@ CREATE TABLE analogy_rules (
     required_dimensions   TEXT NOT NULL,
     explanation_template  TEXT NOT NULL,
     -- How sound the substitution reasoning is, NOT how good the result is.
-    inference_strength    TEXT NOT NULL
+    inference_strength    TEXT NOT NULL,
+    -- Where the rule's wording holds. A state must satisfy every scope that
+    -- is set (newline-separated ids); `states` names exact components and
+    -- replaces the other two when present.
+    forms                 TEXT,
+    families              TEXT,
+    states                TEXT
 );
 
 CREATE TABLE corpora (
@@ -389,7 +396,8 @@ CREATE TABLE component_state_profiles (
     missing_risks     TEXT,
     heaviness_score   INTEGER,
     dryness_score     INTEGER,
-    notes             TEXT
+    notes             TEXT,
+    serving_form      TEXT NOT NULL   -- serving_forms vocabulary id
 );
 
 -- ---------------------------------------------------------------------------

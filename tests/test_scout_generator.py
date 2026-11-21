@@ -7,19 +7,13 @@ def test_roasted_broccoli_generates_analogy_candidates(conn):
         conn, "roasted_broccoli_component"
     )
 
-    # rye_crumbs joined via the toasted-grain reinforcement rule: roasted
-    # broccoli carries both of its required dimensions (sweet, nutty_toasted).
-    # tahini, rosemary, horseradish, and miso joined via new rules that also match
-    # the sweet + nutty_toasted dimensions.
-    # eggs, anchovy, and dill joined via potato rules that match umami + sweet or
-    # nutty_toasted + sweet dimensions (Scout rules are generic, not ingredient-specific).
-    # smoked_salt, chili_crisp, and pomegranate_molasses joined via tomato rules that
-    # match sweet + nutty_toasted + umami dimensions.
+    # Only rules whose wording holds for browned brassica pieces. Flavour tags
+    # alone used to admit thirteen, including anchovy from the potato-soup
+    # rule ("1 cup soup : 1 anchovy fillet") and rosemary from roasted
+    # apricots. Rules are now scoped by serving form and ingredient family.
     assert {h["candidate"] for h in hypotheses} == {
         "lingonberry_vinegar", "brown_butter", "rye_crumbs",
-        "tahini", "rosemary", "horseradish", "miso",
-        "eggs", "anchovy", "dill",
-        "smoked_salt", "chili_crisp", "pomegranate_molasses"
+        "tahini", "miso", "eggs",
     }
     for hypothesis in hypotheses:
         assert hypothesis["candidate_class"] == "scout_candidate"
@@ -50,7 +44,7 @@ def test_candidate_is_generated_not_stored_as_final_pairing(conn):
     assert hypothesis["analogy_id"] == "tart_fruit_for_citrus_on_browned_vegetable"
     assert hypothesis["source"] == "lemon"
     assert "analogue substitution" in hypothesis["compatibility_evidence"][1]
-    assert "lingonberry_vinegar" in hypothesis["explanation"]
+    assert "lingonberry vinegar" in hypothesis["explanation"].lower()
 
 
 def test_rarity_alone_cannot_create_candidate():
@@ -66,7 +60,8 @@ def test_rejected_rules_keep_reasons(conn):
     rejected = [h for h in hypotheses if h["candidate_class"] == "rejected"]
 
     assert rejected
-    assert all(h["rejection_reason"].startswith("State lacks") for h in rejected)
+    assert all(h["rejection_reason"].startswith(("State lacks", "Rule does not apply"))
+               for h in rejected)
     assert all(h["compatibility_score"] == 0 for h in rejected)
 
 

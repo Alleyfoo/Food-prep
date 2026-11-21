@@ -32,7 +32,7 @@ def test_observation_records_corpus_scope_and_occurrence(conn, tmp_path):
     # not be expected to appear even if everyone cooked it. That is what
     # `underpowered` says, and saying it is the point.
     assert summary == {"observed": 1, "not_observed": 0, "underpowered": 1,
-                       "insufficient_coverage": 15}
+                       "insufficient_coverage": 4}
     by_candidate = {h["candidate"]: h for h in after}
     assert by_candidate["brown_butter"]["novelty"]["class"] == "rare"
     assert by_candidate["brown_butter"]["novelty"]["observed_count"] == 1
@@ -62,7 +62,7 @@ def test_absent_alias_is_insufficient_coverage_not_zero(tmp_path):
     )
     hypotheses = query.generate_scout_hypotheses(conn, "roasted_broccoli_component")
 
-    assert summary["insufficient_coverage"] == 17
+    assert summary["insufficient_coverage"] == 6
     assert all(h["novelty"]["class"] == "insufficient_coverage" for h in hypotheses)
     assert all(h["novelty"]["candidate_covered"] is False for h in hypotheses)
 

@@ -16,7 +16,9 @@ def test_generated_hypotheses_include_controlled_protocol(conn):
     )
 
     assert hypothesis["protocol"]["starting_ratio"]
-    assert "one warm roasted floret" in hypothesis["protocol"]["smallest_test"].lower()
+    # The rule now travels across browned brassicas and roots, so its test
+    # says "one warm piece" rather than naming a floret.
+    assert "one warm piece" in hypothesis["protocol"]["smallest_test"].lower()
     assert "not preservation guidance" in hypothesis["protocol"]["safety_note"]
 
 

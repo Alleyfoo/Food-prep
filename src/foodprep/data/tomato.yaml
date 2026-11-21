@@ -226,6 +226,7 @@ techniques:
 #   both   = has a tree AND appears as a filler (potato: tree + mild_base filler)
 ingredients:
   - canonical_name: tomato
+    family: fruit_vegetable
     aliases: "tomatoes\ntomaatti"
     base_roles: "acid\njuicy_component"
     default_availability_class: very_common
@@ -239,7 +240,7 @@ ingredients:
   - { canonical_name: cilantro,   base_roles: "herb",       default_availability_class: occasional }
   - { canonical_name: thyme,      base_roles: "herb",       default_availability_class: common }
   - { canonical_name: garlic,     base_roles: "aromatic",   default_availability_class: very_common }
-  - { canonical_name: onion,      base_roles: "aromatic",   default_availability_class: very_common, kind: full }
+  - { canonical_name: onion, family: allium,      base_roles: "aromatic",   default_availability_class: very_common, kind: full }
   - { canonical_name: mozzarella, base_roles: "fat\nprotein", default_availability_class: common }
   - { canonical_name: parmesan,   base_roles: "umami\nfat", default_availability_class: common }
   - { canonical_name: soft_cheese, aliases: "ricotta\nfeta", base_roles: "fat\nprotein", default_availability_class: common }
@@ -273,6 +274,7 @@ ingredients:
     avoid_when: "high_heat_boil\nalready_high_acid\ndairy_free"
   - { canonical_name: eggs,       base_roles: "protein",    default_availability_class: very_common }
   - canonical_name: cucumber
+    family: fruit_vegetable
     aliases: "kurkku\ncucumbers"
     base_roles: "crunch\nhydration"
     default_availability_class: very_common
@@ -282,8 +284,9 @@ ingredients:
   - { canonical_name: capers,     base_roles: "acid\numami", default_availability_class: occasional }
   - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
   - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
-  - { canonical_name: potato,     base_roles: "carb\nmild_base", default_availability_class: very_common, kind: both, aliases: "potatoes\nperuna" }
+  - { canonical_name: potato, family: root_tuber,     base_roles: "carb\nmild_base", default_availability_class: very_common, kind: both, aliases: "potatoes\nperuna" }
   - canonical_name: cabbage
+    family: brassica
     aliases: "cabbage\nkaali\nsavoy\nred cabbage\ngreen cabbage"
     base_roles: "crunch"
     default_availability_class: very_common
@@ -291,6 +294,7 @@ ingredients:
     availability:
       - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer-autumn; stored winter; imported year-round" }
   - canonical_name: broccoli
+    family: brassica
     aliases: "broccoli\nparskaali\nbroccolini"
     base_roles: "crunch"
     default_availability_class: very_common
@@ -303,6 +307,7 @@ ingredients:
   # Filler-level for now; rutabaga, kale, cucumber and stone fruit are queued
   # for full journey treatment in that order.
   - canonical_name: rutabaga
+    family: root_tuber
     aliases: "swede\nlanttu"
     base_roles: "carb\nmild_base"
     default_availability_class: very_common
@@ -322,6 +327,7 @@ ingredients:
     availability:
       - { region_code: FI, availability_class: very_common, seasonality_note: "canned/frozen year-round; fresh cobs late summer" }
   - canonical_name: kale
+    family: leafy_green
     aliases: "lehtikaali\ncurly kale"
     base_roles: "mild_base\ncrunch"
     default_availability_class: common
@@ -329,12 +335,14 @@ ingredients:
     availability:
       - { region_code: FI, availability_class: common, seasonality_note: "Finnish season autumn-winter; bagged imports most of the year" }
   - canonical_name: mango
+    family: sweet_fruit
     base_roles: "acid\nhydration"
     default_availability_class: common
     kind: both
     availability:
       - { region_code: FI, availability_class: common, seasonality_note: "imported year-round; ripeness varies — ripe is sweet, firm is tart" }
   - canonical_name: apricot
+    family: sweet_fruit
     aliases: "aprikoosi"
     base_roles: "acid"
     default_availability_class: occasional
@@ -342,6 +350,7 @@ ingredients:
     availability:
       - { region_code: FI, availability_class: occasional, seasonality_note: "fresh only in summer; dried year-round" }
   - canonical_name: peach
+    family: sweet_fruit
     aliases: "persikka\nnectarine"
     base_roles: "acid\nhydration"
     default_availability_class: occasional
@@ -1069,7 +1078,7 @@ transformations:
       - { family: state,   value: cooked, polarity: gain }
     state_profile:
       provides: "body\ncarb"
-      flavour: "savory\nsweet"
+      flavour: "sweet"
       texture: "soft\ntender"
       missing_risks: "salt\nfat"
       heaviness_score: 2
@@ -1586,7 +1595,7 @@ transformations:
     risks: "sulfurous_if_overcooked"
     state_profile:
       provides: "body"
-      flavour: "fresh_green\nsweet\nvegetal"
+      flavour: "fresh_green\nsweet"
       texture: "tender\njuicy"
       missing_risks: "salt\nacid"
       heaviness_score: 1

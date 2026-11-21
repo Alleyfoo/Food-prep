@@ -52,6 +52,10 @@ textures:
   - {id: dense, name: Dense, definition: Compact substantial structure.}
   - {id: creamy, name: Creamy, definition: Smooth thick and coating.}
   - {id: fibrous, name: Fibrous, definition: Noticeable strands or plant fibres during chewing.}
+  - {id: firm, name: Firm, definition: Holds its shape under pressure without crunching.}
+  - {id: jammy, name: Jammy, definition: Collapsed and sticky-soft with concentrated juices.}
+  - {id: spoonable, name: Spoonable, definition: Loose enough to be served with a spoon but not poured.}
+  - {id: liquid, name: Liquid, definition: Pours; eaten with a spoon or drunk.}
 
 corrections:
   - {id: too_flat, name: Too flat, definition: Lacks definition or contrast; consider salt acid or aromatics.}
@@ -77,6 +81,36 @@ destinations:
   - {id: preserved_component, name: Preserved component, definition: A safely preserved ingredient intended for later use.}
   - {id: batch_prepared_ingredient, name: Batch-prepared ingredient, definition: A reusable prepared state held for later meals.}
   - {id: drink, name: Drink, definition: A blended or poured drinkable preparation.}
+
+# What a finished state IS on the plate — not where it goes (that is
+# `destinations`). Scout uses it to keep a rule's smallest test honest: a rule
+# whose test says "stir into one cup of warm soup" must never be offered on
+# roasted florets. Each state's form is DERIVED from its technique via the
+# `techniques` list below; a transformation may override it with
+# `state_profile.form`. `keywords` are the nouns that commit a rule's wording
+# to that form — Scout refuses a hypothesis whose test names a different one.
+serving_forms:
+  - {id: cooked_pieces, name: Cooked pieces, definition: "Cooked vegetable or fruit eaten in pieces — roasted, fried, steamed, sautéed, braised.", techniques: [roast, char, fry, hash, smash_roast, stir_fry, saute, steam, boil, bake, braise], keywords: [fries]}
+  - {id: raw_salad, name: Raw or salad, definition: "Served cold and assembled — raw, salted, slawed, massaged or dressed.", techniques: [raw_assemble, raw_slaw, salt_and_drain, massage, salad], keywords: [salad, salads, slaw, slaws]}
+  - {id: pickle, name: Pickle or ferment, definition: "Preserved in brine or by fermentation and eaten as a sharp side.", techniques: [pickle, ferment], keywords: [pickle, sauerkraut, kimchi]}
+  - {id: mash, name: Mash, definition: "Cooked and broken down to a soft spoonable mass.", techniques: [mash], keywords: [mash, puree, purée]}
+  - {id: baked_dish, name: Baked dish, definition: "Layered or bound and baked as one dish.", techniques: [gratin], keywords: [gratin, casserole]}
+  - {id: spoonable, name: Sauce or spoonable, definition: "Spooned onto other food — sauces, salsas, compotes, caramelized onions, frozen bases.", techniques: [simmer, reduce, salsa, caramelize, freeze], keywords: [sauce, sauces, salsa, compote]}
+  - {id: soup, name: Soup, definition: "A liquid eaten from a bowl.", techniques: [soup], keywords: [soup, soups, chowder, broth]}
+  - {id: drink, name: Drink, definition: "Blended or poured and drunk.", techniques: [blend], keywords: [lassi, smoothie]}
+  - {id: dried, name: Dried, definition: "Dehydrated to a chewy concentrated piece.", techniques: [dry], keywords: []}
+  - {id: cooking_fat, name: Cooking fat, definition: "A fat transformed for cooking or dressing — not a dish to put things on.", techniques: [brown, clarify], keywords: []}
+
+# Culinary (not botanical) groupings of the ingredients that own states.
+# A Scout rule written for roasted stone fruit must not fire on roasted
+# broccoli just because both are sweet and toasted.
+ingredient_families:
+  - {id: brassica, name: Brassica, definition: Broccoli and cabbage — sulfurous when overcooked, sweet when browned.}
+  - {id: leafy_green, name: Leafy green, definition: "Kale and other sturdy greens — bitter, chewy, eaten as leaves."}
+  - {id: root_tuber, name: Root or tuber, definition: Potato and rutabaga — starchy, mild or earthy-sweet.}
+  - {id: allium, name: Allium, definition: Onion — pungent raw, sweet when cooked.}
+  - {id: fruit_vegetable, name: Fruiting vegetable, definition: Tomato and cucumber — botanically fruit, used savoury.}
+  - {id: sweet_fruit, name: Sweet fruit, definition: "Mango, apricot, peach — eaten as fruit, used savoury by choice."}
 
 confidence:
   - {id: high, name: High, definition: Strong curated culinary support.}

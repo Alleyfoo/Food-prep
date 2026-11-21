@@ -25,6 +25,10 @@ def test_project_vocabulary_has_shared_cook_scout_categories():
         "destinations",
         "confidence",
         "uncertainty",
+        # what a state is on the plate, and which ingredients behave alike —
+        # together they scope where a Scout rule's wording holds
+        "serving_forms",
+        "ingredient_families",
     }
     assert vocabulary.require("destinations", "side_dish").name == "Side dish"
     assert vocabulary.require("flavours", "fermented_funky").definition

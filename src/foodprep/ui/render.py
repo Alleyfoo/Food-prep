@@ -256,7 +256,9 @@ def claim_cards_html(h: dict) -> str:
     c_body = h.get("shared_function") or h.get("meaningful_difference") or ""
     strength = (h.get("inference_strength") or "").replace("_", " ")
     if strength:
-        c_body = f"{c_body} The substitution reasoning is {strength}."
+        # inference_strength rates the argument, not the food (see
+        # tests/test_claim_vocabulary.py) — say so in those words.
+        c_body = f"{c_body} Strength of this argument: {strength}."
 
     return (
         '<div class="claim-pair">'

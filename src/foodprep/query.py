@@ -994,6 +994,110 @@ def classify_scout_candidate(compatibility_evidence: list[str],
     return "weak_hypothesis"
 
 
+def state_label(component_name: str) -> str:
+    """How a state reads in a sentence: roasted_broccoli_component -> roasted broccoli."""
+    cleaned = component_name.replace("_component", " ").replace("_base", " ")
+    return " ".join(cleaned.replace("_", " ").split())
+
+
+def _state_scope(conn: sqlite3.Connection, component_name: str) -> dict[str, Any]:
+    """Serving form, owning ingredient and its family for one state."""
+    row = conn.execute(
+        """
+        SELECT sp.serving_form, i.canonical_name AS ingredient, i.family
+        FROM component_state_profiles sp
+        JOIN components c ON c.component_id = sp.component_id
+        LEFT JOIN transformations t ON t.output_component_id = c.component_id
+        LEFT JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+        WHERE c.name = ?
+        LIMIT 1
+        """,
+        (component_name,),
+    ).fetchone()
+    return dict(row) if row else {"serving_form": None, "ingredient": None,
+                                  "family": None}
+
+
+def _rule_out_of_scope(rule: dict[str, Any], component_name: str,
+                       scope: dict[str, Any]) -> str | None:
+    """Why a rule's wording does not hold for this state, or None if it does."""
+    states = _split_list(rule.get("states"))
+    if states:
+        if component_name not in states:
+            return "written only for " + ", ".join(state_label(s) for s in states)
+        return None
+    forms = _split_list(rule.get("forms"))
+    if forms and scope["serving_form"] not in forms:
+        return ("the rule's test is written for {wanted}, and this state is {got}"
+                .format(wanted=" / ".join(f.replace("_", " ") for f in forms),
+                        got=(scope["serving_form"] or "unknown").replace("_", " ")))
+    families = _split_list(rule.get("families"))
+    if families and scope["family"] not in families:
+        return ("it is written for {wanted}, and {ing} is {got}"
+                .format(wanted=" / ".join(f.replace("_", " ") for f in families),
+                        ing=scope["ingredient"] or "this state",
+                        got=(scope["family"] or "unclassified").replace("_", " ")))
+    return None
+
+
+#: Rule fields a cook reads as instructions. A serving-form noun in one of
+#: these commits the rule to that form ("stir into one cup of warm soup").
+#: Risks and failures are excluded on purpose: "may taste like soup" is a
+#: comparison, not a claim about what the state is.
+_FORM_CHECKED_FIELDS = ("shared_function", "starting_ratio", "smallest_test")
+_TEXT_FIELDS = ("shared_function", "meaningful_difference", "expected_risk")
+_PROTOCOL_FIELDS = ("starting_ratio", "smallest_test", "success_condition",
+                    "likely_failure", "corrections", "safety_note")
+
+
+def _wording_leak(conn: sqlite3.Connection, texts: dict[str, str],
+                  scope: dict[str, Any], rule: dict[str, Any]) -> str | None:
+    """Name another food the rendered wording commits to, or None.
+
+    The last line of defence: scope is what keeps rules in place, this check
+    is what guarantees that a mis-scoped rule never reaches a cook. Ingredient
+    names (soy sauce, pickles) are removed before looking for form nouns.
+    """
+    ingredient_names = [
+        r[0].replace("_", " ") for r in conn.execute(
+            "SELECT canonical_name FROM ingredients ORDER BY length(canonical_name) DESC")
+    ]
+    own = {scope["ingredient"], rule["source"], rule["candidate"]}
+    owners = [r[0] for r in conn.execute(
+        "SELECT canonical_name FROM ingredients WHERE family IS NOT NULL")
+        if r[0] not in own]
+    for field, text in texts.items():
+        lowered = text.lower()
+        for owner in owners:
+            word = owner.replace("_", " ")
+            if re.search(rf"\b{re.escape(word)}(e?s)?\b", lowered):
+                return f"its {field.replace('_', ' ')} names {word}"
+        if field not in _FORM_CHECKED_FIELDS:
+            continue
+        stripped = lowered
+        for name in ingredient_names:
+            stripped = re.sub(rf"\b{re.escape(name)}\b", " ", stripped)
+        for term in _serving_form_terms():
+            if term.id == scope["serving_form"]:
+                continue
+            for keyword in term.metadata.get("keywords") or []:
+                if re.search(rf"\b{re.escape(keyword)}\b", stripped):
+                    return (f"its {field.replace('_', ' ')} is written for "
+                            f"{term.name.lower()} ({keyword!r})")
+    return None
+
+
+_FORM_TERMS: tuple | None = None
+
+
+def _serving_form_terms():
+    global _FORM_TERMS
+    if _FORM_TERMS is None:
+        from .vocabulary import load_vocabulary
+        _FORM_TERMS = load_vocabulary().terms("serving_forms")
+    return _FORM_TERMS
+
+
 def generate_scout_hypotheses(
     conn: sqlite3.Connection,
     component_name: str,
@@ -1008,6 +1112,8 @@ def generate_scout_hypotheses(
     if state is None:
         return []
     state_dimensions = set(state["flavour_tags"])
+    scope = _state_scope(conn, component_name)
+    label = state_label(component_name)
     rows = conn.execute(
         """
         SELECT ar.*, src.canonical_name AS source,
@@ -1028,9 +1134,29 @@ def generate_scout_hypotheses(
         matched = [dimension for dimension in required if dimension in state_dimensions]
         missing = [dimension for dimension in required if dimension not in state_dimensions]
         evidence = []
+        # Wording first: a rule whose test names another dish is not a
+        # hypothesis about this state, however well the flavours line up.
+        out_of_scope = _rule_out_of_scope(hypothesis, component_name, scope)
+        if out_of_scope is None and hypothesis["source"] == scope["ingredient"]:
+            out_of_scope = (f"it replaces {hypothesis['source']}, which is what "
+                            "this state is made of")
+        protocol = conn.execute(
+            "SELECT starting_ratio, smallest_test, success_condition, "
+            "likely_failure, corrections, safety_note "
+            "FROM tasting_protocol_templates WHERE analogy_id = ?",
+            (hypothesis["analogy_id"],),
+        ).fetchone()
+        protocol = ({k: v.replace("{state}", label) for k, v in dict(protocol).items()}
+                    if protocol else None)
+        for field in _TEXT_FIELDS:
+            hypothesis[field] = hypothesis[field].replace("{state}", label)
+        if out_of_scope is None and matched and not missing:
+            texts = {f: hypothesis[f] for f in _TEXT_FIELDS}
+            texts.update(protocol or {})
+            out_of_scope = _wording_leak(conn, texts, scope, hypothesis)
         # A rule fires only when the state shows EVERY required dimension —
         # a partial match must not qualify as full compatibility evidence.
-        if matched and not missing:
+        if out_of_scope is None and matched and not missing:
             evidence.append("state fit: " + ", ".join(matched))
             evidence.append("mechanism: " + hypothesis["mechanism"].replace("_", " "))
             evidence.append("analogy: " + hypothesis["shared_function"])
@@ -1064,13 +1190,7 @@ def generate_scout_hypotheses(
             novelty["target_covered"] = bool(novelty["target_covered"])
             novelty["candidate_covered"] = bool(novelty["candidate_covered"])
             hypothesis["novelty"] = novelty
-        protocol = conn.execute(
-            "SELECT starting_ratio, smallest_test, success_condition, "
-            "likely_failure, corrections, safety_note "
-            "FROM tasting_protocol_templates WHERE analogy_id = ?",
-            (hypothesis["analogy_id"],),
-        ).fetchone()
-        hypothesis["protocol"] = dict(protocol) if protocol else None
+        hypothesis["protocol"] = protocol
         trials = conn.execute(
             """SELECT tt.tested_at, tt.verdict, tt.preparation, tt.ratio,
                       tt.temperature, tt.supporting_ingredients,
@@ -1085,21 +1205,53 @@ def generate_scout_hypotheses(
         hypothesis["candidate_class"] = classify_scout_candidate(
             evidence, hypothesis["novelty"]["class"]
         )
+        hypothesis["scope_reason"] = out_of_scope
         if hypothesis["candidate_class"] == "rejected":
             hypothesis["rejection_reason"] = (
+                "Rule does not apply here: " + out_of_scope
+                if out_of_scope else
                 "State lacks required dimensions: " + ", ".join(missing)
             )
         else:
             hypothesis["rejection_reason"] = None
-            hypothesis["explanation"] = hypothesis["explanation_template"].format(
-                candidate=hypothesis["candidate"], source=hypothesis["source"],
-                shared_function=hypothesis["shared_function"],
-                matched_dimensions=", ".join(matched),
+            # A sentence for a cook: names without underscores, and the
+            # embedded clause lower-cased ("because both provide fat").
+            shared = hypothesis["shared_function"]
+            shared = shared[:1].lower() + shared[1:]
+            explanation = hypothesis["explanation_template"].format(
+                candidate=hypothesis["candidate"].replace("_", " "),
+                source=hypothesis["source"].replace("_", " "),
+                shared_function=shared,
+                matched_dimensions=", ".join(d.replace("_", " ") for d in matched),
+                state=label,
             )
+            hypothesis["explanation"] = explanation[:1].upper() + explanation[1:]
         if include_rejected or hypothesis["candidate_class"] != "rejected":
             hypotheses.append(hypothesis)
+    hypotheses = _one_card_per_candidate(hypotheses)
     hypotheses.sort(key=lambda h: (-h["compatibility_score"], h["candidate"]))
     return hypotheses
+
+
+def _one_card_per_candidate(hypotheses: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Two rules can propose the same candidate for one state (horseradish on
+    baked potato arrives from the baked-potato rule and the roasted-root rule).
+    Show one: the one with a recorded tasting, else the stronger inference.
+    Rows were fetched strongest-first, so the first seen wins ties."""
+    kept: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    rejected = []
+    for h in hypotheses:
+        if h["candidate_class"] == "rejected":
+            rejected.append(h)
+            continue
+        key = h["candidate"]
+        if key not in kept:
+            kept[key] = h
+            order.append(key)
+        elif h["trials"] and not kept[key]["trials"]:
+            kept[key] = h
+    return [kept[k] for k in order] + rejected
 
 
 def render_generated_hypotheses(conn: sqlite3.Connection,

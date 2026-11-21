@@ -108,9 +108,36 @@ def _source_id(conn: sqlite3.Connection, sid: str) -> int:
     return row[0]
 
 
+class _StrictLoader(yaml.SafeLoader):
+    """SafeLoader that refuses duplicate mapping keys.
+
+    PyYAML silently keeps the LAST value of a repeated key. A rule whose
+    ``- id:`` line went missing therefore merged into the rule above it and
+    overwrote its fields — one rule vanished and nothing complained.
+    """
+
+
+def _construct_unique_mapping(loader: yaml.SafeLoader, node: yaml.MappingNode,
+                              deep: bool = False) -> dict:
+    seen: set = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise LoadError(
+                f"duplicate key {key!r} at line {key_node.start_mark.line + 1}"
+                f" of {key_node.start_mark.name}"
+            )
+        seen.add(key)
+    return loader.construct_mapping(node, deep=deep)
+
+
+_StrictLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping)
+
+
 def load_yaml(path: Path | str = DATA_PATH) -> dict:
     with open(path, "r", encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+        return yaml.load(fh, Loader=_StrictLoader)  # noqa: S506 - SafeLoader subclass
 
 
 def _deep_merge(base: dict, extra: dict) -> dict:
@@ -382,8 +409,8 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
     for ing in data.get("ingredients", []):
         conn.execute(
             "INSERT INTO ingredients(canonical_name, aliases, base_roles, "
-            "default_availability_class, kind, repairs, avoid_when, notes) "
-            "VALUES (?,?,?,?,?,?,?,?)",
+            "default_availability_class, kind, repairs, avoid_when, notes, family) "
+            "VALUES (?,?,?,?,?,?,?,?,?)",
             (
                 ing["canonical_name"],
                 ing.get("aliases"),
@@ -393,6 +420,8 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 ing.get("repairs"),
                 ing.get("avoid_when"),
                 ing.get("notes"),
+                (vocabulary.require("ingredient_families", ing["family"]).id
+                 if ing.get("family") else None),
             ),
         )
         ing_id = conn.execute(
@@ -495,16 +524,26 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
         if state_profile:
             for role in _split_list(state_profile.get("provides")):
                 _role_id(conn, role)  # validate authored functional claims
+            # Flavour and texture tags drive Scout matching, so an unknown or
+            # newline-folded tag must fail here instead of silently matching
+            # nothing.
+            for tag in _split_list(state_profile.get("flavour")):
+                vocabulary.require("flavours", tag)
+            for tag in _split_list(state_profile.get("texture")):
+                vocabulary.require("textures", tag)
+            form = _serving_form(vocabulary, tr["technique"],
+                                 state_profile.get("form"))
             conn.execute(
                 "INSERT INTO component_state_profiles(component_id, provides_roles, "
                 "flavour_tags, texture_tags, missing_risks, heaviness_score, "
-                "dryness_score, notes) VALUES (?,?,?,?,?,?,?,?)",
+                "dryness_score, notes, serving_form) VALUES (?,?,?,?,?,?,?,?,?)",
                 (
                     comp_id, state_profile.get("provides"),
                     state_profile.get("flavour"), state_profile.get("texture"),
                     state_profile.get("missing_risks"),
                     state_profile.get("heaviness_score"),
                     state_profile.get("dryness_score"), state_profile.get("notes"),
+                    form,
                 ),
             )
 
@@ -702,12 +741,28 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
         for dimension in _split_list(rule["required_dimensions"]):
             vocabulary.require("flavours", dimension)
         inference = vocabulary.require("confidence", rule["inference_strength"]).id
+        forms = _as_list(rule.get("forms"))
+        families = _as_list(rule.get("families"))
+        states = _as_list(rule.get("states"))
+        for form in forms:
+            vocabulary.require("serving_forms", form)
+        for family in families:
+            vocabulary.require("ingredient_families", family)
+        for state in states:
+            _component_id(conn, state)  # must already exist as a component
+        if not (forms or states):
+            # Without a scope a rule fires wherever the flavour tags line up,
+            # and its smallest test names a dish the state is not.
+            raise LoadError(
+                f"Scout rule {rule['id']!r} needs `forms` or `states`: say "
+                "where its wording holds")
         conn.execute(
             "INSERT INTO analogy_rules(analogy_id, known_pairing, "
             "source_ingredient_id, substitute_ingredient_id, mechanism, "
             "shared_function, meaningful_difference, expected_risk, "
-            "required_dimensions, explanation_template, inference_strength) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            "required_dimensions, explanation_template, inference_strength, "
+            "forms, families, states) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
                 rule["id"], rule["known_pairing"],
                 _ingredient_id(conn, rule["source_ingredient"]),
@@ -716,6 +771,8 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                 rule["meaningful_difference"], rule["expected_risk"],
                 rule["required_dimensions"], rule["explanation_template"],
                 inference,
+                "\n".join(forms) or None, "\n".join(families) or None,
+                "\n".join(states) or None,
             ),
         )
         protocol = rule.get("protocol")
@@ -730,6 +787,28 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                     protocol["corrections"], protocol["safety_note"],
                 ),
             )
+
+
+def _as_list(value) -> list[str]:
+    """A YAML list, or a newline-separated string, as a list of ids."""
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return _split_list(value)
+    return [str(v).strip() for v in value if str(v).strip()]
+
+
+def _serving_form(vocabulary, technique: str, override: str | None) -> str:
+    """The serving form a technique produces, unless the state overrides it."""
+    if override:
+        return vocabulary.require("serving_forms", override).id
+    matches = [term.id for term in vocabulary.terms("serving_forms")
+               if technique in (term.metadata.get("techniques") or [])]
+    if len(matches) != 1:
+        raise LoadError(
+            f"technique {technique!r} maps to {len(matches)} serving forms "
+            f"({matches}); list it under exactly one, or set state_profile.form")
+    return matches[0]
 
 
 def build(conn: sqlite3.Connection, data_path: Path | str = DATA_PATH,
