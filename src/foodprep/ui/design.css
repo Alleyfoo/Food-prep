@@ -28,28 +28,36 @@
 }
 
 /* ---- pill rows: an st.radio wearing the handoff's pill styling.
-       Applies to any st.container keyed "<something>_pills". ---- */
+       Applies to any st.container keyed "<something>_pills".
+       Streamlit 1.67 rebuilt st.radio on React Aria: each option label now
+       sits inside a wrapper div instead of directly under the radiogroup, so
+       every rule matches both shapes through OPT =
+       :is([role="radiogroup"] > label, [data-testid="stRadioOption"]). ---- */
 [class*="_pills"] [role="radiogroup"] {
   gap: var(--space-2) !important; flex-wrap: wrap;
 }
-[class*="_pills"] [role="radiogroup"] > label {
+[class*="_pills"] :is([role="radiogroup"] > label, [data-testid="stRadioOption"]) {
   border-radius: var(--r-pill); border: 1px solid var(--line-2);
   padding: var(--space-2) calc(var(--space-3) * 1.2);
   margin: 0 !important; cursor: pointer; background: transparent;
   transition: background-color .15s ease, border-color .15s ease;
 }
-/* the radio dot itself — the pill IS the affordance */
-[class*="_pills"] [role="radiogroup"] > label > div:first-child { display: none !important; }
-[class*="_pills"] [role="radiogroup"] > label p {
+/* hide the radio dot — the pill IS the affordance. It is label >
+   div:first-child up to 1.50; 1.67 (React Aria) nests it one level deeper,
+   beside the text container */
+[class*="_pills"] [role="radiogroup"] > label > div:first-child,
+[class*="_pills"] [data-testid="stRadioOption"] > div > div:first-child:not([data-testid])
+  { display: none !important; }
+[class*="_pills"] :is([role="radiogroup"] > label, [data-testid="stRadioOption"]) p {
   font-family: var(--sans) !important;
   font-size: 14px !important; font-weight: 500 !important;
   color: var(--ink) !important; line-height: 1.2 !important;
 }
-[class*="_pills"] [role="radiogroup"] > label:hover { background: rgba(26,27,22,.07); }
-[class*="_pills"] [role="radiogroup"] > label:has(input:checked) {
+[class*="_pills"] :is([role="radiogroup"] > label, [data-testid="stRadioOption"]):hover { background: rgba(26,27,22,.07); }
+[class*="_pills"] :is([role="radiogroup"] > label, [data-testid="stRadioOption"]):has(input:checked) {
   background: var(--primary); border-color: var(--primary);
 }
-[class*="_pills"] [role="radiogroup"] > label:has(input:checked) p {
+[class*="_pills"] :is([role="radiogroup"] > label, [data-testid="stRadioOption"]):has(input:checked) p {
   color: var(--neutral-100) !important;
 }
 /* Two-level navigation: the section rail is the louder of the two, and the
@@ -58,14 +66,14 @@
 /* Breathing room above the rail when the availability strip is hidden
    (reference tabs); the strip's own margin covers it otherwise. */
 .st-key-section_rail_pills { margin-top: var(--space-4); }
-.st-key-section_rail_pills [role="radiogroup"] > label p {
+.st-key-section_rail_pills :is([role="radiogroup"] > label, [data-testid="stRadioOption"]) p {
   font-size: 16px !important; font-weight: 600 !important;
 }
-.st-key-tab_rail_pills [role="radiogroup"] > label { border-color: transparent; }
-.st-key-tab_rail_pills [role="radiogroup"] > label:has(input:checked) {
+.st-key-tab_rail_pills :is([role="radiogroup"] > label, [data-testid="stRadioOption"]) { border-color: transparent; }
+.st-key-tab_rail_pills :is([role="radiogroup"] > label, [data-testid="stRadioOption"]):has(input:checked) {
   background: rgba(26,27,22,.08); border-color: var(--line-2);
 }
-.st-key-tab_rail_pills [role="radiogroup"] > label:has(input:checked) p {
+.st-key-tab_rail_pills :is([role="radiogroup"] > label, [data-testid="stRadioOption"]):has(input:checked) p {
   color: var(--ink) !important;
 }
 .tab-rule {
@@ -690,11 +698,15 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   background-color: var(--bg-2) !important;
 }
 
-/* ============= SELECT / MULTISELECT POLISH ============= */
-[data-baseweb="select"] > div {
+/* ============= SELECT / MULTISELECT POLISH =============
+   Up to 1.50 the input box is [data-baseweb="select"] > div; 1.67 rebuilt
+   selects on React Aria, where it is a [data-rac][role="group"]. Without the
+   second selector inputs fall back to the theme's beige secondary colour. */
+[data-baseweb="select"] > div,
+:is([data-testid="stSelectbox"], [data-testid="stMultiSelect"]) [data-rac][role="group"] {
   transition: border-color .15s ease;
 }
-[data-baseweb="select"] > div:hover {
+:is([data-baseweb="select"] > div, :is([data-testid="stSelectbox"], [data-testid="stMultiSelect"]) [data-rac][role="group"]):hover {
   border-color: var(--line-3) !important;
 }
 
@@ -720,7 +732,8 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink-4) !important;
   font-weight: 500 !important; margin-bottom: 4px !important;
 }
-[data-baseweb="select"] > div { background: var(--surface) !important; }
+[data-baseweb="select"] > div,
+:is([data-testid="stSelectbox"], [data-testid="stMultiSelect"]) [data-rac][role="group"] { background: var(--surface) !important; }
 /* ============= TASTE CIRCLE (grid + rail, shared with the map) ============= */
 .dim-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);

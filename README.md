@@ -193,9 +193,10 @@ opening.
   ingredients are popular.
 - **Tastings are recorded through the CLI.** The app has no write path into
   the append-only record, by design so far.
-- **Streamlit is pinned to 1.50.x** (`requirements.txt` and `pyproject.toml`,
-  kept equal by a test). Newer releases are untested here; widen the pin only
-  after the suite passes on one.
+- **Streamlit is pinned to `>=1.50,<1.68`** (`requirements.txt` and
+  `pyproject.toml`, kept equal by a test). Both ends are tested. Before raising
+  the cap, run the suite **and look at the app**: 1.67 changed widget markup,
+  which broke the styling without failing a single test.
 - **The app builds its database once per process.** Restart `streamlit run`
   after editing YAML.
 
