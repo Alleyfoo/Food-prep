@@ -1,0 +1,9 @@
+Chosen: Component Explorer = roasted_tomato_component, Ingredient Explorer = tomato
+
+Taste Circle shows      : roasted_broccoli_component
+Map shows               : broccoli
+Journeys shows          : broccoli
+Scout shows             : roasted_broccoli_component
+Back in Cook, tab       : Ingredient Explorer
+Component Explorer kept : roasted_tomato_component
+Exceptions              : []

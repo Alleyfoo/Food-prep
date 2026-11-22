@@ -1,0 +1,24 @@
+== Ingredient Explorer, broccoli, Roast card, with mango/lemon/miso on hand
+  Available now             : Available now lemon — have it acid Missing but useful salt sea salt fat garlic confit ghee olive oil herb pars
+  Missing but useful        : Missing but useful salt sea salt fat garlic confit ghee olive oil herb parsley protein parmesan carb pasta Not
+  Not paired here yet       : Not paired here yet mango miso Routes with what you have Creamy and acidic lemon · also needs yogurt, dill Sou
+  Routes with what you have : Routes with what you have Creamy and acidic lemon · also needs yogurt, dill Sour and toasted nut lemon · also 
+
+== Plate Balance: does it show destination-unsuitable roles?
+  'unsuitable' on screen   : False
+
+== Filler Profiles, mango
+  mentions broccoli        : False
+  Avoid when               : Avoid when — FI shop common Mode no pairings yet — not suggested by
+
+== Scout, roasted broccoli
+  mango anywhere on screen : False
+  candidates               : ['eggs', 'lingonberry vinegar', 'miso', 'rye crumbs', 'tahini']
+  rejected expander        : (none)
+  sample rejection reasons :
+
+Exceptions: []
+accepted 6 rejected 45 shown in UI 6
+ - anchovy | Rule does not apply here: the rule's test is written for soup, and this state is cooked pieces
+ - apricot | Rule does not apply here: the rule's test is written for mash, and this state is cooked pieces
+ - balsamic_vinegar | Rule does not apply here: the rule's test is written for raw salad, and this state is cooked pieces
