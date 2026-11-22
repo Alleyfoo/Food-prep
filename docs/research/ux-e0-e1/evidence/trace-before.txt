@@ -1,0 +1,36 @@
+Version under test: subject on first load
+  Component Explorer  : roasted_tomato_component
+  Taste Circle        : roasted_broccoli_component
+  Map                 : broccoli
+  Journeys            : broccoli
+  Scout               : roasted_broccoli_component
+  Ingredient Explorer : broccoli
+
+==== Test A: roasted cabbage, lemon + garlic
+
+-- Test A: visiting every view, target roasted_cabbage_component
+  Cook       > Component Explorer   shows roasted_cabbage_component      ok
+  Cook       > Taste Circle         shows roasted_broccoli_component     WRONG  -> re-picked via Cards
+  Explore    > Map                  shows broccoli                       WRONG  -> re-picked
+  Explore    > Journeys             shows broccoli                       WRONG  -> re-picked
+  Experiment > Scout                shows roasted_broccoli_component     WRONG  -> re-picked
+  Cook       > Ingredient Explorer  shows broccoli                       WRONG  -> re-picked
+  back at start: Component Explorer shows roasted_cabbage_component; available = ['lemon', 'garlic']
+  Test A: 5 re-picks, 13 interactions after the first selection
+
+==== Reload (new session; URL query parameters carried over if any)
+  URL query parameters: (none)
+  after reload: section=Cook, Component Explorer shows roasted_tomato_component, available = []
+
+==== Test B: switch to roasted tomato
+
+-- Test B: visiting every view, target roasted_tomato_component
+  Cook       > Component Explorer   shows roasted_tomato_component       ok
+  Cook       > Taste Circle         shows roasted_cabbage_component      WRONG  -> re-picked via Cards
+  Explore    > Map                  shows cabbage                        WRONG  -> re-picked
+  Explore    > Journeys             shows cabbage                        WRONG  -> re-picked
+  Experiment > Scout                shows roasted_cabbage_component      WRONG  -> re-picked
+  Cook       > Ingredient Explorer  shows cabbage                        WRONG  -> re-picked
+  Test B: 5 re-picks, 13 interactions in total
+
+Exceptions: []

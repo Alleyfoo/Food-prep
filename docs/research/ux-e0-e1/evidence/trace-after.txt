@@ -1,0 +1,36 @@
+Version under test: subject on first load
+  Component Explorer  : roasted_broccoli_component
+  Taste Circle        : roasted_broccoli_component
+  Map                 : broccoli
+  Journeys            : broccoli
+  Scout               : roasted_broccoli_component
+  Ingredient Explorer : broccoli
+
+==== Test A: roasted cabbage, lemon + garlic
+
+-- Test A: visiting every view, target roasted_cabbage_component
+  Cook       > Component Explorer   shows roasted_cabbage_component      ok
+  Cook       > Taste Circle         shows roasted_cabbage_component      ok
+  Explore    > Map                  shows cabbage                        ok
+  Explore    > Journeys             shows cabbage                        ok
+  Experiment > Scout                shows roasted_cabbage_component      ok
+  Cook       > Ingredient Explorer  shows cabbage                        ok
+  back at start: Component Explorer shows roasted_cabbage_component; available = ['lemon', 'garlic']
+  Test A: 0 re-picks, 6 interactions after the first selection
+
+==== Reload (new session; URL query parameters carried over if any)
+  URL query parameters: {'ingredient': ['cabbage'], 'tab': ['component-explorer'], 'state': ['roasted_cabbage_component'], 'have': ['lemon,garlic']}
+  after reload: section=Cook, Component Explorer shows roasted_cabbage_component, available = ['lemon', 'garlic']
+
+==== Test B: switch to roasted tomato
+
+-- Test B: visiting every view, target roasted_tomato_component
+  Cook       > Component Explorer   shows roasted_tomato_component       ok
+  Cook       > Taste Circle         shows roasted_tomato_component       ok
+  Explore    > Map                  shows tomato                         ok
+  Explore    > Journeys             shows tomato                         ok
+  Experiment > Scout                shows roasted_tomato_component       ok
+  Cook       > Ingredient Explorer  shows tomato                         ok
+  Test B: 0 re-picks, 6 interactions in total
+
+Exceptions: []
