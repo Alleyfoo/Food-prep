@@ -117,7 +117,11 @@ def test_t5_record_a_tasting_from_the_app(tmp_path, monkeypatch):
         next(a for a in at.text_area if a.key == "tasting_observations").input(
             "nutty, not greasy")
         next(c for c in at.checkbox if c.key == "tasting_safety").check()
-        at.button(key="FormSubmitter:tasting_form-Save tasting").click().run()
+        at.button(key="FormSubmitter:tasting_form-Review tasting").click().run()
+        assert not at.exception, at.exception
+        # Reviewing writes nothing (E0: review before a permanent save).
+        assert copy.read_bytes() == before_real
+        at.button(key="tasting_confirm").click().run()
         assert not at.exception, at.exception
 
         assert any("Saved to" in s.value for s in at.success)
@@ -147,8 +151,11 @@ def test_t5_refused_tasting_keeps_what_was_typed(tmp_path, monkeypatch):
         _radio(at, "active_section").set_value("Experiment").run()
         text = {t.key: t for t in at.text_input}
         text["tasting_preparation"].input("tossed warm")
-        at.button(key="FormSubmitter:tasting_form-Save tasting").click().run()
-        assert any("safety" in e.value.lower() for e in at.error)
+        at.button(key="FormSubmitter:tasting_form-Review tasting").click().run()
+        errors = " ".join(e.value for e in at.error)
+        # Plain words, no raw field names (Dembrandt audit D9).
+        assert "safely prepared" in errors and "safety_confirmed" not in errors
+        assert "“What you tasted”" in errors
         assert {t.key: t for t in at.text_input}["tasting_preparation"].value == "tossed warm"
         assert copy.read_bytes() == Path(loader.TASTINGS_PATH).read_bytes()
     finally:

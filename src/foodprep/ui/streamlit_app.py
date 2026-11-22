@@ -12,6 +12,7 @@ Run:  streamlit run app.py
 from __future__ import annotations
 
 import sqlite3
+import uuid
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -74,6 +75,152 @@ def get_conn():
 CONN = get_conn()
 
 
+# ---- Shared investigation context (UX experiment E1) ----------------------
+#
+# One context, three separate things: the INGREDIENT being investigated
+# (tomato), the PREPARED STATE within it (roasted_tomato_component, or None),
+# and the AVAILABLE ingredients (the "What do I have" list). Every view that
+# has a subject picker reads its value from here before drawing and writes
+# back here when the user changes it, so a subject chosen anywhere is the
+# subject everywhere. View-specific selections (a Taste Circle dimension, a
+# Map node, a locked filler) stay in their views.
+#
+# Invariant: if a state is set, the ingredient is the one it is made from
+# (query.ingredient_for_component). Changing the ingredient to a different
+# one clears the state rather than guessing a state of the new ingredient.
+
+#: The single app-wide starting point. Views no longer have defaults of
+#: their own, so nothing can silently fall back to broccoli.
+CTX_DEFAULT = ("broccoli", "roasted_broccoli_component")
+
+
+def ctx_ingredient() -> str:
+    return st.session_state.get("ctx_ingredient") or CTX_DEFAULT[0]
+
+
+def ctx_state() -> str | None:
+    return st.session_state.get("ctx_state")
+
+
+def set_ctx_state(component: str | None) -> None:
+    """Make a prepared state the subject; its ingredient follows."""
+    if not component:
+        return
+    st.session_state.ctx_state = component
+    ingredient = query.ingredient_for_component(CONN, component)
+    if ingredient:
+        st.session_state.ctx_ingredient = ingredient
+
+
+def set_ctx_ingredient(ingredient: str | None) -> None:
+    """Make an ingredient the subject; a state of another ingredient is dropped."""
+    if not ingredient:
+        return
+    st.session_state.ctx_ingredient = ingredient
+    state = ctx_state()
+    if state and query.ingredient_for_component(CONN, state) != ingredient:
+        st.session_state.ctx_state = None
+
+
+def _sync_picker(key: str, options: list, value) -> None:
+    """Show the context's value in a view's picker before it is drawn.
+
+    A value the view cannot show becomes None (an empty picker with a
+    placeholder), never the view's own favourite.
+    """
+    st.session_state[key] = value if value in options else None
+
+
+def _picked_state(key: str) -> None:
+    set_ctx_state(st.session_state.get(key))
+
+
+def _picked_ingredient(key: str) -> None:
+    set_ctx_ingredient(st.session_state.get(key))
+
+
+#: Query parameters: short, readable, and only stable catalogue ids.
+_QP_INGREDIENT, _QP_STATE, _QP_HAVE, _QP_TAB = "ingredient", "state", "have", "tab"
+
+
+def _tab_slug(tab: str) -> str:
+    return tab.lower().replace(" ", "-")
+
+
+def load_context_from_url() -> None:
+    """Restore the investigation from the URL once, at the start of a session.
+
+    Unknown ids are ignored, not guessed at: a stale or edited link falls back
+    to the app default for that part only.
+    """
+    if st.session_state.get("_ctx_loaded"):
+        return
+    st.session_state._ctx_loaded = True
+    params = st.query_params
+    ingredient = params.get(_QP_INGREDIENT)
+    state = params.get(_QP_STATE)
+    if state in query.components_list(CONN):
+        set_ctx_state(state)                      # its ingredient follows
+    elif ingredient in query.tree_ingredients(CONN):
+        st.session_state.ctx_ingredient = ingredient
+        st.session_state.ctx_state = None         # an ingredient, no state
+    else:
+        st.session_state.ctx_ingredient, st.session_state.ctx_state = CTX_DEFAULT
+    have = [h for h in (params.get(_QP_HAVE) or "").split(",") if h]
+    known = set(query.ingredients_list(CONN))
+    if have:
+        st.session_state.available_items = [h for h in have if h in known]
+    tab = params.get(_QP_TAB)
+    by_slug = {_tab_slug(t): t for t in TABS}
+    if tab in by_slug:
+        st.session_state.active_tab = by_slug[tab]
+
+
+def write_context_to_url(active_tab: str) -> None:
+    """Mirror the context in the URL so a reload or a shared link restores it.
+
+    Written only when it changed. Streamlit updates the address without adding
+    a browser history entry, so Back leaves the app rather than stepping
+    through investigation states (documented in docs/research/ux-e0-e1).
+    """
+    wanted = {_QP_INGREDIENT: ctx_ingredient(), _QP_TAB: _tab_slug(active_tab)}
+    if ctx_state():
+        wanted[_QP_STATE] = ctx_state()
+    have = st.session_state.get("available_items") or []
+    if have:
+        wanted[_QP_HAVE] = ",".join(have)
+    if st.query_params.to_dict() != wanted:
+        st.query_params.from_dict(wanted)
+
+
+#: Views whose content does not follow the investigation subject.
+_SUBJECT_FREE_TABS = {"Plate Balance", "Filler Profiles"}
+
+
+def context_strip(active_tab: str) -> None:
+    """One line saying what is being investigated and what is on hand.
+
+    Shown on every tab, including Explore, where the "What do I have" box is
+    hidden but the list still applies. Change either from any view's picker.
+    """
+    state = ctx_state()
+    subject = (f'<b>{_esc(_pretty(state).capitalize())}</b>'
+               f'<span class="ctx-sub"> · from {_esc(_pretty(ctx_ingredient()))}</span>'
+               if state else
+               f'<b>{_esc(_pretty(ctx_ingredient()).capitalize())}</b>'
+               f'<span class="ctx-sub"> · no prepared state chosen</span>')
+    have = st.session_state.get("available_items") or []
+    have_txt = (", ".join(_pretty(h) for h in have) if have
+                else '<span class="ctx-sub">nothing entered</span>')
+    note = ('<span class="ctx-note">This view works on plate items or fillers, '
+            'not on the current dish.</span>'
+            if active_tab in _SUBJECT_FREE_TABS else "")
+    _md(f'<div class="ctx-strip" role="status" aria-live="polite">'
+        f'<span class="ctx-label">Investigating</span> {subject}'
+        f'<span class="ctx-gap"></span>'
+        f'<span class="ctx-label">Available</span> {have_txt}{note}</div>')
+
+
 def export_buttons(md: str, filename: str) -> None:
     """Getting the data out stays; the inline preview and the raw-row dump
     were scaffolding and are gone."""
@@ -84,10 +231,10 @@ def export_buttons(md: str, filename: str) -> None:
 
 
 def topbar() -> None:
-    trees = query.tree_ingredients(CONN)
-    comps = query.components_list(CONN)
-    profiles = query.profiles_list(CONN)
-    _md(f"""
+    # The catalogue counts that sat on the right ("62 components · 29 plate
+    # profiles") were removed: jargon a cook cannot act on, on every screen
+    # (Dembrandt audit D7).
+    _md("""
     <div class="topbar">
       <div class="brand">
         <div class="brand-mark">if</div>
@@ -96,10 +243,6 @@ def topbar() -> None:
           <div class="brand-sub">A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.</div>
         </div>
       </div>
-      <div class="topbar-spacer"></div>
-      <div class="topbar-pill">{len(trees)} full ingredients</div>
-      <div class="topbar-pill">{len(comps)} components</div>
-      <div class="topbar-pill">{len(profiles)} plate profiles</div>
     </div>
     """)
 
@@ -112,8 +255,9 @@ def available_selector() -> list[str]:
     with st.container(key="avail_strip"):
         _md('<div class="avail-head">'
             '<span class="avail-title">What do I have right now?</span>'
-            '<span class="avail-hint">filters suggestions into available now · '
-            'missing but useful · no match</span>'
+            # The same three words the cards use (Dembrandt audit D8).
+            '<span class="avail-hint">sorts suggestions into available now · '
+            'missing but useful · not paired here yet</span>'
             '</div>')
         return st.multiselect(
             "Available ingredients", ings, key="available_items",
@@ -140,11 +284,11 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
 
     with subject:
         _md('<div class="eyebrow">Ingredient</div>')
-        # Broccoli is the pilot and on the shopping list; cabbage is not.
-        _seed("explorer_ing", trees, "broccoli")
+        _sync_picker("explorer_ing", trees, ctx_ingredient())
         ingredient = st.selectbox(
             "Ingredient", trees, key="explorer_ing",
-            label_visibility="collapsed", format_func=_pretty)
+            label_visibility="collapsed", format_func=_pretty,
+            on_change=_picked_ingredient, args=("explorer_ing",))
         techs = query.techniques_for_ingredient(CONN, ingredient)
         _md(subject_column_html(
             ingredient, "ingredient",
@@ -171,6 +315,13 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
         else:
             cards = query.all_branch_cards(CONN, ingredient)
             shown = cards[:5]
+            hidden = [c for c in cards[5:] if c.get("component") == ctx_state()]
+            if hidden:
+                _md(f'<div class="hint">The dish you are investigating, '
+                    f'<b>{_esc(_pretty(ctx_state()))}</b>, comes from '
+                    f'<b>{_esc(_pretty(hidden[0]["technique"]))}</b>, which is '
+                    f'below the top five: pick it under <i>Choose technique</i>.'
+                    f'</div>')
             _md(f'<div class="eyebrow">Showing top {len(shown)} of {len(cards)} '
                 f'branches · ranked cooking-before-preservation</div>')
             md_parts = []
@@ -179,6 +330,9 @@ def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
                         if avail else None)
                 routes = (query.flavour_routes_for_component(
                     CONN, c["component"], available_items=avail) if avail else None)
+                if c.get("component") == ctx_state():
+                    _md('<div class="eyebrow ctx-mark">● The dish you are '
+                        'investigating</div>')
                 # the top-ranked branch carries the accent border
                 _md(branch_card_html(c, available=part, lead=(i == 0), routes=routes))
                 md_parts.append(export.render_branch_markdown(c, part))
@@ -195,10 +349,11 @@ def tab_map() -> None:
     trees = query.tree_ingredients(CONN)
     pick, view_col = st.columns([1, 1.4], gap="large")
     with pick:
-        _seed("map_ing", trees, "broccoli")
+        _sync_picker("map_ing", trees, ctx_ingredient())
         ingredient = st.selectbox(
             "Ingredient", trees, key="map_ing", format_func=_pretty,
-            label_visibility="collapsed")
+            label_visibility="collapsed",
+            on_change=_picked_ingredient, args=("map_ing",))
     with view_col:
         view = pill_radio("View", ["Cook paths", "Scout ideas"], "map_view")
     if view == "Scout ideas":
@@ -210,22 +365,50 @@ def tab_map() -> None:
         _md('<div class="hint">How it can be cooked, what each state becomes, '
             'what pairs with it and where it goes. Drag nodes to explore.</div>')
         net = build_ingredient_graph(CONN, ingredient)
-    network_graph(graph_data(net), height=620,
-                  key=f"map_graph_{view}_{ingredient}")
+    data = graph_data(net)
+    # The Map works per ingredient. Say so, and ring the state being
+    # investigated rather than pretending the graph is about it alone.
+    state, focus = ctx_state(), None
+    if state:
+        focus = next((n for n in data["nodes"] if n.get("id") == f"comp:{state}"), None)
+    if focus is not None:
+        focus.update(borderWidth=5, size=(focus.get("size") or 22) + 8,
+                     color={"background": focus.get("color"), "border": "#1A1B16"})
+        _md(f'<div class="hint ctx-mark">The map shows all of '
+            f'<b>{_esc(_pretty(ingredient))}</b>; <b>{_esc(_pretty(state))}</b>, '
+            f'the dish you are investigating, has the dark ring.</div>')
+    elif state:
+        _md(f'<div class="hint ctx-mark"><b>{_esc(_pretty(state))}</b> is not '
+            f'drawn in this view of {_esc(_pretty(ingredient))}.</div>')
+    if view == "Scout ideas" and not any(
+            str(n.get("id", "")).startswith("hyp:") for n in data["nodes"]):
+        _md(f'<div class="hint">No Scout hypotheses for any state of '
+            f'{_esc(_pretty(ingredient))} yet. The rule set does not cover it; '
+            f'that is a gap in the rules, not evidence that nothing pairs.</div>')
+    network_graph(data, height=620,
+                  key=f"map_graph_{view}_{ingredient}_{state}")
 
 
 def tab_journeys() -> None:
     trees = query.tree_ingredients(CONN)
     col, _pad = st.columns([2.4, 1], gap="large")
     with col:
-        _seed("journey_ing", trees, "broccoli")
+        _sync_picker("journey_ing", trees, ctx_ingredient())
         ingredient = st.selectbox(
             "Ingredient", trees, key="journey_ing", label_visibility="collapsed",
-            format_func=_pretty)
+            format_func=_pretty,
+            on_change=_picked_ingredient, args=("journey_ing",))
         journeys = query.ingredient_journeys(CONN, ingredient)
         if not journeys:
-            _md(f'<div class="hint">No complete journeys modelled for '
-                f'<b>{_esc(ingredient)}</b> yet.</div>')
+            # Missing catalogue knowledge, said as such, with somewhere to go
+            # (Dembrandt audit D16).
+            _md(f'<div class="hint">Nobody has written a complete cook path for '
+                f'<b>{_esc(_pretty(ingredient))}</b> yet. That is a gap in the '
+                f'catalogue, not a sign it cannot be cooked: its '
+                f'transformations are listed in Ingredient Explorer.</div>')
+            st.button(f"Open {_pretty(ingredient)} in Ingredient Explorer",
+                      key="journeys_to_explorer", on_click=_goto_explorer,
+                      args=(ingredient,))
             return
         _md(f'<div class="h2">{_esc(ingredient.capitalize())} — '
             f'{len(journeys)} complete cook path'
@@ -233,21 +416,41 @@ def tab_journeys() -> None:
             f'<div class="hint">Each one reads left to right: preparation → '
             f'transformation → sensory change → flavour route → correction → '
             f'destination.</div>')
+        state = ctx_state()
+        if state and not any(j.get("primary_component") == state for j in journeys):
+            _md(f'<div class="hint ctx-mark">None of these paths is built on '
+                f'<b>{_esc(_pretty(state))}</b>, the dish you are investigating.'
+                f'</div>')
         for i, j in enumerate(journeys, start=1):
+            if state and j.get("primary_component") == state:
+                _md('<div class="eyebrow ctx-mark">● Built on the dish you are '
+                    'investigating</div>')
             _md(journey_card_html(j, index=i))
 
 
 def tab_component_explorer(available_items: list[str] | None = None) -> None:
     comps = query.components_list(CONN)
-    default = "roasted_tomato_component" if "roasted_tomato_component" in comps else comps[0]
     subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
 
     with subject:
         _md('<div class="eyebrow">Something you already cooked</div>')
-        _seed("component_explorer_comp", comps, default)
+        _sync_picker("component_explorer_comp", comps, ctx_state())
         comp = st.selectbox("Component", comps,
                             label_visibility="collapsed", format_func=_pretty,
-                            key="component_explorer_comp")
+                            key="component_explorer_comp",
+                            placeholder="Choose a prepared state",
+                            on_change=_picked_state,
+                            args=("component_explorer_comp",))
+    if comp is None:
+        states = query.states_for_ingredient(CONN, ctx_ingredient())
+        with answer:
+            _md(f'<div class="hint">You are investigating '
+                f'<b>{_esc(_pretty(ctx_ingredient()))}</b> without a prepared '
+                f'state. Choose one on the left; '
+                f'{_esc(_pretty(ctx_ingredient()))} can become: '
+                f'{_esc(", ".join(_pretty(s) for s in states)) or "nothing modelled yet"}.'
+                f'</div>')
+        return
     d = query.component_card(CONN, comp)
     if not d:
         with answer:
@@ -278,8 +481,10 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
     with subject:
         _md(subject_column_html(
             comp, "component",
-            note="A component is a state you already have — you do not always "
-                 "start from raw. This one came from "
+            # One name for one thing on this screen (Dembrandt audit D6):
+            # the heading says "Something you already cooked", so does this.
+            note="Something you already cooked — you do not always start "
+                 "from raw. This one came from "
                  f"{prod_str}."))
         _md(f'<div class="eyebrow subject-block">Storage</div>'
             f'<div class="subject-note">keeps {_esc(d.get("keeps_well") or "—")} · '
@@ -465,11 +670,13 @@ def tab_filler_profiles() -> None:
                 '<th>Works best with</th><th>Confidence</th></tr></thead>'
                 f'<tbody>{rows}</tbody></table>')
         else:
-            _md('<div class="hint">No pairings recorded yet.</div>')
+            _md(f'<div class="hint">No pairings are recorded for '
+                f'<b>{_esc(_pretty(name))}</b> yet. That is missing catalogue '
+                f'knowledge, not a sign it pairs badly with anything.</div>')
 
 
 def _goto_explorer(name: str) -> None:
-    st.session_state["explorer_ing"] = name
+    set_ctx_ingredient(name)
     st.session_state["active_section"] = "Cook"
     st.session_state["active_tab"] = "Ingredient Explorer"
 
@@ -480,6 +687,56 @@ def _scout_step(n: int) -> None:
 
 def _scout_goto(index: int) -> None:
     st.session_state.scout_index = index
+
+
+def _explain_unrepresentable(view: str, usable: list[str]) -> None:
+    """Say why this view cannot show the current subject, and offer real ones.
+
+    Never swap in a different state silently: the context is unchanged until
+    the user picks.
+    """
+    state, ingredient = ctx_state(), ctx_ingredient()
+    options = [s for s in query.states_for_ingredient(CONN, ingredient,
+                                                      profiled_only=True)
+               if s in usable]
+    if state:
+        reason = (f'<b>{_esc(_pretty(state))}</b> has no flavour profile, and '
+                  f'{view} works from flavour profiles.')
+    else:
+        reason = (f'You are investigating <b>{_esc(_pretty(ingredient))}</b> '
+                  f'without a prepared state, and {view} works on prepared '
+                  f'states.')
+    offer = (f' {_esc(_pretty(ingredient)).capitalize()} states it can use: '
+             f'{_esc(", ".join(_pretty(s) for s in options))}. Choose one on the left.'
+             if options else
+             f' No state of {_esc(_pretty(ingredient))} has a flavour profile yet.')
+    _md(f'<div class="hint ctx-mark">{reason}{offer}</div>')
+
+
+def _no_hypotheses_html(comp: str) -> str:
+    """Why Scout has nothing for a state: what was checked, and what it means.
+
+    Counts come from the same generator with rejections included; nothing is
+    invented, and an empty result is a limit of the rule set, never evidence
+    that nothing pairs (Dembrandt audit D16).
+    """
+    checked = query.generate_scout_hypotheses(CONN, comp, include_rejected=True)
+    scope = sum(1 for h in checked
+                if (h.get("rejection_reason") or "").startswith("Rule does not apply"))
+    flavour = sum(1 for h in checked
+                  if (h.get("rejection_reason") or "").startswith("State lacks"))
+    siblings = [s for s in query.states_for_ingredient(
+                    CONN, query.ingredient_for_component(CONN, comp) or "",
+                    profiled_only=True)
+                if s != comp and any(h["candidate_class"] != "rejected"
+                                     for h in query.generate_scout_hypotheses(CONN, s))]
+    nxt = (f' Other states of the same ingredient do have ideas: '
+           f'{_esc(", ".join(_pretty(s) for s in siblings))}.' if siblings else "")
+    return (f'<div class="hint">None of the {len(checked)} analogy rules fits '
+            f'<b>{_esc(_pretty(comp))}</b>: {scope} are written for a different '
+            f'kind of dish or ingredient, and {flavour} need flavours this state '
+            f'does not have. That is a limit of the rule set, not evidence that '
+            f'nothing pairs with it.{nxt}</div>')
 
 
 def tab_scout(available_items: list[str] | None = None) -> None:
@@ -493,16 +750,21 @@ def tab_scout(available_items: list[str] | None = None) -> None:
             'Run <code>foodprep build</code> first.</div>')
         return
 
-    default = ("roasted_broccoli_component"
-               if "roasted_broccoli_component" in state_comps else state_comps[0])
     subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
 
     with subject:
         _md('<div class="eyebrow">Transformed state</div>')
-        _seed("tab_scout_component_select", state_comps, default)
+        _sync_picker("tab_scout_component_select", state_comps, ctx_state())
         comp = st.selectbox("Transformed state", state_comps,
                             label_visibility="collapsed", format_func=_pretty,
-                            key="tab_scout_component_select")
+                            key="tab_scout_component_select",
+                            placeholder="Choose a prepared state",
+                            on_change=_picked_state,
+                            args=("tab_scout_component_select",))
+    if comp is None:
+        with answer:
+            _explain_unrepresentable("Scout", state_comps)
+        return
 
     hypotheses = query.generate_scout_hypotheses(CONN, comp)
     candidates = [h for h in hypotheses if h["candidate_class"] != "rejected"]
@@ -544,8 +806,7 @@ def tab_scout(available_items: list[str] | None = None) -> None:
             'to transformed states. They are <b>not classics</b>. Taste a small '
             'amount before serving.</div>')
         if not current:
-            _md(f'<div class="hint">No generated hypotheses for '
-                f'<b>{_esc(pretty)}</b>.</div>')
+            _md(_no_hypotheses_html(comp))
             return
 
         h = dict(current)
@@ -587,10 +848,13 @@ def _tcm_init(state_comps: list[str]) -> None:
     for key in ("tcm_expanded", "tcm_last_click"):
         st.session_state.setdefault(key, None)
     st.session_state.setdefault("tcm_page", 0)
-    if st.session_state.get("tcm_component") not in state_comps:
-        st.session_state.tcm_component = (
-            "roasted_broccoli_component"
-            if "roasted_broccoli_component" in state_comps else state_comps[0])
+    # The circle follows the shared context (E1). A dish belongs to its state,
+    # so a real change of state starts a fresh dish, as switching did before.
+    target = ctx_state()
+    if target in state_comps and st.session_state.get("tcm_component") != target:
+        if st.session_state.get("tcm_component"):
+            _tcm_reset_cb()
+        st.session_state.tcm_component = target
 
 
 #: Verdicts in the order a cook reaches for them, with readable labels.
@@ -609,6 +873,16 @@ _TASTING_TEXT = ("tasting_preparation", "tasting_ratio", "tasting_temperature",
                  "tasting_failure", "tasting_correction")
 
 
+#: Required fields, in the words the form uses (Dembrandt audit D9: no raw
+#: field names such as "safety_confirmed" in messages).
+_TASTING_REQUIRED = {
+    "tasting_preparation": "What you did",
+    "tasting_ratio": "Ratio",
+    "tasting_temperature": "Temperature",
+    "tasting_observations": "What you tasted",
+}
+
+
 def _tasting_reset(ratio: str) -> None:
     for key in _TASTING_TEXT:
         st.session_state[key] = ""
@@ -616,40 +890,114 @@ def _tasting_reset(ratio: str) -> None:
     st.session_state.tasting_verdict = "works"
     st.session_state.tasting_date = date.today()
     st.session_state.tasting_safety = False
+    st.session_state.pop("tasting_pending", None)
 
 
-def _tasting_save(comp: str, candidate: str, ratio_default: str) -> None:
-    """Form callback: append the trial, then clear the form for the next one."""
+def _tasting_problems() -> list[str]:
+    """What stops the entry being recorded, in plain words."""
     ss = st.session_state
+    problems = [f"Fill in “{label}”." for key, label in _TASTING_REQUIRED.items()
+                if not (ss.get(key) or "").strip()]
+    if not ss.get("tasting_safety"):
+        problems.append("Tick “Everything was safely prepared and cooked "
+                        "through” to confirm the food was safe.")
+    return problems
+
+
+def _tasting_review(comp: str, candidate: str) -> None:
+    """Form callback: check the entry and hold it for review. Writes nothing."""
+    ss = st.session_state
+    problems = _tasting_problems()
+    if problems:
+        ss.tasting_flash = ("error", " ".join(problems))
+        return
+    ss.tasting_pending = {
+        "token": uuid.uuid4().hex,
+        "target": (comp, candidate),
+        "verdict": ss.tasting_verdict,
+        "tested_at": ss.tasting_date.isoformat(),
+        "preparation": ss.tasting_preparation.strip(),
+        "ratio": ss.tasting_ratio.strip(),
+        "temperature": ss.tasting_temperature.strip(),
+        "observations": ss.tasting_observations.strip(),
+        "supporting_ingredients": (ss.tasting_supporting or "").strip() or None,
+        "failure_mode": (ss.tasting_failure or "").strip() or None,
+        "successful_correction": (ss.tasting_correction or "").strip() or None,
+    }
+
+
+def _tasting_edit() -> None:
+    """Back from review to the form; everything typed is still there."""
+    st.session_state.pop("tasting_pending", None)
+
+
+def _tasting_confirm(ratio_default: str) -> None:
+    """Append exactly the reviewed entry, once.
+
+    The pending entry is taken out of session state before anything is
+    written, and its token is remembered, so a second click, a rerun or a
+    stale button can never write it twice.
+    """
+    ss = st.session_state
+    pending = ss.pop("tasting_pending", None)
+    saved = ss.setdefault("tasting_saved_tokens", set())
+    if not pending or pending["token"] in saved:
+        return
+    comp, candidate = pending["target"]
     path = tasting.tastings_path()
     try:
         tasting.record_trial(
             CONN, comp, candidate,
-            verdict=ss.tasting_verdict,
-            preparation=ss.tasting_preparation, ratio=ss.tasting_ratio,
-            temperature=ss.tasting_temperature,
-            observations=ss.tasting_observations,
-            supporting_ingredients=ss.tasting_supporting or None,
-            failure_mode=ss.tasting_failure or None,
-            successful_correction=ss.tasting_correction or None,
-            safety_confirmed=ss.tasting_safety,
-            tested_at=ss.tasting_date.isoformat(),
+            verdict=pending["verdict"], preparation=pending["preparation"],
+            ratio=pending["ratio"], temperature=pending["temperature"],
+            observations=pending["observations"],
+            supporting_ingredients=pending["supporting_ingredients"],
+            failure_mode=pending["failure_mode"],
+            successful_correction=pending["successful_correction"],
+            safety_confirmed=True, tested_at=pending["tested_at"],
             yaml_path=path,
         )
     except tasting.TastingError as exc:
+        message = str(exc)
+        if "already recorded" in message:
+            message = ("A tasting of this pairing is already recorded for "
+                       f"{pending['tested_at']}. Nothing was saved. If this was "
+                       "a second attempt, record it under the day it happened.")
+        else:
+            message = f"Nothing was saved: {message}."
         # Keep everything typed; only say what is wrong.
-        ss.tasting_flash = ("error", str(exc).capitalize() + ".")
+        ss.tasting_flash = ("error", message)
         return
+    saved.add(pending["token"])
     ss.tasting_flash = ("ok", f"Saved to {path}. Commit that file to keep the "
                               "record — it is the one the app rebuilds from.")
     _tasting_reset(ratio_default)
 
 
+def _tasting_review_html(pending: dict, comp: str, candidate: str) -> str:
+    rows = [("Pairing", f"{_pretty(comp)} + {_pretty(candidate)}"),
+            ("Verdict", _VERDICT_LABELS.get(pending["verdict"], pending["verdict"])),
+            ("Tasted on", pending["tested_at"]),
+            ("What you did", pending["preparation"]),
+            ("Ratio", pending["ratio"]),
+            ("Temperature", pending["temperature"]),
+            ("What you tasted", pending["observations"])]
+    for key, label in (("supporting_ingredients", "Also on the plate"),
+                       ("failure_mode", "What went wrong"),
+                       ("successful_correction", "What fixed it")):
+        if pending.get(key):
+            rows.append((label, pending[key]))
+    body = "".join(f'<div class="row"><span class="lbl">{_esc(k)}</span>'
+                   f'<div class="val">{_esc(v)}</div></div>' for k, v in rows)
+    return (f'<div class="card tasting-review"><div class="card-kicker">Check '
+            f'before saving — this cannot be changed afterwards</div>{body}</div>')
+
+
 def _tasting_form(comp: str, h: dict) -> None:
     """Record a tasting from the app. Appends to tastings.yaml, never edits it.
 
-    It used to be a terminal command only, which made the last step of the
-    loop impossible for anyone without a terminal (usability pass, T5).
+    Two steps: the form is reviewed first, and only "Save permanently" writes
+    (Dembrandt audit D10). A later, disagreeing attempt is a new trial.
     """
     candidate = h["candidate"]
     ratio = (h.get("protocol") or {}).get("starting_ratio") or ""
@@ -663,10 +1011,27 @@ def _tasting_form(comp: str, h: dict) -> None:
         kind, message = flash
         (st.success if kind == "ok" else st.error)(message)
 
-    with st.expander("Record a tasting", expanded=bool(flash and flash[0] == "error")):
+    pending = st.session_state.get("tasting_pending")
+    if pending and pending.get("target") != (comp, candidate):
+        pending = None
+    reviewing = pending is not None
+    with st.expander("Record a tasting",
+                     expanded=reviewing or bool(flash and flash[0] == "error")):
+        if reviewing:
+            _md(_tasting_review_html(pending, comp, candidate))
+            confirm, back, _sp = st.columns([1.4, 1.2, 2])
+            with confirm:
+                st.button("Save permanently", key="tasting_confirm",
+                          type="primary", on_click=_tasting_confirm,
+                          args=(ratio,))
+            with back:
+                st.button("Back to edit", key="tasting_edit",
+                          on_click=_tasting_edit)
+            return
         _md('<div class="hint">One observation per attempt. The record is '
             'append-only: if a later try disagrees, record that too rather '
-            'than changing this one.</div>')
+            'than changing this one. You will see the entry before it is '
+            'saved.</div>')
         with st.form(key="tasting_form", border=False):
             left, right = st.columns(2)
             with left:
@@ -686,9 +1051,9 @@ def _tasting_form(comp: str, h: dict) -> None:
             st.text_input("What fixed it (optional)", key="tasting_correction")
             st.checkbox("Everything was safely prepared and cooked through",
                         key="tasting_safety")
-            st.form_submit_button("Save tasting", type="primary",
-                                  on_click=_tasting_save,
-                                  args=(comp, candidate, ratio))
+            st.form_submit_button("Review tasting", type="primary",
+                                  on_click=_tasting_review,
+                                  args=(comp, candidate))
 
 
 def _tc_lock(dim: str) -> None:
@@ -706,8 +1071,8 @@ def _tc_unlock(dim: str) -> None:
 
 
 def _tc_component_changed() -> None:
-    st.session_state.tcm_component = st.session_state.taste_circle_component
-    _tcm_reset_cb()
+    # The picker changes the shared subject; _tcm_init then resets the dish.
+    set_ctx_state(st.session_state.taste_circle_component)
 
 
 def tab_taste_circle(available_items: list[str] | None = None) -> None:
@@ -717,6 +1082,23 @@ def tab_taste_circle(available_items: list[str] | None = None) -> None:
     eleven dimension cards with a picker each. They used to be two tabs with
     two separate dishes, so a filler chosen in one was missing from the other.
     """
+    state_comps = [c for c in query.components_list(CONN)
+                   if query.component_state_profile(CONN, c) is not None]
+    if ctx_state() not in state_comps:
+        # Say why, and let the user choose; never draw a different dish.
+        pick, note = st.columns(_SUBJECT_RATIO, gap="large")
+        options = query.states_for_ingredient(CONN, ctx_ingredient(),
+                                              profiled_only=True) or state_comps
+        with pick:
+            _md('<div class="eyebrow">Prepared state</div>')
+            _sync_picker("tc_state_pick", options, None)
+            st.selectbox("Prepared state", options, key="tc_state_pick",
+                         label_visibility="collapsed", format_func=_pretty,
+                         placeholder="Choose a prepared state",
+                         on_change=_picked_state, args=("tc_state_pick",))
+        with note:
+            _explain_unrepresentable("Taste Circle", state_comps)
+        return
     view = pill_radio("View", ["Circle", "Cards"], "tc_view")
     if view == "Cards":
         _taste_circle_cards()
@@ -917,10 +1299,15 @@ def tab_taste_circle_map(available_items: list[str] | None = None) -> None:
             f'</div>',
             unsafe_allow_html=True)
 
-        # Switching component starts a fresh circle.
+        # Switching component starts a fresh circle, and the arrows are a
+        # subject picker like any other: the shared context follows.
         if st.session_state.tcm_component != component:
             _reset()
             st.session_state.tcm_component = component
+            set_ctx_state(component)
+            # The context strip was drawn above with the old subject; draw
+            # the page again so the strip and the circle agree.
+            st.rerun()
 
         _md('<div class="hint">Click a dimension to see what fills it, '
             'click an ingredient to lock it in.</div>')
@@ -1124,7 +1511,7 @@ _STICKY_WIDGETS = frozenset({
     "plate_items",
     "filler_profile_name",
     "tab_scout_component_select",
-    "taste_circle_component",
+    "taste_circle_component", "tc_state_pick",
     # the Scout tasting form: a half-written observation survives a tab switch
     "tasting_verdict", "tasting_date", "tasting_preparation", "tasting_ratio",
     "tasting_temperature", "tasting_supporting", "tasting_observations",
@@ -1213,6 +1600,7 @@ def main() -> None:
         st.markdown(f"<style>{_CSS_PATH.read_text(encoding='utf-8')}</style>",
                     unsafe_allow_html=True)
     _persist_widget_state()
+    load_context_from_url()          # once per session; before any widget
     topbar()
     # The strip sits above the rail but only belongs on tabs that use it, and
     # which tab is active is known only once the rail has run — so reserve
@@ -1220,6 +1608,7 @@ def main() -> None:
     # so it survives a visit to a tab that hides the strip.
     strip = st.container()
     active = tab_rail()
+    context_strip(active)
     render = TABS[active]
     if active in _TABS_WITH_AVAILABLE:
         with strip:
@@ -1227,6 +1616,7 @@ def main() -> None:
         render(available_items)
     else:
         render()
+    write_context_to_url(active)
 
 
 if __name__ == "__main__":

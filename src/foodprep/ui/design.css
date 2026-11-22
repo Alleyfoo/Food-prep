@@ -78,8 +78,44 @@
 }
 .tab-rule {
   height: 1px; background: var(--line);
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-4);
 }
+
+/* ---- Keyboard focus (UX experiment E0, Dembrandt audit D3) ----
+   The pills hide the radio dot, which took Streamlit's focus cue with it, so
+   a keyboard user could not see where they were. Show a ring only for
+   keyboard focus (:focus-visible), never on mouse clicks. Ink, not a hue:
+   it must read on every pill state, filled or tinted. */
+[class*="_pills"] :is([role="radiogroup"] > label, [data-testid="stRadioOption"]):has(input:focus-visible) {
+  outline: 3px solid var(--ink) !important; outline-offset: 2px;
+}
+:is([data-testid^="stBaseButton"], [data-testid="stExpander"] summary):focus-visible {
+  outline: 3px solid var(--ink) !important; outline-offset: 2px;
+}
+[data-testid="stCheckbox"] label:has(input:focus-visible) {
+  outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 4px;
+}
+
+/* ---- Shared investigation context (UX experiment E1) ----
+   One quiet line under the navigation: what is being investigated and what
+   is on hand. Body face, small, never a second dashboard. */
+.ctx-strip {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px;
+  font-size: 15px; color: var(--ink);
+  margin: 0 0 var(--space-6); padding: 0;
+}
+.ctx-label {
+  font-size: 12px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--neutral-700);
+}
+.ctx-sub { color: var(--neutral-700); }
+.ctx-gap { width: var(--space-4); }
+.ctx-note { flex-basis: 100%; font-size: 14px; color: var(--neutral-700); }
+.ctx-mark { color: var(--ink); }
+.eyebrow.ctx-mark { color: var(--ink); margin-bottom: 4px; }
+
+/* the tasting review step: the entry exactly as it will be written */
+.card.tasting-review .card-kicker { color: var(--primary); }
 
 /* ---- buttons: pills, body face (Caprasimo never goes this small) ---- */
 [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-primary"] {

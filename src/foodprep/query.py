@@ -994,6 +994,53 @@ def classify_scout_candidate(compatibility_evidence: list[str],
     return "weak_hypothesis"
 
 
+def ingredient_for_component(conn: sqlite3.Connection,
+                             component_name: str) -> str | None:
+    """The ingredient a prepared state is made from, or None.
+
+    Deterministic: every component is the output of exactly one ingredient's
+    transformations, except a by-product (tomato water), which belongs to the
+    ingredient of the step that yields it. Plate items and unknown names have
+    no ingredient and return None.
+    """
+    row = conn.execute(
+        """SELECT i.canonical_name FROM transformations t
+           JOIN components c ON c.component_id = t.output_component_id
+           JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+           WHERE c.name = ? ORDER BY t.transformation_id LIMIT 1""",
+        (component_name,),
+    ).fetchone()
+    if row is None:
+        row = conn.execute(
+            """SELECT i.canonical_name FROM transformation_byproducts b
+               JOIN components c ON c.component_id = b.component_id
+               JOIN transformations t ON t.transformation_id = b.transformation_id
+               JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+               WHERE c.name = ? LIMIT 1""",
+            (component_name,),
+        ).fetchone()
+    return row[0] if row else None
+
+
+def states_for_ingredient(conn: sqlite3.Connection, ingredient: str,
+                          profiled_only: bool = False) -> list[str]:
+    """Prepared states made from an ingredient, in transformation order.
+
+    *profiled_only* keeps states with a flavour profile, the ones Taste Circle
+    and Scout can work with.
+    """
+    rows = conn.execute(
+        """SELECT DISTINCT c.name FROM transformations t
+           JOIN components c ON c.component_id = t.output_component_id
+           JOIN ingredients i ON i.ingredient_id = t.ingredient_id
+           LEFT JOIN component_state_profiles sp ON sp.component_id = c.component_id
+           WHERE i.canonical_name = ? AND (? = 0 OR sp.component_id IS NOT NULL)
+           ORDER BY t.transformation_id""",
+        (ingredient, 1 if profiled_only else 0),
+    ).fetchall()
+    return [r[0] for r in rows]
+
+
 def state_label(component_name: str) -> str:
     """How a state reads in a sentence: roasted_broccoli_component -> roasted broccoli."""
     for suffix in ("_component", "_base"):
