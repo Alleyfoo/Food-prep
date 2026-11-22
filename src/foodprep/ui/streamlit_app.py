@@ -891,6 +891,7 @@ def _tasting_reset(ratio: str) -> None:
     st.session_state.tasting_date = date.today()
     st.session_state.tasting_safety = False
     st.session_state.pop("tasting_pending", None)
+    st.session_state.pop("tasting_editing", None)
 
 
 def _tasting_problems() -> list[str]:
@@ -927,8 +928,13 @@ def _tasting_review(comp: str, candidate: str) -> None:
 
 
 def _tasting_edit() -> None:
-    """Back from review to the form; everything typed is still there."""
+    """Back from review to the form; everything typed is still there.
+
+    The panel stays open: found in the browser check that "Back to edit"
+    otherwise collapsed the expander and hid the form being edited.
+    """
     st.session_state.pop("tasting_pending", None)
+    st.session_state.tasting_editing = True
 
 
 def _tasting_confirm(ratio_default: str) -> None:
@@ -1016,7 +1022,8 @@ def _tasting_form(comp: str, h: dict) -> None:
         pending = None
     reviewing = pending is not None
     with st.expander("Record a tasting",
-                     expanded=reviewing or bool(flash and flash[0] == "error")):
+                     expanded=(reviewing or bool(flash and flash[0] == "error")
+                               or bool(st.session_state.get("tasting_editing")))):
         if reviewing:
             _md(_tasting_review_html(pending, comp, candidate))
             confirm, back, _sp = st.columns([1.4, 1.2, 2])

@@ -245,6 +245,9 @@ def test_back_to_edit_keeps_the_text_and_writes_nothing(tastings_copy):
     at.button(key="tasting_edit").click().run()
     assert {t.key: t for t in at.text_input}["tasting_preparation"].value == "tossed one warm piece"
     assert tastings_copy.read_bytes() == before
+    # Found in the browser: the panel used to collapse here, hiding the form.
+    panel = next(e for e in at.expander if e.label == "Record a tasting")
+    assert panel.proto.expanded
 
 
 def test_confirm_writes_exactly_once(tastings_copy):
