@@ -1,0 +1,44 @@
+== Pill levels stacked per screen (section > tab > view/mode)
+  Cook       > Ingredient Explorer : 3 levels ['active_section', 'active_tab', 'explorer_mode']
+  Cook       > Component Explorer  : 2 levels ['active_section', 'active_tab']
+  Cook       > Plate Balance       : 2 levels ['active_section', 'active_tab']
+  Cook       > Taste Circle        : 3 levels ['active_section', 'active_tab', 'tc_view']
+  Explore    > Map                 : 3 levels ['active_section', 'active_tab', 'map_view']
+  Explore    > Journeys            : 2 levels ['active_section', 'active_tab']
+  Explore    > Filler Profiles     : 2 levels ['active_section', 'active_tab']
+  Experiment > Scout               : 1 levels ['active_section']
+
+== Coined or domain terms visible, and on how many of 8 screens
+  component       8  Ingredient Explorer, Component Explorer, Plate Balance, Taste Circle, Map, Journeys, Filler Profiles, Scout
+  role            8  Ingredient Explorer, Component Explorer, Plate Balance, Taste Circle, Map, Journeys, Filler Profiles, Scout
+  plate profile   8  Ingredient Explorer, Component Explorer, Plate Balance, Taste Circle, Map, Journeys, Filler Profiles, Scout
+  medium          4  Ingredient Explorer, Component Explorer, Filler Profiles, Scout
+  taste circle    4  Ingredient Explorer, Component Explorer, Plate Balance, Taste Circle
+  state           3  Component Explorer, Map, Scout
+  filler          3  Map, Journeys, Filler Profiles
+  journey         3  Map, Journeys, Filler Profiles
+  route           2  Component Explorer, Journeys
+  destination     2  Taste Circle, Journeys
+  hypothes        1  Scout
+  scout           1  Map
+  cook mode       1  Plate Balance
+  branch          1  Ingredient Explorer
+  hard gap        1  Plate Balance
+  target role     1  Plate Balance
+  novelty         1  Scout
+  compatibility   1  Scout
+  corpus          1  Scout
+  analogy         1  Scout
+  dimension       1  Taste Circle
+  preparation     1  Journeys
+  total distinct: 22
+
+== Error message when a tasting is saved without the safety tick
+   ['Safety_confirmed is required before recording a trial.']
+
+== Empty states
+  Plate Balance, no items : Pick one or more plate items to see what the plate has, what it lacks, and what to add.
+  Journeys, butter        :     No complete journeys modelled for  butter  yet. 
+  Scout, ghee             :  Hypotheses come from analogy rules applied to transformed states. They are  not classics . Taste a small amount before serving.   No generated hypotheses for  
+
+Exceptions: []
