@@ -914,6 +914,8 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
 .answer-links a { color: var(--primary); font-weight: 600; }
 .answer-links a:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 @media (max-width: 640px) {
+  /* the initial disc carries no information the name below does not */
+  .st-key-explorer_b_subject .subject-disc { display: none; }
   .answer-first { padding: var(--space-3) var(--space-4); }
   .answer-headline { font-size: 22px; }
   .answer-lines { grid-template-columns: 1fr; gap: 0; }

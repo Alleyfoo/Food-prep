@@ -306,7 +306,9 @@ def _ingredient_explorer_b(available_items: list[str] | None = None) -> None:
     avail = available_items or None
     subject, main = st.columns(_SUBJECT_RATIO, gap="large")
 
-    with subject:
+    # Keyed so the stylesheet can drop the decorative disc on phones, where
+    # it pushed the answer below the first screen (E3 phone capture).
+    with subject, st.container(key="explorer_b_subject"):
         _md('<div class="eyebrow">Ingredient</div>')
         _sync_picker("explorer_ing", trees, ctx_ingredient())
         ingredient = st.selectbox(
