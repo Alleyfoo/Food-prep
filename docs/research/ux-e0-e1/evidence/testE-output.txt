@@ -1,0 +1,19 @@
+Context strip: to available now · missing but useful · not paired here yet Investigating Roasted cabbage · from cabbage Available mango
+
+== Ingredient Explorer (cabbage), Roast card
+  Available now             : Available now lemon — have it acid Missing but useful salt sea salt fa
+  Not paired here yet       : Not paired here yet mango Use in bowl eggs hash sandwich 
+  Routes with what you have : (absent)
+
+== Component Explorer (roasted cabbage)
+  mango: useful salt sea salt fat olive oil herb dill protein eggs carb bread Not paired here yet mango Use in bowl eggs hash sandwich Flavour routes No routes modelled from this state yet
+
+== Scout (roasted cabbage)
+  mango mentioned: False
+
+== Filler Profiles (mango)
+   ler and a full ingredient Roles acid hydration Repairs — Avoid when — FI shop common Mode no pairings yet — not suggested by the plate engine Pairings No pairings are recorded for
+  cabbage mentioned: False
+
+Negative claims anywhere: none
+Exceptions: []

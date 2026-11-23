@@ -155,9 +155,11 @@ def routes_with_what_you_have_html(routes: list[dict]) -> str:
 def branch_card_html(d: dict, with_debug: bool = False,
                      available: dict | None = None,
                      lead: bool = False,
-                     routes: list[dict] | None = None) -> str:
+                     routes: list[dict] | None = None,
+                     anchor: str | None = None) -> str:
     """*lead* marks the top-ranked branch, which takes the accent border.
-    *routes* (with availability) adds the routes that use what is on hand."""
+    *routes* (with availability) adds the routes that use what is on hand.
+    *anchor* gives the card an id the answer-first summary links to (E3)."""
     conf = d.get("confidence") or ""
     card_cls = "scout" if conf == "experimental" else ""
     if lead:
@@ -203,7 +205,8 @@ def branch_card_html(d: dict, with_debug: bool = False,
     if d.get("flavour_shift") or d.get("texture_shift"):
         shift = f'<div class="card-shift">{_esc(d.get("flavour_shift") or "—")} · {_esc(d.get("texture_shift") or "—")}</div>'
 
-    parts = [f'<div class="card {card_cls}">']
+    id_attr = f' id="{_esc(anchor)}"' if anchor else ""
+    parts = [f'<div class="card {card_cls}"{id_attr}>']
     parts.append(
         f'<div class="card-head"><span class="card-tech">{_esc(_readable(d["technique"]))}</span>'
         f'<span class="card-comp">{_esc(_readable(d.get("component") or ""))}</span>'

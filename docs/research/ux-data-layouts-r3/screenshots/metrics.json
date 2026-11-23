@@ -1,0 +1,98 @@
+{
+ "complete-roasted-broccoli/table": {
+  "gap_markers": 1,
+  "status_badges": 52,
+  "records_visible": 5,
+  "height_screens": 1.6
+ },
+ "complete-roasted-broccoli/explorer": {
+  "gap_markers": 1,
+  "status_badges": 28,
+  "records_visible": 1,
+  "height_screens": 1.95
+ },
+ "complete-roasted-broccoli/workspace": {
+  "gap_markers": 2,
+  "status_badges": 30,
+  "records_visible": 1,
+  "height_screens": 1.99
+ },
+ "complete-roasted-broccoli/cards": {
+  "gap_markers": 0,
+  "status_badges": 0,
+  "records_visible": 2,
+  "height_screens": 3.31
+ },
+ "incomplete-roasted-cabbage/table": {
+  "gap_markers": 1,
+  "status_badges": 59,
+  "records_visible": 8,
+  "height_screens": 1.83
+ },
+ "incomplete-roasted-cabbage/explorer": {
+  "gap_markers": 1,
+  "status_badges": 24,
+  "records_visible": 1,
+  "height_screens": 1.65
+ },
+ "incomplete-roasted-cabbage/workspace": {
+  "gap_markers": 3,
+  "status_badges": 20,
+  "records_visible": 1,
+  "height_screens": 1.77
+ },
+ "incomplete-roasted-cabbage/cards": {
+  "gap_markers": 0,
+  "status_badges": 0,
+  "records_visible": 2,
+  "height_screens": 4.53
+ },
+ "sparse-smashed-roasted-potato/table": {
+  "gap_markers": 6,
+  "status_badges": 74,
+  "records_visible": 10,
+  "height_screens": 2.05
+ },
+ "sparse-smashed-roasted-potato/explorer": {
+  "gap_markers": 4,
+  "status_badges": 16,
+  "records_visible": 4,
+  "height_screens": 1.13
+ },
+ "sparse-smashed-roasted-potato/workspace": {
+  "gap_markers": 7,
+  "status_badges": 9,
+  "records_visible": 3,
+  "height_screens": 1.37
+ },
+ "sparse-smashed-roasted-potato/cards": {
+  "gap_markers": 0,
+  "status_badges": 0,
+  "records_visible": 3,
+  "height_screens": 4.54
+ },
+ "tasks/trace-lemon-across-broccoli": {
+  "gap_markers": 1,
+  "status_badges": 13,
+  "records_visible": 3,
+  "height_screens": 1.15
+ },
+ "tasks/compare-roasted-vs-steamed": {
+  "gap_markers": 0,
+  "status_badges": 23,
+  "records_visible": 3,
+  "height_screens": 1.23
+ },
+ "tasks/filter-has-route": {
+  "gap_markers": 1,
+  "status_badges": 52,
+  "records_visible": 5,
+  "height_screens": 1.63
+ },
+ "tasks/filter-paired-with-lemon-cabbage": {
+  "gap_markers": 1,
+  "status_badges": 59,
+  "records_visible": 8,
+  "height_screens": 1.99
+ }
+}

@@ -1,0 +1,41 @@
+== broccoli (on hand: yogurt, lemon, garlic) · record roasted_broccoli_component
+  overview summary   glyphs  39 ->   0 · words  159 ->  231
+  overview matrix    glyphs  21 ->   0 · words  161 ->  133
+  overview evidence  glyphs  17 ->   0 · words  104 ->  151
+  sheet words                     782 ->  948
+  sheet 'scope: not recorded'       8 ->    1
+  sheet 'not on hand'              17 ->   19
+  sheet source-title mentions      12 ->   14
+  sheet glyphs                      5 ->    0
+  compare glyphs 24 -> 0 · rows 19 -> 20
+  trace step 1: 15 relationships / 16 entities · graph shown
+  trace step 2: 30 relationships / 27 entities · graph collapsed
+  trace step 3: 40 relationships / 29 entities · graph collapsed
+== cabbage (on hand: lemon) · record roasted_cabbage_component
+  overview summary   glyphs  57 ->   0 · words  167 ->  273
+  overview matrix    glyphs  23 ->   0 · words  209 ->  178
+  overview evidence  glyphs  26 ->   0 · words  157 ->  224
+  sheet words                     622 ->  794
+  sheet 'scope: not recorded'       7 ->    1
+  sheet 'not on hand'              13 ->   13
+  sheet source-title mentions      10 ->   12
+  sheet glyphs                      1 ->    0
+  compare glyphs 19 -> 0 · rows 20 -> 21
+  trace step 1: 15 relationships / 16 entities · graph shown
+  trace step 2: 23 relationships / 22 entities · graph collapsed
+  trace step 3: 31 relationships / 24 entities · graph collapsed
+== potato (on hand: nothing) · record smashed_roasted_potato_component
+  overview summary   glyphs  64 ->   0 · words  210 ->  310
+  overview matrix    glyphs  23 ->   0 · words  272 ->  236
+  overview evidence  glyphs  30 ->   0 · words  180 ->  252
+  sheet words                     316 ->  429
+  sheet 'scope: not recorded'       0 ->    0
+  sheet 'not on hand'               1 ->    0
+  sheet source-title mentions       1 ->    1
+  sheet glyphs                      0 ->    0
+  compare glyphs 19 -> 0 · rows 18 -> 19
+  trace step 1: 7 relationships / 8 entities · graph shown
+  trace step 2: 8 relationships / 9 entities · graph shown
+  trace step 3: 9 relationships / 10 entities · graph shown
+== preparation traces above 20 relationships: 39 of 183
+== matrix legend words: R4 42 · R4.1 36
