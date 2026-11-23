@@ -6,7 +6,8 @@ Research only, desktop only. R4 (8541) and R4.1 (8542) stay runnable.
 The facilitator picks the condition in the URL: ov=a|b|c (overview encoding),
 sheet=full|dense (fact sheet). It is shown only in the browser tab title.
 
-Same URL keys as R4, plus the local key `graph=1` (show a collapsed graph).
+Same URL keys as R4, plus the local key `graph=1` (show a collapsed graph) and
+pane=circle: the product's Taste Circle around the record in detail (tc, tcx, tcp, tcb).
 
 The whole investigation context lives in the URL (see state.py), e.g.
 ?ingredient=broccoli&have=yogurt,lemon,garlic&rec=roasted_broccoli_component
@@ -29,6 +30,8 @@ from foodprep import loader, query  # noqa: E402
 import r4_model as M  # noqa: E402
 import r42_state as S  # noqa: E402
 import r42_views as V  # noqa: E402
+import r42_circle as C  # noqa: E402
+from foodprep.ui.taste_circle import taste_circle_map  # noqa: E402
 
 _q = st.query_params.to_dict()
 st.set_page_config(page_title=f"R4.2 · {_q.get('ov', 'b').upper()} · {_q.get('sheet', 'full')}", layout="wide",
@@ -93,10 +96,27 @@ with left.container(height=H, border=False):
     st.html(V.CSS + '<div class="r4">' + V.overview_html(m, ctx) + "</div>")
 with right:
     pane = S.pane(ctx)
-    st.html(V.CSS + V.tabs_html(m, ctx, pane))
+    st.html(V.CSS + C.CSS + V.tabs_html(m, ctx, pane))
 right = right.container(height="content" if full else H - 44, border=False)
 with right:
-    if pane == "compare":
+    if pane == "circle":
+        # The product's Taste Circle, built around the record in detail. A
+        # click becomes a URL change, like every other click in the workspace.
+        if C.can_anchor(c, ctx["rec"]):
+            st.html(V.CSS + C.CSS + C.readout_html(c, ctx))
+            data = C.graph_data(c, ctx)
+            click = taste_circle_map(nodes=data["nodes"], edges=data["edges"], height=460,
+                                     key="r42_tc")
+            if click and click.get("t") != st.session_state.get("r42_tc_last"):
+                st.session_state.r42_tc_last = click.get("t")
+                new = dict(ctx)
+                new.update(C.apply_click(c, ctx, click.get("id")))
+                st.query_params.from_dict(S.to_params(new))
+                st.rerun()
+            st.html(V.CSS + C.CSS + C.dish_html(c, ctx))
+        else:
+            st.html(V.CSS + C.unavailable_html(c, ctx))
+    elif pane == "compare":
         st.html(V.CSS + V.compare_html(m, ctx))
     elif pane == "trace":
         # The relationship table is the reading surface. A small graph (at most

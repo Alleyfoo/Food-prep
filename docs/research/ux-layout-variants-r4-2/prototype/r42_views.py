@@ -1549,7 +1549,8 @@ def tabs_html(m: dict, st: dict, current: str) -> str:
     labels = {"detail": "Detail" + (f": {pretty(st['rec'])}" if st["rec"] else ""),
               "compare": f"Compare ({len(st['cmp'])})" + (f": {cmp_txt}" if st["cmp"] else ""),
               "trace": "Trace" + (f": {_focus_label(m, S.trace_focus(st))}"
-                                  if S.trace_focus(st) else "")}
+                                  if S.trace_focus(st) else ""),
+              "circle": "Taste circle" + (f": {pretty(st['rec'])}" if st["rec"] else "")}
     return '<div class="r4"><div class="tabs">' + "".join(
         f'<span class="on k-{k}">{esc(t)}</span>' if k == current else
         a(S.href(st, pane=k), esc(t)).replace("<a ", f'<a class="k-{k}" ', 1)

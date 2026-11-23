@@ -6,6 +6,14 @@ VARIANT     ov     overview cell encoding: a = compact code (R4), b = labelled
             -> set by the facilitator in the URL; every link and "reset all"
                keeps them, so a participant stays in one condition.
 
+CIRCLE      pane=circle opens the product's Taste Circle builder around the
+            record in detail. Its dish is LOCAL and URL-held too:
+            tc   locked dimensions, "dimension:filler" in the order chosen
+            tcx  the dimension whose fillers are fanned out
+            tcp  page of that fan
+            tcb  the record the dish was built around; when rec changes,
+                 reconcile() starts a fresh circle
+
 Everything below is R4.1's state module, unchanged:
 
 
@@ -37,16 +45,17 @@ from urllib.parse import urlencode
 
 from r4_model import of, pretty, route_ids
 
-LIST_KEYS = ("have", "has", "paired", "gap", "cmp")
+LIST_KEYS = ("have", "has", "paired", "gap", "cmp", "tc")
 DEFAULTS: dict[str, Any] = {
     "ingredient": "broccoli", "have": [], "has": [], "paired": [], "gap": [],
     "hide": False, "rec": "", "cmp": [], "trace": "", "pane": "",
     "cols": "summary", "depth": 1, "diff": False, "answer": False,
     "graph": False, "ov": "b", "sheet": "full",
+    "tc": [], "tcx": "", "tcp": 0, "tcb": "",
 }
 GLOBAL = ("ingredient", "have", "has", "paired", "gap", "hide")
 SELECTION = ("rec", "cmp", "trace")
-LOCAL = ("pane", "cols", "depth", "diff", "answer", "graph")
+LOCAL = ("pane", "cols", "depth", "diff", "answer", "graph", "tc", "tcx", "tcp", "tcb")
 VARIANT = ("ov", "sheet")
 OV = {"a": "compact code", "b": "labelled summary", "c": "named roles"}
 SHEETS = {"full": "full", "dense": "dense"}
@@ -57,7 +66,7 @@ GAP = {"unpaired": "a need with no curated pairing", "noroute": "no flavour rout
        "nosource": "a pairing with no source", "noprofile": "no sensory profile"}
 COLS = {"summary": "Summary", "sensory": "Sensory", "matrix": "Needs × roles",
         "evidence": "Evidence"}
-PANES = ("detail", "compare", "trace")
+PANES = ("detail", "compare", "trace", "circle")
 TRACE_KINDS = ("state", "ingredient", "route", "source")
 
 
@@ -72,6 +81,8 @@ def parse(params: Mapping[str, str]) -> dict[str, Any]:
             st[k] = str(v) == "1"
         elif k == "depth":
             st[k] = max(1, min(3, int(v))) if str(v).isdigit() else 1
+        elif k == "tcp":
+            st[k] = min(int(v), 50) if str(v).isdigit() else 0
         else:
             st[k] = str(v)
     st["cmp"] = st["cmp"][:3]
@@ -168,6 +179,8 @@ def reconcile(st: dict[str, Any], m: dict) -> dict[str, Any]:
     st = dict(st)
     if st["rec"] and st["rec"] not in comps:
         st["rec"] = ""
+    if st.get("tcb", "") != st["rec"] or not st["rec"]:   # a new subject: a fresh circle
+        st.update(tc=[], tcx="", tcp=0, tcb="")
     st["cmp"] = [c for c in st["cmp"] if c in comps]
     f = trace_focus(st)
     if f and ((f[0] == "state" and f[1] not in comps)

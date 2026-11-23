@@ -72,6 +72,19 @@ Tasks in the sheet. The index may be used.
 
 D3 and D4 are the same on both records on purpose. They test the layout of the same facts. D1 and D2 differ, so a participant cannot answer the second from memory of the first.
 
+## Part 3 (optional): the taste circle (about 5 min)
+
+The Taste circle pane is not a layout condition: it is the same in every condition. Use it to check that the workspace still carries the product's main builder. Open:
+`http://localhost:8543/?ingredient=broccoli&have=yogurt,lemon,garlic&rec=roasted_broccoli_component&pane=circle`
+
+| Task | Answer |
+| --- | --- |
+| **T1** Which taste dimensions does roasted broccoli already provide? | Sweet, Umami, Nutty/Toasted |
+| **T2** Add something sour that you have on hand. | Lemon or yogurt, from the Sour fan |
+| **T3** Change your mind about the sour ingredient. | Click the locked Sour dimension, or *remove* in *Your dish* |
+
+Record: correct · partly · wrong, whether they read the answer from the circle or from the read-out above it, and any click that did something they did not expect.
+
 ## What to record
 
 The sheet for each block:
@@ -102,4 +115,5 @@ After both parts, ask:
 - Mobile.
 - Recommendation tasks ("what should I cook?").
 - The E3 answer panel.
+- Comparing the circle with the old cards or the product's Cards view.
 - Changes to the name cell. It is the next density lever, held fixed here so it does not confound the encodings ([evaluation.md](evaluation.md)).
