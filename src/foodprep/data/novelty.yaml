@@ -14,7 +14,7 @@ corpora:
 - corpus_id: culinarydb
   name: CulinaryDB
   scope: 45772 recipes in supplied CulinaryDB files
-  source_path: F:\download\google\CulinaryDB
+  source_path: outside the repository (CulinaryDB)
   recipe_count: 45772
   search_date: '2026-11-21'
 observations:

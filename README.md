@@ -155,7 +155,20 @@ build artifact that is rebuilt from it every time.
 | `flavour_routes.yaml` | reusable dressing combinations and the states they fit |
 | `component_profiles.yaml`, `destination_profiles.yaml` | plate-balance profiles |
 | `tastings.yaml` | **append-only** kitchen results; a disagreeing retry is a new trial, never an edit |
-| `novelty.yaml` | **generated** corpus measurements; regenerate with `scripts/observe_novelty.py <CulinaryDB dir>`, never hand-edit |
+| `novelty.yaml` | **generated** corpus measurements; regenerate with `scripts/observe_novelty.py`, never hand-edit |
+
+**The recipe corpus stays local.** CulinaryDB (`01_Recipe_Details.csv`,
+`02_Ingredients.csv`, `04_Recipe-Ingredients_Aliases.csv`) does not ship with
+the app. `scripts/observe_novelty.py`, `foodprep novelty` and
+`foodprep backfill` find it in this order:
+
+1. a folder given on the command line;
+2. the `FOODPREP_CORPUS_DIR` environment variable;
+3. `data/corpus/culinarydb/` in the repository, which git ignores.
+
+A folder named in (1) or (2) that lacks the files is an error, never a silent
+fall-through. `novelty.yaml` records the corpus relative to the repository, or
+by folder name only, never a machine's own path.
 
 The loader refuses duplicate YAML keys, unknown vocabulary terms, and
 techniques without a serving form. Those used to fail silently.

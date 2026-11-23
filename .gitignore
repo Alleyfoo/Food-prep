@@ -8,6 +8,9 @@ dist/
 venv/
 .env
 
+# Local recipe corpus (CulinaryDB): never committed, see foodprep.corpus
+data/corpus/
+
 # SQLite databases are build artifacts
 *.sqlite
 *.db

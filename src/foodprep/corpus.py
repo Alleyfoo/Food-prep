@@ -16,15 +16,22 @@ role.
 CulinaryDB keys ingredients by Entity ID (file 02 uses Title Case names, file 04
 uses lowercase with trailing spaces — so Entity ID is the only stable key).
 
-CulinaryDB files expected in the given directory:
+CulinaryDB files expected in the corpus directory:
     01_Recipe_Details.csv          Recipe ID,Title,Source,Cuisine
     02_Ingredients.csv             Aliased Ingredient Name,Ingredient Synonyms,Entity ID,Category
     04_Recipe-Ingredients_Aliases.csv  Recipe ID,Original Ingredient,Aliased Ingredient,Entity ID
+
+Where the corpus lives: CulinaryDB does not ship with the app, so
+`resolve_corpus_dir` looks in one fixed order (see its docstring): a path
+given on the command line, then $FOODPREP_CORPUS_DIR, then data/corpus/
+culinarydb/ in the repository (ignored by git). What gets recorded in the
+committed novelty.yaml is `portable_source`, never a machine's own path.
 """
 
 from __future__ import annotations
 
 import csv
+import os
 import re
 import sqlite3
 from datetime import date
@@ -57,6 +64,67 @@ CANONICAL_TO_CORPUS: dict[str, list[str]] = {
     "hard_cheese": ["parmesan cheese", "gruyere cheese", "cheddar cheese"],
     "pickles": ["pickle", "pickled cucumber", "cucumber"],
 }
+
+
+CORPUS_ENV = "FOODPREP_CORPUS_DIR"
+CORPUS_FILES = ("01_Recipe_Details.csv", "02_Ingredients.csv",
+                "04_Recipe-Ingredients_Aliases.csv")
+_PACKAGE_DIR = Path(__file__).resolve().parent
+# In a source checkout (src/foodprep/) the repository root is two levels up;
+# an installed package has no repository, so it looks under the working folder.
+REPO_ROOT = (_PACKAGE_DIR.parents[1] if _PACKAGE_DIR.parent.name == "src"
+             else Path.cwd())
+DEFAULT_CORPUS_DIR = REPO_ROOT / "data" / "corpus" / "culinarydb"
+
+
+class CorpusNotFound(FileNotFoundError):
+    """No usable CulinaryDB directory; the message says where to put it."""
+
+
+def _missing_files(path: Path) -> list[str]:
+    return [name for name in CORPUS_FILES if not (path / name).is_file()]
+
+
+def resolve_corpus_dir(explicit: Path | str | None = None, *,
+                       env: dict[str, str] | None = None) -> Path:
+    """The CulinaryDB directory to read, from the first place that names one:
+
+    1. ``explicit``, a path given on the command line;
+    2. the ``FOODPREP_CORPUS_DIR`` environment variable;
+    3. ``data/corpus/culinarydb/`` in the repository (ignored by git).
+
+    A path given in (1) or (2) that lacks the CSVs is an error rather than a
+    silent fall-through, so a typo never measures against a different corpus.
+    """
+    env = os.environ if env is None else env
+    for source, value in (("the path given", explicit),
+                          (f"${CORPUS_ENV}", env.get(CORPUS_ENV))):
+        if value:
+            path = Path(value).expanduser()
+            missing = _missing_files(path)
+            if missing:
+                raise CorpusNotFound(
+                    f"{source} ({path}) is not a CulinaryDB directory: "
+                    f"missing {', '.join(missing)}.")
+            return path
+    if not _missing_files(DEFAULT_CORPUS_DIR):
+        return DEFAULT_CORPUS_DIR
+    raise CorpusNotFound(
+        "No CulinaryDB corpus found. Put "
+        f"{', '.join(CORPUS_FILES)} in {DEFAULT_CORPUS_DIR} (ignored by git), "
+        f"or set {CORPUS_ENV} to the folder that holds them, "
+        "or pass the folder on the command line.")
+
+
+def portable_source(dir_path: Path | str) -> str:
+    """How a corpus location is recorded in committed files: relative to the
+    repository when it is inside it, otherwise only the folder's name, so no
+    one's local drive layout ends up in novelty.yaml."""
+    path = Path(dir_path).resolve()
+    try:
+        return path.relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        return f"outside the repository ({path.name})"
 
 
 def _norm(name: str) -> str:
@@ -327,7 +395,7 @@ def observe_hypotheses(
            ON CONFLICT(corpus_id) DO UPDATE SET name=excluded.name, scope=excluded.scope,
              source_path=excluded.source_path, recipe_count=excluded.recipe_count,
              search_date=excluded.search_date""",
-        (corpus_id, corpus_name, scope_text, str(Path(dir_path)),
+        (corpus_id, corpus_name, scope_text, portable_source(dir_path),
          len(recipe_titles), observed_at),
     )
 
