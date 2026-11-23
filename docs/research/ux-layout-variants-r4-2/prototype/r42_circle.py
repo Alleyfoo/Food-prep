@@ -101,7 +101,8 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
     """Colour every node and edge by its job, from the world's tokens:
     each state takes the world's circle role (white/cool: open = white
     with an outline, provided = neutral fill, locked = the selection blue,
-    expanded = solid blue; pantry: open = pale sage, provided = yogurt,
+    expanded = solid blue; pantry: open = pale sage, provided = yogurt
+    with a sage outline,
     locked = red cabbage, expanded = mustard seed), and an option you have
     on hand takes the on-hand fill. The fan (lines and option outlines)
     takes the expanded dimension's accent in pantry, so the outline says
@@ -125,7 +126,7 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
             bg, line, label, width = {
                 "open": (c("open-fill"), T["line"] if back else c("open-edge"),
                          T["ink-3"] if back else c("open-label"), 1),
-                "provided": (c("prov-fill"), c("prov-fill") if back else c("prov-edge"), c("prov-label"), 1),
+                "provided": (c("prov-fill"), c("prov-calm") if back else c("prov-edge"), c("prov-label"), 1),
                 "locked": (c("lock-fill"), c("lock-calm") if back else c("lock-edge"), c("lock-label"), 2),
                 "expanded": (c("exp-fill"), c("exp-edge"), c("exp-label"), 3),
             }[role]

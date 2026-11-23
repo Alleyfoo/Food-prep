@@ -239,3 +239,13 @@ def test_pantry_mustard_marks_only_the_opened_dimension_and_its_fan(conn):
     assert fan and all(e["color"]["color"] == "#674C14" for e in fan)
     locked = {n["id"]: n for n in C.graph_data(conn, _st(tc=["sour:lemon"], pal="pantry"))["nodes"]}
     assert locked["dim:sour"]["color"]["background"] == "#ECDFF0"
+
+
+def test_pantry_provided_dimensions_stay_visible_when_a_fan_is_open(conn):
+    """Provided dimensions explain the preparation: quieter, never invisible."""
+    import r42_palette as P
+    T = P.tokens("pantry")
+    for st in (_st(pal="pantry"), _st(tcx="sour", pal="pantry")):
+        umami = {n["id"]: n for n in C.graph_data(conn, st)["nodes"]}["dim:umami"]["color"]
+        assert umami["background"] == T["panel"]
+        assert P.contrast(umami["border"], T["circle-canvas"]) >= 2.0

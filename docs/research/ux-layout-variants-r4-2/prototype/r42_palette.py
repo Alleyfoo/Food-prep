@@ -159,7 +159,7 @@ def _extras(w: dict) -> dict:
     # Focus on the fanned-out dimension: the line to it, the fan's lines and
     # option outlines, and the read-out note. Defaults keep the jobs worlds
     # and peach as they were.
-    for k, v in {"exp-line": w["circle"]["exp-fill"], "fan-edge": w["line_strong"],
+    for k, v in {"prov-calm": w["circle"]["prov-fill"], "exp-line": w["circle"]["exp-fill"], "fan-edge": w["line_strong"],
                  "fan-have-edge": C["have"]["base"], "fan-note-fill": w["fill_soft"],
                  "fan-note-edge": w["ink2"]}.items():
         w["circle"].setdefault(k, v)
@@ -193,12 +193,15 @@ def _pantry() -> dict:
             # Circle: the outline says focus, the fill says status. Mustard
             # seed marks only the dimension you opened, with its fan; the
             # dimensions still to fill are pale sage (clickable, like the
-            # filters); the ones the state provides sit back on yogurt.
+            # filters); the ones the state provides are yogurt with a sage
+            # outline: quieter than the open ones, but still real nodes,
+            # because they explain what the preparation already brings.
             # Option chips keep their status fill: parsley on hand, red
             # cabbage once locked into the dish.
             "circle": {"canvas": panel,
                        "open-fill": fill, "open-edge": ink2, "open-label": ink2,
-                       "prov-fill": panel, "prov-edge": line, "prov-label": ink2,
+                       "prov-fill": panel, "prov-edge": hsl(72, 14, 50), "prov-calm": hsl(72, 14, 62),
+                       "prov-label": ink2,
                        "lock-fill": "#ECDFF0", "lock-edge": "#633F68", "lock-calm": hsl(288, 22, 70),
                        "lock-label": "#633F68",
                        "exp-fill": "#F1E5AE", "exp-edge": "#674C14", "exp-label": "#674C14",
@@ -278,6 +281,7 @@ def mark_pairs(name: str = DEFAULT_WORLD) -> list[tuple[str, str, str]]:
              ("tab top, circle", "circle-tab", "surface")]
     if name == "pantry":         # the outline is what marks focus there
         pairs += [("open dimension outline", "circle-exp-edge", "circle-canvas"),
+                  ("provided dimension outline", "circle-prov-edge", "circle-canvas"),
                   ("fan option outline", "circle-fan-edge", "circle-canvas")]
     if name != "peach":          # the reference world is kept as it was
         pairs.append(("experimental outline", "hyp-border", "surface"))

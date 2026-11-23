@@ -76,7 +76,7 @@ The proposal puts food references back, with **one food per job**. Its colours a
 | Trace | beetroot `#883046` |
 | Links | olive `#5F692C`, the selection colour (the "where you act" job) |
 | Dimensions still to fill | pale sage with a sage outline, like the filters: clickable |
-| Dimensions the state already provides | yogurt with a faint line. These cannot be clicked |
+| Dimensions the state already provides | yogurt with a sage outline (`#8A916E`, 3.2:1 on the canvas; `#A6AC91` while a fan is open): quieter than the dimensions still to fill, but still real nodes, because they explain what the preparation already brings. These cannot be clicked |
 | Hypotheses | no hue, as in the other worlds |
 | Lines and secondary text | sage tones (secondary `#5d634b`) |
 
