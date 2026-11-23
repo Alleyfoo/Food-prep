@@ -210,12 +210,12 @@ def context_strip(active_tab: str) -> None:
                f'<span class="ctx-sub"> · from {_esc(_pretty(ctx_ingredient()))}</span>'
                if state else
                f'<b>{_esc(_pretty(ctx_ingredient()).capitalize())}</b>'
-               f'<span class="ctx-sub"> · no prepared state chosen</span>')
+               f'<span class="ctx-sub"> · no prepared ingredient chosen</span>')
     have = st.session_state.get("available_items") or []
     have_txt = (", ".join(_pretty(h) for h in have) if have
                 else '<span class="ctx-sub">nothing entered</span>')
     note = ('<span class="ctx-note">This view works on plate items or fillers, '
-            'not on the current dish.</span>'
+            'not on the prepared ingredient you are investigating.</span>'
             if active_tab in _SUBJECT_FREE_TABS else "")
     _md(f'<div class="ctx-strip" role="status" aria-live="polite">'
         f'<span class="ctx-label">Investigating</span> {subject}'
@@ -417,7 +417,7 @@ def _ingredient_explorer_a(available_items: list[str] | None = None) -> None:
             shown = cards[:5]
             hidden = [c for c in cards[5:] if c.get("component") == ctx_state()]
             if hidden:
-                _md(f'<div class="hint">The dish you are investigating, '
+                _md(f'<div class="hint">The prepared ingredient you are investigating, '
                     f'<b>{_esc(_pretty(ctx_state()))}</b>, comes from '
                     f'<b>{_esc(_pretty(hidden[0]["technique"]))}</b>, which is '
                     f'below the top five: pick it under <i>Choose technique</i>.'
@@ -431,7 +431,7 @@ def _ingredient_explorer_a(available_items: list[str] | None = None) -> None:
                 routes = (query.flavour_routes_for_component(
                     CONN, c["component"], available_items=avail) if avail else None)
                 if c.get("component") == ctx_state():
-                    _md('<div class="eyebrow ctx-mark">● The dish you are '
+                    _md('<div class="eyebrow ctx-mark">● The prepared ingredient you are '
                         'investigating</div>')
                 # the top-ranked branch carries the accent border
                 _md(branch_card_html(c, available=part, lead=(i == 0), routes=routes))
@@ -457,7 +457,7 @@ def tab_map() -> None:
     with view_col:
         view = pill_radio("View", ["Cook paths", "Scout ideas"], "map_view")
     if view == "Scout ideas":
-        _md('<div class="hint">Generated hypotheses for each transformed state. '
+        _md('<div class="hint">Generated hypotheses for each prepared ingredient. '
             'Diamonds have three lines of compatibility evidence; dots are '
             'thinner. Untested — see Scout before cooking any of them.</div>')
         net = build_scout_graph(CONN, ingredient)
@@ -476,7 +476,7 @@ def tab_map() -> None:
                      color={"background": focus.get("color"), "border": "#1A1B16"})
         _md(f'<div class="hint ctx-mark">The map shows all of '
             f'<b>{_esc(_pretty(ingredient))}</b>; <b>{_esc(_pretty(state))}</b>, '
-            f'the dish you are investigating, has the dark ring.</div>')
+            f'the prepared ingredient you are investigating, has the dark ring.</div>')
     elif state:
         _md(f'<div class="hint ctx-mark"><b>{_esc(_pretty(state))}</b> is not '
             f'drawn in this view of {_esc(_pretty(ingredient))}.</div>')
@@ -519,11 +519,11 @@ def tab_journeys() -> None:
         state = ctx_state()
         if state and not any(j.get("primary_component") == state for j in journeys):
             _md(f'<div class="hint ctx-mark">None of these paths is built on '
-                f'<b>{_esc(_pretty(state))}</b>, the dish you are investigating.'
+                f'<b>{_esc(_pretty(state))}</b>, the prepared ingredient you are investigating.'
                 f'</div>')
         for i, j in enumerate(journeys, start=1):
             if state and j.get("primary_component") == state:
-                _md('<div class="eyebrow ctx-mark">● Built on the dish you are '
+                _md('<div class="eyebrow ctx-mark">● Built on the prepared ingredient you are '
                     'investigating</div>')
             _md(journey_card_html(j, index=i))
 
@@ -538,7 +538,7 @@ def tab_component_explorer(available_items: list[str] | None = None) -> None:
         comp = st.selectbox("Component", comps,
                             label_visibility="collapsed", format_func=_pretty,
                             key="component_explorer_comp",
-                            placeholder="Choose a prepared state",
+                            placeholder="Choose a prepared ingredient",
                             on_change=_picked_state,
                             args=("component_explorer_comp",))
     if comp is None:
@@ -804,12 +804,12 @@ def _explain_unrepresentable(view: str, usable: list[str]) -> None:
                   f'{view} works from flavour profiles.')
     else:
         reason = (f'You are investigating <b>{_esc(_pretty(ingredient))}</b> '
-                  f'without a prepared state, and {view} works on prepared '
-                  f'states.')
-    offer = (f' {_esc(_pretty(ingredient)).capitalize()} states it can use: '
+                  f'without a prepared ingredient, and {view} works on prepared '
+                  f'ingredients.')
+    offer = (f' Prepared {_esc(_pretty(ingredient))} it can use: '
              f'{_esc(", ".join(_pretty(s) for s in options))}. Choose one on the left.'
              if options else
-             f' No state of {_esc(_pretty(ingredient))} has a flavour profile yet.')
+             f' No prepared {_esc(_pretty(ingredient))} has a flavour profile yet.')
     _md(f'<div class="hint ctx-mark">{reason}{offer}</div>')
 
 
@@ -853,12 +853,12 @@ def tab_scout(available_items: list[str] | None = None) -> None:
     subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
 
     with subject:
-        _md('<div class="eyebrow">Transformed state</div>')
+        _md('<div class="eyebrow">Prepared ingredient</div>')
         _sync_picker("tab_scout_component_select", state_comps, ctx_state())
-        comp = st.selectbox("Transformed state", state_comps,
+        comp = st.selectbox("Prepared ingredient", state_comps,
                             label_visibility="collapsed", format_func=_pretty,
                             key="tab_scout_component_select",
-                            placeholder="Choose a prepared state",
+                            placeholder="Choose a prepared ingredient",
                             on_change=_picked_state,
                             args=("tab_scout_component_select",))
     if comp is None:
@@ -903,7 +903,7 @@ def tab_scout(available_items: list[str] | None = None) -> None:
 
     with answer:
         _md('<div class="disclaimer">Hypotheses come from analogy rules applied '
-            'to transformed states. They are <b>not classics</b>. Taste a small '
+            'to prepared ingredients. They are <b>not classics</b>. Taste a small '
             'amount before serving.</div>')
         if not current:
             _md(_no_hypotheses_html(comp))
@@ -1197,11 +1197,11 @@ def tab_taste_circle(available_items: list[str] | None = None) -> None:
         options = query.states_for_ingredient(CONN, ctx_ingredient(),
                                               profiled_only=True) or state_comps
         with pick:
-            _md('<div class="eyebrow">Prepared state</div>')
+            _md('<div class="eyebrow">Prepared ingredient</div>')
             _sync_picker("tc_state_pick", options, None)
-            st.selectbox("Prepared state", options, key="tc_state_pick",
+            st.selectbox("Prepared ingredient", options, key="tc_state_pick",
                          label_visibility="collapsed", format_func=_pretty,
-                         placeholder="Choose a prepared state",
+                         placeholder="Choose a prepared ingredient",
                          on_change=_picked_state, args=("tc_state_pick",))
         with note:
             _explain_unrepresentable("Taste Circle", state_comps)

@@ -122,7 +122,7 @@ def test_changing_ingredient_drops_a_state_of_another_ingredient():
     _select(at, "map_ing").set_value("tomato").run()
     assert at.session_state["ctx_ingredient"] == "tomato"
     assert at.session_state["ctx_state"] is None
-    assert "no prepared state chosen" in _page(at)
+    assert "no prepared ingredient chosen" in _page(at)
 
 
 def test_a_view_that_cannot_show_the_state_explains_instead_of_substituting():

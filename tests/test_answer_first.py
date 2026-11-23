@@ -238,3 +238,23 @@ def test_variant_a_is_unchanged(monkeypatch):
     assert not any('class="answer-first"' in m.value for m in at.markdown)
     lead = next(m.value for m in at.markdown if 'class="card lead' in m.value)
     assert "raw broccoli" in lead          # the old emphasis, for comparison
+
+
+# ---- terminology (E3 phase 3) -------------------------------------------------
+
+OLD_TERMS = ("transformed state", "prepared state", "dish you are investigating",
+             "the current dish")
+
+
+@pytest.mark.parametrize("tab", ["ingredient-explorer", "component-explorer",
+                                 "plate-balance", "taste-circle", "map",
+                                 "journeys", "filler-profiles", "scout"])
+def test_one_name_for_a_prepared_ingredient(tab):
+    at = _app(tab=tab, state="roasted_cabbage_component")
+    text = _md(at).lower()
+    labels = " ".join(str(getattr(w, "label", "")) + " " +
+                      str(getattr(w, "placeholder", "") or "")
+                      for w in at.selectbox).lower()
+    for term in OLD_TERMS:
+        assert term not in text, (tab, term)
+        assert term not in labels, (tab, term)
