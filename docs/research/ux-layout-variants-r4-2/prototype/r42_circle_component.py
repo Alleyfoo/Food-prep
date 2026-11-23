@@ -1,7 +1,7 @@
 """The product's Taste Circle component, served with a transparent page.
 
 The product's component (src/foodprep/ui/taste_circle_component/) paints its
-iframe a fixed warm paper, #F4F2EC, which would carry the food tint into
+iframe a fixed page colour (#F5F5EB, oat, since the pantry port), which would carry the food tint into
 every colour world. Rather than change src/, the prototype builds its own
 copy at start-up: the product's index.html with only the background made
 transparent, and the product's vendored vis-network, in a temp folder. The
@@ -19,7 +19,7 @@ import streamlit.components.v1 as components
 import foodprep.ui
 
 SRC = Path(foodprep.ui.__file__).resolve().parent / "taste_circle_component"
-PRODUCT_BG = "background: #F4F2EC;"
+PRODUCT_BG = "background: #F5F5EB;"
 
 
 def frontend_dir() -> Path:

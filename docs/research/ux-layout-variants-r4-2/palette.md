@@ -105,4 +105,4 @@ The proposal puts food references back, with **one food per job**. Its colours a
 ## What it does not change
 
 - **Layout.** `metrics.json` is identical before and after.
-- **The product app and `src/`.** The product's own palette (`design.css`) still uses the food ramps. Whether the product should follow is a separate decision.
+- **The product app and `src/`** were unchanged by this research. *Update 2026-11-24:* the product now follows pantry (`design.css`, `graph.py`, the Taste Circle component and `.streamlit/config.toml`; ramps from `scripts/gen_palette.py`; checked by `tests/test_design_palette.py`).

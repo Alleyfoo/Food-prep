@@ -475,7 +475,7 @@ def tab_map() -> None:
         focus = next((n for n in data["nodes"] if n.get("id") == f"comp:{state}"), None)
     if focus is not None:
         focus.update(borderWidth=5, size=(focus.get("size") or 22) + 8,
-                     color={"background": focus.get("color"), "border": "#1A1B16"})
+                     color={"background": focus.get("color"), "border": "#24291D"})
         _md(f'<div class="hint ctx-mark">The map shows all of '
             f'<b>{_esc(_pretty(ingredient))}</b>; <b>{_esc(_pretty(state))}</b>, '
             f'the prepared ingredient you are investigating, has the dark ring.</div>')

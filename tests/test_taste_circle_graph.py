@@ -8,7 +8,7 @@ import pytest
 from foodprep import query
 from foodprep.ui.graph import (
     TASTE_DIMENSIONS, _DIM_RX, _DIM_RY, _FADED_FONT, _FAN_RADIUS_MAX,
-    _FAN_RADIUS_MIN, _FAN_SPREAD, _MAX_FILLER_NODES, _MORE_SUFFIX, _POSITIVE,
+    _FAN_RADIUS_MIN, _FAN_SPREAD, _MAX_FILLER_NODES, _MORE_SUFFIX, _CIRCLE,
     _fan_page, _pill_extent, random_dish_selections, taste_circle_graph_data,
 )
 
@@ -232,13 +232,13 @@ def test_on_hand_fillers_are_flagged_in_the_fan(conn):
                                    available={target})
     nodes = _by_id(data)
     on_hand = nodes[f"filler:sour:{target}"]
-    assert on_hand["color"]["background"] == _POSITIVE[200]
-    assert on_hand["color"]["border"] == _POSITIVE[500]
-    # and a filler that is not on hand keeps the primary tint
+    assert on_hand["color"]["background"] == _CIRCLE["have_fill"]          # status: parsley
+    assert on_hand["color"]["border"] == _CIRCLE["focus_edge"]             # focus: mustard
+    # and a filler that is not on hand keeps the plain option fill
     others = [n for n in data["nodes"]
               if n["id"].startswith("filler:sour:") and n["id"] != on_hand["id"]]
     assert others
-    assert all(n["color"]["background"] != _POSITIVE[200] for n in others)
+    assert all(n["color"]["background"] != _CIRCLE["have_fill"] for n in others)
 
 
 def test_long_pool_pages_instead_of_overflowing(conn):
