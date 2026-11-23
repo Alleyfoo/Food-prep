@@ -53,8 +53,13 @@ def contrast(a: str, b: str) -> float:
 H, S, L = hex_to_hsl(SEED)
 
 # brand-tinted neutrals: (step, saturation, lightness) from the skill
-NEUTRAL_STEPS = [(900, 12, 10), (700, 10, 30), (600, 9, 40), (500, 8, 50), (300, 6, 70),
-                 (200, 5, 82), (150, 4.5, 87), (100, 4, 92), (50, 3, 96)]
+# No grey (user request, 2026-11-23): the skill's neutrals (3-12% saturation)
+# read as grey, so every neutral is a clearly coloured tone of the seed hue:
+# warm paper for fills, sand for lines, roasted brown for text. Saturation
+# rises towards the light end, where a low value would wash out to grey.
+NEUTRAL_STEPS = [(900, 35, 10), (700, 28, 27), (600, 26, 36), (500, 24, 46), (300, 28, 68),
+                 (200, 32, 80), (150, 36, 86), (100, 42, 91), (50, 50, 95)]
+NEUTRAL_MIN_SAT = 20         # below this a tone starts to read as grey
 N = {step: hsl(H, s, l) for step, s, l in NEUTRAL_STEPS}
 
 CONCEPT_HUES = {"sel": H, "cmp": 215, "trace": 268, "have": 145, "diff": 4}
@@ -68,21 +73,22 @@ def concept(hue: float) -> dict[str, str]:
             # fills. The skill's "subtle" (S x 0.3, L 94) is too close to the
             # page to mark a selected row, so fills follow its "selection"
             # rule instead: L 90+, moderate saturation.
-            "subtle": hsl(hue, S * 0.6, 92),    # selected row, chips, tags
-            "subtle2": hsl(hue, S * 0.5, 86),   # second stripe of a hatched fill
+            # (on the cream page a fill needs more colour to stand out)
+            "subtle": hsl(hue, S * 0.8, 88),    # selected row, chips, tags
+            "subtle2": hsl(hue, S * 0.65, 82),  # second stripe of a hatched fill
             "faint": hsl(hue, S * 0.4, 97)}     # large calm fills (idea box)
 
 
 C = {k: concept(h) for k, h in CONCEPT_HUES.items()}
 INK = N[900]                 # near-black body text
-SURFACE = "#fefefd"          # cards, tables: off-white, not pure #fff
+SURFACE = hsl(H, 70, 97.5)    # cards, chips: a cream, not pure #fff
 PAGE = N[50]                 # the page behind the panes
 # The skill allows "primary or a dedicated high-visibility blue" for links.
 # At the seed's lightness (22%) blue reads as black, so links are lighter.
 LINK = hsl(215, 75, 36)
 
 
-def _passing(bgs: list[str], start: float, target: float = 4.5, s: float = 9) -> str:
+def _passing(bgs: list[str], start: float, target: float = 4.5, s: float = 26) -> str:
     """Lightest seed-tinted grey at or below *start* lightness that reaches
     *target* on every fill in *bgs*."""
     l = start

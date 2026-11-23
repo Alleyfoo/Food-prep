@@ -6,7 +6,7 @@
 
 ## Set-up
 
-- **Prototype:** `py -3.11 -m streamlit run docs/research/ux-layout-variants-r4-2/prototype/app.py --server.port 8543`. Desktop, 1440 × 900, one browser window.
+- **Prototype:** `py -3.11 docs/research/ux-layout-variants-r4-2/prototype/run.py`. Desktop, 1440 × 900, one browser window.
 - **Conditions** are set by URL only. The tab title shows the condition to the facilitator.
 - **The on-hand lists are session input, not culinary data:**
   - broccoli: yogurt, lemon, garlic;

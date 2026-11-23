@@ -1,6 +1,6 @@
 """Capture the R4.2 layout variants on identical states (desktop, 1440 x 900).
 
-    py -3.11 -m streamlit run docs/research/ux-layout-variants-r4-2/prototype/app.py --server.port 8543
+    py -3.11 docs/research/ux-layout-variants-r4-2/prototype/run.py
     py -3.11 docs/research/ux-layout-variants-r4-2/evidence/capture_variants.py
 
 One prototype, one URL per state; only the condition keys differ:

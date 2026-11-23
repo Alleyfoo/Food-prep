@@ -1,7 +1,7 @@
 """R4.2 layout variants: R4.1 with switchable encodings for data-layout validation.
 Research only, desktop only. R4 (8541) and R4.1 (8542) stay runnable.
 
-    py -3.11 -m streamlit run docs/research/ux-layout-variants-r4-2/prototype/app.py --server.port 8543
+    py -3.11 docs/research/ux-layout-variants-r4-2/prototype/run.py
 
 The facilitator picks the condition in the URL: ov=a|b|c (overview encoding),
 sheet=full|dense (fact sheet). It is shown only in the browser tab title.

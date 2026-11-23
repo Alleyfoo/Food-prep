@@ -1,6 +1,6 @@
 """Capture the embedded Taste Circle pane (desktop, 1440 x 900).
 
-    py -3.11 -m streamlit run docs/research/ux-layout-variants-r4-2/prototype/app.py --server.port 8543
+    py -3.11 docs/research/ux-layout-variants-r4-2/prototype/run.py
     py -3.11 docs/research/ux-layout-variants-r4-2/evidence/capture_circle.py
 
 Every state is a URL; the circle's dish is held in tc / tcx (see r42_state).

@@ -33,9 +33,9 @@
 - The overview encodings are unchanged, so the measurements in evaluation.md still hold.
 
 **Colours and tint are derived, not picked** ([palette.md](palette.md)). About 60 hand-picked colours were replaced by tokens derived from the product's primary, `#6F4102`, using the dembrandt-skills palette method.
-- The page now has an off-white tint and near-black text, and the greys are tinted with the seed.
+- No grey: the page is warm paper, fills are cream, lines are sand and text is roasted brown, all tones of the seed. That includes Streamlit's own controls (through `prototype/run.py`) and the circle.
 - Each concept has one hue at the seed's weight.
-- Every text pair passes WCAG AA: the lowest is 4.54:1, against 2.47:1 before.
+- Every text pair passes WCAG AA: the lowest is 4.68:1, against 2.47:1 before.
 
 **One correction to R4 and R4.1 found on the way.** The tasting record's *observation* ("works… garlic confit on the same state was clearly better, so brown butter is a real option here but not the best one") was never shown, so the sheet said only "works". R4.2 shows it in every condition. A test covers it.
 
@@ -47,10 +47,10 @@
 | [palette.md](palette.md) | Derived palette: method, tokens, contrast before and after, departures from the skill |
 | [answer-key.md](answer-key.md) | Ground truth for the scan and understand tasks, generated from the model |
 
-**Run**
+**Run** (the launcher passes the palette to Streamlit's theme; plain `streamlit run …/app.py` also works, with Streamlit's default control colours)
 
 ```powershell
-py -3.11 -m streamlit run docs/research/ux-layout-variants-r4-2/prototype/app.py --server.port 8543
+py -3.11 docs/research/ux-layout-variants-r4-2/prototype/run.py
 ```
 
 For example: `http://localhost:8543/?ingredient=potato&have=dill,olive_oil&ov=c&sheet=dense`

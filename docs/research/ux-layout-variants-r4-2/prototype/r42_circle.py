@@ -23,6 +23,7 @@ from typing import Any, Mapping
 from foodprep import query
 from foodprep.ui.graph import TASTE_DIMENSIONS, random_dish_selections
 
+import r42_palette as P
 import r42_state as S
 from r4_model import pretty
 from r42_views import a, esc
@@ -57,12 +58,45 @@ def provided(c: sqlite3.Connection, comp: str) -> list[str]:
     return [d for d in ORDER if d in tags]
 
 
+CIRCLE_BG = "#F4F2EC"          # the component page's own background (index.html)
+
+
+def _recolour(value: Any, *, text: bool = False) -> Any:
+    """Recolour the product's greys in the workspace palette (no grey).
+
+    The product's graph data is unchanged; this works on the prototype's copy.
+    A colour with less saturation than P.NEUTRAL_MIN_SAT becomes the seed
+    tone of the nearest lightness, unless it has a hue of its own (a muted
+    green), which keeps its hue with more saturation. A label colour that fails 4.5:1 on the
+    circle's background becomes the palette's secondary text."""
+    if isinstance(value, dict):
+        return {k: _recolour(v, text=text or k == "font") for k, v in value.items()}
+    if isinstance(value, list):
+        return [_recolour(v, text=text) for v in value]
+    if not (isinstance(value, str) and len(value) == 7 and value.startswith("#")):
+        return value
+    if text and P.contrast(value, CIRCLE_BG) < 4.5:
+        return P.SECONDARY
+    hue, sat, light = P.hex_to_hsl(value)
+    if sat >= P.NEUTRAL_MIN_SAT:
+        return value
+    if light > 97:
+        return P.SURFACE
+    if abs(hue - P.H) > 30 and sat >= 15:
+        # a muted colour with its own hue (the provided green's outline):
+        # keep the hue, lift it out of grey
+        return P.hsl(hue, P.NEUTRAL_MIN_SAT + 10, light)
+    tones = [P.INK] + [P.N[k] for k, *_ in P.NEUTRAL_STEPS]
+    return min(tones, key=lambda t: abs(P.hex_to_hsl(t)[2] - light))
+
+
 def graph_data(c: sqlite3.Connection, st: Mapping[str, Any]) -> dict[str, list]:
     from foodprep.ui.graph import taste_circle_graph_data
     sel = selections(st)
-    return taste_circle_graph_data(c, st["rec"], locked_dimensions=set(sel), selections=sel,
+    data = taste_circle_graph_data(c, st["rec"], locked_dimensions=set(sel), selections=sel,
                                    expanded_dimension=st["tcx"] or None,
                                    available=set(st["have"]), page=st["tcp"])
+    return {"nodes": _recolour(data["nodes"]), "edges": _recolour(data["edges"])}
 
 
 def apply_click(c: sqlite3.Connection, st: Mapping[str, Any], node: str | None) -> dict[str, Any]:

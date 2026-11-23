@@ -39,15 +39,20 @@ def test_no_pure_black_on_pure_white():
     assert P.INK != "#000000" and P.SURFACE != "#ffffff" and P.PAGE != "#ffffff"
 
 
-def test_neutrals_carry_the_seed_hue_and_lose_saturation_as_they_lighten():
-    steps = sorted(P.NEUTRAL_STEPS)                  # 50 ... 900
-    sats = [s for _step, s, _l in steps]
-    assert sats == sorted(sats)                      # lighter step, lower saturation
-    for step, _s, light in steps:
-        h, s, _ = P.hex_to_hsl(P.N[step])
-        assert s < 15, step
-        if light < 85:                               # 8-bit rounding blurs hue near white
-            assert abs(h - P.H) < 12, step
+def test_no_grey_every_neutral_is_a_tone_of_the_seed():
+    """User request: no grey. Every neutral, the page, the surface and the
+    secondary text carry the seed hue at a saturation that does not read grey."""
+    tones = [P.N[step] for step, _s, _l in P.NEUTRAL_STEPS] + [P.PAGE, P.SURFACE, P.SECONDARY, P.INK]
+    for t in tones:
+        h, s, _l = P.hex_to_hsl(t)
+        assert s >= P.NEUTRAL_MIN_SAT, t
+        assert abs(h - P.H) < 8, t
+
+
+def test_no_grey_left_in_the_workspace_tokens():
+    for name, t in P.TOKENS.items():
+        _h, s, _l = P.hex_to_hsl(t)
+        assert s >= P.NEUTRAL_MIN_SAT, name
 
 
 def test_every_concept_takes_the_seeds_weight():

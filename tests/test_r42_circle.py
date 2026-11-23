@@ -152,3 +152,24 @@ def test_a_record_without_a_profile_says_why(conn):
     txt = _text(C.unavailable_html(conn, _st(rec="raw_broccoli_component")))
     assert "no sensory profile" in txt
     assert "Open a prepared ingredient" in _text(C.unavailable_html(conn, _st(rec="")))
+
+
+def test_the_circle_has_no_grey_and_readable_labels(conn):
+    import r42_palette as P
+    data = C.graph_data(conn, _st(tc=["sour:lemon"], tcx="aromatic"))
+    def walk(v, text=False):
+        if isinstance(v, dict):
+            for k, x in v.items():
+                yield from walk(x, text or k == "font")
+        elif isinstance(v, list):
+            for x in v:
+                yield from walk(x, text)
+        elif isinstance(v, str) and len(v) == 7 and v.startswith("#"):
+            yield v, text
+    cols = list(walk(data))
+    assert cols
+    for col, is_text in cols:
+        if is_text:
+            assert P.contrast(col, C.CIRCLE_BG) >= 4.5, col
+        else:
+            assert P.hex_to_hsl(col)[1] >= P.NEUTRAL_MIN_SAT, col
