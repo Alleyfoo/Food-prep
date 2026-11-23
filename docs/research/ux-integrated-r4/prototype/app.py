@@ -79,13 +79,13 @@ if ctx["answer"] and ctx["rec"]:
 wide = ctx["cols"] == "matrix"
 left, right = st.columns([7, 5] if wide else [10, 11], gap="medium")
 full = st.query_params.get("full") == "1"   # captures only: no inner scrolling
-H = None if full else 640
+H = "content" if full else 640
 with left.container(height=H, border=False):
     st.html(V.CSS + '<div class="r4">' + V.overview_html(m, ctx) + "</div>")
 with right:
     pane = S.pane(ctx)
     st.html(V.CSS + V.tabs_html(m, ctx, pane))
-right = right.container(height=None if full else H - 44, border=False)
+right = right.container(height="content" if full else H - 44, border=False)
 with right:
     if pane == "compare":
         st.html(V.CSS + V.compare_html(m, ctx))

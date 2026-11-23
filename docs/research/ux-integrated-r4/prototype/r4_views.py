@@ -67,6 +67,7 @@ CSS = """
 .r4 .dots {letter-spacing:1px; font-size:13px}
 .r4 .num {text-align:right; font-variant-numeric:tabular-nums}
 .r4 .diff {color:#8a3b3b; font-weight:700}
+.r4 table.trace td:nth-child(1), .r4 table.trace td:nth-child(3) {min-width:8.5em}
 </style>
 """
 
@@ -959,7 +960,7 @@ def trace_table_html(m: dict, st: dict) -> str:
     note = (f'<div class="muted">Not applicable to any row here: {esc(", ".join(dropped))}.</div>'
             if dropped else "")
     return ('<div class="r4">' + title + lvl + summary + note +
-            "<table><tr>" + "".join(f"<th>{heads[i]}</th>" for i in keep) + "</tr>" +
+            '<table class="trace"><tr>' + "".join(f"<th>{heads[i]}</th>" for i in keep) + "</tr>" +
             "".join("<tr>" + "".join(row[i] for i in keep) + "</tr>" for row in rows) +
             "</table></div>")
 
