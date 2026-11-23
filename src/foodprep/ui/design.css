@@ -871,7 +871,10 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   font-weight: 400;
   color: var(--ink-5);
   letter-spacing: 0.06em;
+  text-transform: none;
 }
+/* E3: visible feedback after the Taste Circle arrows move the subject */
+.hint.tcm-moved { color: var(--ink); font-weight: 500; }
 
 /* ---- Answer first (UX experiment E3, Ingredient Explorer variant B) ----
    The suggested next step, in sentences, above the detailed cards. Same

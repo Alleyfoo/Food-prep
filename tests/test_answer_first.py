@@ -258,3 +258,32 @@ def test_one_name_for_a_prepared_ingredient(tab):
     for term in OLD_TERMS:
         assert term not in text, (tab, term)
         assert term not in labels, (tab, term)
+
+
+# ---- Taste Circle arrows say where they go (E3 phase 4) ----------------------
+
+def _tc(at):
+    return {b.key: b for b in at.button if b.key in ("tcm_prev", "tcm_next")}
+
+
+def test_taste_circle_arrows_name_their_target():
+    at = _app(tab="taste-circle", state="roasted_broccoli_component")
+    buttons = _tc(at)
+    nxt = buttons["tcm_next"].label
+    assert nxt.endswith("▶") and nxt != "▶"
+    assert "every view" in (buttons["tcm_next"].help or "")
+    assert "change the one you are investigating" in _md(at)
+    target = nxt.rstrip(" ▶")
+    buttons["tcm_next"].click().run()
+    assert not at.exception
+    page = _md(at)
+    assert f"Now investigating <b>{target}</b> instead of roasted broccoli" in page
+    assert at.session_state.ctx_state.replace("_component", "").replace("_", " ") == target
+
+
+def test_taste_circle_feedback_is_shown_once():
+    at = _app(tab="taste-circle", state="roasted_broccoli_component")
+    _tc(at)["tcm_next"].click().run()
+    assert "Now investigating" in _md(at)
+    at.run()                                   # any later interaction
+    assert "Now investigating" not in _md(at)

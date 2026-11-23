@@ -1387,35 +1387,54 @@ def tab_taste_circle_map(available_items: list[str] | None = None) -> None:
 
     with canvas:
         idx = state_comps.index(st.session_state.tcm_component)
-        nav_prev, nav_name, nav_next = st.columns([1, 8, 1])
+        total = len(state_comps)
+        prev_c = state_comps[(idx - 1) % total]
+        next_c = state_comps[(idx + 1) % total]
+        # The arrows change the shared subject in every view (E1), so they
+        # say where they go instead of a bare ◀ ▶ with a tooltip (E3, from
+        # R2 finding M1).
+        nav_prev, nav_name, nav_next = st.columns([3, 4, 3])
         with nav_prev:
-            if st.button("◀", key="tcm_prev", help="Previous component"):
-                idx = (idx - 1) % len(state_comps)
+            if st.button(f"◀ {_pretty(prev_c)}", key="tcm_prev",
+                         help=f"Investigate {_pretty(prev_c)} instead, in every view"):
+                idx = (idx - 1) % total
         # The name sits between the arrows but must show the post-click
         # component, so reserve the slot and fill it once both are read.
         name_slot = nav_name.empty()
         with nav_next:
-            if st.button("▶", key="tcm_next", help="Next component"):
-                idx = (idx + 1) % len(state_comps)
+            if st.button(f"{_pretty(next_c)} ▶", key="tcm_next",
+                         help=f"Investigate {_pretty(next_c)} instead, in every view"):
+                idx = (idx + 1) % total
 
         component = state_comps[idx]
         pretty = _pretty(component)
         name_slot.markdown(
             f'<div class="tcm-component-name">{pretty}'
-            f'<span class="tcm-component-pos">{idx + 1} / {len(state_comps)}</span>'
-            f'</div>',
+            f'<span class="tcm-component-pos">prepared ingredient {idx + 1} of '
+            f'{total}</span></div>',
             unsafe_allow_html=True)
 
         # Switching component starts a fresh circle, and the arrows are a
         # subject picker like any other: the shared context follows.
         if st.session_state.tcm_component != component:
+            moved_from = st.session_state.tcm_component
             _reset()
             st.session_state.tcm_component = component
             set_ctx_state(component)
+            st.session_state.tcm_moved = (moved_from, component)
             # The context strip was drawn above with the old subject; draw
             # the page again so the strip and the circle agree.
             st.rerun()
 
+        moved = st.session_state.pop("tcm_moved", None)
+        if moved and moved[1] == component:
+            _md(f'<div class="hint tcm-moved" role="status">Now investigating '
+                f'<b>{_esc(_pretty(moved[1]))}</b> instead of '
+                f'{_esc(_pretty(moved[0]))}, in every view.</div>')
+        else:
+            _md('<div class="hint">The arrows step through all prepared '
+                'ingredients and change the one you are investigating, in '
+                'every view.</div>')
         _md('<div class="hint">Click a dimension to see what fills it, '
             'click an ingredient to lock it in.</div>')
 
