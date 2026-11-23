@@ -101,10 +101,12 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
     """Colour every node and edge by its job, from the world's tokens:
     each state takes the world's circle role (white/cool: open = white
     with an outline, provided = neutral fill, locked = the selection blue,
-    expanded = solid blue; pantry: open = mustard seed, provided = pale
-    sage, locked = red cabbage), and an option you have on hand takes
-    the on-hand colour. When one dimension is fanned out, the others step
-    back to lighter versions of the same roles."""
+    expanded = solid blue; pantry: open = pale sage, provided = yogurt,
+    locked = red cabbage, expanded = mustard seed), and an option you have
+    on hand takes the on-hand fill. The fan (lines and option outlines)
+    takes the expanded dimension's accent in pantry, so the outline says
+    focus and the fill says status. When one dimension is fanned out, the
+    others step back to lighter versions of the same roles."""
     T = P.tokens(st["pal"])
     have = set(st["have"])
     fanned = bool(st["tcx"])
@@ -133,11 +135,11 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
         elif kind == "filler":
             _p, _dim, filler = n["id"].split(":", 2)
             if filler == MORE:
-                n["color"] = _paint(T["fill"], T["line"], T["ink"])
+                n["color"] = _paint(T["fill"], T["circle-fan-edge"], T["ink"])
             elif filler in have:
-                n["color"] = _paint(T["have-subtle"], T["have-base"], T["ink"])
+                n["color"] = _paint(T["have-subtle"], T["circle-fan-have-edge"], T["ink"])
             else:
-                n["color"] = _paint(T["surface"], T["line-strong"], T["ink"])
+                n["color"] = _paint(T["surface"], T["circle-fan-edge"], T["ink"])
             n["font"] = {**n.get("font", {}), "color": T["ink"]}
         out_nodes.append(n)
     out_edges = []
@@ -145,10 +147,10 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
         e = dict(e)
         role = state_of.get(e.get("to", ""))
         if role is None:                              # dimension -> option (the fan)
-            col, w = T["line-strong"], 1
+            col, w = T["circle-fan-edge"], 1
         else:
             col, w = {"open": (T["line"], 1), "provided": (T["circle-prov-edge"], 1.5),
-                      "locked": (T["circle-lock-edge"], 2), "expanded": (T["circle-exp-fill"], 2)}[role]
+                      "locked": (T["circle-lock-edge"], 2), "expanded": (T["circle-exp-line"], 2)}[role]
         e["color"], e["width"] = {"color": col}, w
         out_edges.append(e)
     return {"nodes": out_nodes, "edges": out_edges}
@@ -292,7 +294,7 @@ CSS = """<style>
 .r4 .tabs .k-circle {border-top:3px solid var(--circle-tab)}
 .r4.tc .tc-dl {display:grid; grid-template-columns:max-content 1fr; gap:2px 12px; margin:6px 0}
 .r4.tc .tc-dl dt {color:var(--ink-3)} .r4.tc .tc-dl dd {margin:0}
-.r4.tc .tc-fan {background:var(--fill-soft); border-left:3px solid var(--ink-2); padding:4px 8px; margin:4px 0}
+.r4.tc .tc-fan {background:var(--circle-fan-note-fill); border-left:3px solid var(--circle-fan-note-edge); padding:4px 8px; margin:4px 0}
 .r4.tc .tc-name {font-weight:600; margin:2px 0 4px}
 .r4.tc table.tc-dish td, .r4.tc table.tc-dish th {padding:2px 10px 2px 0; text-align:left}
 </style>"""

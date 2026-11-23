@@ -65,7 +65,7 @@ The proposal puts food references back, with **one food per job**. Its colours a
 | Selected row | Green olive | `#E9EDC2` | `#5F692C` edge |
 | Ingredient on hand | Parsley | `#DCEBDF` | `#29543E` |
 | Locked into the dish | Red cabbage | `#ECDFF0` | `#633F68` |
-| Open dimension in the circle | Mustard seed | `#F1E5AE` | `#674C14` |
+| The dimension you opened on the circle, and its fan | Mustard seed | `#F1E5AE` | `#674C14` |
 | Missing or unrecorded | Muted sage | `#EBEDE4` | `#535C4A` |
 
 **Jobs the proposal leaves open, filled from the same family:**
@@ -75,14 +75,15 @@ The proposal puts food references back, with **one food per job**. Its colours a
 | Compare | blueberry `#355282` |
 | Trace | beetroot `#883046` |
 | Links | olive `#5F692C`, the selection colour (the "where you act" job) |
-| Dimensions the state already provides | pale sage, the proposal's "inactive" role. These cannot be clicked |
+| Dimensions still to fill | pale sage with a sage outline, like the filters: clickable |
+| Dimensions the state already provides | yogurt with a faint line. These cannot be clicked |
 | Hypotheses | no hue, as in the other worlds |
 | Lines and secondary text | sage tones (secondary `#5d634b`) |
 
 **Contrast:** every text pair passes, with the lowest at 4.65:1.
 
 **Interpretations and one addition, to confirm:**
-- **"Dimension open in the circle"** is read as every dimension that can still be filled. They are all mustard. The one you have fanned out takes the mustard text colour (`#674C14`) as a solid fill, which reads as dark brown. If "open" meant only the fanned-out dimension, the rest would go back to yogurt with an outline.
+- **On the circle, the outline says focus and the fill says status** (decided 2026-11-23). Mustard marks only the dimension you clicked open: its node, the line to it, the fan's lines and the outline of every option in the fan, and the note in the read-out. The other dimensions still to fill stay pale sage, so you see what you are working on and what is left. An option's fill keeps its status: lemon is parsley (on hand) with a mustard outline while it is offered in the Sour fan, and Sour turns red cabbage once you lock lemon in.
 - **The selected row needs its olive edge.** Olive and oat are nearly the same lightness (1.10:1), so the row is drawn with the proposal's `#5F692C` edge above and below.
 - **Olive and mustard are close in hue** (66° and 49°). They mark different things in different places: a row in the overview, a dimension on the circle.
 

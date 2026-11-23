@@ -156,6 +156,13 @@ def _extras(w: dict) -> dict:
         "lock-label": C["sel"]["deep"],
         "exp-fill": C["sel"]["base"], "exp-edge": C["sel"]["deep"], "exp-label": C["sel"]["deep"],
     })
+    # Focus on the fanned-out dimension: the line to it, the fan's lines and
+    # option outlines, and the read-out note. Defaults keep the jobs worlds
+    # and peach as they were.
+    for k, v in {"exp-line": w["circle"]["exp-fill"], "fan-edge": w["line_strong"],
+                 "fan-have-edge": C["have"]["base"], "fan-note-fill": w["fill_soft"],
+                 "fan-note-edge": w["ink2"]}.items():
+        w["circle"].setdefault(k, v)
     return w
 
 
@@ -183,12 +190,20 @@ def _pantry() -> dict:
             "note": {"fill": page, "line": line},
             "node": {"state": panel, "route": panel, "source": fill, "pairing": panel},
             "circle_tab": ink2, "primary": sel["base"], "gap": gap, "sel_edge": "#5F692C",
+            # Circle: the outline says focus, the fill says status. Mustard
+            # seed marks only the dimension you opened, with its fan; the
+            # dimensions still to fill are pale sage (clickable, like the
+            # filters); the ones the state provides sit back on yogurt.
+            # Option chips keep their status fill: parsley on hand, red
+            # cabbage once locked into the dish.
             "circle": {"canvas": panel,
-                       "open-fill": "#F1E5AE", "open-edge": "#674C14", "open-label": "#674C14",
-                       "prov-fill": fill, "prov-edge": ink2, "prov-label": ink2,
+                       "open-fill": fill, "open-edge": ink2, "open-label": ink2,
+                       "prov-fill": panel, "prov-edge": line, "prov-label": ink2,
                        "lock-fill": "#ECDFF0", "lock-edge": "#633F68", "lock-calm": hsl(288, 22, 70),
                        "lock-label": "#633F68",
-                       "exp-fill": "#674C14", "exp-edge": hsl(40, 67, 16), "exp-label": "#674C14"}}
+                       "exp-fill": "#F1E5AE", "exp-edge": "#674C14", "exp-label": "#674C14",
+                       "exp-line": "#674C14", "fan-edge": "#674C14", "fan-have-edge": "#674C14",
+                       "fan-note-fill": "#F1E5AE", "fan-note-edge": "#674C14"}}
 
 
 def _white() -> dict:
@@ -250,7 +265,8 @@ def text_pairs(name: str = DEFAULT_WORLD) -> list[tuple[str, str, str]]:
              ("circle label, open", "circle-open-label", "circle-canvas"),
              ("circle label, provided", "circle-prov-label", "circle-canvas"),
              ("circle label, locked", "circle-lock-label", "circle-canvas"),
-             ("circle label, expanded", "circle-exp-label", "circle-canvas")]
+             ("circle label, expanded", "circle-exp-label", "circle-canvas"),
+             ("open-dimension note", "ink", "circle-fan-note-fill")]
     return [(n, t[f], t[b]) for n, f, b in pairs]
 
 
@@ -260,6 +276,9 @@ def mark_pairs(name: str = DEFAULT_WORLD) -> list[tuple[str, str, str]]:
     pairs = [("compare pin bar", "cmp-base", "sel-subtle"), ("tab top, detail", "sel-mid", "surface"),
              ("tab top, compare", "cmp-base", "surface"), ("tab top, trace", "trace-base", "surface"),
              ("tab top, circle", "circle-tab", "surface")]
+    if name == "pantry":         # the outline is what marks focus there
+        pairs += [("open dimension outline", "circle-exp-edge", "circle-canvas"),
+                  ("fan option outline", "circle-fan-edge", "circle-canvas")]
     if name != "peach":          # the reference world is kept as it was
         pairs.append(("experimental outline", "hyp-border", "surface"))
     return [(n, t[f], t[b]) for n, f, b in pairs]

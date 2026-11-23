@@ -89,7 +89,7 @@ def test_pantry_uses_the_proposed_colours_exactly():
                 "ink-2": "#515a43", "sel-subtle": "#e9edc2", "sel-edge": "#5f692c",
                 "have-subtle": "#dcebdf", "have-base": "#29543e",
                 "circle-lock-fill": "#ecdff0", "circle-lock-edge": "#633f68",
-                "circle-open-fill": "#f1e5ae", "circle-open-edge": "#674c14",
+                "circle-exp-fill": "#f1e5ae", "circle-exp-edge": "#674c14",
                 "gap-fill": "#ebede4", "gap-text": "#535c4a"}
     for k, v in proposed.items():
         assert t[k] == v, k

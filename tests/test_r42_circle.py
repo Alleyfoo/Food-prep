@@ -213,5 +213,29 @@ def test_pantry_circle_roles(conn):
     T = P.tokens("pantry")
     calm = {n["id"]: n for n in C.graph_data(conn, _st(tc=["sour:lemon"], pal="pantry"))["nodes"]}
     assert calm["dim:sour"]["color"]["background"] == T["circle-lock-fill"]     # red cabbage
-    assert calm["dim:salty"]["color"]["background"] == T["circle-open-fill"]    # mustard seed
-    assert calm["dim:umami"]["color"]["background"] == T["circle-prov-fill"]    # pale sage
+    assert calm["dim:salty"]["color"]["background"] == T["fill"]                # still to fill: pale sage
+    assert calm["dim:umami"]["color"]["background"] == T["panel"]               # provided: yogurt
+    mustard = {"#f1e5ae", "#674c14"}
+    assert not mustard & {c for c, _t in _colours(C.graph_data(conn, _st(tc=["sour:lemon"], pal="pantry")))}
+
+
+def test_pantry_mustard_marks_only_the_opened_dimension_and_its_fan(conn):
+    """Outline = focus, fill = status: Sour open is mustard, the rest stay
+    pale sage; lemon in the fan keeps its parsley fill with a mustard
+    outline, and turns red cabbage once locked in."""
+    import r42_palette as P
+    T = P.tokens("pantry")
+    d = C.graph_data(conn, _st(tcx="sour", pal="pantry"))
+    nodes = {n["id"]: n for n in d["nodes"]}
+    assert nodes["dim:sour"]["color"]["background"] == "#F1E5AE"
+    assert nodes["dim:sour"]["color"]["border"] == "#674C14"
+    others = [n for k, n in nodes.items() if k.startswith("dim:") and k != "dim:sour"
+              and C.node_state(_st(tcx="sour", pal="pantry"), k[4:], set()) == "open"
+              and n["color"]["background"] != T["panel"]]
+    assert others and all(n["color"]["background"] == T["fill"] for n in others)
+    lemon = nodes["filler:sour:lemon"]["color"]
+    assert (lemon["background"], lemon["border"]) == (T["have-subtle"], "#674C14")
+    fan = [e for e in d["edges"] if e["to"].startswith("filler:sour:")]
+    assert fan and all(e["color"]["color"] == "#674C14" for e in fan)
+    locked = {n["id"]: n for n in C.graph_data(conn, _st(tc=["sour:lemon"], pal="pantry"))["nodes"]}
+    assert locked["dim:sour"]["color"]["background"] == "#ECDFF0"
