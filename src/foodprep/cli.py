@@ -106,8 +106,13 @@ def cmd_novelty(args: argparse.Namespace) -> int:
     if not _db_has(conn, "analogy_rules"):
         print("Database is empty or has no Scout rules. Run `foodprep build` first.")
         return 1
+    try:
+        corpus_dir = corpus.resolve_corpus_dir(args.dir)
+    except corpus.CorpusNotFound as err:
+        print(err)
+        return 1
     summary = corpus.observe_hypotheses(
-        conn, args.component, args.dir, corpus_id=args.corpus_id,
+        conn, args.component, corpus_dir, corpus_id=args.corpus_id,
         corpus_name=args.corpus_name, scope=args.scope,
     )
     print(
@@ -180,8 +185,13 @@ def cmd_backfill(args: argparse.Namespace) -> int:
     if conn.execute("SELECT count(*) FROM pairings").fetchone()[0] == 0:
         print("Database is empty. Run `foodprep build` first.")
         return 1
-    summary = corpus.backfill(conn, args.dir, verbose=args.verbose)
-    print(f"Backfill from {args.dir}: "
+    try:
+        corpus_dir = corpus.resolve_corpus_dir(args.dir)
+    except corpus.CorpusNotFound as err:
+        print(err)
+        return 1
+    summary = corpus.backfill(conn, corpus_dir, verbose=args.verbose)
+    print(f"Backfill from {corpus_dir}: "
           f"{summary['updated']} pairings gained corpus evidence, "
           f"{summary['zero']} resolved to no co-occurrence, "
           f"{summary['skipped']} skipped (no target transformation).")
@@ -294,7 +304,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     pnov = sub.add_parser("novelty", help="Check generated hypotheses in CulinaryDB")
     pnov.add_argument("component", help="e.g. roasted_broccoli_component")
-    pnov.add_argument("dir", help="CulinaryDB directory with the three CSVs")
+    pnov.add_argument("dir", nargs="?", default=None,
+                      help="CulinaryDB directory; default $FOODPREP_CORPUS_DIR, "
+                           "then data/corpus/culinarydb/")
     pnov.add_argument("--corpus-id", default="culinarydb")
     pnov.add_argument("--corpus-name", default="CulinaryDB")
     pnov.add_argument("--scope", default=None,
@@ -338,7 +350,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     pbf = sub.add_parser("backfill",
                          help="Attach CulinaryDB co-occurrence evidence to pairings")
-    pbf.add_argument("dir", help="CulinaryDB directory with the 4 CSVs")
+    pbf.add_argument("dir", nargs="?", default=None,
+                     help="CulinaryDB directory; default $FOODPREP_CORPUS_DIR, "
+                          "then data/corpus/culinarydb/")
     pbf.add_argument("--verbose", action="store_true", help="print each pairing")
     pbf.set_defaults(func=cmd_backfill)
 

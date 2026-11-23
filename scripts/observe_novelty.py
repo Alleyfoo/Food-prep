@@ -15,7 +15,10 @@ What the numbers can and cannot say:
   * **`insufficient_coverage` is honest.** If either side does not resolve
     strictly, no claim is made rather than a false "never seen".
 
-Run:  py -3.11 scripts/observe_novelty.py <path-to-CulinaryDB>
+Run:  py -3.11 scripts/observe_novelty.py [path-to-CulinaryDB]
+
+Without a path it uses $FOODPREP_CORPUS_DIR, then data/corpus/culinarydb/ in
+the repository (see foodprep.corpus.resolve_corpus_dir).
 """
 
 from __future__ import annotations
@@ -23,7 +26,6 @@ from __future__ import annotations
 import sqlite3
 import sys
 from datetime import date
-from pathlib import Path
 
 import yaml
 
@@ -32,12 +34,13 @@ from foodprep.loader import NOVELTY_PATH, build
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
+    if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help")):
         print(__doc__)
         return 2
-    corpus_dir = Path(sys.argv[1])
-    if not corpus_dir.exists():
-        print(f"no such corpus directory: {corpus_dir}")
+    try:
+        corpus_dir = corpus.resolve_corpus_dir(sys.argv[1] if len(sys.argv) == 2 else None)
+    except corpus.CorpusNotFound as err:
+        print(err)
         return 1
 
     conn = sqlite3.connect(":memory:")
