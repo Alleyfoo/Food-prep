@@ -51,6 +51,7 @@ CSS = """
               color:#6b665d; border-color:#d8d4cb}
 .r3 .cell-nr {background:repeating-linear-gradient(45deg,#faf9f6,#faf9f6 4px,#efece5 4px,#efece5 8px);
               color:#6b665d; font-size:12px}
+.r3 tr.focus td.cell-nr {background:repeating-linear-gradient(45deg,#fff8e6,#fff8e6 4px,#efe6cf 4px,#efe6cf 8px)}
 .r3 .cell-none {color:#b8b3aa}
 .r3 .legend {font-size:12px; color:#555; margin:2px 0 8px}
 .r3 .muted {color:#6b665d; font-size:12px}
