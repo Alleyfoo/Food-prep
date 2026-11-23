@@ -115,8 +115,10 @@ def explorer_answer(ingredient: str, card: dict | None,
             lines.append(("Still missing", "; ".join(
                 f"{m['role']}" + (f" (e.g. {_r(m['fillers'][0])})" if m["fillers"] else "")
                 for m in miss)))
+        no_route = ("No flavour route is written for it yet." if not routes
+                    else "No flavour route here uses what you have.")
         lines.append(("Why", "These are single pairings recorded for "
-                      f"{_r(state)}. No flavour route here uses what you have."))
+                      f"{_r(state)}. {no_route}"))
     elif have:
         result.update(kind="no_match", have=[])
         result["headline"] = f"Nothing you have is paired with {_r(state)} yet"

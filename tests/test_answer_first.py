@@ -296,3 +296,13 @@ def test_needs_answer_lists_every_role_the_card_lists(conn):
     add = dict(a["lines"])["Add"]
     for m in card["missing"]:
         assert m["role_name"] in add
+
+
+def test_pairing_answer_says_whether_any_route_exists(conn):
+    a, _ = _answer(conn, "cabbage", "roasted_cabbage_component", HAVE)
+    assert "No flavour route is written for it yet" in dict(a["lines"])["Why"]
+    # roasted broccoli has routes; with only a single-pairing item on hand
+    # the answer says none of them uses it.
+    a, _ = _answer(conn, "broccoli", "roasted_broccoli_component", ["parsley"])
+    assert a["kind"] == "pairings"
+    assert "No flavour route here uses what you have" in dict(a["lines"])["Why"]
