@@ -1,0 +1,64 @@
+{
+  "default-desktop": {
+    "target_y": null,
+    "chips_above": null,
+    "lead": "raw broccoli",
+    "screens": null
+  },
+  "default-phone": {
+    "target_y": null,
+    "chips_above": null,
+    "lead": "raw broccoli",
+    "screens": null
+  },
+  "T1-broccoli-on-hand-desktop": {
+    "target_y": 1464,
+    "chips_above": 40,
+    "lead": "raw broccoli",
+    "screens": 1.63
+  },
+  "T1-broccoli-on-hand-phone": {
+    "target_y": 2724,
+    "chips_above": 38,
+    "lead": "raw broccoli",
+    "screens": 3.23
+  },
+  "T2-roasted-tomato-desktop": {
+    "target_y": 1089,
+    "chips_above": 32,
+    "lead": "charred tomato",
+    "screens": 1.21
+  },
+  "T2-roasted-tomato-phone": {
+    "target_y": 2404,
+    "chips_above": 34,
+    "lead": "charred tomato",
+    "screens": 2.85
+  },
+  "T3-smashed-potato-desktop": {
+    "target_y": null,
+    "chips_above": null,
+    "lead": "baked potato",
+    "screens": null
+  },
+  "T3-smashed-potato-phone": {
+    "target_y": null,
+    "chips_above": null,
+    "lead": "baked potato",
+    "screens": null
+  },
+  "T4-switch-to-roasted-cabbage-desktop": {
+    "target_y": 2532,
+    "chips_above": 92,
+    "lead": "braised cabbage",
+    "screens": 2.81,
+    "stale": 0
+  },
+  "T4-switch-to-roasted-cabbage-phone": {
+    "target_y": 4395,
+    "chips_above": 92,
+    "lead": "braised cabbage",
+    "screens": 5.21,
+    "stale": 0
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "default-desktop": {
+    "target_y": null,
+    "chips_above": null,
+    "lead": "roasted broccoli",
+    "screens": null
+  },
+  "default-phone": {
+    "target_y": null,
+    "chips_above": null,
+    "lead": "roasted broccoli",
+    "screens": null
+  },
+  "T1-broccoli-on-hand-desktop": {
+    "target_y": 467,
+    "chips_above": 0,
+    "lead": "roasted broccoli",
+    "screens": 0.52
+  },
+  "T1-broccoli-on-hand-phone": {
+    "target_y": 950,
+    "chips_above": 0,
+    "lead": "roasted broccoli",
+    "screens": 1.13
+  },
+  "T2-roasted-tomato-desktop": {
+    "target_y": 511,
+    "chips_above": 0,
+    "lead": "roasted tomato",
+    "screens": 0.57
+  },
+  "T2-roasted-tomato-phone": {
+    "target_y": 1005,
+    "chips_above": 0,
+    "lead": "roasted tomato",
+    "screens": 1.19
+  },
+  "T3-smashed-potato-desktop": {
+    "target_y": 467,
+    "chips_above": 0,
+    "lead": "smashed roasted potato",
+    "screens": 0.52
+  },
+  "T3-smashed-potato-phone": {
+    "target_y": 912,
+    "chips_above": 0,
+    "lead": "smashed roasted potato",
+    "screens": 1.08
+  },
+  "T4-switch-to-roasted-cabbage-desktop": {
+    "target_y": 467,
+    "chips_above": 0,
+    "lead": "roasted cabbage",
+    "screens": 0.52,
+    "stale": 0
+  },
+  "T4-switch-to-roasted-cabbage-phone": {
+    "target_y": 950,
+    "chips_above": 0,
+    "lead": "roasted cabbage",
+    "screens": 1.13,
+    "stale": 0
+  }
+}

@@ -1,0 +1,250 @@
+if
+Ingredient Foundry
+A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.
+What do I have right now?
+sorts suggestions into available now · missing but useful · not paired here yet
+yogurt
+lemon
+garlic
+
+Cook
+
+Explore
+
+Experiment
+
+Ingredient Explorer
+
+Component Explorer
+
+Plate Balance
+
+Taste Circle
+
+INVESTIGATING
+Roasted broccoli
+· from broccoli
+AVAILABLE
+yogurt, lemon, garlic
+INGREDIENT
+broccoli
+B
+Broccoli
+5 ways to transform it, ranked cooking before preservation.
+MODE
+
+Best branches
+
+Choose technique
+
+SHOWING TOP 5 OF 5 BRANCHES · RANKED COOKING-BEFORE-PRESERVATION
+Raw Assemble
+raw broccoli
+HIGH
+Crunchy, vegetal, mild; faintly sulfurous raw · Firm, crunchy
+TAGS
+fresh
+vegetal
+firm
+RISKS
+harsh when raw
+MISSING
+salt
+fat
+acid
+protein
+AVAILABLE NOW
+lemon — have it
+acid
+MISSING BUT USEFUL
+SALT
+sea salt
+FAT
+olive oil
+PROTEIN
+eggs
+NOT PAIRED HERE YET
+garlic
+yogurt
+USE IN
+bowl
+dip
+salad
+sandwich
+● THE DISH YOU ARE INVESTIGATING
+Roast
+roasted broccoli
+HIGH
+Nutty, sweet, charred edges; deeper savory · Crisp-charred floret tips, tender stems
+TAGS
+concentrated
+savory
+sweet
+roasted
+RISKS
+sulfurous if overcooked
+MISSING
+salt
+fat
+acid
+herb
+protein
+carb
+AVAILABLE NOW
+lemon — have it
+acid
+MISSING BUT USEFUL
+SALT
+sea salt
+FAT
+garlic confit
+ghee
+olive oil
+HERB
+parsley
+PROTEIN
+parmesan
+CARB
+pasta
+NOT PAIRED HERE YET
+garlic
+ROUTES WITH WHAT YOU HAVE
+Creamy and acidic
+yogurt
+lemon
+· also needs dill
+Sour and toasted nut
+lemon
+· also needs walnut, olive oil
+USE IN
+bowl
+eggs
+hash
+pasta
+sandwich
+Steam
+steamed broccoli
+HIGH
+Bright, sweet-nutty, vegetal; raw sharpness mellowed · Tender-crisp, vivid green (brief steam; shock to lock)
+TAGS
+fresh
+sweet
+vegetal
+tender crisp
+cooked
+RISKS
+sulfurous if overcooked
+MISSING
+salt
+fat
+acid
+protein
+carb
+AVAILABLE NOW
+lemon — have it
+acid
+MISSING BUT USEFUL
+SALT
+sea salt
+FAT
+butter
+garlic confit
+PROTEIN
+parmesan
+tofu
+CARB
+rice
+NOT PAIRED HERE YET
+garlic
+ROUTES WITH WHAT YOU HAVE
+Creamy and acidic
+yogurt
+lemon
+· also needs dill
+Sour and toasted nut
+lemon
+· also needs walnut, olive oil
+USE IN
+bowl
+eggs
+pasta
+rice
+salad
+Stir Fry
+stir fried broccoli
+HIGH
+Savory, sweet, vegetal; garlicky if allium added · Crisp-tender with char spots
+TAGS
+savory
+sweet
+vegetal
+firm
+cooked
+RISKS
+sulfurous if overcooked
+MISSING
+salt
+carb
+protein
+acid
+MISSING BUT USEFUL
+SALT
+soy sauce
+CARB
+rice
+PROTEIN
+eggs
+tofu
+ACID
+vinegar
+NOT PAIRED HERE YET
+lemon
+yogurt
+ROUTES WITH WHAT YOU HAVE
+Soy and garlic
+garlic
+· also needs soy sauce, vinegar
+USE IN
+bowl
+eggs
+grains
+rice
+Soup
+broccoli soup base
+MEDIUM HIGH
+Sweet, vegetal, savory; creamy when blended · Liquid to silky-creamy
+TAGS
+savory
+sweet
+vegetal
+liquid
+cooked
+RISKS
+sulfurous if overcooked
+MISSING
+herb
+cream
+crunch
+body
+protein
+MISSING BUT USEFUL
+HERB
+dill
+CREAM
+cream
+CRUNCH
+croutons
+BODY
+potato
+PROTEIN
+bacon
+NOT PAIRED HERE YET
+garlic
+lemon
+yogurt
+USE IN
+bowl
+chilled soup
+soup
+
+Download .md
