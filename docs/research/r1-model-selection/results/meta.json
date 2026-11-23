@@ -1,0 +1,39 @@
+{
+  "pairing_rows": 4928,
+  "pairing_queries": 56,
+  "pairing_positives": 286,
+  "scout_rows": 8091,
+  "scout_queries": 93,
+  "scout_positives": 104,
+  "ingredients_without_vector": [
+    "chili_crisp",
+    "croutons",
+    "fresh_herbs",
+    "garlic_confit",
+    "gochugaru",
+    "juniper_berries",
+    "malt_vinegar",
+    "pasta_water",
+    "pomegranate_molasses",
+    "smoked_salt",
+    "sumac",
+    "zaatar"
+  ],
+  "corpus_recipes": 45772,
+  "feature_counts": {
+    "pairing": {
+      "A": 6,
+      "B": 93,
+      "C": 99,
+      "D": 148,
+      "L": 164
+    },
+    "scout": {
+      "A": 11,
+      "B": 127,
+      "C": 138,
+      "D": 187,
+      "L": 203
+    }
+  }
+}
