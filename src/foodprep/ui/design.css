@@ -872,3 +872,47 @@ code, .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
   color: var(--ink-5);
   letter-spacing: 0.06em;
 }
+
+/* ---- Answer first (UX experiment E3, Ingredient Explorer variant B) ----
+   The suggested next step, in sentences, above the detailed cards. Same
+   surface and tokens as a card; the left rule marks it as the answer, the
+   accent border stays with the card it summarises. */
+.answer-first {
+  background: var(--surface); border-radius: var(--r-lg);
+  border-left: 4px solid var(--primary);
+  padding: var(--space-4) var(--space-6); box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-6);
+}
+.answer-kicker {
+  font-size: 12px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--primary);
+}
+.answer-headline {
+  font-family: var(--heading); font-size: 26px; line-height: 1.2;
+  margin: var(--space-1) 0 var(--space-3);
+}
+.answer-lines {
+  display: grid; grid-template-columns: 130px 1fr;
+  gap: var(--space-1) var(--space-4); margin: 0; font-size: 16px;
+}
+.answer-lines dt {
+  font-size: 12px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--neutral-700); padding-top: 3px;
+}
+.answer-lines dd { margin: 0; line-height: 1.5; color: var(--ink); }
+.answer-lines dd.answer-wide { grid-column: 1 / -1; }
+.answer-watch { margin-top: var(--space-3); font-size: 15px; color: var(--ink); }
+.answer-watch-lbl {
+  font-size: 12px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--destination-700, var(--neutral-700));
+  margin-right: var(--space-2);
+}
+.answer-links { margin-top: var(--space-3); font-size: 15px; line-height: 1.7; }
+.answer-links a { color: var(--primary); font-weight: 600; }
+.answer-links a:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .answer-first { padding: var(--space-3) var(--space-4); }
+  .answer-headline { font-size: 22px; }
+  .answer-lines { grid-template-columns: 1fr; gap: 0; }
+  .answer-lines dt { padding-top: var(--space-2); }
+}

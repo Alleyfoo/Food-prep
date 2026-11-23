@@ -11,6 +11,7 @@ Run:  streamlit run app.py
 
 from __future__ import annotations
 
+import os
 import sqlite3
 import uuid
 from datetime import date
@@ -21,6 +22,7 @@ import streamlit as st
 
 from foodprep.loader import build
 from foodprep import export, query, tasting
+from foodprep.ui.answer import answer_html, card_anchor, explorer_answer
 from foodprep.ui.render import (
     _esc, _readable, chip, chips, conf_pill, debug_block, tag_class,
     available_partition_html, branch_card_html, subject_column_html,
@@ -277,7 +279,105 @@ def pill_radio(label: str, options: list[str], key: str) -> str:
                         label_visibility="collapsed", key=key)
 
 
+def explorer_variant() -> str:
+    """UX experiment E3: which Ingredient Explorer hierarchy to draw.
+
+    "B" (answer first) is this branch's default; "A" is the previous
+    hierarchy, unchanged, kept for comparison. Development-only: set
+    FOODPREP_EXPLORER_VARIANT=A in the environment before starting Streamlit.
+    There is deliberately no in-app switch.
+    """
+    return (os.environ.get("FOODPREP_EXPLORER_VARIANT") or "B").strip().upper()
+
+
 def tab_ingredient_explorer(available_items: list[str] | None = None) -> None:
+    if explorer_variant() == "A":
+        _ingredient_explorer_a(available_items)
+    else:
+        _ingredient_explorer_b(available_items)
+
+
+def _ingredient_explorer_b(available_items: list[str] | None = None) -> None:
+    """Answer first (E3 variant B): the suggested next step for the prepared
+    ingredient being investigated, then its full card, then the other
+    preparations. Same queries and data as variant A; only the order and the
+    emphasis differ. The rule is in foodprep.ui.answer."""
+    trees = query.tree_ingredients(CONN)
+    avail = available_items or None
+    subject, main = st.columns(_SUBJECT_RATIO, gap="large")
+
+    with subject:
+        _md('<div class="eyebrow">Ingredient</div>')
+        _sync_picker("explorer_ing", trees, ctx_ingredient())
+        ingredient = st.selectbox(
+            "Ingredient", trees, key="explorer_ing",
+            label_visibility="collapsed", format_func=_pretty,
+            on_change=_picked_ingredient, args=("explorer_ing",))
+        cards = query.all_branch_cards(CONN, ingredient)
+        states = [c["component"] for c in cards]
+        _md(subject_column_html(
+            ingredient, "ingredient",
+            note=f"{len(cards)} ways to prepare it."))
+        _md('<div class="eyebrow subject-block">Prepared ingredient</div>')
+        _sync_picker("explorer_state", states, ctx_state())
+        st.selectbox("Prepared ingredient", states, key="explorer_state",
+                     label_visibility="collapsed", format_func=_pretty,
+                     placeholder="Choose a prepared ingredient",
+                     on_change=_picked_state, args=("explorer_state",))
+
+    state = ctx_state() if ctx_state() in states else None
+    chosen = next((c for c in cards if c["component"] == state), None)
+
+    def _parts(c: dict):
+        part = (query.available_filter(CONN, c["transformation_id"], avail)
+                if avail else None)
+        routes = query.flavour_routes_for_component(
+            CONN, c["component"], available_items=avail)
+        return part, routes
+
+    data = {c["component"]: _parts(c) for c in cards}
+
+    with main:
+        part, routes = data[state] if chosen else (None, None)
+        others = [(c, data[c["component"]][1]) for c in cards if c is not chosen]
+        _md(answer_html(explorer_answer(ingredient, chosen, routes, part,
+                                        available_items or [], others)))
+        md_parts = []
+        if chosen:
+            # The accent border goes to the card the answer is about, never to
+            # whichever branch happens to rank first.
+            _md('<div class="eyebrow ctx-mark">● The prepared ingredient you are '
+                'investigating</div>')
+            _md(branch_card_html(chosen, available=part, lead=True,
+                                 routes=routes if avail else None,
+                                 anchor=card_anchor(chosen["component"])))
+            md_parts.append(export.render_branch_markdown(chosen, part))
+        rest = [c for c in cards if c is not chosen]
+        if rest:
+            _md(f'<div class="eyebrow">Other ways to prepare '
+                f'{_esc(_pretty(ingredient))} · ranked cooking before '
+                f'preservation</div>')
+        for i, c in enumerate(rest):
+            if i == 4 and len(rest) > 4:
+                break
+            p, r = data[c["component"]]
+            _md(branch_card_html(c, available=p, routes=r if avail else None,
+                                 anchor=card_anchor(c["component"])))
+            md_parts.append(export.render_branch_markdown(c, p))
+        if len(rest) > 4:
+            # Nothing is dropped: the remainder is one click away.
+            with st.expander(f"{len(rest) - 4} more ways to prepare "
+                             f"{_pretty(ingredient)}"):
+                for c in rest[4:]:
+                    p, r = data[c["component"]]
+                    _md(branch_card_html(c, available=p, routes=r if avail else None,
+                                         anchor=card_anchor(c["component"])))
+                    md_parts.append(export.render_branch_markdown(c, p))
+        export_buttons("\n\n---\n\n".join(md_parts), "branches.md")
+
+
+def _ingredient_explorer_a(available_items: list[str] | None = None) -> None:
+    """The pre-E3 hierarchy, unchanged (E3 variant A)."""
     trees = query.tree_ingredients(CONN)
     avail = available_items or None
     subject, answer = st.columns(_SUBJECT_RATIO, gap="large")
@@ -1512,7 +1612,7 @@ _STICKY_WIDGETS = frozenset({
     "active_tab",
     "available_items",
     "active_section",
-    "explorer_ing", "explorer_mode", "explorer_tech",
+    "explorer_ing", "explorer_mode", "explorer_tech", "explorer_state",
     "map_ing", "map_view", "journey_ing", "tc_view",
     "component_explorer_comp",
     "plate_items",
