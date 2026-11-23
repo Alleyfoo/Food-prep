@@ -360,9 +360,6 @@ def roles_summary(m: dict, comp: str) -> str:
     else:
         cov = f"{rec} of {n} needed roles covered"
     out = [f"{cnt} · {cov}"]
-    extra = sum(1 for p in pairs if not p["attrs"]["role_is_needed"])
-    if extra:
-        out.append(f'<span class="muted">+{extra} for a role not listed as a need</span>')
     if m["have"]:
         on = [p for p in pairs if p["availability"] == "on hand"]
         out.append('<span class="have">on hand: ' + esc(", ".join(
@@ -437,9 +434,8 @@ def overview_html(m: dict, st: dict) -> str:
                 + (f'<div class="sub">{esc(s["from_label"])} → {esc(s["technique"])} · '
                    f'confidence {esc(pretty(s["confidence"]))}</div>'
                    if cols == "summary" else "")
-                + (f"<div>{''.join(tags)}</div>" if tags else "")
                 + (f'<div class="why">excluded: {esc("; ".join(why))}</div>' if why else "")
-                + acts)
+                + acts.replace('<div class="acts">', '<div class="acts">' + "".join(tags), 1))
         cells = [f"<td>{name}</td>"]
         cells += _overview_cells(m, st, s, cols, common, comp == st["rec"])
         rows.append(f'<tr class="{cls}">' + "".join(cells) + "</tr>")
@@ -976,13 +972,13 @@ def compare_html(m: dict, st: dict) -> str:
         if st["diff"] and not differs:
             continue
         if group != last:
-            body.append(f'<tr class="grp"><td colspan="{len(comps) + 1}">{esc(group)}</td></tr>')
+            body.append(f'<tr class="grp"><td colspan="{len(comps) + 2}">{esc(group)}</td></tr>')
             last = group
         tds = "".join(c if c.startswith("<td") else f"<td>{c}</td>" for c in cells)
-        mark = ('<br><span class="tag t-diff">differs</span>' if differs
-                else '<br><span class="na">same</span>')
-        body.append(f'<tr class="{"" if differs else "same"}"><td class="nm">{esc(label)}'
-                    f"{mark}</td>{tds}</tr>")
+        mark = ('<span class="tag t-diff">differs</span>' if differs
+                else '<span class="na">same</span>')
+        body.append(f'<tr class="{"" if differs else "same"}"><td>{mark}</td>'
+                    f"<td>{esc(label)}</td>{tds}</tr>")
     toggle = a(S.href(st, diff=not st["diff"]),
                "show all rows" if st["diff"] else "show only the rows that differ")
     excl = [f"{pretty(c)} ({'; '.join(S.exclusion(m, c, st))})" for c in comps
@@ -994,7 +990,7 @@ def compare_html(m: dict, st: dict) -> str:
             + (f" · {hidden} identical rows hidden" if st["diff"] and hidden else
                " · identical rows are greyed") + f" · {toggle}")
     return (f'<div class="r4">{ban}<div class="muted">{note}</div>'
-            f'<table><thead><tr><th></th>{head}</tr></thead>' + "".join(body) + "</table></div>")
+            f'<table><thead><tr><th></th><th></th>{head}</tr></thead>' + "".join(body) + "</table></div>")
 
 
 # ---------------------------------------------------------------------------
