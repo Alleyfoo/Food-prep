@@ -16,6 +16,7 @@
 | `ov=b` | Overview in R4.1's labelled summary (default) |
 | `ov=c` | Overview with one named token per needed role and its status |
 | `sheet=dense` | Fact sheet with the same facts, tighter (default `full` = R4.1) |
+| `pal=white\|cool\|peach` | Colour world (default white; peach is the previous palette, for reference) |
 | `pane=circle` | Not a condition: the product's **Taste Circle** builder as a fourth pane, around the record in detail |
 
 **What the counts already say** ([evaluation.md](evaluation.md)):
@@ -32,10 +33,15 @@
 - Records without a sensory profile (raw broccoli, broccoli soup base) cannot anchor a circle, and the pane says so.
 - The overview encodings are unchanged, so the measurements in evaluation.md still hold.
 
-**Colours and tint are derived, not picked** ([palette.md](palette.md)). About 60 hand-picked colours were replaced by tokens derived from the product's primary, `#6F4102`, using the dembrandt-skills palette method.
-- No grey: the page is warm paper, fills are cream, lines are sand and text is roasted brown, all tones of the seed. That includes Streamlit's own controls (through `prototype/run.py`) and the circle.
-- Each concept has one hue at the seed's weight.
-- Every text pair passes WCAG AA: the lowest is 4.68:1, against 2.47:1 before.
+**Colour by job, not by food** ([palette.md](palette.md)). The first palette was seeded from the product's food colours, and peach ended up doing six jobs at once. The redesign gives each colour one job:
+- blue: selection and links;
+- violet: compare;
+- magenta: trace;
+- green: on hand;
+- no hue for hypotheses, which are marked by outline and weight instead;
+- cool, quiet neutrals for structure.
+
+Three colour worlds can be compared with `pal=white` (the default), `pal=cool`, or `pal=peach` (the previous palette). The circle follows the same roles. Every text pair passes WCAG AA in every world.
 
 **One correction to R4 and R4.1 found on the way.** The tasting record's *observation* ("works… garlic confit on the same state was clearly better, so brown butter is a real option here but not the best one") was never shown, so the sheet said only "works". R4.2 shows it in every condition. A test covers it.
 
@@ -44,7 +50,7 @@
 | [variants.md](variants.md) | The three overview encodings and the two sheet densities, side by side, and what was held fixed |
 | [evaluation.md](evaluation.md) | Mechanical comparison: rows in view, row height, words, legend, tooltip-only names, sheet length |
 | [session-plan.md](session-plan.md) | Three-person session: Latin square, scan and understand tasks, sheet tasks, record sheet, decision rules |
-| [palette.md](palette.md) | Derived palette: method, tokens, contrast before and after, departures from the skill |
+| [palette.md](palette.md) | Colour worlds: one job per colour, the three worlds, checks |
 | [answer-key.md](answer-key.md) | Ground truth for the scan and understand tasks, generated from the model |
 
 **Run** (the launcher passes the palette to Streamlit's theme; plain `streamlit run …/app.py` also works, with Streamlit's default control colours)
@@ -61,6 +67,7 @@ For example: `http://localhost:8543/?ingredient=potato&have=dill,olive_oil&ov=c&
 | --- | --- |
 | `evidence/capture_variants.py` | `screenshots/<state>/<condition>.png`, `screenshots/side-by-side/`, `screenshots/metrics.json`, `evidence/capture-output.txt` |
 | `evidence/answer_key.py` | `answer-key.md` |
+| `evidence/capture_worlds.py` | `screenshots/worlds/`: detail, compare, trace and circle in each colour world, side by side |
 | `evidence/capture_circle.py` | `screenshots/circle/`: the circle pane empty, with Sour open, with a dish, cabbage, and a record with no profile |
 
 **Tests.** `tests/test_r42_variants.py` (18), `tests/test_r42_circle.py` (10) and `tests/test_r42_palette.py` (33). They cover:
@@ -73,4 +80,4 @@ For example: `http://localhost:8543/?ingredient=potato&have=dill,olive_oil&ov=c&
 - the dense sheet keeps every fact and link;
 - the tasting observation is shown in both sheets;
 - the circle pane: the product's click rules, the URL-held dish and its round trip, a fresh circle for a new subject, every dimension named in the read-out, links keeping the condition, and records with no profile;
-- the palette: every text pair at least 4.5:1, marks at least 3:1, no hex colours or translucent tints in the CSS, neutrals tinted with the seed, every concept at the seed's weight.
+- the colour worlds: every text pair at least 4.5:1 and marks at least 3:1 in every world; no food tint in the new worlds' structure; one hue per job; circle colours from the world's tokens only; no hex or translucent colours in the CSS; `pal` survives links.

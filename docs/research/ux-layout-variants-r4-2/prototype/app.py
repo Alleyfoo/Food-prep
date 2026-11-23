@@ -32,21 +32,15 @@ import r42_state as S  # noqa: E402
 import r42_views as V  # noqa: E402
 import r42_circle as C  # noqa: E402
 import r42_palette as P  # noqa: E402
-from foodprep.ui.taste_circle import taste_circle_map  # noqa: E402
+from r42_circle_component import taste_circle_map  # noqa: E402
 
 _q = st.query_params.to_dict()
-st.set_page_config(page_title=f"R4.2 · {_q.get('ov', 'b').upper()} · {_q.get('sheet', 'full')}", layout="wide",
+st.set_page_config(page_title=f"R4.2 · {_q.get('ov', 'b').upper()} · {_q.get('sheet', 'full')} · {_q.get('pal', 'white')}", layout="wide",
                    initial_sidebar_state="collapsed")
 st.markdown("<style>[data-testid=stSidebar], [data-testid=stSidebarCollapsedControl] {display:none}"
             " .block-container {padding-top:3.2rem; padding-left:1.5rem; padding-right:1.5rem;"
             " padding-bottom:0.5rem}"
-            # Page tint and ink from the derived palette (r42_palette): an
-            # off-white, seed-tinted page and near-black text, not #000 on #fff.
-            f" .stApp, [data-testid=stHeader] {{background:{P.PAGE}}}"
-            f" .stApp {{color:{P.INK}}}"
-            # Inputs on the same tinted fill; on-hand chips in the on-hand green
-            f" [data-baseweb=select] > div {{background:{P.TOKENS['fill']}; border-color:{P.TOKENS['fill']}}}"
-            f" [data-baseweb=tag] {{background:{P.TOKENS['have-base']} !important}}</style>",
+            "</style>",
             unsafe_allow_html=True)
 
 
@@ -61,6 +55,16 @@ def conn() -> sqlite3.Connection:
 c = conn()
 url = S.parse(st.query_params.to_dict())
 ctx = dict(url)
+
+# The colour world (VARIANT key `pal`): page, ink and Streamlit's own controls
+# follow it; every workspace block gets its tokens through CSS below.
+T = P.tokens(url["pal"])
+st.markdown(f"<style>.stApp, [data-testid=stHeader] {{background:{T['page']}}}"
+            f" .stApp {{color:{T['ink']}}}"
+            f" [data-baseweb=select] > div {{background:{T['fill']}; border-color:{T['line']}}}"
+            f" [data-baseweb=tag] {{background:{T['have-base']} !important}}</style>",
+            unsafe_allow_html=True)
+CSS = V.css(url["pal"])
 
 # --- GLOBAL context: a filter bar across the top, written back to the URL --
 ings = query.tree_ingredients(c)
@@ -86,7 +90,7 @@ ctx = S.reconcile(ctx, m)
 if S.to_params(ctx) != S.to_params(url):
     st.query_params.from_dict(S.to_params(ctx))
 
-st.html(V.CSS + '<div class="r4">' + V.context_bar(m, ctx) + "</div>")
+st.html(CSS + '<div class="r4">' + V.context_bar(m, ctx) + "</div>")
 
 if ctx["answer"] and ctx["rec"]:
     from foodprep.ui import answer as E3
@@ -101,17 +105,17 @@ left, right = st.columns([7, 5] if wide else [1, 1], gap="medium")
 full = st.query_params.get("full") == "1"   # captures only: no inner scrolling
 H = "content" if full else 640
 with left.container(height=H, border=False):
-    st.html(V.CSS + '<div class="r4">' + V.overview_html(m, ctx) + "</div>")
+    st.html(CSS + '<div class="r4">' + V.overview_html(m, ctx) + "</div>")
 with right:
     pane = S.pane(ctx)
-    st.html(V.CSS + C.CSS + V.tabs_html(m, ctx, pane))
+    st.html(CSS + C.CSS + V.tabs_html(m, ctx, pane))
 right = right.container(height="content" if full else H - 44, border=False)
 with right:
     if pane == "circle":
         # The product's Taste Circle, built around the record in detail. A
         # click becomes a URL change, like every other click in the workspace.
         if C.can_anchor(c, ctx["rec"]):
-            st.html(V.CSS + C.CSS + C.readout_html(c, ctx))
+            st.html(CSS + C.CSS + C.readout_html(c, ctx))
             data = C.graph_data(c, ctx)
             click = taste_circle_map(nodes=data["nodes"], edges=data["edges"], height=460,
                                      key="r42_tc")
@@ -121,26 +125,26 @@ with right:
                 new.update(C.apply_click(c, ctx, click.get("id")))
                 st.query_params.from_dict(S.to_params(new))
                 st.rerun()
-            st.html(V.CSS + C.CSS + C.dish_html(c, ctx))
+            st.html(CSS + C.CSS + C.dish_html(c, ctx))
         else:
-            st.html(V.CSS + C.unavailable_html(c, ctx))
+            st.html(CSS + C.unavailable_html(c, ctx))
     elif pane == "compare":
-        st.html(V.CSS + V.compare_html(m, ctx))
+        st.html(CSS + V.compare_html(m, ctx))
     elif pane == "trace":
         # The relationship table is the reading surface. A small graph (at most
         # V.GRAPH_LIMIT relationships) sits above it; a larger one is collapsed
         # and, when revealed, drawn under the table.
         place = V.graph_placement(m, ctx)
-        st.html(V.CSS + V.trace_head_html(m, ctx) + V.graph_note_html(m, ctx))
+        st.html(CSS + V.trace_head_html(m, ctx) + V.graph_note_html(m, ctx))
         if place == "shown":
             st.graphviz_chart(V.trace_dot(m, ctx), use_container_width=False)
-        st.html(V.CSS + V.trace_table_html(m, ctx))
+        st.html(CSS + V.trace_table_html(m, ctx))
         if place == "below":
             st.graphviz_chart(V.trace_dot(m, ctx), use_container_width=False)
     else:
         if ctx["rec"]:
-            st.html(V.CSS + V.detail_html(m, ctx, ctx["rec"]))
+            st.html(CSS + V.detail_html(m, ctx, ctx["rec"]))
         else:
-            st.html(V.CSS + '<div class="r4 muted">Click a prepared ingredient in the overview '
+            st.html(CSS + '<div class="r4 muted">Click a prepared ingredient in the overview '
                     "to open its fact sheet. “add to compare” puts rows side by side; "
                     "“trace” follows their relationships.</div>")

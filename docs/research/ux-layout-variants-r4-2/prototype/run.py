@@ -18,13 +18,9 @@ sys.path.insert(0, str(HERE))
 
 import r42_palette as P  # noqa: E402
 
-THEME = {
-    "theme.base": "light",
-    "theme.primaryColor": P.SEED,
-    "theme.backgroundColor": P.PAGE,
-    "theme.secondaryBackgroundColor": P.TOKENS["fill"],
-    "theme.textColor": P.INK,
-}
+# Streamlit's theme is per process, so it takes the default world; app.py
+# recolours the page and the filter controls for the world in the URL.
+THEME = P.theme(P.DEFAULT_WORLD)
 
 
 def argv(extra: list[str]) -> list[str]:

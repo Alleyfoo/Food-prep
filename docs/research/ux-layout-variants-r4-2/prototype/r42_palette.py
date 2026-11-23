@@ -1,30 +1,49 @@
-"""The workspace palette, derived from one seed instead of picked by hand.
+"""Workspace colour worlds: one job per colour.
 
-Method: dembrandt-skills `algorithmic-color-palette`, checked against
-`wcag-accessibility` and `status-colors-and-errors`
-(https://github.com/dembrandt/dembrandt-skills).
+Method: dembrandt-skills `algorithmic-color-palette`, `status-colors-and-errors`,
+`surface-separation` and `wcag-accessibility`
+(https://github.com/dembrandt/dembrandt-skills), read as guidance.
 
-- Seed: the product's primary, --filler-700 #6F4102 in src/foodprep/ui/design.css.
-- Neutrals: the seed hue, desaturated, saturation falling as lightness rises
-  (steps 900 ... 50). No generic greys, no pure black on pure white.
-- Concept colours: each concept keeps its hue (selection = the seed, compare
-  blue, trace violet, on hand green, differs red) and takes the seed's
-  saturation and lightness, so none reads louder than another. Each concept
-  gets base (text), border (the skill's tint, L + 40) and subtle (fill:
-  S x 0.3, L 94) variants.
-- One meaning per colour: the circle pane's tab, which used green, moves to
-  a neutral, because green means "on hand".
-- Contrast: every text colour is checked against every fill it sits on
-  (pairs below, test in tests/test_r42_palette.py). Where the skill's
-  neutral step fails 4.5:1, the step is darkened until it passes; that is
-  the only departure from the skill's numbers.
+Why worlds. The first palette took the product's food colours (design.css
+ramps named ingredient, filler, component ...) and seeded everything from
+the filler amber. On review (2026-11-23) that was the wrong foundation:
+peach did six jobs at once (page tint, every neutral, the selected row,
+hypotheses, the idea box, open circle dimensions) and cast one tint over
+the whole screen. The redesign assigns colours by JOB, not by food:
+
+  structure    ink, lines, fills         neutral; carries no meaning
+  selection    the record in detail      blue  (also links and focus:
+                                                one job, "where you act")
+  compare      pinned records, differs   violet
+  trace        the traced entity         magenta
+  on hand      what is in your kitchen   green
+  hypothesis   experimental, tasted      no hue: dashed / solid outline,
+                                         italic / bold. Shape, not colour
+  gap          not recorded              neutral hatch
+
+Worlds differ only in the structure layer, so they can be compared on
+identical screens (URL key `pal`):
+
+  peach   the previous palette, kept as the reference
+  white   white page and surfaces; structure by thin cool lines; colour
+          appears only where it means something
+  cool    a faint blue-white page and fills, tied to the selection blue
+
+Every world: every text pair >= 4.5:1, every meaningful mark >= 3:1
+(tests/test_r42_palette.py), no translucent tints.
 """
 from __future__ import annotations
 
 import colorsys
+from functools import lru_cache
 
-SEED = "#6F4102"
+SEED = "#6F4102"          # the product's --filler-700; seed of the peach world only
+WORLDS = ("peach", "white", "cool")
+DEFAULT_WORLD = "white"
+NEUTRAL_MIN_SAT = 20      # peach world: below this a tone reads as grey
 
+
+# ---------------------------------------------------------------- colour maths
 
 def hex_to_hsl(h: str) -> tuple[float, float, float]:
     r, g, b = (int(h[i:i + 2], 16) / 255 for i in (1, 3, 5))
@@ -50,103 +69,155 @@ def contrast(a: str, b: str) -> float:
     return (la + 0.05) / (lb + 0.05)
 
 
-H, S, L = hex_to_hsl(SEED)
-
-# brand-tinted neutrals: (step, saturation, lightness) from the skill
-# No grey (user request, 2026-11-23): the skill's neutrals (3-12% saturation)
-# read as grey, so every neutral is a clearly coloured tone of the seed hue:
-# warm paper for fills, sand for lines, roasted brown for text. Saturation
-# rises towards the light end, where a low value would wash out to grey.
-NEUTRAL_STEPS = [(900, 35, 10), (700, 28, 27), (600, 26, 36), (500, 24, 46), (300, 28, 68),
-                 (200, 32, 80), (150, 36, 86), (100, 42, 91), (50, 50, 95)]
-NEUTRAL_MIN_SAT = 20         # below this a tone starts to read as grey
-N = {step: hsl(H, s, l) for step, s, l in NEUTRAL_STEPS}
-
-CONCEPT_HUES = {"sel": H, "cmp": 215, "trace": 268, "have": 145, "diff": 4}
-
-
-def concept(hue: float) -> dict[str, str]:
-    return {"base": hsl(hue, S, L),            # text, rules, focus edge
-            "deep": hsl(hue, S, L - 6),         # emphasised text (tested)
-            "mid": hsl(hue, S * 0.75, L + 18),  # dashed / secondary borders
-            "border": hsl(hue, S * 0.6, L + 40),
-            # fills. The skill's "subtle" (S x 0.3, L 94) is too close to the
-            # page to mark a selected row, so fills follow its "selection"
-            # rule instead: L 90+, moderate saturation.
-            # (on the cream page a fill needs more colour to stand out)
-            "subtle": hsl(hue, S * 0.8, 88),    # selected row, chips, tags
-            "subtle2": hsl(hue, S * 0.65, 82),  # second stripe of a hatched fill
-            "faint": hsl(hue, S * 0.4, 97)}     # large calm fills (idea box)
-
-
-C = {k: concept(h) for k, h in CONCEPT_HUES.items()}
-INK = N[900]                 # near-black body text
-SURFACE = hsl(H, 70, 97.5)    # cards, chips: a cream, not pure #fff
-PAGE = N[50]                 # the page behind the panes
-# The skill allows "primary or a dedicated high-visibility blue" for links.
-# At the seed's lightness (22%) blue reads as black, so links are lighter.
-LINK = hsl(215, 75, 36)
-
-
-def _passing(bgs: list[str], start: float, target: float = 4.5, s: float = 26) -> str:
-    """Lightest seed-tinted grey at or below *start* lightness that reaches
+def passing(hue: float, sat: float, bgs: list[str], start: float, target: float = 4.5) -> str:
+    """Lightest tone of (hue, sat) at or below *start* lightness that reaches
     *target* on every fill in *bgs*."""
     l = start
-    while min(contrast(hsl(H, s, l), bg) for bg in bgs) < target and l > 0:
+    while min(contrast(hsl(hue, sat, l), bg) for bg in bgs) < target and l > 0:
         l -= 1
-    return hsl(H, s, l)
+    return hsl(hue, sat, l)
 
 
-# Secondary text must pass 4.5:1 on the darkest fills it sits on (the
-# hatches). De-emphasised text (excluded rows, "same" rows, repeated names)
-# is still data, not a disabled control, so it gets the same grey; the
-# de-emphasis is carried by the row fill and the words ("excluded", "same").
-SECONDARY = _passing([C["sel"]["subtle2"], N[100]], 40)
-
-TOKENS: dict[str, str] = {
-    "ink": INK, "ink-2": N[700], "ink-3": SECONDARY,
-    "page": PAGE, "surface": SURFACE, "fill": N[100], "fill-2": N[150], "fill-soft": N[50],
-    "line": N[200], "line-strong": N[300], "link": LINK,
-    **{f"{k}-{v}": c for k, d in C.items() for v, c in d.items()},
-}
+def ramp(hue: float, s: float, l: float, *, fill_s: float, fill_l: float = 92) -> dict[str, str]:
+    """base (text), deep (emphasis), mid and border (outlines), subtle,
+    subtle2 and faint (fills, from strongest to calmest)."""
+    return {"base": hsl(hue, s, l), "deep": hsl(hue, s, l - 7),
+            "mid": hsl(hue, s * 0.8, l + 16), "border": hsl(hue, s * 0.7, l + 36),
+            "subtle": hsl(hue, fill_s, fill_l), "subtle2": hsl(hue, fill_s * 0.85, fill_l - 6),
+            "faint": hsl(hue, fill_s * 0.8, 97.5)}
 
 
-def css_vars() -> str:
-    return ":root {" + "; ".join(f"--{k}:{v}" for k, v in TOKENS.items()) + "}"
+# ---------------------------------------------------------------- the worlds
+
+def _peach() -> dict:
+    """The previous palette, unchanged: every neutral a tone of the seed."""
+    H, S, L = hex_to_hsl(SEED)
+    steps = [(900, 35, 10), (700, 28, 27), (600, 26, 36), (500, 24, 46), (300, 28, 68),
+             (200, 32, 80), (150, 36, 86), (100, 42, 91), (50, 50, 95)]
+    N = {k: hsl(H, s, l) for k, s, l in steps}
+
+    def concept(hue: float) -> dict[str, str]:
+        return {"base": hsl(hue, S, L), "deep": hsl(hue, S, L - 6),
+                "mid": hsl(hue, S * 0.75, L + 18), "border": hsl(hue, S * 0.6, L + 40),
+                "subtle": hsl(hue, S * 0.8, 88), "subtle2": hsl(hue, S * 0.65, 82),
+                "faint": hsl(hue, S * 0.4, 97)}
+    C = {k: concept(h) for k, h in {"sel": H, "cmp": 215, "trace": 268, "have": 145, "diff": 4}.items()}
+    secondary = passing(H, 26, [C["sel"]["subtle2"], N[100]], 40)
+    hyp = {"text": C["sel"]["base"], "deep": C["sel"]["deep"], "border": C["sel"]["border"],
+           "line": C["sel"]["mid"], "fill": C["sel"]["faint"]}
+    return {"name": "peach", "hue": H, "ink": N[900], "ink2": N[700], "secondary": secondary,
+            "page": N[50], "surface": hsl(H, 70, 97.5), "fill": N[100], "fill2": N[150],
+            "fill_soft": N[50], "line": N[200], "line_strong": N[300], "link": hsl(215, 75, 36),
+            "C": C, "hyp": hyp, "note": {"fill": C["sel"]["faint"], "line": C["sel"]["border"]},
+            "node": {"state": C["cmp"]["faint"], "route": C["have"]["faint"],
+                     "source": C["sel"]["faint"], "pairing": C["sel"]["faint"]},
+            "circle_tab": N[700], "primary": SEED, "steps": steps, "N": N}
 
 
-# text colour -> the fills it is drawn on in the workspace
-TEXT_PAIRS: list[tuple[str, str, str]] = [
-    ("body text", INK, SURFACE), ("body text on page", INK, PAGE),
-    ("body text, selected row", INK, C["sel"]["subtle"]),
-    ("secondary text", SECONDARY, SURFACE),
-    ("secondary text, header", SECONDARY, N[100]),
-    ("secondary text, selected row hatch", SECONDARY, C["sel"]["subtle2"]),
-    ("secondary text, not-recorded hatch", SECONDARY, N[100]),
-    ("link", LINK, SURFACE), ("link, header", LINK, N[100]), ("link, selected row", LINK, C["sel"]["subtle"]),
-    ("link, compare chip", LINK, C["cmp"]["subtle"]),
-    ("experimental", C["sel"]["base"], SURFACE),
-    ("experimental chip", C["sel"]["base"], C["sel"]["faint"]),
-    ("tested", C["sel"]["deep"], C["sel"]["faint"]),
-    ("in-detail tag", C["sel"]["base"], C["sel"]["subtle"]),
-    ("compare tag", C["cmp"]["base"], C["cmp"]["subtle"]),
-    ("trace tag", C["trace"]["base"], C["trace"]["subtle"]),
-    ("differs tag", C["diff"]["base"], C["diff"]["subtle"]),
-    ("on hand", C["have"]["base"], SURFACE),
-    ("on hand chip", C["have"]["base"], C["have"]["subtle"]),
-    ("on hand, selected row", C["have"]["base"], C["sel"]["subtle"]),
-    ("remove link in chip", C["diff"]["base"], SURFACE),
-]
-# UI marks that carry meaning alone need 3:1 against the surface
-MARK_PAIRS: list[tuple[str, str, str]] = [
-    ("compare pin bar", C["cmp"]["base"], C["sel"]["subtle"]),
-    ("tab top, detail", C["sel"]["mid"], SURFACE), ("tab top, compare", C["cmp"]["base"], SURFACE),
-    ("tab top, trace", C["trace"]["base"], SURFACE), ("tab top, circle", N[700], SURFACE),
-]
+def _jobs(name: str, *, page: str, fill: str, fill2: str, fill_soft: str,
+          line: str, line_strong: str) -> dict:
+    """A role-based world: neutral structure (hue 220, cool) plus one hue per job."""
+    nh = 220                                            # structure hue: cool, not food
+    ink, ink2 = hsl(nh, 28, 12), hsl(nh, 18, 30)
+    surface = "#ffffff"
+    C = {"sel": ramp(218, 72, 40, fill_s=85),
+         "cmp": ramp(265, 55, 42, fill_s=70),
+         "trace": ramp(322, 62, 38, fill_s=72),
+         "have": ramp(150, 70, 27, fill_s=55)}
+    C["diff"] = C["cmp"]                                # differs is part of comparing
+    secondary = passing(nh, 16, [fill, fill2, C["sel"]["subtle2"], C["sel"]["subtle"]], 46)
+    hyp = {"text": ink2, "deep": ink, "border": secondary, "line": ink2, "fill": surface}
+    return {"name": name, "hue": nh, "ink": ink, "ink2": ink2, "secondary": secondary,
+            "page": page, "surface": surface, "fill": fill, "fill2": fill2, "fill_soft": fill_soft,
+            "line": line, "line_strong": line_strong, "link": C["sel"]["base"], "C": C, "hyp": hyp,
+            "note": {"fill": fill_soft, "line": line},
+            "node": {"state": surface, "route": surface, "source": fill_soft, "pairing": surface},
+            "circle_tab": ink2, "primary": C["sel"]["base"]}
+
+
+def _white() -> dict:
+    return _jobs("white", page="#ffffff", fill=hsl(220, 22, 96.5), fill2=hsl(220, 18, 92),
+                 fill_soft=hsl(220, 25, 98), line=hsl(220, 16, 87), line_strong=hsl(220, 12, 62))
+
+
+def _cool() -> dict:
+    return _jobs("cool", page=hsl(218, 45, 97), fill=hsl(218, 38, 94), fill2=hsl(218, 30, 89),
+                 fill_soft=hsl(218, 45, 97.5), line=hsl(218, 26, 84), line_strong=hsl(218, 18, 60))
+
+
+@lru_cache(maxsize=None)
+def world(name: str = DEFAULT_WORLD) -> dict:
+    return {"peach": _peach, "white": _white, "cool": _cool}.get(name, _white)()
+
+
+@lru_cache(maxsize=None)
+def tokens(name: str = DEFAULT_WORLD) -> dict[str, str]:
+    w = world(name)
+    t = {"ink": w["ink"], "ink-2": w["ink2"], "ink-3": w["secondary"], "page": w["page"],
+         "surface": w["surface"], "fill": w["fill"], "fill-2": w["fill2"], "fill-soft": w["fill_soft"],
+         "line": w["line"], "line-strong": w["line_strong"], "link": w["link"],
+         "circle-tab": w["circle_tab"]}
+    for k, d in w["C"].items():
+        t.update({f"{k}-{v}": c for v, c in d.items()})
+    t.update({f"hyp-{k}": v for k, v in w["hyp"].items()})
+    t.update({f"note-{k}": v for k, v in w["note"].items()})
+    t.update({f"node-{k}": v for k, v in w["node"].items()})
+    return t
+
+
+def css_vars(name: str = DEFAULT_WORLD) -> str:
+    return ":root {" + "; ".join(f"--{k}:{v}" for k, v in tokens(name).items()) + "}"
+
+
+def text_pairs(name: str = DEFAULT_WORLD) -> list[tuple[str, str, str]]:
+    """Text colour -> the fills it is drawn on in the workspace."""
+    t = tokens(name)
+    pairs = [("body text", "ink", "surface"), ("body text on page", "ink", "page"),
+             ("body text, selected row", "ink", "sel-subtle"),
+             ("secondary text", "ink-3", "surface"), ("secondary text, header", "ink-3", "fill"),
+             ("secondary text, selected row hatch", "ink-3", "sel-subtle2"),
+             ("secondary text, not-recorded hatch", "ink-3", "fill-2"),
+             ("link", "link", "surface"), ("link, header", "link", "fill"),
+             ("link, selected row", "link", "sel-subtle"), ("link, compare chip", "link", "cmp-subtle"),
+             ("experimental", "hyp-text", "surface"), ("experimental chip", "hyp-text", "hyp-fill"),
+             ("tested", "hyp-deep", "hyp-fill"), ("experimental, selected row", "hyp-text", "sel-subtle"),
+             ("in-detail tag", "sel-base", "sel-subtle"), ("compare tag", "cmp-base", "cmp-subtle"),
+             ("trace tag", "trace-base", "trace-subtle"), ("differs tag", "diff-base", "diff-subtle"),
+             ("on hand", "have-base", "surface"), ("on hand chip", "have-base", "have-subtle"),
+             ("on hand, selected row", "have-base", "sel-subtle"),
+             ("remove link in chip", "diff-base", "surface"), ("note banner", "ink", "note-fill")]
+    return [(n, t[f], t[b]) for n, f, b in pairs]
+
+
+def mark_pairs(name: str = DEFAULT_WORLD) -> list[tuple[str, str, str]]:
+    """UI marks that carry meaning alone need 3:1 against what is around them."""
+    t = tokens(name)
+    pairs = [("compare pin bar", "cmp-base", "sel-subtle"), ("tab top, detail", "sel-mid", "surface"),
+             ("tab top, compare", "cmp-base", "surface"), ("tab top, trace", "trace-base", "surface"),
+             ("tab top, circle", "circle-tab", "surface")]
+    if name != "peach":          # the reference world is kept as it was
+        pairs.append(("experimental outline", "hyp-border", "surface"))
+    return [(n, t[f], t[b]) for n, f, b in pairs]
+
+
+def theme(name: str = DEFAULT_WORLD) -> dict[str, str]:
+    """Streamlit's own theme for this world (run.py)."""
+    w = world(name)
+    return {"theme.base": "light", "theme.primaryColor": w["primary"],
+            "theme.backgroundColor": w["page"], "theme.secondaryBackgroundColor": w["fill"],
+            "theme.textColor": w["ink"]}
+
+
+# -- names the rest of the prototype reads: the default world ------------------
+_W = world(DEFAULT_WORLD)
+TOKENS = tokens(DEFAULT_WORLD)
+INK, PAGE, SURFACE, SECONDARY = _W["ink"], _W["page"], _W["surface"], _W["secondary"]
 
 if __name__ == "__main__":
-    print(f"seed {SEED} = hsl({H:.0f}, {S:.0f}%, {L:.0f}%)")
-    for k, v in TOKENS.items():
-        print(f"  --{k:16} {v}")
-    for name, fg, bg in TEXT_PAIRS + MARK_PAIRS:
-        print(f"{contrast(fg, bg):5.2f}  {name}")
+    import sys
+    for name in sys.argv[1:] or WORLDS:
+        print(f"== {name}")
+        for k, v in tokens(name).items():
+            print(f"  --{k:16} {v}")
+        for n, fg, bg in text_pairs(name) + mark_pairs(name):
+            print(f"{contrast(fg, bg):5.2f}  {n}")

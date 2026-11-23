@@ -154,22 +154,54 @@ def test_a_record_without_a_profile_says_why(conn):
     assert "Open a prepared ingredient" in _text(C.unavailable_html(conn, _st(rec="")))
 
 
-def test_the_circle_has_no_grey_and_readable_labels(conn):
+def _colours(v, text=False):
+    if isinstance(v, dict):
+        for k, x in v.items():
+            yield from _colours(x, text or k == "font")
+    elif isinstance(v, list):
+        for x in v:
+            yield from _colours(x, text)
+    elif isinstance(v, str) and len(v) == 7 and v.startswith("#"):
+        yield v.lower(), text
+
+
+@pytest.mark.parametrize("pal", ["peach", "white", "cool"])
+def test_circle_labels_are_readable_on_the_page_in_every_world(conn, pal):
     import r42_palette as P
-    data = C.graph_data(conn, _st(tc=["sour:lemon"], tcx="aromatic"))
-    def walk(v, text=False):
-        if isinstance(v, dict):
-            for k, x in v.items():
-                yield from walk(x, text or k == "font")
-        elif isinstance(v, list):
-            for x in v:
-                yield from walk(x, text)
-        elif isinstance(v, str) and len(v) == 7 and v.startswith("#"):
-            yield v, text
-    cols = list(walk(data))
-    assert cols
-    for col, is_text in cols:
-        if is_text:
-            assert P.contrast(col, C.CIRCLE_BG) >= 4.5, col
-        else:
+    page = P.tokens(pal)["page"]
+    data = C.graph_data(conn, _st(tc=["sour:lemon"], tcx="aromatic", pal=pal))
+    labels = [col for col, is_text in _colours(data) if is_text]
+    assert labels
+    for col in labels:
+        assert P.contrast(col, page) >= 4.5, (pal, col)
+
+
+@pytest.mark.parametrize("pal", ["white", "cool"])
+def test_circle_uses_only_the_worlds_role_colours(conn, pal):
+    """No product food colour survives in the new worlds."""
+    import r42_palette as P
+    allowed = {v.lower() for v in P.tokens(pal).values()}
+    for st in (_st(pal=pal), _st(tc=["sour:lemon"], tcx="aromatic", pal=pal)):
+        cols = {col for col, _t in _colours(C.graph_data(conn, st))}
+        assert cols and cols <= allowed, cols - allowed
+
+
+def test_circle_roles(conn):
+    import r42_palette as P
+    T = P.tokens("white")
+    st = _st(tc=["sour:lemon"], tcx="aromatic", pal="white")
+    nodes = {n["id"]: n for n in C.graph_data(conn, st)["nodes"]}
+    assert nodes["dim:sour"]["color"]["border"] == T["sel-border"]         # locked, stepped back
+    calm = {n["id"]: n for n in C.graph_data(conn, _st(tc=["sour:lemon"], pal="white"))["nodes"]}
+    assert calm["dim:sour"]["color"]["border"] == T["sel-base"]            # locked: selection blue
+    assert nodes["dim:aromatic"]["color"]["background"] == T["sel-base"]   # expanded: solid blue
+    assert nodes["dim:umami"]["color"]["background"] == T["fill-2"]        # provided: neutral fill
+    assert nodes["filler:aromatic:garlic"]["color"]["background"] == T["have-subtle"]   # on hand
+
+
+def test_peach_reference_keeps_no_grey(conn):
+    import r42_palette as P
+    data = C.graph_data(conn, _st(tc=["sour:lemon"], tcx="aromatic", pal="peach"))
+    for col, is_text in _colours(data):
+        if not is_text:
             assert P.hex_to_hsl(col)[1] >= P.NEUTRAL_MIN_SAT, col

@@ -58,45 +58,110 @@ def provided(c: sqlite3.Connection, comp: str) -> list[str]:
     return [d for d in ORDER if d in tags]
 
 
-CIRCLE_BG = "#F4F2EC"          # the component page's own background (index.html)
-
-
-def _recolour(value: Any, *, text: bool = False) -> Any:
-    """Recolour the product's greys in the workspace palette (no grey).
-
-    The product's graph data is unchanged; this works on the prototype's copy.
-    A colour with less saturation than P.NEUTRAL_MIN_SAT becomes the seed
-    tone of the nearest lightness, unless it has a hue of its own (a muted
-    green), which keeps its hue with more saturation. A label colour that fails 4.5:1 on the
-    circle's background becomes the palette's secondary text."""
+def _recolour_peach(value: Any, bg: str, *, text: bool = False) -> Any:
+    """Peach world (the reference): the product's colours with its greys
+    lifted into seed tones, as before the redesign."""
+    w = P.world("peach")
     if isinstance(value, dict):
-        return {k: _recolour(v, text=text or k == "font") for k, v in value.items()}
+        return {k: _recolour_peach(v, bg, text=text or k == "font") for k, v in value.items()}
     if isinstance(value, list):
-        return [_recolour(v, text=text) for v in value]
+        return [_recolour_peach(v, bg, text=text) for v in value]
     if not (isinstance(value, str) and len(value) == 7 and value.startswith("#")):
         return value
-    if text and P.contrast(value, CIRCLE_BG) < 4.5:
-        return P.SECONDARY
+    if text and P.contrast(value, bg) < 4.5:
+        return w["secondary"]
     hue, sat, light = P.hex_to_hsl(value)
     if sat >= P.NEUTRAL_MIN_SAT:
         return value
     if light > 97:
-        return P.SURFACE
-    if abs(hue - P.H) > 30 and sat >= 15:
-        # a muted colour with its own hue (the provided green's outline):
-        # keep the hue, lift it out of grey
+        return w["surface"]
+    if abs(hue - w["hue"]) > 30 and sat >= 15:
         return P.hsl(hue, P.NEUTRAL_MIN_SAT + 10, light)
-    tones = [P.INK] + [P.N[k] for k, *_ in P.NEUTRAL_STEPS]
+    tones = [w["ink"]] + [w["N"][k] for k, *_ in w["steps"]]
     return min(tones, key=lambda t: abs(P.hex_to_hsl(t)[2] - light))
 
 
+def _paint(bg: str, border: str, hover: str) -> dict[str, Any]:
+    return {"background": bg, "border": border, "hover": {"background": bg, "border": hover},
+            "highlight": {"background": bg, "border": hover}}
+
+
+def node_state(st: Mapping[str, Any], dim: str, prov: set[str]) -> str:
+    """provided / locked / expanded / open: the circle's states as roles."""
+    if dim in prov:
+        return "provided"
+    if dim in selections(st):
+        return "locked"
+    if dim == st["tcx"]:
+        return "expanded"
+    return "open"
+
+
+def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
+    """Colour every node and edge by its job, from the world's tokens:
+    open = white with an outline, provided = neutral fill, locked = the
+    selection blue, expanded = solid blue, an option you have on hand =
+    the on-hand green. When one dimension is fanned out, the others step
+    back to lighter versions of the same roles."""
+    T = P.tokens(st["pal"])
+    have = set(st["have"])
+    fanned = bool(st["tcx"])
+    out_nodes, state_of = [], {}
+    for n in data["nodes"]:
+        n = dict(n)
+        kind = n["id"].split(":", 1)[0]
+        if kind == "comp":
+            n["color"], n["font"] = _paint(T["surface"], T["ink"], T["ink"]), {**n.get("font", {}), "color": T["ink"]}
+        elif kind == "dim":
+            dim = n["id"][4:]
+            role = node_state(st, dim, prov)
+            back = fanned and role != "expanded"
+            state_of[n["id"]] = role
+            bg, line, label, width = {
+                "open": (T["surface"], T["line"] if back else T["line-strong"], T["ink-3"] if back else T["ink-2"], 1),
+                "provided": (T["fill-2"], T["fill-2"] if back else T["ink-3"], T["ink-3"], 1),
+                "locked": (T["sel-subtle"], T["sel-border"] if back else T["sel-base"], T["sel-deep"], 2),
+                "expanded": (T["sel-base"], T["sel-deep"], T["sel-deep"], 3),
+            }[role]
+            n["color"] = _paint(bg, line, T["ink"])
+            n["borderWidth"] = width
+            n["font"] = {**n.get("font", {}), "color": label}
+        elif kind == "filler":
+            _p, _dim, filler = n["id"].split(":", 2)
+            if filler == MORE:
+                n["color"] = _paint(T["fill"], T["line"], T["ink"])
+            elif filler in have:
+                n["color"] = _paint(T["have-subtle"], T["have-base"], T["ink"])
+            else:
+                n["color"] = _paint(T["surface"], T["line-strong"], T["ink"])
+            n["font"] = {**n.get("font", {}), "color": T["ink"]}
+        out_nodes.append(n)
+    out_edges = []
+    for e in data["edges"]:
+        e = dict(e)
+        role = state_of.get(e.get("to", ""))
+        if role is None:                              # dimension -> option (the fan)
+            col, w = T["line-strong"], 1
+        else:
+            col, w = {"open": (T["line"], 1), "provided": (T["ink-3"], 1.5),
+                      "locked": (T["sel-base"], 2), "expanded": (T["sel-base"], 2)}[role]
+        e["color"], e["width"] = {"color": col}, w
+        out_edges.append(e)
+    return {"nodes": out_nodes, "edges": out_edges}
+
+
 def graph_data(c: sqlite3.Connection, st: Mapping[str, Any]) -> dict[str, list]:
+    """The product's graph data for this dish, coloured for the colour world.
+    The product's function and data are unchanged; this colours a copy."""
     from foodprep.ui.graph import taste_circle_graph_data
     sel = selections(st)
     data = taste_circle_graph_data(c, st["rec"], locked_dimensions=set(sel), selections=sel,
                                    expanded_dimension=st["tcx"] or None,
                                    available=set(st["have"]), page=st["tcp"])
-    return {"nodes": _recolour(data["nodes"]), "edges": _recolour(data["edges"])}
+    if st.get("pal", P.DEFAULT_WORLD) == "peach":
+        bg = P.tokens("peach")["page"]
+        return {"nodes": _recolour_peach(data["nodes"], bg), "edges": _recolour_peach(data["edges"], bg)}
+    return style_by_role(data, st, set(provided(c, st["rec"])))
 
 
 def apply_click(c: sqlite3.Connection, st: Mapping[str, Any], node: str | None) -> dict[str, Any]:
@@ -220,7 +285,7 @@ def unavailable_html(c: sqlite3.Connection, st: Mapping[str, Any]) -> str:
 
 
 CSS = """<style>
-.r4 .tabs .k-circle {border-top:3px solid var(--ink-2)}
+.r4 .tabs .k-circle {border-top:3px solid var(--circle-tab)}
 .r4.tc .tc-dl {display:grid; grid-template-columns:max-content 1fr; gap:2px 12px; margin:6px 0}
 .r4.tc .tc-dl dt {color:var(--ink-3)} .r4.tc .tc-dl dd {margin:0}
 .r4.tc .tc-fan {background:var(--fill-soft); border-left:3px solid var(--ink-2); padding:4px 8px; margin:4px 0}

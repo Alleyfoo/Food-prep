@@ -53,7 +53,6 @@ GRAPH_LIMIT = 20   # relationships; above this the graph is collapsed by default
 #   not recorded      hatched + the words "not recorded"
 CSS = """
 <style>
-""" + P.css_vars() + """
 .r4 {font-size:14px; line-height:1.4; color:var(--ink)}
 .r4 table.ov {font-size:13px}
 .r4 a {color:var(--link); text-decoration:none} .r4 a:hover {text-decoration:underline}
@@ -77,12 +76,12 @@ CSS = """
          color:var(--ink-3); font-size:12px}
 .r4 tr.sel td.nr {background:repeating-linear-gradient(45deg,var(--sel-subtle),var(--sel-subtle) 4px,var(--sel-subtle2) 4px,var(--sel-subtle2) 8px)}
 .r4 .na {color:var(--ink-3); font-size:12px}
-.r4 .exp {font-style:italic; color:var(--sel-base)}
-.r4 .gen {font-style:italic; color:var(--sel-base)}
+.r4 .exp {font-style:italic; color:var(--hyp-text)}
+.r4 .gen {font-style:italic; color:var(--hyp-text)}
 .r4 .have {color:var(--have-base); font-weight:600}
 .r4 .lbl {font-size:11px; color:var(--ink-3); margin-left:3px}
 .r4 .lbl.have {color:var(--have-base); font-weight:400}
-.r4 .tested {color:var(--sel-deep); font-weight:600}
+.r4 .tested {color:var(--hyp-deep); font-weight:600}
 .r4 .ctx {background:var(--fill-soft); border:1px solid var(--line); border-radius:6px; padding:6px 10px;
           margin:0 0 8px; font-size:13px}
 .r4 .ctx b {font-weight:600; color:var(--ink-2)}
@@ -120,11 +119,11 @@ CSS = """
 .r4 dl {margin:0; display:grid; grid-template-columns:170px 1fr; gap:2px 10px}
 .r4 dt {font-weight:600; color:var(--ink-2)} .r4 dd {margin:0}
 .r4 .sub {font-size:12px; color:var(--ink-3)}
-.r4 .ideas {border:1px dashed var(--sel-mid); border-radius:6px; padding:4px 10px; background:var(--sel-faint)}
+.r4 .ideas {border:1px dashed var(--hyp-line); border-radius:6px; padding:4px 10px; background:var(--hyp-fill)}
 .r4 .gapbox {border:1px solid var(--line); border-radius:6px; padding:4px 10px;
              background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 6px,var(--fill) 6px,var(--fill) 12px)}
 .r4 .stockbox {border:1px solid var(--have-border); border-radius:6px; padding:4px 10px; background:var(--have-faint)}
-.r4 .banner {background:var(--sel-faint); border:1px solid var(--sel-border); border-radius:6px; padding:4px 10px;
+.r4 .banner {background:var(--note-fill); border:1px solid var(--note-line); border-radius:6px; padding:4px 10px;
              margin:0 0 6px; font-size:13px}
 .r4 .legend {font-size:12px; color:var(--ink-3); margin:2px 0 6px}
 .r4 .num {text-align:right; font-variant-numeric:tabular-nums}
@@ -141,8 +140,8 @@ CSS = """
 .r4 .rc-have {border-color:var(--have-border); color:var(--have-base); background:var(--have-subtle); font-weight:600}
 .r4 .rc-nr {background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 4px,var(--fill) 4px,var(--fill) 8px);
             color:var(--ink-3)}
-.r4 .rc-exp {border-color:var(--sel-border); color:var(--sel-base); font-style:italic; background:var(--sel-faint)}
-.r4 .rc-tested {border-color:var(--sel-mid); color:var(--sel-deep); font-weight:600; background:var(--sel-faint)}
+.r4 .rc-exp {border-color:var(--hyp-border); color:var(--hyp-text); font-style:italic; background:var(--hyp-fill)}
+.r4 .rc-tested {border-color:var(--hyp-line); color:var(--hyp-deep); font-weight:600; background:var(--hyp-fill)}
 .r4.dense {font-size:13px; line-height:1.3}
 .r4.dense td, .r4.dense th {padding:2px 5px}
 .r4.dense table {margin:2px 0 6px}
@@ -158,6 +157,12 @@ CSS = """
                 margin:4px 0 8px; font-size:13px}
 </style>
 """
+
+
+def css(pal: str) -> str:
+    """The workspace CSS with the colour world's tokens (r42_palette)."""
+    return f"<style>{P.css_vars(pal)}</style>" + CSS
+
 
 NA = '<span class="na">n/a</span>'
 
@@ -1407,10 +1412,10 @@ def trace_dot(m: dict, st: dict) -> str:
              'node [shape=box, style="rounded,filled", fillcolor="@surface@", color="@line-strong@", '
              'fontname="Helvetica", fontsize=11, margin="0.08,0.03"];',
              'edge [color="@ink-3@", fontname="Helvetica", fontsize=9, fontcolor="@ink-3@"];']
-    shapes = {"state": 'fillcolor="@cmp-faint@"', "role": 'shape=ellipse, fillcolor="@fill-soft@"',
-              "route": 'shape=hexagon, fillcolor="@have-faint@"', "source": 'shape=note, fillcolor="@sel-faint@"',
+    shapes = {"state": 'fillcolor="@node-state@"', "role": 'shape=ellipse, fillcolor="@fill-soft@"',
+              "route": 'shape=hexagon, fillcolor="@node-route@"', "source": 'shape=note, fillcolor="@node-source@"',
               "gap": 'style="rounded,dashed", color="@line-strong@", fontcolor="@ink-3@"',
-              "pairing": 'fillcolor="@sel-faint@"'}
+              "pairing": 'fillcolor="@node-pairing@"'}
     for nid, n in nodes.items():
         recs = [r for e in edges if nid in (e["src"], e["dst"]) for r in e["records"]
                 if r.get("ingredient") == n["name"]]
@@ -1431,7 +1436,7 @@ def trace_dot(m: dict, st: dict) -> str:
         r = e["records"][0] if e["records"] else {}
         style = []
         if r.get("knowledge") in ("experimental", "generated"):
-            style.append('style=dashed, color="@sel-mid@"')
+            style.append('style=dashed, color="@hyp-line@"')
             if r.get("knowledge") == "generated" and r["testing"]["status"] == "tested":
                 style.append('penwidth=2')
         elif e["relation"].endswith("backed by") or e["relation"].startswith("backs"):
@@ -1447,7 +1452,7 @@ def trace_dot(m: dict, st: dict) -> str:
     lines.append("}")
     # DOT has no CSS variables: fill the at-sign placeholders from the palette
     dot = "\n".join(lines)
-    for k, v in P.TOKENS.items():
+    for k, v in P.tokens(st.get("pal", P.DEFAULT_WORLD)).items():
         dot = dot.replace(f"@{k}@", v)
     return dot
 
