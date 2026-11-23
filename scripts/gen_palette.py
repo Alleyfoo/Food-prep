@@ -8,6 +8,12 @@ then walk a single lightness scale with chroma eased down at both ends.
 Colour in these graphs is meaning, not decoration, so the output is emitted as hex:
 vis-network paints to a canvas and the values are read by both CSS and Python.
 
+Pantry (2026-11-24): the hues now come from the pantry palette chosen in the
+R4.2 research (docs/research/ux-layout-variants-r4-2/palette.md): parsley,
+blueberry, red cabbage, mustard seed and beetroot, plus a sage neutral ramp.
+Where the palette gives an exact colour, that step is pinned to it (PINNED);
+the other steps follow the shared lightness scale in the pinned colour's hue.
+
 Run: py -3.11 scripts/gen_palette.py            # prints CSS + Python blocks
 """
 
@@ -18,12 +24,24 @@ import math
 # Our five hues — the ones already carrying meaning in the graphs. Only their hue
 # angle survives; lightness and chroma are normalised below.
 SOURCE_HUES = {
-    "ingredient": "#0E7C5A",   # green
-    "technique":  "#1F6FC4",   # blue
-    "component":  "#6B4C8A",   # purple
-    "filler":     "#A5640A",   # amber  (also flavour routes)
-    "destination": "#B23B2E",  # red
+    "ingredient": "#29543E",   # parsley       (on hand, positive)
+    "technique":  "#355282",   # blueberry
+    "component":  "#633F68",   # red cabbage   (hypotheses, locked into a dish)
+    "filler":     "#674C14",   # mustard seed  (also flavour routes)
+    "destination": "#883046",  # beetroot      (risk)
+    "neutral":    "#515A43",   # sage          (structure)
 }
+
+# The pantry palette's own values, used exactly at these steps.
+PINNED = {
+    "ingredient": {200: "#DCEBDF", 700: "#29543E"},
+    "technique": {700: "#355282"},
+    "component": {200: "#ECDFF0", 700: "#633F68"},
+    "filler": {100: "#FAF5DC", 200: "#F1E5AE", 300: "#E3D28C", 700: "#674C14"},   # light steps stay mustard, never tan or peach
+    "destination": {100: "#F9F0F2", 200: "#F2DEE3", 300: "#E7C0CA", 700: "#883046"},  # beetroot, not candy pink
+    "neutral": {200: "#E9ECD9", 700: "#515A43"},
+}
+NEUTRAL_C = 0.30   # the sage ramp keeps a third of the shared chroma: quiet, never grey
 
 BASE_L = 0.62   # shared lightness for the 500 step
 BASE_C = 0.11   # shared chroma for the 500 step
@@ -87,9 +105,9 @@ def oklch_to_hex(L: float, C: float, H: float) -> str:
 
 # ---- ramp construction -----------------------------------------------------
 
-def ramp(hue: float) -> dict[int, str]:
+def ramp(hue: float, chroma: float = 1.0) -> dict[int, str]:
     return {
-        step: oklch_to_hex(L_SCALE[i], BASE_C * C_SCALE[i], hue)
+        step: oklch_to_hex(L_SCALE[i], BASE_C * chroma * C_SCALE[i], hue)
         for i, step in enumerate(STEPS)
     }
 
@@ -107,7 +125,12 @@ def contrast(a: str, b: str) -> float:
 
 
 def build() -> dict[str, dict[int, str]]:
-    return {name: ramp(hex_to_oklch(src)[2]) for name, src in SOURCE_HUES.items()}
+    out = {}
+    for name, src in SOURCE_HUES.items():
+        r = ramp(hex_to_oklch(src)[2], NEUTRAL_C if name == "neutral" else 1.0)
+        r.update(PINNED.get(name, {}))
+        out[name] = r
+    return out
 
 
 def main() -> None:
@@ -122,14 +145,15 @@ def main() -> None:
     print("# graph.py node colours (the 500 step of each ramp)")
     print("_COLORS = {")
     for name, r in ramps.items():
-        print(f'    "{name}": "{r[500]}",')
+        if name != "neutral":
+            print(f'    "{name}": "{r[500]}",')
     print("}")
 
     print("\n# sanity — contrast of the text steps on their own tinted fills")
     for name, r in ramps.items():
         print(f"  {name:12} 700-on-200 {contrast(r[700], r[200]):.2f}  "
               f"800-on-100 {contrast(r[800], r[100]):.2f}  "
-              f"500-on-bg  {contrast(r[500], '#F4F2EC'):.2f}")
+              f"500-on-bg  {contrast(r[500], '#F5F5EB'):.2f}")
 
 
 if __name__ == "__main__":

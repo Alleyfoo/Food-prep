@@ -14,7 +14,7 @@ in Arial — so they are worth a test rather than a comment.
 import pytest
 
 from foodprep.ui.graph import (
-    _COLORS, _EDGE_COLORS, _FONT_FACE, build_ingredient_graph,
+    _COLORS, _EDGE_COLORS, _FONT_FACE, _INK, _LINE, _SECONDARY, build_ingredient_graph,
     build_scout_graph, graph_data,
 )
 
@@ -44,18 +44,18 @@ def test_node_font_survives(net):
     for node in net.nodes:
         assert node["font"]["face"] == _FONT_FACE
         assert node["font"]["size"] >= 14
-        assert node["font"]["color"] == "#1A1B16"
+        assert node["font"]["color"] == _INK
 
 
 def test_edges_use_our_palette(net):
-    allowed = set(_EDGE_COLORS.values()) | {"#D2CDBE"}
+    allowed = set(_EDGE_COLORS.values()) | {_LINE}
     for edge in net.edges:
         assert edge["color"] in allowed, f"stray edge colour {edge['color']}"
 
 
 def test_scout_graph_is_styled_too(conn):
     scout = build_scout_graph(conn, "broccoli")
-    palette = set(_COLORS.values()) | {"#75796E"}
+    palette = set(_COLORS.values()) | {_SECONDARY}
     for node in scout.nodes:
         assert "group" not in node
         assert node["color"] in palette

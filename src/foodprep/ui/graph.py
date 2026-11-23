@@ -28,24 +28,30 @@ from foodprep import query
 #: hues at one shared lightness/chroma, so no node type shouts over another.
 #: Keep in step with :root there; regenerate both via scripts/gen_palette.py.
 _COLORS = {
-    "ingredient": "#359B76",
-    "technique":  "#5589C7",
-    "component":  "#9774BB",
-    "filler":     "#B37736",
-    "route":      "#B37736",
-    "destination": "#BF6B5E",
-    "hypothesis": "#9774BB",
-    "dimension":  "#5589C7",
+    "ingredient": "#3F9A6F",
+    "technique":  "#5E86C8",
+    "component":  "#A56FAD",
+    "filler":     "#A77F2C",
+    "route":      "#A77F2C",
+    "destination": "#BE6879",
+    "hypothesis": "#A56FAD",
+    "dimension":  "#5E86C8",
 }
 
-#: Edges sit one step darker than their node so they read on the cream ground.
+#: Edges sit one step darker than their node so they read on the oat ground.
 _EDGE_COLORS = {
-    "ingredient": "#057C59",
-    "technique":  "#396BA5",
-    "component":  "#78579A",
-    "filler":     "#925A14",
-    "destination": "#9D4E43",
+    "ingredient": "#1C7B53",
+    "technique":  "#4368A6",
+    "component":  "#86528D",
+    "filler":     "#876105",
+    "destination": "#9C4C5D",
 }
+
+#: Structure, from design.css (pantry palette): oat page, sage ink and lines.
+_BG = "#F5F5EB"          # --bg; faded circle nodes blend toward it
+_INK = "#24291D"         # --ink
+_SECONDARY = "#5D634B"   # --ink-4: unclassified nodes, edge labels
+_LINE = "#CDD2BA"        # --line-2: plain edges
 
 _FONT_FACE = "Figtree, system-ui, sans-serif"
 
@@ -64,20 +70,20 @@ def _add_node(net: Network, node_id: str, label: str, group: str,
     any node carrying a group (see pyvis 0.3.2), which silently handed these
     graphs vis.js's default palette instead of ours.
     """
-    node_color = color if color is not None else _COLORS.get(group, "#75796E")
+    node_color = color if color is not None else _COLORS.get(group, _SECONDARY)
     node_shape = shape if shape is not None else {"technique": "diamond", "route": "square",
               "destination": "triangle"}.get(group, "dot")
     net.add_node(
         node_id, label=label, color=node_color, size=size, shape=node_shape,
         title=title or label,
-        font={"color": "#1A1B16", "size": 14, "face": _FONT_FACE},
+        font={"color": _INK, "size": 14, "face": _FONT_FACE},
     )
 
 
 def _add_edge(net: Network, src: str, dst: str, label: str = "",
-              color: str = "#D2CDBE", dashes: bool = False) -> None:
+              color: str = _LINE, dashes: bool = False) -> None:
     net.add_edge(src, dst, label=label, color=color, dashes=dashes,
-                 font={"color": "#75796E", "size": 12, "face": _FONT_FACE,
+                 font={"color": _SECONDARY, "size": 12, "face": _FONT_FACE,
                         "align": "middle"},
                  width=2)
 
@@ -87,7 +93,7 @@ def build_ingredient_graph(conn: sqlite3.Connection,
     """Build a pyvis Network for one ingredient's transformation tree + connections."""
     # font_color must stay falsy: pyvis replaces each node's whole `font`
     # dict with {"color": font_color} when it is set, losing face and size.
-    net = Network(height="600px", width="100%", bgcolor="#F4F2EC",
+    net = Network(height="600px", width="100%", bgcolor=_BG,
                   font_color=False, directed=True)
     net.barnes_hut(gravity=-3000, central_gravity=0.3, spring_length=120,
                    spring_strength=0.05, damping=0.09, overlap=0)
@@ -222,7 +228,7 @@ def build_scout_graph(conn: sqlite3.Connection,
     """
     # font_color must stay falsy: pyvis replaces each node's whole `font`
     # dict with {"color": font_color} when it is set, losing face and size.
-    net = Network(height="600px", width="100%", bgcolor="#F4F2EC",
+    net = Network(height="600px", width="100%", bgcolor=_BG,
                   font_color=False, directed=True)
     net.barnes_hut(gravity=-3000, central_gravity=0.3, spring_length=120,
                    spring_strength=0.05, damping=0.09, overlap=0)
@@ -262,7 +268,7 @@ def build_scout_graph(conn: sqlite3.Connection,
                 continue
 
             candidate_class = hyp["candidate_class"]
-            color = _COLORS["component"] if candidate_class == "scout_candidate" else "#75796E"
+            color = _COLORS["component"] if candidate_class == "scout_candidate" else _SECONDARY
             size = 14 if candidate_class == "scout_candidate" else 10
 
             analogy = hyp.get("analogy", "")
@@ -334,15 +340,26 @@ _DISC_MIN = 40.0   # one option
 _DISC_MAX = 64.0   # twenty or more
 _DISC_CAP = 20
 
-# State palette — the 100–900 ramps in design.css.
-_PRIMARY = {200: "#F9E4D0", 300: "#ECCAAA", 400: "#D7A676",
-            500: "#B37736", 600: "#925A14", 700: "#6F4102", 800: "#4B2A00",
-            100: "#FFF3E8"}
-_POSITIVE = {200: "#D3F0E2", 500: "#359B76", 700: "#035C41"}
-_NEUTRAL = {200: "#ECE8DE", 400: "#D2CDBE", 600: "#9AA092"}
-
-_BG = "#F4F2EC"          # app background; faded nodes blend toward it
-_FADED_FONT = "#B7B3A6"  # label colour for faded nodes
+# Circle roles, pantry palette (design.css; docs/research/ux-layout-variants-r4-2/
+# palette.md). The outline says focus, the fill says status:
+#   mustard seed  the dimension you opened, its fan lines and option outlines
+#   pale sage     a dimension still to fill (clickable, like the filters)
+#   yogurt        a dimension the state already provides, with a sage outline:
+#                 quieter, but a real node, since it explains the preparation
+#   red cabbage   a dimension locked into your dish
+#   parsley       an option you have on hand (its fill)
+#   muted sage    a dimension with no fillers recorded
+_CIRCLE = {
+    "open_fill": "#E9ECD9", "open_edge": "#515A43",
+    "prov_fill": "#FFFDF5", "prov_edge": "#8A916E", "prov_calm": "#A6AC91",
+    "prov_label": "#515A43",
+    "lock_fill": "#ECDFF0", "lock_edge": "#633F68",
+    "focus_fill": "#F1E5AE", "focus_edge": "#674C14",
+    "have_fill": "#DCEBDF", "option_fill": "#FFFDF5", "more_fill": "#E9ECD9",
+    "gap_fill": "#EBEDE4", "gap_label": "#535C4A",
+    "line": "#CDD2BA", "line_faint": "#E1E4D2",
+}
+_FADED_FONT = "#9AA088"  # label colour for faded nodes (sage, toward the page)
 _FADE_T = 0.55           # 45% opacity over the ground == 55% blend into it
 
 
@@ -397,7 +414,8 @@ def _fan_radius(labels: list[str]) -> float:
                max(_FAN_RADIUS_MIN, extent / _FAN_SPREAD))
 
 
-def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None) -> None:
+def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None,
+               border: str | None = None) -> None:
     """Drop an unfocused dimension to 45% opacity over the ground.
 
     Keeps the node's ``clickable`` flag untouched: a faded-but-available
@@ -405,7 +423,7 @@ def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None) -> None:
     """
     color = node["color"]
     faded_bg = _blend(color["background"], _BG, _FADE_T)
-    faded_border = _blend(color["border"], _BG, _FADE_T)
+    faded_border = border or _blend(color["border"], _BG, _FADE_T)
     node["color"] = {
         "background": faded_bg, "border": faded_border,
         "hover": {"background": faded_bg, "border": faded_border},
@@ -414,7 +432,7 @@ def _fade_node(node: dict[str, Any], edge: dict[str, Any] | None) -> None:
     node["borderWidth"] = 1
     node["font"] = {**node.get("font", {}), "color": _FADED_FONT}
     if edge is not None:
-        edge["color"] = {"color": _PRIMARY[100]}
+        edge["color"] = {"color": _CIRCLE["line_faint"]}
         edge["width"] = 1
 
 
@@ -423,8 +441,8 @@ def _node_color(color: str, border: str | None = None) -> dict[str, Any]:
     return {
         "background": color,
         "border": border,
-        "hover": {"background": color, "border": "#1A1B16"},
-        "highlight": {"background": color, "border": "#1A1B16"},
+        "hover": {"background": color, "border": _INK},
+        "highlight": {"background": color, "border": _INK},
     }
 
 
@@ -468,9 +486,9 @@ def taste_circle_graph_data(
         "label": query.state_label(component_name),
         "x": 0.0, "y": 0.0, "fixed": True,
         "shape": "circle", "widthConstraint": {"minimum": 108},
-        "color": _node_color("#FFFFFF", "#1A1B16"),
+        "color": _node_color(_CIRCLE["prov_fill"], _INK),
         "borderWidth": 2,
-        "font": {"size": 19, "color": "#1A1B16"},
+        "font": {"size": 19, "color": _INK},
         "title": "Base component",
         "clickable": False,
     })
@@ -492,25 +510,25 @@ def taste_circle_graph_data(
             node.update({
                 "label": f"{title_name}\nprovided",
                 "shape": "dot", "size": _disc_size(1),
-                "color": _node_color(_POSITIVE[500], _POSITIVE[700]),
-                "borderWidth": 2,
-                "font": {"size": 14, "color": _POSITIVE[700]},
+                "color": _node_color(_CIRCLE["prov_fill"], _CIRCLE["prov_edge"]),
+                "borderWidth": 1.5,
+                "font": {"size": 14, "color": _CIRCLE["prov_label"]},
                 "title": f"{title_name} — already in the component",
                 "clickable": False,
             })
-            edge.update({"color": {"color": _POSITIVE[500]}, "width": 3})
+            edge.update({"color": {"color": _CIRCLE["prov_edge"]}, "width": 1.5})
         elif dim_key in locked:
             filler = selections.get(dim_key, "")
             node.update({
                 "label": f"{title_name}\n🔒 {filler.replace('_', ' ')}",
                 "shape": "dot", "size": _disc_size(6),
-                "color": _node_color(_PRIMARY[600], _PRIMARY[800]),
+                "color": _node_color(_CIRCLE["lock_fill"], _CIRCLE["lock_edge"]),
                 "borderWidth": 2.5,
-                "font": {"size": 14, "color": "#1A1B16"},
+                "font": {"size": 14, "color": _INK},
                 "title": f"{title_name}: {filler.replace('_', ' ')} — click to change",
                 "clickable": True,
             })
-            edge.update({"color": {"color": _PRIMARY[500]}, "width": 3})
+            edge.update({"color": {"color": _CIRCLE["lock_edge"]}, "width": 3})
         elif dim_key in fillers_by_dim and fillers_by_dim[dim_key]:
             fillers = [f for f in fillers_by_dim[dim_key]
                        if f["filler"] not in chosen_fillers]
@@ -532,13 +550,13 @@ def taste_circle_graph_data(
                 node.update({
                     "label": f"{title_name}\n{len(shown)} of {total}",
                     "shape": "dot", "size": _disc_size(total),
-                    "color": _node_color(_PRIMARY[500], _PRIMARY[700]),
+                    "color": _node_color(_CIRCLE["focus_fill"], _CIRCLE["focus_edge"]),
                     "borderWidth": 3,
-                    "font": {"size": 14, "color": "#1A1B16"},
+                    "font": {"size": 14, "color": _INK},
                     "title": f"{title_name} — click again to close",
                     "clickable": True,
                 })
-                edge.update({"color": {"color": _PRIMARY[500]}, "width": 3})
+                edge.update({"color": {"color": _CIRCLE["focus_edge"]}, "width": 3})
 
                 labels = [f["filler"].replace("_", " ") for f in shown]
                 if remaining > 0:
@@ -551,15 +569,16 @@ def taste_circle_graph_data(
                     is_more = remaining > 0 and j == k - 1
                     fname = _MORE_SUFFIX if is_more else shown[j]["filler"]
                     fid = f"filler:{dim_key}:{fname}"
+                    border = _CIRCLE["focus_edge"]   # every option in the fan: focus
                     if is_more:
-                        fill, border = _NEUTRAL[200], _NEUTRAL[400]
+                        fill = _CIRCLE["more_fill"]
                         title = f"Show the next {min(remaining, _MAX_FILLER_NODES)}"
                     elif fname in on_hand:
                         # "available now" has to read at a glance
-                        fill, border = _POSITIVE[200], _POSITIVE[500]
+                        fill = _CIRCLE["have_fill"]
                         title = f"{text} — in your kitchen. Click to choose it."
                     else:
-                        fill, border = _PRIMARY[200], _PRIMARY[300]
+                        fill = _CIRCLE["option_fill"]
                         title = f"Click to choose {text}"
                     nodes.append({
                         "id": fid,
@@ -576,45 +595,45 @@ def taste_circle_graph_data(
                         "margin": {"top": 5, "bottom": 5, "left": 13, "right": 13},
                         "color": _node_color(fill, border),
                         "borderWidth": 1,
-                        "font": {"size": 14, "color": "#1A1B16"},
+                        "font": {"size": 14, "color": _INK},
                         "title": title,
                         "clickable": True,
                     })
                     edges.append({
                         "from": dim_id, "to": fid,
-                        "width": 1.5, "color": {"color": _PRIMARY[300]},
+                        "width": 1.5, "color": {"color": _CIRCLE["focus_edge"]},
                     })
             else:
                 plural = "option" if total == 1 else "options"
                 node.update({
                     "label": f"{title_name}\n{total} {plural}",
                     "shape": "dot", "size": _disc_size(total),
-                    "color": _node_color(_PRIMARY[200], _PRIMARY[400]),
-                    "borderWidth": 2,
-                    "font": {"size": 14, "color": "#1A1B16"},
+                    "color": _node_color(_CIRCLE["open_fill"], _CIRCLE["open_edge"]),
+                    "borderWidth": 1.5,
+                    "font": {"size": 14, "color": _INK},
                     "title": f"{title_name} — click to see options",
                     "clickable": True,
                 })
-                edge.update({"color": {"color": _NEUTRAL[400]}})
+                edge.update({"color": {"color": _CIRCLE["line"]}})
         else:
             # Keep the node: "we have nothing here" is information the
             # curator needs to see, so it is never hidden.
             node.update({
                 "label": f"{title_name}\nno fillers yet",
                 "shape": "dot", "size": _disc_size(1),
-                "color": _node_color(_NEUTRAL[200], _NEUTRAL[400]),
+                "color": _node_color(_CIRCLE["gap_fill"], _CIRCLE["line"]),
                 "borderWidth": 1,
-                "font": {"size": 14, "color": _NEUTRAL[600]},
+                "font": {"size": 14, "color": _CIRCLE["gap_label"]},
                 "title": f"{title_name} — no fillers in the catalogue",
                 "clickable": False,
             })
-            edge.update({"color": {"color": _NEUTRAL[400]}, "dashes": True})
+            edge.update({"color": {"color": _CIRCLE["line"]}, "dashes": True})
 
         # While a dimension is expanded, every other one drops to 45% so the
         # fan is unambiguously the active region. Faded dimensions stay
         # clickable — clicking one moves the focus there.
         if expanded_dimension and dim_key != expanded_dimension:
-            _fade_node(node, edge)
+            _fade_node(node, edge, _CIRCLE["prov_calm"] if dim_key in provided else None)
 
         nodes.append(node)
         edges.append(edge)

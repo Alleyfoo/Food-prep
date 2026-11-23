@@ -134,7 +134,7 @@
   color: var(--neutral-100) !important;
 }
 [data-testid="stBaseButton-primary"]:hover {
-  background: var(--filler-800) !important; border-color: var(--filler-800) !important;
+  background: var(--primary-deep) !important; border-color: var(--primary-deep) !important;
 }
 /* Scout's "other candidates": a list you can click, so it reads as a list
    (the subject-note style it replaced), with a link affordance on hover. */
@@ -156,61 +156,64 @@
      neighbours. Colour here is MEANING: one hue per node type, never
      per instance. Regenerate rather than hand-editing.
      --------------------------------------------------------------- */
-  --ingredient-100: #EAFAF2; --ingredient-200: #D3F0E2; --ingredient-300: #AFDDC8;
-  --ingredient-400: #7BC3A4; --ingredient-500: #359B76; --ingredient-600: #057C59;
-  --ingredient-700: #035C41; --ingredient-800: #003D2A; --ingredient-900: #002719;
+  --ingredient-100: #EAFAF0; --ingredient-200: #DCEBDF; --ingredient-300: #B2DDC4;
+  --ingredient-400: #80C29E; --ingredient-500: #3F9A6F; --ingredient-600: #1C7B53;
+  --ingredient-700: #29543E; --ingredient-800: #023E26; --ingredient-900: #002716;
 
-  --technique-100: #EFF6FF; --technique-200: #D9EAFE; --technique-300: #B8D4F7;
-  --technique-400: #8BB4E7; --technique-500: #5589C7; --technique-600: #396BA5;
-  --technique-700: #234E80; --technique-800: #11335A; --technique-900: #07203B;
+  --technique-100: #F0F6FF; --technique-200: #DBE9FF; --technique-300: #BCD2F7;
+  --technique-400: #91B2E8; --technique-500: #5E86C8; --technique-600: #4368A6;
+  --technique-700: #355282; --technique-800: #19325B; --technique-900: #0D1E3C;
 
-  --component-100: #F8F2FF; --component-200: #EDE2FB; --component-300: #DAC8EF;
-  --component-400: #BEA3DD; --component-500: #9774BB; --component-600: #78579A;
-  --component-700: #5A3D76; --component-800: #3D2752; --component-900: #261636;
+  --component-100: #FCF1FD; --component-200: #ECDFF0; --component-300: #E4C5E7;
+  --component-400: #CC9FD1; --component-500: #A56FAD; --component-600: #86528D;
+  --component-700: #633F68; --component-800: #45234A; --component-900: #2C1430;
 
-  --filler-100: #FFF3E8; --filler-200: #F9E4D0; --filler-300: #ECCAAA;
-  --filler-400: #D7A676; --filler-500: #B37736; --filler-600: #925A14;
-  --filler-700: #6F4102; --filler-800: #4B2A00; --filler-900: #301901;
+  --filler-100: #FAF5DC; --filler-200: #F1E5AE; --filler-300: #E3D28C;
+  --filler-400: #CDAC71; --filler-500: #A77F2C; --filler-600: #876105;
+  --filler-700: #674C14; --filler-800: #432F01; --filler-900: #2B1C01;
 
-  --destination-100: #FEF2F0; --destination-200: #FFE0DA; --destination-300: #F4C4BB;
-  --destination-400: #E29D91; --destination-500: #BF6B5E; --destination-600: #9D4E43;
-  --destination-700: #79352C; --destination-800: #542019; --destination-900: #37120D;
+  --destination-100: #F9F0F2; --destination-200: #F2DEE3; --destination-300: #E7C0CA;
+  --destination-400: #E19AA6; --destination-500: #BE6879; --destination-600: #9C4C5D;
+  --destination-700: #883046; --destination-800: #531F2B; --destination-900: #36111A;
 
-  /* surface — warm paper */
-  --bg:        #F4F2EC;
-  --bg-2:      #ECE8DE;
-  --surface:   #FFFFFF;
-  --surface-2: #FBF9F3;
+  /* surface — pantry: oat page, yogurt panels and cards, pale sage fills */
+  --bg:        #F5F5EB;
+  --bg-2:      #E9ECD9;
+  --surface:   #FFFDF5;
+  --surface-2: #FAFAF0;
 
-  /* ink */
-  --ink:    #1A1B16;
-  --ink-2:  #2C2E26;
-  --ink-3:  #51544A;
-  --ink-4:  #75796E;
-  --ink-5:  #9AA092;
-  --muted:  #B8BCB0;
+  /* ink — sage-tinted, never pure black */
+  --ink:    #24291D;
+  --ink-2:  #303528;
+  --ink-3:  #515A43;
+  --ink-4:  #5D634B;
+  --ink-5:  #818A75;
+  --muted:  #ADB4A3;
 
   /* lines */
-  --line:   #E2DED2;
-  --line-2: #D2CDBE;
-  --line-3: #BBB5A3;
+  --line:   #E1E4D2;
+  --line-2: #CDD2BA;
+  --line-3: #ADB4A3;
 
-  /* neutral ramp — the warm greys above, named as a scale so the
-     handoff's --color-neutral-* rules port across directly. */
-  --neutral-100: #FBF9F3; --neutral-200: #ECE8DE; --neutral-300: #E2DED2;
-  --neutral-400: #D2CDBE; --neutral-500: #BBB5A3; --neutral-600: #9AA092;
-  --neutral-700: #75796E; --neutral-800: #51544A; --neutral-900: #2C2E26;
+  /* neutral ramp — sage, named as a scale so the handoff's
+     --color-neutral-* rules port across directly. */
+  --neutral-100: #F4F6F2; --neutral-200: #E9ECD9; --neutral-300: #CED3C7;
+  --neutral-400: #ADB4A3; --neutral-500: #818A75; --neutral-600: #646C58;
+  --neutral-700: #515A43; --neutral-800: #303528; --neutral-900: #1D2117;
 
   /* ---------------------------------------------------------------
      Semantic roles. These are what UI chrome reads; the categorical
-     ramps above are what the GRAPHS read. Amber carries the primary
-     (it is our warmest hue and the closest to the handoff's accent),
-     green carries "provided / have it", red carries risk.
+     ramps above are what the GRAPHS read. Pantry palette: one food per
+     job. Green olive carries the primary ("where you act": selected
+     pills, primary buttons, links), parsley carries "provided / have
+     it", beetroot carries risk. Mustard seed (the filler ramp) is the
+     focus colour on the Taste Circle.
      --------------------------------------------------------------- */
-  --primary:      var(--filler-700);
-  --primary-mid:  var(--filler-500);
-  --primary-soft: var(--filler-300);
-  --primary-tint: var(--filler-100);
+  --primary:      #5F692C;
+  --primary-deep: #4A5222;
+  --primary-mid:  #8A9445;
+  --primary-soft: #CDD49A;
+  --primary-tint: #E9EDC2;
   --positive:      var(--ingredient-700);
   --positive-soft: var(--ingredient-300);
   --positive-tint: var(--ingredient-100);
