@@ -112,6 +112,7 @@ def test_t5_record_a_tasting_from_the_app(tmp_path, monkeypatch):
         text = {t.key: t for t in at.text_input}
         # The protocol's starting ratio is prefilled.
         assert text["tasting_ratio"].value.startswith("1 small piece of roasted cabbage")
+        next(s for s in at.selectbox if s.key == "tasting_verdict").set_value("works")
         text["tasting_preparation"].input("tossed one warm piece")
         text["tasting_temperature"].input("warm")
         next(a for a in at.text_area if a.key == "tasting_observations").input(
@@ -124,7 +125,7 @@ def test_t5_record_a_tasting_from_the_app(tmp_path, monkeypatch):
         at.button(key="tasting_confirm").click().run()
         assert not at.exception, at.exception
 
-        assert any("Saved to" in s.value for s in at.success)
+        assert any(s.value.startswith("Saved:") for s in at.success)
         added = copy.read_text(encoding="utf-8")[len(before_real.decode("utf-8")):]
         assert "component: roasted_cabbage_component" in added
         assert "observations: nutty, not greasy" in added

@@ -987,7 +987,9 @@ def _tasting_reset(ratio: str) -> None:
     for key in _TASTING_TEXT:
         st.session_state[key] = ""
     st.session_state.tasting_ratio = ratio
-    st.session_state.tasting_verdict = "works"
+    # No default verdict (E3): "Works" was preselected, so a hurried save
+    # recorded a success nobody chose (R2 finding N11).
+    st.session_state.tasting_verdict = None
     st.session_state.tasting_date = date.today()
     st.session_state.tasting_safety = False
     st.session_state.pop("tasting_pending", None)
@@ -997,8 +999,9 @@ def _tasting_reset(ratio: str) -> None:
 def _tasting_problems() -> list[str]:
     """What stops the entry being recorded, in plain words."""
     ss = st.session_state
-    problems = [f"Fill in “{label}”." for key, label in _TASTING_REQUIRED.items()
-                if not (ss.get(key) or "").strip()]
+    problems = [] if ss.get("tasting_verdict") else ["Choose a verdict."]
+    problems += [f"Fill in “{label}”." for key, label in _TASTING_REQUIRED.items()
+                 if not (ss.get(key) or "").strip()]
     if not ss.get("tasting_safety"):
         problems.append("Tick “Everything was safely prepared and cooked "
                         "through” to confirm the food was safe.")
@@ -1050,7 +1053,7 @@ def _tasting_confirm(ratio_default: str) -> None:
     if not pending or pending["token"] in saved:
         return
     comp, candidate = pending["target"]
-    path = tasting.tastings_path()
+    path = tasting.tastings_path()   # where it goes; not shown to the cook
     try:
         tasting.record_trial(
             CONN, comp, candidate,
@@ -1075,8 +1078,12 @@ def _tasting_confirm(ratio_default: str) -> None:
         ss.tasting_flash = ("error", message)
         return
     saved.add(pending["token"])
-    ss.tasting_flash = ("ok", f"Saved to {path}. Commit that file to keep the "
-                              "record — it is the one the app rebuilds from.")
+    # Plain language, no file path or git chore (R2 finding N5). Where the
+    # record lives is documented in the README for whoever keeps the repo.
+    verdict = _VERDICT_LABELS.get(pending["verdict"], pending["verdict"])
+    ss.tasting_flash = ("ok", f"Saved: {_pretty(comp)} + {_pretty(candidate)}, "
+                              f"“{verdict}”, {pending['tested_at']}. It is now "
+                              "in the trial history below.")
     _tasting_reset(ratio_default)
 
 
@@ -1143,7 +1150,8 @@ def _tasting_form(comp: str, h: dict) -> None:
             left, right = st.columns(2)
             with left:
                 st.selectbox("Verdict", list(_VERDICT_LABELS),
-                             format_func=_VERDICT_LABELS.get, key="tasting_verdict")
+                             format_func=_VERDICT_LABELS.get, key="tasting_verdict",
+                             placeholder="Choose a verdict")
                 st.text_input("What you did", key="tasting_preparation",
                               placeholder="e.g. tossed one warm piece, tasted at once")
                 st.text_input("Ratio", key="tasting_ratio")

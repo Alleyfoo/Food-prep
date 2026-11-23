@@ -219,7 +219,10 @@ def tastings_copy(tmp_path, monkeypatch):
     assert Path(loader.TASTINGS_PATH).read_bytes() == real   # never touched
 
 
-def _fill_tasting(at, observation="nutty, not greasy"):
+def _fill_tasting(at, observation="nutty, not greasy", verdict="works"):
+    # No verdict is preselected (E3); a tester chooses one.
+    if verdict:
+        next(s for s in at.selectbox if s.key == "tasting_verdict").set_value(verdict)
     text = {t.key: t for t in at.text_input}
     text["tasting_preparation"].input("tossed one warm piece")
     text["tasting_temperature"].input("warm")
@@ -256,7 +259,7 @@ def test_confirm_writes_exactly_once(tastings_copy):
     _fill_tasting(at, observation="once only")
     reviewed = dict(at.session_state["tasting_pending"])
     at.button(key="tasting_confirm").click().run()
-    assert any("Saved to" in s.value for s in at.success)
+    assert any(s.value.startswith("Saved:") for s in at.success)
     after_first = tastings_copy.read_text(encoding="utf-8")
     assert after_first.count("once only") == 1
     assert len(after_first) > len(before)
@@ -293,3 +296,47 @@ def test_empty_states_explain_and_offer_a_next_step():
     at = _app(state="ghee_component", tab="scout")
     page = _page(at)
     assert "analogy rules fits" in page and "limit of the rule set" in page
+
+
+# ---- E3: explicit verdict and a plain save confirmation ---------------------
+
+def test_no_verdict_is_preselected_and_none_blocks_review(tastings_copy):
+    before = tastings_copy.read_bytes()
+    at = _app(state="roasted_cabbage_component", tab="scout")
+    assert next(s for s in at.selectbox if s.key == "tasting_verdict").value is None
+    _fill_tasting(at, verdict=None)
+    assert any("Choose a verdict" in e.value for e in at.error)
+    assert "tasting_pending" not in at.session_state
+    assert tastings_copy.read_bytes() == before
+
+
+def test_chosen_verdict_is_reviewed_and_saved(tastings_copy):
+    at = _app(state="roasted_cabbage_component", tab="scout")
+    _fill_tasting(at, observation="too greasy", verdict="needs_adjustment")
+    assert "Needs adjustment" in _page(at)
+    at.button(key="tasting_confirm").click().run()
+    added = tastings_copy.read_text(encoding="utf-8")
+    assert "verdict: needs_adjustment" in added
+
+
+def test_save_confirmation_is_plain_language(tastings_copy):
+    at = _app(state="roasted_cabbage_component", tab="scout")
+    _fill_tasting(at)
+    at.button(key="tasting_confirm").click().run()
+    message = next(s.value for s in at.success)
+    assert message.startswith("Saved: roasted cabbage + ")
+    assert "trial history" in message
+    for leak in ("Commit", "commit", ".yaml", "\\", "/"):
+        assert leak not in message, leak
+
+
+def test_a_second_save_of_the_same_entry_is_refused_plainly(tastings_copy):
+    at = _app(state="roasted_cabbage_component", tab="scout")
+    _fill_tasting(at, observation="first")
+    at.button(key="tasting_confirm").click().run()
+    after_first = tastings_copy.read_text(encoding="utf-8")
+    # The same pairing on the same day: the append-only guard refuses it.
+    _fill_tasting(at, observation="second")
+    at.button(key="tasting_confirm").click().run()
+    assert tastings_copy.read_text(encoding="utf-8") == after_first
+    assert any("already recorded" in e.value for e in at.error)
