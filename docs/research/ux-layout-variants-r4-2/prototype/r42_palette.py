@@ -28,7 +28,7 @@ identical screens (URL key `pal`):
   white   white page and surfaces; structure by thin cool lines; colour
           appears only where it means something
   cool    a faint blue-white page and fills, tied to the selection blue
-  pantry  the user's proposal (2026-11-23): food references again, but one
+  pantry  (default) the user's proposal (2026-11-23): food references again, but one
           job per food - oat page, yogurt panels, pale sage filters, green
           olive selection, parsley on hand, red cabbage locked, mustard
           seed open dimensions, muted sage gaps. Jobs the proposal left
@@ -45,7 +45,7 @@ from functools import lru_cache
 
 SEED = "#6F4102"          # the product's --filler-700; seed of the peach world only
 WORLDS = ("peach", "white", "cool", "pantry")
-DEFAULT_WORLD = "white"
+DEFAULT_WORLD = "pantry"     # chosen by the user, 2026-11-23
 NEUTRAL_MIN_SAT = 20      # peach world: below this a tone reads as grey
 
 
@@ -204,7 +204,7 @@ def _cool() -> dict:
 @lru_cache(maxsize=None)
 def world(name: str = DEFAULT_WORLD) -> dict:
     return _extras({"peach": _peach, "white": _white, "cool": _cool,
-                    "pantry": _pantry}.get(name, _white)())
+                    "pantry": _pantry}.get(name, _pantry)())
 
 
 @lru_cache(maxsize=None)

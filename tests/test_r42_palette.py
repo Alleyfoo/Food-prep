@@ -129,8 +129,8 @@ def test_the_trace_graph_reads_the_world():
 def test_the_colour_world_is_a_url_condition_that_survives_links():
     st = S.parse({"ingredient": "broccoli", "pal": "cool"})
     assert st["pal"] == "cool" and S.to_params(st)["pal"] == "cool"
-    assert "pal" not in S.to_params(S.parse({"ingredient": "broccoli"}))     # white is the default
-    assert S.parse({"ingredient": "broccoli", "pal": "neon"})["pal"] == "white"
+    assert "pal" not in S.to_params(S.parse({"ingredient": "broccoli"}))     # pantry is the default
+    assert S.parse({"ingredient": "broccoli", "pal": "neon"})["pal"] == "pantry"
     assert "pal=cool" in S.href(st, rec="x")
 
 

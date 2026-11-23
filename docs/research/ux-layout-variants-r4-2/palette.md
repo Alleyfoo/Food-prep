@@ -44,14 +44,16 @@ The worlds differ only in the structure layer. The job colours are the same in w
 
 | `pal` | Page | Fills and lines | Intent |
 | --- | --- | --- | --- |
-| **white** (default) | `#ffffff` | very light cool fills (`#f4f5f8`) and thin cool lines (`#d9dce3`) | colour appears only where it means something |
+| **white** | `#ffffff` | very light cool fills (`#f4f5f8`) and thin cool lines (`#d9dce3`) | colour appears only where it means something |
 | **cool** | faint blue-white `#f4f6fb` | slightly bluer fills (`#eaeef6`) and lines (`#ccd3e1`) | a calmer page, tied to the selection blue |
 | **peach** | `#f9f3ec` | the previous palette, unchanged | the reference, for comparison |
-| **pantry** | oat `#F5F5EB`, yogurt panels | the user's proposal, one food per job (below) | food references, each with one job |
+| **pantry** (default, chosen 2026-11-23) | oat `#F5F5EB`, yogurt panels | the user's proposal, one food per job (below) | food references, each with one job |
 
 **Side by side**, peach, white, cool and pantry from left to right: `screenshots/worlds/side-by-side/` covers the detail, compare, trace and circle panes, from `evidence/capture_worlds.py`.
 
-## Pantry: your proposal (`pal=pantry`)
+## Pantry: the default (`pal=pantry`)
+
+**Chosen as the default on 2026-11-23.** White, cool and peach stay available for comparison.
 
 The proposal puts food references back, with **one food per job**. Its colours are used exactly as given; a test checks every value.
 

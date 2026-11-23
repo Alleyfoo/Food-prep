@@ -65,7 +65,6 @@ st.markdown(f"<style>.stApp, [data-testid=stHeader] {{background:{T['page']}}}"
             f" [data-baseweb=tag] {{background:{T['have-base']} !important}}"
             # panels (the two scrolling panes) and the circle canvas
             f" .st-key-r42-left, .st-key-r42-right {{background:{T['panel']}; border-radius:8px}}"
-            f" .st-key-r42-left {{padding:0 6px}} .st-key-r42-right {{padding:0 8px}}"
             f" iframe[title*='r42_taste_circle'] {{background:{T['circle-canvas']}; border-radius:8px}}</style>",
             unsafe_allow_html=True)
 CSS = V.css(url["pal"])

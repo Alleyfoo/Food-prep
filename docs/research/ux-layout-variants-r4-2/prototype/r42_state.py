@@ -3,7 +3,7 @@
 VARIANT     ov     overview cell encoding: a = compact code (R4), b = labelled
                    summary (R4.1, default), c = named roles with status words
             sheet  fact-sheet density: full (R4.1, default) or dense
-            pal    colour world: white (default), cool, or peach (the
+            pal    colour world: pantry (default), white, cool, or peach (the
                    previous food-coloured palette, kept as the reference)
             -> set by the facilitator in the URL; every link and "reset all"
                keeps them, so a participant stays in one condition.
@@ -53,7 +53,7 @@ DEFAULTS: dict[str, Any] = {
     "hide": False, "rec": "", "cmp": [], "trace": "", "pane": "",
     "cols": "summary", "depth": 1, "diff": False, "answer": False,
     "graph": False, "ov": "b", "sheet": "full",
-    "tc": [], "tcx": "", "tcp": 0, "tcb": "", "pal": "white",
+    "tc": [], "tcx": "", "tcp": 0, "tcb": "", "pal": "pantry",
 }
 GLOBAL = ("ingredient", "have", "has", "paired", "gap", "hide")
 SELECTION = ("rec", "cmp", "trace")
@@ -98,7 +98,7 @@ def parse(params: Mapping[str, str]) -> dict[str, Any]:
     if st["sheet"] not in SHEETS:
         st["sheet"] = "full"
     if st["pal"] not in PALS:
-        st["pal"] = "white"
+        st["pal"] = "pantry"
     return st
 
 
