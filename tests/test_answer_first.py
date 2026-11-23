@@ -287,3 +287,12 @@ def test_taste_circle_feedback_is_shown_once():
     assert "Now investigating" in _md(at)
     at.run()                                   # any later interaction
     assert "Now investigating" not in _md(at)
+
+
+def test_needs_answer_lists_every_role_the_card_lists(conn):
+    a, _ = _answer(conn, "tomato", "roasted_tomato_component", [])
+    card = next(c for c in query.all_branch_cards(conn, "tomato")
+                if c["component"] == "roasted_tomato_component")
+    add = dict(a["lines"])["Add"]
+    for m in card["missing"]:
+        assert m["role_name"] in add

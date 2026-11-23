@@ -45,7 +45,7 @@ def _first_route_using(routes: list[dict] | None) -> dict | None:
     return None
 
 
-def _role_needs(card: dict, limit: int = 4) -> list[tuple[str, str | None]]:
+def _role_needs(card: dict) -> list[tuple[str, str | None]]:
     """(role, first curated filler or None) for the roles the state misses."""
     fillers = card.get("fillers_by_role") or {}
     out = []
@@ -53,7 +53,7 @@ def _role_needs(card: dict, limit: int = 4) -> list[tuple[str, str | None]]:
         role = m["role_name"]
         first = (fillers.get(role) or [{}])[0].get("filler")
         out.append((role, first))
-    return out[:limit]
+    return out          # all of them: the card lists every missing role too
 
 
 def explorer_answer(ingredient: str, card: dict | None,
