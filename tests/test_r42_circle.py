@@ -165,18 +165,19 @@ def _colours(v, text=False):
         yield v.lower(), text
 
 
-@pytest.mark.parametrize("pal", ["peach", "white", "cool"])
+@pytest.mark.parametrize("pal", ["peach", "white", "cool", "pantry"])
 def test_circle_labels_are_readable_on_the_page_in_every_world(conn, pal):
     import r42_palette as P
     page = P.tokens(pal)["page"]
     data = C.graph_data(conn, _st(tc=["sour:lemon"], tcx="aromatic", pal=pal))
+    page = P.tokens(pal)["circle-canvas"]
     labels = [col for col, is_text in _colours(data) if is_text]
     assert labels
     for col in labels:
         assert P.contrast(col, page) >= 4.5, (pal, col)
 
 
-@pytest.mark.parametrize("pal", ["white", "cool"])
+@pytest.mark.parametrize("pal", ["white", "cool", "pantry"])
 def test_circle_uses_only_the_worlds_role_colours(conn, pal):
     """No product food colour survives in the new worlds."""
     import r42_palette as P
@@ -205,3 +206,12 @@ def test_peach_reference_keeps_no_grey(conn):
     for col, is_text in _colours(data):
         if not is_text:
             assert P.hex_to_hsl(col)[1] >= P.NEUTRAL_MIN_SAT, col
+
+
+def test_pantry_circle_roles(conn):
+    import r42_palette as P
+    T = P.tokens("pantry")
+    calm = {n["id"]: n for n in C.graph_data(conn, _st(tc=["sour:lemon"], pal="pantry"))["nodes"]}
+    assert calm["dim:sour"]["color"]["background"] == T["circle-lock-fill"]     # red cabbage
+    assert calm["dim:salty"]["color"]["background"] == T["circle-open-fill"]    # mustard seed
+    assert calm["dim:umami"]["color"]["background"] == T["circle-prov-fill"]    # pale sage

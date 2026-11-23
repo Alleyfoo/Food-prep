@@ -68,12 +68,13 @@ CSS = """
 .r4 tr.excluded td {color:var(--ink-3); background:var(--fill)}
 .r4 tr.excluded td a {color:var(--link)}
 .r4 tr.sel td {background:var(--sel-subtle)}
+.r4 tr.sel td {border-top:1px solid var(--sel-edge); border-bottom:1px solid var(--sel-edge)}
 .r4 tr.pinned td:first-child {box-shadow:inset 4px 0 0 var(--cmp-base)}
 .r4 tr.same td {color:var(--ink-3)}
 .r4 .why {font-size:12px; color:var(--ink-3)}
 .r4 .muted {color:var(--ink-3); font-size:12px}
-.r4 .nr {background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 4px,var(--fill) 4px,var(--fill) 8px);
-         color:var(--ink-3); font-size:12px}
+.r4 .nr {background:repeating-linear-gradient(45deg,var(--gap-fill),var(--gap-fill) 4px,var(--gap-fill2) 4px,var(--gap-fill2) 8px);
+         color:var(--gap-text); font-size:12px}
 .r4 tr.sel td.nr {background:repeating-linear-gradient(45deg,var(--sel-subtle),var(--sel-subtle) 4px,var(--sel-subtle2) 4px,var(--sel-subtle2) 8px)}
 .r4 .na {color:var(--ink-3); font-size:12px}
 .r4 .exp {font-style:italic; color:var(--hyp-text)}
@@ -121,7 +122,7 @@ CSS = """
 .r4 .sub {font-size:12px; color:var(--ink-3)}
 .r4 .ideas {border:1px dashed var(--hyp-line); border-radius:6px; padding:4px 10px; background:var(--hyp-fill)}
 .r4 .gapbox {border:1px solid var(--line); border-radius:6px; padding:4px 10px;
-             background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 6px,var(--fill) 6px,var(--fill) 12px)}
+             background:repeating-linear-gradient(45deg,var(--gap-fill),var(--gap-fill) 6px,var(--gap-fill2) 6px,var(--gap-fill2) 12px)}
 .r4 .stockbox {border:1px solid var(--have-border); border-radius:6px; padding:4px 10px; background:var(--have-faint)}
 .r4 .banner {background:var(--note-fill); border:1px solid var(--note-line); border-radius:6px; padding:4px 10px;
              margin:0 0 6px; font-size:13px}
@@ -138,8 +139,8 @@ CSS = """
 .r4 .rc {display:inline-block; white-space:normal; border:1px solid var(--line); border-radius:3px;
          padding:0 4px; margin:1px 2px 1px 0; font-size:12px; line-height:16px; background:var(--surface)}
 .r4 .rc-have {border-color:var(--have-border); color:var(--have-base); background:var(--have-subtle); font-weight:600}
-.r4 .rc-nr {background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 4px,var(--fill) 4px,var(--fill) 8px);
-            color:var(--ink-3)}
+.r4 .rc-nr {background:repeating-linear-gradient(45deg,var(--gap-fill),var(--gap-fill) 4px,var(--gap-fill2) 4px,var(--gap-fill2) 8px);
+            color:var(--gap-text)}
 .r4 .rc-exp {border-color:var(--hyp-border); color:var(--hyp-text); font-style:italic; background:var(--hyp-fill)}
 .r4 .rc-tested {border-color:var(--hyp-line); color:var(--hyp-deep); font-weight:600; background:var(--hyp-fill)}
 .r4.dense {font-size:13px; line-height:1.3}

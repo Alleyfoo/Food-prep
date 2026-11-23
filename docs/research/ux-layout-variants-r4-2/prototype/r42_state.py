@@ -61,7 +61,7 @@ LOCAL = ("pane", "cols", "depth", "diff", "answer", "graph", "tc", "tcx", "tcp",
 VARIANT = ("ov", "sheet", "pal")
 OV = {"a": "compact code", "b": "labelled summary", "c": "named roles"}
 SHEETS = {"full": "full", "dense": "dense"}
-PALS = ("peach", "white", "cool")      # colour world, see r42_palette
+PALS = ("peach", "white", "cool", "pantry")      # colour world, see r42_palette
 
 HAS = {"route": "a flavour route", "idea": "a Scout idea", "tested": "a tasting",
        "onhand": "a curated pairing on hand"}

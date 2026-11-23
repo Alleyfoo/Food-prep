@@ -28,6 +28,12 @@ identical screens (URL key `pal`):
   white   white page and surfaces; structure by thin cool lines; colour
           appears only where it means something
   cool    a faint blue-white page and fills, tied to the selection blue
+  pantry  the user's proposal (2026-11-23): food references again, but one
+          job per food - oat page, yogurt panels, pale sage filters, green
+          olive selection, parsley on hand, red cabbage locked, mustard
+          seed open dimensions, muted sage gaps. Jobs the proposal left
+          open take the same family: blueberry compare, beetroot trace,
+          olive links, sage lines and secondary text, no hue for hypotheses
 
 Every world: every text pair >= 4.5:1, every meaningful mark >= 3:1
 (tests/test_r42_palette.py), no translucent tints.
@@ -38,7 +44,7 @@ import colorsys
 from functools import lru_cache
 
 SEED = "#6F4102"          # the product's --filler-700; seed of the peach world only
-WORLDS = ("peach", "white", "cool")
+WORLDS = ("peach", "white", "cool", "pantry")
 DEFAULT_WORLD = "white"
 NEUTRAL_MIN_SAT = 20      # peach world: below this a tone reads as grey
 
@@ -135,6 +141,56 @@ def _jobs(name: str, *, page: str, fill: str, fill2: str, fill_soft: str,
             "circle_tab": ink2, "primary": C["sel"]["base"]}
 
 
+def _extras(w: dict) -> dict:
+    """Panel, gap, selected-row edge and circle roles, derived for worlds
+    that do not set them (the jobs worlds and peach)."""
+    C = w["C"]
+    w.setdefault("panel", w["page"])
+    w.setdefault("gap", {"fill": w["fill_soft"], "fill2": w["fill"], "text": w["secondary"]})
+    w.setdefault("sel_edge", C["sel"]["subtle"])        # no edge: the fill carries it
+    w.setdefault("circle", {
+        "canvas": w["page"],
+        "open-fill": w["surface"], "open-edge": w["line_strong"], "open-label": w["ink2"],
+        "prov-fill": w["fill2"], "prov-edge": w["secondary"], "prov-label": w["secondary"],
+        "lock-fill": C["sel"]["subtle"], "lock-edge": C["sel"]["base"], "lock-calm": C["sel"]["border"],
+        "lock-label": C["sel"]["deep"],
+        "exp-fill": C["sel"]["base"], "exp-edge": C["sel"]["deep"], "exp-label": C["sel"]["deep"],
+    })
+    return w
+
+
+def _pantry() -> dict:
+    """The user's proposal, exactly where it gives a colour; the rest from
+    the same family (see the module docstring)."""
+    ink, ink2 = "#24291D", "#515A43"
+    page, panel, fill = "#F5F5EB", "#FFFDF5", "#E9ECD9"
+    fill2, line = hsl(70, 24, 84), hsl(70, 20, 80)
+    sel = ramp(66, 41, 29, fill_s=54, fill_l=85)
+    sel.update({"subtle": "#E9EDC2", "base": "#5F692C", "subtle2": hsl(66, 45, 79)})
+    have = ramp(150, 34, 25, fill_s=27, fill_l=89)
+    have.update({"subtle": "#DCEBDF", "base": "#29543E"})
+    C = {"sel": sel, "have": have,
+         "cmp": ramp(218, 42, 36, fill_s=40, fill_l=91),       # blueberry
+         "trace": ramp(345, 48, 36, fill_s=42, fill_l=91)}     # beetroot
+    C["diff"] = C["cmp"]
+    secondary = passing(75, 14, [fill, fill2, sel["subtle2"], sel["subtle"], "#EBEDE4", hsl(72, 16, 87)], 46)
+    gap = {"fill": "#EBEDE4", "fill2": hsl(72, 16, 87), "text": "#535C4A"}
+    return {"name": "pantry", "hue": 70, "ink": ink, "ink2": ink2, "secondary": secondary,
+            "page": page, "surface": panel, "panel": panel, "fill": fill, "fill2": fill2,
+            "fill_soft": page, "line": line, "line_strong": hsl(72, 14, 50),
+            "link": sel["base"], "C": C,
+            "hyp": {"text": ink2, "deep": ink, "border": secondary, "line": ink2, "fill": panel},
+            "note": {"fill": page, "line": line},
+            "node": {"state": panel, "route": panel, "source": fill, "pairing": panel},
+            "circle_tab": ink2, "primary": sel["base"], "gap": gap, "sel_edge": "#5F692C",
+            "circle": {"canvas": panel,
+                       "open-fill": "#F1E5AE", "open-edge": "#674C14", "open-label": "#674C14",
+                       "prov-fill": fill, "prov-edge": ink2, "prov-label": ink2,
+                       "lock-fill": "#ECDFF0", "lock-edge": "#633F68", "lock-calm": hsl(288, 22, 70),
+                       "lock-label": "#633F68",
+                       "exp-fill": "#674C14", "exp-edge": hsl(40, 67, 16), "exp-label": "#674C14"}}
+
+
 def _white() -> dict:
     return _jobs("white", page="#ffffff", fill=hsl(220, 22, 96.5), fill2=hsl(220, 18, 92),
                  fill_soft=hsl(220, 25, 98), line=hsl(220, 16, 87), line_strong=hsl(220, 12, 62))
@@ -147,7 +203,8 @@ def _cool() -> dict:
 
 @lru_cache(maxsize=None)
 def world(name: str = DEFAULT_WORLD) -> dict:
-    return {"peach": _peach, "white": _white, "cool": _cool}.get(name, _white)()
+    return _extras({"peach": _peach, "white": _white, "cool": _cool,
+                    "pantry": _pantry}.get(name, _white)())
 
 
 @lru_cache(maxsize=None)
@@ -156,12 +213,14 @@ def tokens(name: str = DEFAULT_WORLD) -> dict[str, str]:
     t = {"ink": w["ink"], "ink-2": w["ink2"], "ink-3": w["secondary"], "page": w["page"],
          "surface": w["surface"], "fill": w["fill"], "fill-2": w["fill2"], "fill-soft": w["fill_soft"],
          "line": w["line"], "line-strong": w["line_strong"], "link": w["link"],
-         "circle-tab": w["circle_tab"]}
+         "circle-tab": w["circle_tab"], "panel": w["panel"], "sel-edge": w["sel_edge"]}
     for k, d in w["C"].items():
         t.update({f"{k}-{v}": c for v, c in d.items()})
     t.update({f"hyp-{k}": v for k, v in w["hyp"].items()})
     t.update({f"note-{k}": v for k, v in w["note"].items()})
     t.update({f"node-{k}": v for k, v in w["node"].items()})
+    t.update({f"gap-{k}": v for k, v in w["gap"].items()})
+    t.update({f"circle-{k}": v for k, v in w["circle"].items()})
     return t
 
 
@@ -185,7 +244,13 @@ def text_pairs(name: str = DEFAULT_WORLD) -> list[tuple[str, str, str]]:
              ("trace tag", "trace-base", "trace-subtle"), ("differs tag", "diff-base", "diff-subtle"),
              ("on hand", "have-base", "surface"), ("on hand chip", "have-base", "have-subtle"),
              ("on hand, selected row", "have-base", "sel-subtle"),
-             ("remove link in chip", "diff-base", "surface"), ("note banner", "ink", "note-fill")]
+             ("remove link in chip", "diff-base", "surface"), ("note banner", "ink", "note-fill"),
+             ("not recorded", "gap-text", "gap-fill"), ("not recorded, hatch", "gap-text", "gap-fill2"),
+             ("body text on panel", "ink", "panel"), ("secondary text on panel", "ink-3", "panel"),
+             ("circle label, open", "circle-open-label", "circle-canvas"),
+             ("circle label, provided", "circle-prov-label", "circle-canvas"),
+             ("circle label, locked", "circle-lock-label", "circle-canvas"),
+             ("circle label, expanded", "circle-exp-label", "circle-canvas")]
     return [(n, t[f], t[b]) for n, f, b in pairs]
 
 

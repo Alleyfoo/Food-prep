@@ -25,7 +25,8 @@ import r42_state as S  # noqa: E402
 import r42_views as V  # noqa: E402
 
 HEX = re.compile(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b")
-NEW = ["white", "cool"]
+NEW = ["white", "cool"]          # cool-neutral structure
+JOBS = ["white", "cool", "pantry"]   # one job per colour
 TEXT = [(w, *pair) for w in P.WORLDS for pair in P.text_pairs(w)]
 MARKS = [(w, *pair) for w in P.WORLDS for pair in P.mark_pairs(w)]
 
@@ -57,7 +58,7 @@ def test_structure_carries_no_food_tint(world):
         assert s < 50, (world, key)                       # structure stays quiet
 
 
-@pytest.mark.parametrize("world", NEW)
+@pytest.mark.parametrize("world", JOBS)
 def test_one_job_per_hue(world):
     """selection, compare, trace and on hand each have their own hue, far
     enough apart to tell apart; hypotheses carry no hue at all."""
@@ -74,10 +75,24 @@ def test_one_job_per_hue(world):
     assert t["link"] == t["sel-base"]                        # links: "where you act"
 
 
-@pytest.mark.parametrize("world", NEW)
+@pytest.mark.parametrize("world", JOBS)
 def test_selected_row_stands_out_from_the_page(world):
+    """By its fill, or (pantry, where olive and oat are close) by its edge."""
     t = P.tokens(world)
-    assert P.contrast(t["sel-subtle"], t["page"]) >= 1.15
+    assert (P.contrast(t["sel-subtle"], t["page"]) >= 1.15
+            or P.contrast(t["sel-edge"], t["sel-subtle"]) >= 3.0)
+
+
+def test_pantry_uses_the_proposed_colours_exactly():
+    t = {k: v.lower() for k, v in P.tokens("pantry").items()}
+    proposed = {"page": "#f5f5eb", "panel": "#fffdf5", "ink": "#24291d", "fill": "#e9ecd9",
+                "ink-2": "#515a43", "sel-subtle": "#e9edc2", "sel-edge": "#5f692c",
+                "have-subtle": "#dcebdf", "have-base": "#29543e",
+                "circle-lock-fill": "#ecdff0", "circle-lock-edge": "#633f68",
+                "circle-open-fill": "#f1e5ae", "circle-open-edge": "#674c14",
+                "gap-fill": "#ebede4", "gap-text": "#535c4a"}
+    for k, v in proposed.items():
+        assert t[k] == v, k
 
 
 def test_peach_reference_is_unchanged_and_has_no_grey():

@@ -16,7 +16,7 @@
 | `ov=b` | Overview in R4.1's labelled summary (default) |
 | `ov=c` | Overview with one named token per needed role and its status |
 | `sheet=dense` | Fact sheet with the same facts, tighter (default `full` = R4.1) |
-| `pal=white\|cool\|peach` | Colour world (default white; peach is the previous palette, for reference) |
+| `pal=white\|cool\|pantry\|peach` | Colour world (default white; pantry is the user's proposal; peach is the previous palette, for reference) |
 | `pane=circle` | Not a condition: the product's **Taste Circle** builder as a fourth pane, around the record in detail |
 
 **What the counts already say** ([evaluation.md](evaluation.md)):
@@ -41,7 +41,7 @@
 - no hue for hypotheses, which are marked by outline and weight instead;
 - cool, quiet neutrals for structure.
 
-Three colour worlds can be compared with `pal=white` (the default), `pal=cool`, or `pal=peach` (the previous palette). The circle follows the same roles. Every text pair passes WCAG AA in every world.
+Colour worlds can be compared with `pal=white` (the default), `pal=cool`, `pal=pantry` (the user's proposal: oat, yogurt, sage, olive, parsley, red cabbage, mustard seed, one food per job) or `pal=peach` (the previous palette). The circle follows the same roles. Every text pair passes WCAG AA in every world.
 
 **One correction to R4 and R4.1 found on the way.** The tasting record's *observation* ("works… garlic confit on the same state was clearly better, so brown butter is a real option here but not the best one") was never shown, so the sheet said only "works". R4.2 shows it in every condition. A test covers it.
 

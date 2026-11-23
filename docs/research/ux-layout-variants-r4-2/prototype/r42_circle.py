@@ -99,9 +99,11 @@ def node_state(st: Mapping[str, Any], dim: str, prov: set[str]) -> str:
 
 def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
     """Colour every node and edge by its job, from the world's tokens:
-    open = white with an outline, provided = neutral fill, locked = the
-    selection blue, expanded = solid blue, an option you have on hand =
-    the on-hand green. When one dimension is fanned out, the others step
+    each state takes the world's circle role (white/cool: open = white
+    with an outline, provided = neutral fill, locked = the selection blue,
+    expanded = solid blue; pantry: open = mustard seed, provided = pale
+    sage, locked = red cabbage), and an option you have on hand takes
+    the on-hand colour. When one dimension is fanned out, the others step
     back to lighter versions of the same roles."""
     T = P.tokens(st["pal"])
     have = set(st["have"])
@@ -111,17 +113,19 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
         n = dict(n)
         kind = n["id"].split(":", 1)[0]
         if kind == "comp":
-            n["color"], n["font"] = _paint(T["surface"], T["ink"], T["ink"]), {**n.get("font", {}), "color": T["ink"]}
+            n["color"], n["font"] = _paint(T["circle-canvas"], T["ink"], T["ink"]), {**n.get("font", {}), "color": T["ink"]}
         elif kind == "dim":
             dim = n["id"][4:]
             role = node_state(st, dim, prov)
             back = fanned and role != "expanded"
             state_of[n["id"]] = role
+            c = lambda k: T[f"circle-{k}"]  # noqa: E731
             bg, line, label, width = {
-                "open": (T["surface"], T["line"] if back else T["line-strong"], T["ink-3"] if back else T["ink-2"], 1),
-                "provided": (T["fill-2"], T["fill-2"] if back else T["ink-3"], T["ink-3"], 1),
-                "locked": (T["sel-subtle"], T["sel-border"] if back else T["sel-base"], T["sel-deep"], 2),
-                "expanded": (T["sel-base"], T["sel-deep"], T["sel-deep"], 3),
+                "open": (c("open-fill"), T["line"] if back else c("open-edge"),
+                         T["ink-3"] if back else c("open-label"), 1),
+                "provided": (c("prov-fill"), c("prov-fill") if back else c("prov-edge"), c("prov-label"), 1),
+                "locked": (c("lock-fill"), c("lock-calm") if back else c("lock-edge"), c("lock-label"), 2),
+                "expanded": (c("exp-fill"), c("exp-edge"), c("exp-label"), 3),
             }[role]
             n["color"] = _paint(bg, line, T["ink"])
             n["borderWidth"] = width
@@ -143,8 +147,8 @@ def style_by_role(data: dict, st: Mapping[str, Any], prov: set[str]) -> dict:
         if role is None:                              # dimension -> option (the fan)
             col, w = T["line-strong"], 1
         else:
-            col, w = {"open": (T["line"], 1), "provided": (T["ink-3"], 1.5),
-                      "locked": (T["sel-base"], 2), "expanded": (T["sel-base"], 2)}[role]
+            col, w = {"open": (T["line"], 1), "provided": (T["circle-prov-edge"], 1.5),
+                      "locked": (T["circle-lock-edge"], 2), "expanded": (T["circle-exp-fill"], 2)}[role]
         e["color"], e["width"] = {"color": col}, w
         out_edges.append(e)
     return {"nodes": out_nodes, "edges": out_edges}

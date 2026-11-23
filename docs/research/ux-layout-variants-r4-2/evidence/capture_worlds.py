@@ -4,9 +4,9 @@
     py -3.11 docs/research/ux-layout-variants-r4-2/evidence/capture_worlds.py
 
 Only the URL key `pal` differs between shots: peach (the previous, food-
-coloured palette), white, cool. Writes screenshots/worlds/<state>/<pal>.png
-and screenshots/worlds/side-by-side/<state>.png (peach, white, cool, left
-to right).
+coloured palette), white, cool, pantry. Writes screenshots/worlds/<state>/<pal>.png
+and screenshots/worlds/side-by-side/<state>.png (peach, white, cool,
+pantry, left to right).
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "screenshots" / "worlds"
 BASE = "http://localhost:8543/?"
-WORLDS = ("peach", "white", "cool")
+WORLDS = ("peach", "white", "cool", "pantry")
 CTX = ("ingredient=broccoli&have=yogurt,lemon,garlic&rec=roasted_broccoli_component"
        "&cmp=roasted_broccoli_component,steamed_broccoli_component&trace=ingredient:lemon&ov=c")
 STATES = {

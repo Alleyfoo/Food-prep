@@ -62,7 +62,11 @@ T = P.tokens(url["pal"])
 st.markdown(f"<style>.stApp, [data-testid=stHeader] {{background:{T['page']}}}"
             f" .stApp {{color:{T['ink']}}}"
             f" [data-baseweb=select] > div {{background:{T['fill']}; border-color:{T['line']}}}"
-            f" [data-baseweb=tag] {{background:{T['have-base']} !important}}</style>",
+            f" [data-baseweb=tag] {{background:{T['have-base']} !important}}"
+            # panels (the two scrolling panes) and the circle canvas
+            f" .st-key-r42-left, .st-key-r42-right {{background:{T['panel']}; border-radius:8px}}"
+            f" .st-key-r42-left {{padding:0 6px}} .st-key-r42-right {{padding:0 8px}}"
+            f" iframe[title*='r42_taste_circle'] {{background:{T['circle-canvas']}; border-radius:8px}}</style>",
             unsafe_allow_html=True)
 CSS = V.css(url["pal"])
 
@@ -104,12 +108,12 @@ wide = ctx["cols"] == "matrix"
 left, right = st.columns([7, 5] if wide else [1, 1], gap="medium")
 full = st.query_params.get("full") == "1"   # captures only: no inner scrolling
 H = "content" if full else 640
-with left.container(height=H, border=False):
+with left.container(height=H, border=False, key="r42-left"):
     st.html(CSS + '<div class="r4">' + V.overview_html(m, ctx) + "</div>")
 with right:
     pane = S.pane(ctx)
     st.html(CSS + C.CSS + V.tabs_html(m, ctx, pane))
-right = right.container(height="content" if full else H - 44, border=False)
+right = right.container(height="content" if full else H - 44, border=False, key="r42-right")
 with right:
     if pane == "circle":
         # The product's Taste Circle, built around the record in detail. A
