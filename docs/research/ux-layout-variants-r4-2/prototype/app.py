@@ -31,6 +31,7 @@ import r4_model as M  # noqa: E402
 import r42_state as S  # noqa: E402
 import r42_views as V  # noqa: E402
 import r42_circle as C  # noqa: E402
+import r42_palette as P  # noqa: E402
 from foodprep.ui.taste_circle import taste_circle_map  # noqa: E402
 
 _q = st.query_params.to_dict()
@@ -38,7 +39,14 @@ st.set_page_config(page_title=f"R4.2 · {_q.get('ov', 'b').upper()} · {_q.get('
                    initial_sidebar_state="collapsed")
 st.markdown("<style>[data-testid=stSidebar], [data-testid=stSidebarCollapsedControl] {display:none}"
             " .block-container {padding-top:3.2rem; padding-left:1.5rem; padding-right:1.5rem;"
-            " padding-bottom:0.5rem}</style>",
+            " padding-bottom:0.5rem}"
+            # Page tint and ink from the derived palette (r42_palette): an
+            # off-white, seed-tinted page and near-black text, not #000 on #fff.
+            f" .stApp, [data-testid=stHeader] {{background:{P.PAGE}}}"
+            f" .stApp {{color:{P.INK}}}"
+            # Inputs on the same tinted fill; on-hand chips in the on-hand green
+            f" [data-baseweb=select] > div {{background:{P.TOKENS['fill']}; border-color:{P.TOKENS['fill']}}}"
+            f" [data-baseweb=tag] {{background:{P.TOKENS['have-base']} !important}}</style>",
             unsafe_allow_html=True)
 
 

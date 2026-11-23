@@ -32,6 +32,11 @@
 - Records without a sensory profile (raw broccoli, broccoli soup base) cannot anchor a circle, and the pane says so.
 - The overview encodings are unchanged, so the measurements in evaluation.md still hold.
 
+**Colours and tint are derived, not picked** ([palette.md](palette.md)). About 60 hand-picked colours were replaced by tokens derived from the product's primary, `#6F4102`, using the dembrandt-skills palette method.
+- The page now has an off-white tint and near-black text, and the greys are tinted with the seed.
+- Each concept has one hue at the seed's weight.
+- Every text pair passes WCAG AA: the lowest is 4.54:1, against 2.47:1 before.
+
 **One correction to R4 and R4.1 found on the way.** The tasting record's *observation* ("works… garlic confit on the same state was clearly better, so brown butter is a real option here but not the best one") was never shown, so the sheet said only "works". R4.2 shows it in every condition. A test covers it.
 
 | Document | Contents |
@@ -39,6 +44,7 @@
 | [variants.md](variants.md) | The three overview encodings and the two sheet densities, side by side, and what was held fixed |
 | [evaluation.md](evaluation.md) | Mechanical comparison: rows in view, row height, words, legend, tooltip-only names, sheet length |
 | [session-plan.md](session-plan.md) | Three-person session: Latin square, scan and understand tasks, sheet tasks, record sheet, decision rules |
+| [palette.md](palette.md) | Derived palette: method, tokens, contrast before and after, departures from the skill |
 | [answer-key.md](answer-key.md) | Ground truth for the scan and understand tasks, generated from the model |
 
 **Run**
@@ -57,7 +63,7 @@ For example: `http://localhost:8543/?ingredient=potato&have=dill,olive_oil&ov=c&
 | `evidence/answer_key.py` | `answer-key.md` |
 | `evidence/capture_circle.py` | `screenshots/circle/`: the circle pane empty, with Sour open, with a dish, cabbage, and a record with no profile |
 
-**Tests.** `tests/test_r42_variants.py` (18) and `tests/test_r42_circle.py` (10). They cover:
+**Tests.** `tests/test_r42_variants.py` (18), `tests/test_r42_circle.py` (10) and `tests/test_r42_palette.py` (33). They cover:
 - the default condition equals R4.1, apart from the observation line;
 - every variant carries the same facts in every row;
 - only A uses glyphs and a legend;
@@ -66,4 +72,5 @@ For example: `http://localhost:8543/?ingredient=potato&have=dill,olive_oil&ov=c&
 - unknown conditions fall back to R4.1;
 - the dense sheet keeps every fact and link;
 - the tasting observation is shown in both sheets;
-- the circle pane: the product's click rules, the URL-held dish and its round trip, a fresh circle for a new subject, every dimension named in the read-out, links keeping the condition, and records with no profile.
+- the circle pane: the product's click rules, the URL-held dish and its round trip, a fresh circle for a new subject, every dimension named in the read-out, links keeping the condition, and records with no profile;
+- the palette: every text pair at least 4.5:1, marks at least 3:1, no hex colours or translucent tints in the CSS, neutrals tinted with the seed, every concept at the seed's weight.

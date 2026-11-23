@@ -36,6 +36,7 @@ from __future__ import annotations
 from html import escape as esc
 from typing import Any
 
+import r42_palette as P
 import r42_state as S
 from r4_model import (CONFIDENCE_FIELD_LABEL, KNOWLEDGE_LABEL, gaps, linked, of,
                       pretty, shared_gaps, state_by)
@@ -52,95 +53,96 @@ GRAPH_LIMIT = 20   # relationships; above this the graph is collapsed by default
 #   not recorded      hatched + the words "not recorded"
 CSS = """
 <style>
-.r4 {font-size:14px; line-height:1.4; color:#1f2328}
+""" + P.css_vars() + """
+.r4 {font-size:14px; line-height:1.4; color:var(--ink)}
 .r4 table.ov {font-size:13px}
-.r4 a {color:#1a4f8b; text-decoration:none} .r4 a:hover {text-decoration:underline}
+.r4 a {color:var(--link); text-decoration:none} .r4 a:hover {text-decoration:underline}
 .r4 table {border-collapse:collapse; width:100%; margin:4px 0 12px}
-.r4 th {text-align:left; font-weight:600; background:#f3f1ec; border-bottom:2px solid #d8d4cb;
+.r4 th {text-align:left; font-weight:600; background:var(--fill); border-bottom:2px solid var(--line);
         padding:4px 7px; font-size:13px; vertical-align:bottom}
-.r4 td {border-bottom:1px solid #e6e2da; padding:4px 7px; vertical-align:top;
+.r4 td {border-bottom:1px solid var(--fill-2); padding:4px 7px; vertical-align:top;
         overflow-wrap:normal; word-break:normal; hyphens:manual}
-.r4 thead {position:sticky; top:0; z-index:3; background:#f3f1ec; box-shadow:0 1px 0 #d8d4cb}
-.r4 thead th {background:#f3f1ec}
-.r4 thead tr.legendrow th {font-weight:400; border-bottom:1px solid #e1ddd3; background:#faf8f4}
+.r4 thead {position:sticky; top:0; z-index:3; background:var(--fill); box-shadow:0 1px 0 var(--line)}
+.r4 thead th {background:var(--fill)}
+.r4 thead tr.legendrow th {font-weight:400; border-bottom:1px solid var(--line); background:var(--fill-soft)}
 .r4 .nm, .r4 table.trace td a {white-space:nowrap}
-.r4 tr.excluded td {color:#9a958c; background:#f7f6f3}
-.r4 tr.excluded td a {color:#7f8ea3}
-.r4 tr.sel td {background:#fff4d1}
-.r4 tr.pinned td:first-child {box-shadow:inset 4px 0 0 #1a4f8b}
-.r4 tr.same td {color:#8d877c}
-.r4 .why {font-size:12px; color:#7a6a55}
-.r4 .muted {color:#6b665d; font-size:12px}
-.r4 .nr {background:repeating-linear-gradient(45deg,#faf9f6,#faf9f6 4px,#efece5 4px,#efece5 8px);
-         color:#5f5a52; font-size:12px}
-.r4 tr.sel td.nr {background:repeating-linear-gradient(45deg,#fff4d1,#fff4d1 4px,#efe3bf 4px,#efe3bf 8px)}
-.r4 .na {color:#9a958c; font-size:12px}
-.r4 .exp {font-style:italic; color:#7a5510}
-.r4 .gen {font-style:italic; color:#7a5510}
-.r4 .have {color:#1f6b35; font-weight:600}
-.r4 .lbl {font-size:11px; color:#6b665d; margin-left:3px}
-.r4 .lbl.have {color:#1f6b35; font-weight:400}
-.r4 .tested {color:#5c3f08; font-weight:600}
-.r4 .ctx {background:#f6f4ef; border:1px solid #e1ddd3; border-radius:6px; padding:6px 10px;
+.r4 tr.excluded td {color:var(--ink-3); background:var(--fill)}
+.r4 tr.excluded td a {color:var(--link)}
+.r4 tr.sel td {background:var(--sel-subtle)}
+.r4 tr.pinned td:first-child {box-shadow:inset 4px 0 0 var(--cmp-base)}
+.r4 tr.same td {color:var(--ink-3)}
+.r4 .why {font-size:12px; color:var(--ink-3)}
+.r4 .muted {color:var(--ink-3); font-size:12px}
+.r4 .nr {background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 4px,var(--fill) 4px,var(--fill) 8px);
+         color:var(--ink-3); font-size:12px}
+.r4 tr.sel td.nr {background:repeating-linear-gradient(45deg,var(--sel-subtle),var(--sel-subtle) 4px,var(--sel-subtle2) 4px,var(--sel-subtle2) 8px)}
+.r4 .na {color:var(--ink-3); font-size:12px}
+.r4 .exp {font-style:italic; color:var(--sel-base)}
+.r4 .gen {font-style:italic; color:var(--sel-base)}
+.r4 .have {color:var(--have-base); font-weight:600}
+.r4 .lbl {font-size:11px; color:var(--ink-3); margin-left:3px}
+.r4 .lbl.have {color:var(--have-base); font-weight:400}
+.r4 .tested {color:var(--sel-deep); font-weight:600}
+.r4 .ctx {background:var(--fill-soft); border:1px solid var(--line); border-radius:6px; padding:6px 10px;
           margin:0 0 8px; font-size:13px}
-.r4 .ctx b {font-weight:600; color:#4a463f}
-.r4 .chip {display:inline-block; border:1px solid #cfc9bd; border-radius:10px; padding:0 7px;
-           margin:1px 3px 1px 0; background:#fff; white-space:nowrap}
-.r4 .chip a {color:#8a3b3b; margin-left:4px}
-.r4 .chip.c-sel {border-color:#d9b44a; background:#fff4d1}
-.r4 .chip.c-cmp {border-color:#1a4f8b; background:#eaf1fa}
-.r4 .chip.c-trace {border-color:#6b4fa0; background:#f2eefa}
+.r4 .ctx b {font-weight:600; color:var(--ink-2)}
+.r4 .chip {display:inline-block; border:1px solid var(--line-strong); border-radius:10px; padding:0 7px;
+           margin:1px 3px 1px 0; background:var(--surface); white-space:nowrap}
+.r4 .chip a {color:var(--diff-base); margin-left:4px}
+.r4 .chip.c-sel {border-color:var(--sel-border); background:var(--sel-subtle)}
+.r4 .chip.c-cmp {border-color:var(--cmp-border); background:var(--cmp-subtle)}
+.r4 .chip.c-trace {border-color:var(--trace-border); background:var(--trace-subtle)}
 .r4 .tag {display:inline-block; font-size:11px; line-height:15px; border-radius:3px; padding:0 4px;
           margin:1px 3px 0 0; white-space:nowrap; border:1px solid}
-.r4 .t-sel {background:#fff4d1; border-color:#d9b44a; color:#6b5210}
-.r4 .t-cmp {background:#eaf1fa; border-color:#1a4f8b; color:#1a4f8b; font-weight:600}
-.r4 .t-trace {background:#f2eefa; border-color:#6b4fa0; color:#4f3880}
-.r4 .t-diff {background:#fbeeee; border-color:#b56b6b; color:#8a3b3b}
+.r4 .t-sel {background:var(--sel-subtle); border-color:var(--sel-border); color:var(--sel-base)}
+.r4 .t-cmp {background:var(--cmp-subtle); border-color:var(--cmp-border); color:var(--cmp-base); font-weight:600}
+.r4 .t-trace {background:var(--trace-subtle); border-color:var(--trace-border); color:var(--trace-base)}
+.r4 .t-diff {background:var(--diff-subtle); border-color:var(--diff-border); color:var(--diff-base)}
 .r4 .acts {font-size:12px; margin-top:2px}
 .r4 .acts a {margin-right:8px}
 .r4 .tabs a, .r4 .tabs span {display:inline-block; padding:3px 12px; margin-right:4px;
-          border:1px solid #d8d4cb; border-bottom:none; border-radius:6px 6px 0 0; background:#f3f1ec}
-.r4 .tabs span.on {background:#fff; font-weight:600}
-.r4 .tabs {border-bottom:1px solid #d8d4cb; margin:0 0 8px}
-.r4 .tabs .k-detail {border-top:3px solid #d9b44a} .r4 .tabs .k-compare {border-top:3px solid #1a4f8b}
-.r4 .tabs .k-trace {border-top:3px solid #6b4fa0}
+          border:1px solid var(--line); border-bottom:none; border-radius:6px 6px 0 0; background:var(--fill)}
+.r4 .tabs span.on {background:var(--surface); font-weight:600}
+.r4 .tabs {border-bottom:1px solid var(--line); margin:0 0 8px}
+.r4 .tabs .k-detail {border-top:3px solid var(--sel-mid)} .r4 .tabs .k-compare {border-top:3px solid var(--cmp-base)}
+.r4 .tabs .k-trace {border-top:3px solid var(--trace-base)}
 .r4 h3 {margin:2px 0 6px; font-size:18px}
-.r4 h4 {clear:both; margin:12px 0 3px; font-size:14px; color:#3b3833; scroll-margin-top:64px}
-.r4 h4 .n {color:#8d877c; font-weight:400; margin-right:4px}
-.r4 h5 {margin:8px 0 2px; font-size:13px; color:#4a463f}
-.r4 .band {margin:16px 0 0; padding:2px 0; border-bottom:2px solid #d8d4cb; font-size:12px;
-           letter-spacing:.04em; text-transform:uppercase; color:#6b665d; font-weight:600}
-.r4 .index {position:sticky; top:0; z-index:4; background:#fffdf9; border:1px solid #e1ddd3;
+.r4 h4 {clear:both; margin:12px 0 3px; font-size:14px; color:var(--ink-2); scroll-margin-top:64px}
+.r4 h4 .n {color:var(--ink-3); font-weight:400; margin-right:4px}
+.r4 h5 {margin:8px 0 2px; font-size:13px; color:var(--ink-2)}
+.r4 .band {margin:16px 0 0; padding:2px 0; border-bottom:2px solid var(--line); font-size:12px;
+           letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.r4 .index {position:sticky; top:0; z-index:4; background:var(--surface); border:1px solid var(--line);
             border-radius:6px; padding:4px 8px; margin:0 0 6px; font-size:12px}
-.r4 .index b {color:#6b665d; font-weight:600; margin-right:4px}
+.r4 .index b {color:var(--ink-3); font-weight:600; margin-right:4px}
 .r4 .index a {margin-right:9px; white-space:nowrap}
 .r4 .index .grp {display:inline-block; margin-right:10px}
 .r4 dl {margin:0; display:grid; grid-template-columns:170px 1fr; gap:2px 10px}
-.r4 dt {font-weight:600; color:#4a463f} .r4 dd {margin:0}
-.r4 .sub {font-size:12px; color:#6b665d}
-.r4 .ideas {border:1px dashed #b07d1a; border-radius:6px; padding:4px 10px; background:#fffdf7}
-.r4 .gapbox {border:1px solid #d8d4cb; border-radius:6px; padding:4px 10px;
-             background:repeating-linear-gradient(45deg,#fbfaf7,#fbfaf7 6px,#f3f0ea 6px,#f3f0ea 12px)}
-.r4 .stockbox {border:1px solid #b9d3bf; border-radius:6px; padding:4px 10px; background:#f5faf6}
-.r4 .banner {background:#fbf6e9; border:1px solid #e8d9ad; border-radius:6px; padding:4px 10px;
+.r4 dt {font-weight:600; color:var(--ink-2)} .r4 dd {margin:0}
+.r4 .sub {font-size:12px; color:var(--ink-3)}
+.r4 .ideas {border:1px dashed var(--sel-mid); border-radius:6px; padding:4px 10px; background:var(--sel-faint)}
+.r4 .gapbox {border:1px solid var(--line); border-radius:6px; padding:4px 10px;
+             background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 6px,var(--fill) 6px,var(--fill) 12px)}
+.r4 .stockbox {border:1px solid var(--have-border); border-radius:6px; padding:4px 10px; background:var(--have-faint)}
+.r4 .banner {background:var(--sel-faint); border:1px solid var(--sel-border); border-radius:6px; padding:4px 10px;
              margin:0 0 6px; font-size:13px}
-.r4 .legend {font-size:12px; color:#555; margin:2px 0 6px}
+.r4 .legend {font-size:12px; color:var(--ink-3); margin:2px 0 6px}
 .r4 .num {text-align:right; font-variant-numeric:tabular-nums}
-.r4 tr.grp td {background:#faf8f4; font-weight:600; color:#3b3833}
+.r4 tr.grp td {background:var(--fill-soft); font-weight:600; color:var(--ink-2)}
 .r4 tr.grp td .muted {font-weight:400}
-.r4 details summary {cursor:pointer; color:#1a4f8b; font-size:12px}
+.r4 details summary {cursor:pointer; color:var(--link); font-size:12px}
 .r4 .tscroll {overflow-x:auto; max-width:100%}
 .r4 .tscroll table.trace {width:auto; min-width:100%}
-.r4 table.trace td.rep a {color:#9aa6b6}
+.r4 table.trace td.rep a {color:var(--ink-3)}
 .r4 table.trace td.src {min-width:12em}
 .r4 .dots {letter-spacing:1px; font-size:13px}
-.r4 .rc {display:inline-block; white-space:normal; border:1px solid #d8d4cb; border-radius:3px;
-         padding:0 4px; margin:1px 2px 1px 0; font-size:12px; line-height:16px; background:#fff}
-.r4 .rc-have {border-color:#8fbf9b; color:#1f6b35; background:#f3faf5; font-weight:600}
-.r4 .rc-nr {background:repeating-linear-gradient(45deg,#faf9f6,#faf9f6 4px,#efece5 4px,#efece5 8px);
-            color:#5f5a52}
-.r4 .rc-exp {border-color:#d9c08a; color:#7a5510; font-style:italic; background:#fffdf7}
-.r4 .rc-tested {border-color:#c7a25a; color:#5c3f08; font-weight:600; background:#fffaf0}
+.r4 .rc {display:inline-block; white-space:normal; border:1px solid var(--line); border-radius:3px;
+         padding:0 4px; margin:1px 2px 1px 0; font-size:12px; line-height:16px; background:var(--surface)}
+.r4 .rc-have {border-color:var(--have-border); color:var(--have-base); background:var(--have-subtle); font-weight:600}
+.r4 .rc-nr {background:repeating-linear-gradient(45deg,var(--fill-soft),var(--fill-soft) 4px,var(--fill) 4px,var(--fill) 8px);
+            color:var(--ink-3)}
+.r4 .rc-exp {border-color:var(--sel-border); color:var(--sel-base); font-style:italic; background:var(--sel-faint)}
+.r4 .rc-tested {border-color:var(--sel-mid); color:var(--sel-deep); font-weight:600; background:var(--sel-faint)}
 .r4.dense {font-size:13px; line-height:1.3}
 .r4.dense td, .r4.dense th {padding:2px 5px}
 .r4.dense table {margin:2px 0 6px}
@@ -151,8 +153,8 @@ CSS = """
 .r4.dense dl.dl4 dd.w {grid-column:2 / span 3}
 .r4.dense dl.dl4 dt.w {grid-column:1}
 .r4 table.ov.sum td:first-child {min-width:15em}
-.r4 .obs {font-size:12px; color:#4a463f; margin-top:2px}
-.r4 .graphnote {border:1px solid #e1ddd3; border-radius:6px; background:#faf8f4; padding:6px 10px;
+.r4 .obs {font-size:12px; color:var(--ink-2); margin-top:2px}
+.r4 .graphnote {border:1px solid var(--line); border-radius:6px; background:var(--fill-soft); padding:6px 10px;
                 margin:4px 0 8px; font-size:13px}
 </style>
 """
@@ -1402,24 +1404,24 @@ def trace_dot(m: dict, st: dict) -> str:
     f = S.trace_focus(st)
     focus_id = _node(*f) if f else ""
     lines = ['digraph G {', 'rankdir=LR; bgcolor="transparent"; nodesep=0.12; ranksep=0.35; size="7.2,6";',
-             'node [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#9aa5b4", '
+             'node [shape=box, style="rounded,filled", fillcolor="@surface@", color="@line-strong@", '
              'fontname="Helvetica", fontsize=11, margin="0.08,0.03"];',
-             'edge [color="#7d8796", fontname="Helvetica", fontsize=9, fontcolor="#5b5f66"];']
-    shapes = {"state": 'fillcolor="#eef2f7"', "role": 'shape=ellipse, fillcolor="#f6f4ef"',
-              "route": 'shape=hexagon, fillcolor="#f1f6ee"', "source": 'shape=note, fillcolor="#f8f6f0"',
-              "gap": 'style="rounded,dashed", color="#b8b3aa", fontcolor="#6b665d"',
-              "pairing": 'fillcolor="#f8f6f0"'}
+             'edge [color="@ink-3@", fontname="Helvetica", fontsize=9, fontcolor="@ink-3@"];']
+    shapes = {"state": 'fillcolor="@cmp-faint@"', "role": 'shape=ellipse, fillcolor="@fill-soft@"',
+              "route": 'shape=hexagon, fillcolor="@have-faint@"', "source": 'shape=note, fillcolor="@sel-faint@"',
+              "gap": 'style="rounded,dashed", color="@line-strong@", fontcolor="@ink-3@"',
+              "pairing": 'fillcolor="@sel-faint@"'}
     for nid, n in nodes.items():
         recs = [r for e in edges if nid in (e["src"], e["dst"]) for r in e["records"]
                 if r.get("ingredient") == n["name"]]
         attrs = [f'label="{_node_label(m, n, recs)}"', shapes.get(n["kind"], "")]
         if n["kind"] == "ingredient" and n["name"] in m["have"]:
-            attrs.append('color="#2f8a4b", penwidth=2')
+            attrs.append('color="@have-base@", penwidth=2')
         if n["kind"] == "state" and S.exclusion(m, n["name"], st):
-            attrs.append('fontcolor="#9a958c", color="#cfcac0"')
+            attrs.append('fontcolor="@ink-3@", color="@line@"')
             attrs[0] = f'label="{n["label"]}\\n(excluded by filter)"'
         if nid == focus_id:                       # violet = trace, as everywhere
-            attrs.append('penwidth=2.5, color="#6b4fa0", fillcolor="#f2eefa"')
+            attrs.append('penwidth=2.5, color="@trace-base@", fillcolor="@trace-subtle@"')
         if n["kind"] == "state":
             attrs.append(f'URL="{S.href(st, rec=n["name"], pane="detail")}", target="_self"')
         elif n["kind"] == "ingredient":
@@ -1429,13 +1431,13 @@ def trace_dot(m: dict, st: dict) -> str:
         r = e["records"][0] if e["records"] else {}
         style = []
         if r.get("knowledge") in ("experimental", "generated"):
-            style.append('style=dashed, color="#b07d1a"')
+            style.append('style=dashed, color="@sel-mid@"')
             if r.get("knowledge") == "generated" and r["testing"]["status"] == "tested":
                 style.append('penwidth=2')
         elif e["relation"].endswith("backed by") or e["relation"].startswith("backs"):
-            style.append('style=dotted, color="#8a8478"')
+            style.append('style=dotted, color="@ink-3@"')
         elif e["relation"] == "not recorded":
-            style.append('style=dashed, color="#b8b3aa"')
+            style.append('style=dashed, color="@line-strong@"')
         if r.get("optionality") in ("supporting", "finish"):
             style.append("style=dashed")
         lab = e["label"]
@@ -1443,7 +1445,11 @@ def trace_dot(m: dict, st: dict) -> str:
             lab += " · tasted: " + r["testing"]["trials"][0]["verdict"]
         lines.append(f'"{e["src"]}" -> "{e["dst"]}" [label="{lab}", {", ".join(style)}];')
     lines.append("}")
-    return "\n".join(lines)
+    # DOT has no CSS variables: fill the at-sign placeholders from the palette
+    dot = "\n".join(lines)
+    for k, v in P.TOKENS.items():
+        dot = dot.replace(f"@{k}@", v)
+    return dot
 
 
 def trace_head_html(m: dict, st: dict) -> str:

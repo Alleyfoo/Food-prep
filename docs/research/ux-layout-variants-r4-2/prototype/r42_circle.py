@@ -186,10 +186,10 @@ def unavailable_html(c: sqlite3.Connection, st: Mapping[str, Any]) -> str:
 
 
 CSS = """<style>
-.r4 .tabs .k-circle {border-top:3px solid #2e7d4f}
+.r4 .tabs .k-circle {border-top:3px solid var(--ink-2)}
 .r4.tc .tc-dl {display:grid; grid-template-columns:max-content 1fr; gap:2px 12px; margin:6px 0}
-.r4.tc .tc-dl dt {color:#5b574f} .r4.tc .tc-dl dd {margin:0}
-.r4.tc .tc-fan {background:#eef6f0; border-left:3px solid #2e7d4f; padding:4px 8px; margin:4px 0}
+.r4.tc .tc-dl dt {color:var(--ink-3)} .r4.tc .tc-dl dd {margin:0}
+.r4.tc .tc-fan {background:var(--fill-soft); border-left:3px solid var(--ink-2); padding:4px 8px; margin:4px 0}
 .r4.tc .tc-name {font-weight:600; margin:2px 0 4px}
 .r4.tc table.tc-dish td, .r4.tc table.tc-dish th {padding:2px 10px 2px 0; text-align:left}
 </style>"""
