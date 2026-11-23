@@ -1,0 +1,70 @@
+if
+Ingredient Foundry
+A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.
+What do I have right now?
+sorts suggestions into available now · missing but useful · not paired here yet
+e.g. lemon, yogurt, pickles, bread, eggs, beans
+
+Cook
+
+Explore
+
+Experiment
+
+Ingredient Explorer
+
+Component Explorer
+
+Plate Balance
+
+Taste Circle
+
+INVESTIGATING
+Roasted tomato
+· from tomato
+AVAILABLE
+nothing entered
+SOMETHING YOU ALREADY COOKED
+roasted tomato
+RT
+Roasted Tomato
+Something you already cooked — you do not always start from raw. This one came from tomato + roast.
+STORAGE
+keeps medium · freezes well · high batch value
+TAGS
+concentrated
+savory
+sweet
+jammy
+roasted
+MAY NEED
+salt
+acid
+herb
+carb
+protein
+NEXT MOVES
+PROTEIN
+eggs
+soft cheese
+CARB
+pasta
+SALT
+sea salt
+HERB
+basil
+fresh herbs
+parsley
+ACID
+lemon
+USE IN
+bowl
+pasta
+pizza
+soup
+toast
+
+Download .md
+
+FLAVOUR ROUTES
+No routes modelled from this state yet. Routes are hand-curated — absence here means nobody has written one, not that the state leads nowhere.

@@ -1,0 +1,70 @@
+if
+Ingredient Foundry
+A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.
+What do I have right now?
+sorts suggestions into available now · missing but useful · not paired here yet
+e.g. lemon, yogurt, pickles, bread, eggs, beans
+
+Cook
+
+Explore
+
+Experiment
+
+INVESTIGATING
+Roasted cabbage
+· from cabbage
+AVAILABLE
+nothing entered
+TRANSFORMED STATE
+roasted cabbage
+RC
+Roasted Cabbage
+sweet
+nutty toasted
+umami
+OTHER CANDIDATES
+
+eggs
+
+lingonberry vinegar
+
+miso
+
+rye crumbs
+
+tahini
+
+Hypotheses come from analogy rules applied to transformed states. They are not classics. Taste a small amount before serving.
+HYPOTHESIS
+Roasted Cabbage + Brown Butter
+Brown butter may reinforce this state because both provide fat, while browned butter also reinforces toasted aromas. The state contributes nutty toasted.
+Reasoned from a known pairing: roasted broccoli with olive oil.
+flavour reinforcement
+analogy substitution
+COMPATIBILITY
+Plausible
+Both provide fat, while browned butter also reinforces toasted aromas. Strength of this argument: medium high.
+NOVELTY
+Too rare to tell
+Together these are rare enough that the corpus would not be expected to hold even three recipes with both, even if cooks pair them. Finding none proves nothing.
+SMALLEST TEST
+RATIO
+1 small piece of roasted cabbage : 1/4 teaspoon brown butter
+SUCCESS
+Nutty aroma reinforces browning while the roasted cabbage remains recognizable and not greasy.
+LIKELY FAILURE
+Fat coats the palate and suppresses the vegetable's own character.
+CORRECTION
+Use half as much butter; add one drop lemon; finish with salt rather than more fat.
+SAFETY
+Use freshly prepared brown butter without burned milk solids and fully cooked vegetables.
+
+Next hypothesis
+
+keyboard_arrow_right
+
+Record a tasting
+
+TRIAL HISTORY
+No tastings recorded yet.

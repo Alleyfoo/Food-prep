@@ -1,0 +1,120 @@
+if
+Ingredient Foundry
+A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.
+What do I have right now?
+sorts suggestions into available now · missing but useful · not paired here yet
+e.g. lemon, yogurt, pickles, bread, eggs, beans
+
+Cook
+
+Explore
+
+Experiment
+
+Ingredient Explorer
+
+Component Explorer
+
+Plate Balance
+
+Taste Circle
+
+INVESTIGATING
+Roasted broccoli
+· from broccoli
+AVAILABLE
+nothing entered
+SOMETHING YOU ALREADY COOKED
+roasted broccoli
+RB
+Roasted Broccoli
+Something you already cooked — you do not always start from raw. This one came from broccoli + roast.
+STORAGE
+keeps short · freezes well · high batch value
+TAGS
+concentrated
+savory
+sweet
+roasted
+RISKS
+sulfurous if overcooked
+MAY NEED
+salt
+fat
+acid
+herb
+protein
+carb
+NEXT MOVES
+FAT
+garlic confit
+ghee
+olive oil
+PROTEIN
+parmesan
+CARB
+pasta
+SALT
+sea salt
+HERB
+parsley
+ACID
+lemon
+USE IN
+bowl
+eggs
+hash
+pasta
+sandwich
+
+Download .md
+
+FLAVOUR ROUTES — 2 DIRECTIONS FROM THIS STATE
+Sour And Toasted Nut
+Acid contrasts browned sweetness while nuts reinforce roasted character.
+ATTESTED HIGH
+DIMENSIONS
+sour
+nutty toasted
+rich fatty
+DESTINATIONS
+side dish
+rice or grain bowl
+salad
+CULTURE
+General browned-vegetable, sharp-condiment, and nut structure.
+RISKS
+Excess acid can make broccoli metallic; too many nuts make the route heavy.
+ELEMENTS
+lemon
+Fresh acidity
+walnut
+Toasted richness and crunch
+olive_oil
+Carries flavour and softens sharpness
+FIT
+Acid balances concentration and walnut echoes toasted floret edges.
+Creamy And Acidic
+A cool creamy carrier with enough acidity to keep green vegetables lively.
+ATTESTED MEDIUM HIGH
+DIMENSIONS
+sour
+rich fatty
+fresh green
+DESTINATIONS
+side dish
+salad
+sauce or base
+CULTURE
+General yogurt-and-citrus dressing structure.
+RISKS
+A thick heavy coating can mute broccoli; add yogurt gradually and preserve acidity.
+ELEMENTS
+yogurt
+Creamy tang and moisture
+lemon
+Acidic lift
+dill
+Fresh aromatic finish
+FIT
+Cool yogurt contrasts hot browned edges.

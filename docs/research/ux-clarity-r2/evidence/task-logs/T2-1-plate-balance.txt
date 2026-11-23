@@ -1,0 +1,61 @@
+if
+Ingredient Foundry
+A local cooking map for turning ingredients into useful components, seeing what taste roles are missing, and finding the next sensible move.
+What do I have right now?
+sorts suggestions into available now · missing but useful · not paired here yet
+e.g. lemon, yogurt, pickles, bread, eggs, beans
+
+Cook
+
+Explore
+
+Experiment
+
+Ingredient Explorer
+
+Component Explorer
+
+Plate Balance
+
+Taste Circle
+
+INVESTIGATING
+Roasted broccoli
+· from broccoli
+AVAILABLE
+nothing entered
+This view works on plate items or fillers, not on the current dish.
+Plate Balance Cook mode — no experimental pairings
+
+PLATE ITEMS
+
+mashed potatoes
+chickpea patty
+ITEMS
+2
+on the plate
+HARD GAPS
+3
+target roles missing
+MAY WANT MORE
+0
+soft flags
+HEAVINESS
+3.5 / 5
+rich · average per item
+ALREADY PROVIDES
+body
+carb
+fat
+mild base
+protein
+salt
+umami
+MISSING — HARD GAPS
+acidvinegar lemon lime mustard
+herbdill parsley basil cilantro
+crunchcroutons walnut apple cucumber
+AVOID ADDING MORE OF
+more fat / cream
+
+Download .md

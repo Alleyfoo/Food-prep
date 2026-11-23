@@ -1,0 +1,16 @@
+real tastings.yaml sha256 before 1db8915147be97a18b0151d45cdec528c3ac46d8c51972ff07cbecb39370dad2
+real tastings.yaml sha256 after  1db8915147be97a18b0151d45cdec528c3ac46d8c51972ff07cbecb39370dad2
+unchanged: True
+
+appended to scratch copy:
+
+  - analogy_id: browned_fat_for_plain_fat_on_toasted_state
+    component: roasted_broccoli_component
+    candidate: brown_butter
+    tested_at: '2026-11-23'
+    preparation: tossed one warm floret in brown butter
+    ratio: '1 piece : 1/4 tsp'
+    temperature: warm
+    verdict: works
+    observations: 'Research walkthrough entry: nutty, still tasted of broccoli.'
+    safety_confirmed: true
