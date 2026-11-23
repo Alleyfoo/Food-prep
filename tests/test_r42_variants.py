@@ -72,8 +72,19 @@ def test_default_condition_is_r41_unchanged(conn, ing, have, rec):
     for cols in ("summary", "matrix", "evidence", "sensory"):
         assert _text(V.overview_html(m, _st(S, ing, have, cols=cols))) == \
             _text(V41.overview_html(m, _st(S41, ing, have, cols=cols))), cols
-    assert _text(V.detail_html(m, _st(S, ing, have, rec=rec), rec)) == \
-        _text(V41.detail_html(m, _st(S41, ing, have, rec=rec), rec))
+    # the one deliberate R4.2 change in the default sheet: trial observations shown
+    r42 = re.sub(r'<div class="obs">.*?</div>', "", V.detail_html(m, _st(S, ing, have, rec=rec), rec))
+    r42 = r42.replace("Conditions and observations", "Conditions")
+    assert _text(r42) == _text(V41.detail_html(m, _st(S41, ing, have, rec=rec), rec))
+
+
+def test_tasting_observation_qualifies_the_verdict_in_both_sheets(conn):
+    m = M.build(conn, "broccoli", [])
+    rec = "roasted_broccoli_component"
+    for sheet in ("full", "dense"):
+        s7 = _text(V.detail_html(m, _st(S, "broccoli", rec=rec, sheet=sheet), rec))
+        s7 = s7.split("Recorded tasting results")[1].split("Experimental pairings")[0]
+        assert "works" in s7 and "Garlic confit on the same state was clearly better" in s7
 
 
 @pytest.mark.parametrize("ing,have,rec", DATASETS)

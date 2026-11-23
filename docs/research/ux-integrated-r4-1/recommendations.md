@@ -18,7 +18,9 @@ These were removed by:
 
 **For the workspace structure, not shown.** The overview, the three panes, the filters, the trace steps and the column sets are R4's, unchanged. Whether people find and understand them is the open question R4 already named. R4.1 removed the symbol layer on top of that structure. It did not test the structure.
 
-## Verdict: mature enough for human usability testing
+## Verdict: ready for focused data-layout validation, not the final layout
+
+> **Revised after review (2026-11-23).** R4.1 settles the structure and removes the cryptic notation. It is not the final layout. The open question is the balance between scanning quickly and understanding accurately. A comparison with the old cards would mix functionality with layout, so it was dropped. The next round validates layout variants on this same workspace: see [R4.2](../ux-layout-variants-r4-2/README.md).
 
 **No further structural problem was found that should be fixed before testing.** R4.1 found no data relationship that the layout cannot show. Every K1–K7 task is answered in the same steps as R4, with nothing left to decode, and the three datasets behave consistently.
 
@@ -49,11 +51,11 @@ These were removed by:
 | Sentence-length cells (first render) | **Dropped** during the build | About 3 of 5 rows on the first screen |
 | Progressive disclosure | **Only for text that is not a fact about the record** (source self-descriptions) | Trial conditions and route optionality stay visible, because hiding them changes the meaning of the facts shown |
 
-## For the usability session
+## For the validation session
 
-Run the three-person desktop session R4 planned on K1–K7, with these changes:
+> **Superseded by [R4.2's session plan](../ux-layout-variants-r4-2/session-plan.md).** It compares encodings on this one workspace, with scan and understand tasks, and does not use the cards. The points below carry over.
 
-1. **Use R4.1 as the workspace condition.** Keep the cards as the comparison, as R4 planned. R4 vs R4.1 was evaluated here mechanically. A human R4 vs R4.1 comparison is worth it only if the session shows people struggling with overview density.
+1. **Do not compare against the cards.** Their functionality differs too much, so a comparison would not isolate the layout. Compare layout variants on the same workspace instead.
 2. **Add two probes:**
    - "What does *not on hand* in section 8 mean, compared to *not recorded*?"
    - "Which records are you comparing right now?", asked while the Trace pane is open.

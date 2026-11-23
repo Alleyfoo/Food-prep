@@ -15,7 +15,7 @@
   - every status in words, every selection named, one colour per concept.
 - **The cost is length.** Fewer overview rows in the first screen (potato 6 of 10 vs 10 of 10), a sheet 21–36% longer in words, and a taller comparison.
 - **The gain is in large traces.** The relationship table now starts at 195 px instead of 709 px.
-- **Verdict: the information layout is mature enough for human usability testing.** What remains is density versus explicitness, which needs people, not another structural pass.
+- **Verdict (revised): ready for focused data-layout validation, not the final layout.** The structure is settled; the balance between scanning quickly and understanding accurately is not. Validated next on this same workspace, without the cards: see [R4.2](../ux-layout-variants-r4-2/README.md).
 - **Not tested with people.**
 
 | Document | Contents |

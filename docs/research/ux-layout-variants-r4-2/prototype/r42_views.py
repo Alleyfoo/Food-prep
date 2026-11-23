@@ -151,6 +151,7 @@ CSS = """
 .r4.dense dl.dl4 dd.w {grid-column:2 / span 3}
 .r4.dense dl.dl4 dt.w {grid-column:1}
 .r4 table.ov.sum td:first-child {min-width:15em}
+.r4 .obs {font-size:12px; color:#4a463f; margin-top:2px}
 .r4 .graphnote {border:1px solid #e1ddd3; border-radius:6px; background:#faf8f4; padding:6px 10px;
                 margin:4px 0 8px; font-size:13px}
 </style>
@@ -950,9 +951,13 @@ def _ideas_html(m, st, comp, ideas, pairs, dense: bool = False) -> str:
                             f"<span class='muted'>replacing {esc(pretty(i['attrs']['replaces']))}"
                             f"</span></td><td class='tested'>{esc(t['verdict'])}</td>"
                             f"<td>{esc(t['preparation'])}; ratio {esc(t['ratio'])}; "
-                            f"temperature {esc(t['temperature'])}</td></tr>")
+                            f"temperature {esc(t['temperature'])}"
+                            # R4.2: the recorded observation qualifies the verdict
+                            # (R4 and R4.1 never showed it)
+                            + (f'<div class="obs">Observed: {esc(t["observations"])}</div>'
+                               if t.get("observations") else "") + "</td></tr>")
         out.append("<table><tr><th>Date</th><th>Idea tasted</th><th>Verdict</th>"
-                   "<th>Conditions</th></tr>" + "".join(rows) + "</table>")
+                   "<th>Conditions and observations</th></tr>" + "".join(rows) + "</table>")
     else:
         out.append('<div class="muted">No tasting recorded for this preparation.</div>')
     out.append("<h5>Experimental pairings</h5>")

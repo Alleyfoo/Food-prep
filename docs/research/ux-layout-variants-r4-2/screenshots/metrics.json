@@ -7,7 +7,7 @@
    "overview_words": 127,
    "legend_words": 47,
    "tooltip_only": 14,
-   "pane_screens": 5.56,
+   "pane_screens": 5.76,
    "section_offsets": [
     128,
     258,
@@ -16,7 +16,7 @@
     1439,
     1885,
     2231,
-    3074
+    3194
    ],
    "sections_first_screen": 3,
    "errors": 0
@@ -28,7 +28,7 @@
    "overview_words": 214,
    "legend_words": 0,
    "tooltip_only": 1,
-   "pane_screens": 5.56,
+   "pane_screens": 5.76,
    "section_offsets": [
     128,
     258,
@@ -37,7 +37,7 @@
     1439,
     1885,
     2231,
-    3074
+    3194
    ],
    "sections_first_screen": 3,
    "errors": 0
@@ -49,7 +49,7 @@
    "overview_words": 168,
    "legend_words": 0,
    "tooltip_only": 1,
-   "pane_screens": 5.56,
+   "pane_screens": 5.76,
    "section_offsets": [
     128,
     258,
@@ -58,7 +58,7 @@
     1439,
     1885,
     2231,
-    3074
+    3194
    ],
    "sections_first_screen": 3,
    "errors": 0
@@ -278,7 +278,7 @@
    "overview_words": 214,
    "legend_words": 0,
    "tooltip_only": 1,
-   "pane_screens": 5.56,
+   "pane_screens": 5.76,
    "section_offsets": [
     128,
     258,
@@ -287,7 +287,7 @@
     1439,
     1885,
     2231,
-    3074
+    3194
    ],
    "sections_first_screen": 3,
    "errors": 0
@@ -299,7 +299,7 @@
    "overview_words": 214,
    "legend_words": 0,
    "tooltip_only": 1,
-   "pane_screens": 4.18,
+   "pane_screens": 4.31,
    "section_offsets": [
     110,
     180,
@@ -308,7 +308,7 @@
     1073,
     1382,
     1657,
-    2285
+    2364
    ],
    "sections_first_screen": 4,
    "errors": 0
