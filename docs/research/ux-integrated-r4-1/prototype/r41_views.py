@@ -48,7 +48,7 @@ CSS = """
         padding:4px 7px; font-size:13px; vertical-align:bottom}
 .r4 td {border-bottom:1px solid #e6e2da; padding:4px 7px; vertical-align:top;
         overflow-wrap:normal; word-break:normal; hyphens:manual}
-.r4 thead {position:sticky; top:0; z-index:3}
+.r4 thead {position:sticky; top:0; z-index:3; background:#f3f1ec; box-shadow:0 1px 0 #d8d4cb}
 .r4 thead th {background:#f3f1ec}
 .r4 thead tr.legendrow th {font-weight:400; border-bottom:1px solid #e1ddd3; background:#faf8f4}
 .r4 .nm, .r4 table.trace td a {white-space:nowrap}
