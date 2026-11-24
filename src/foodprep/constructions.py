@@ -573,6 +573,8 @@ def freeze_manifest() -> dict:
                        "water_routes": sorted(data["water_routes"]),
                        "gap_kinds": list(GAP_KINDS), "splits": list(SPLITS)},
         "operations": {k: _sha(v) for k, v in sorted(cat.operations.items())},
+        "catalogue": _sha({"scales": cat.scales, "default_false": sorted(cat.default_false),
+                           "functions": cat.functions}),
         "property_keys": sorted(keys - {"edible", "not_food_reason"}),
         "code": {"constructions.py": _code_sha(Path(__file__)),
                  "operations.py": _code_sha(Path(o.__file__))},

@@ -1,0 +1,326 @@
+note: 'R3 schema freeze: written by docs/research/r3-construction-modelling/run.py --freeze before any
+  held-out dish was represented. tests/test_constructions.py fails if a held-out dish relies on anything
+  changed after it.'
+held_out:
+- draniki
+- kolokythokeftedes
+- chawanmushi
+- farcis_nicois
+- pierogi_ruskie
+- spanakopita
+- zha_qie_he
+- moi_moi
+schema:
+  dish:
+  - name
+  - tradition
+  - split
+  - routes
+  - note
+  route:
+  - recipes
+  - patterns
+  - holds_by
+  - water
+  - why
+  - materials
+  - assemblies
+  - result
+  - final
+  - gaps
+  - note
+  material:
+  - from
+  - steps
+  - recipes
+  - water
+  - note
+  source:
+  - material
+  - step
+  - output
+  step:
+  - op
+  - keep
+  - or
+  - discard
+  - recipes
+  - evidence
+  - expects
+  - optional
+  - note
+  assembly:
+  - op
+  - roles
+  - state
+  - because
+  - expects
+  - steps
+  - recipes
+  - holds_by
+  - water
+  - evidence
+  - note
+  member:
+  - use
+  - recipes
+  - note
+  - water
+  - optional
+  - prep
+  expect:
+  - state
+  - member
+  - because
+  - recipes
+  final:
+  - state
+  - recipes
+  - evidence
+  gap:
+  - kind
+  - note
+  addition:
+  - catalogue
+  - shop
+  - props
+  - note
+vocabulary:
+  patterns:
+  - C1
+  - C2
+  - C3
+  - C4
+  - C5
+  - C6
+  - C7
+  - C8
+  - C9
+  mechanisms:
+  - H1
+  - H10
+  - H11
+  - H2
+  - H3
+  - H4
+  - H5a
+  - H5b
+  - H5c
+  - H5d
+  - H6a
+  - H6a_own_juice
+  - H6b
+  - H7
+  - H8
+  - H9
+  water_routes:
+  - W1
+  - W2
+  - W3
+  - W4
+  - W5
+  - W6
+  - W7
+  - W8
+  - W9
+  gap_kinds:
+  - model
+  - scope
+  - ingredient
+  - evidence
+  splits:
+  - design
+  - held_out
+operations:
+  abaisser: c85923be21fc2cbe
+  acidifier: 1c63bbb1e88ab9d2
+  appertiser: f5ed9471d12e9d9c
+  batonnet: bfcb13a2dde6c853
+  blanchir: 2674cfbd46df1dd9
+  braiser: 02dc7acca47a9a87
+  broyer: 060a3fb6cb39a4e5
+  brunoise: 2aaf0386db2df17c
+  caramelliser: a6f7dfe49e9bc7aa
+  chiffonade: ddfc5009f0786339
+  ciseler: 2ac688705129e66a
+  clarifier: db44fb58c374dd13
+  concasser: 68f6ce6c4ad7ab33
+  confire: 0d415108470c4811
+  congeler: 5130a204921559e5
+  creuser: 546528600cf5472b
+  cuire_anglaise: 20535ad0cfe4be16
+  cuire_four: 3423c467f0815b85
+  cuire_vapeur: f33138096ee0b7fb
+  decanter: 381973f5bdb5b159
+  decocter: f1d32ebf19c30185
+  decortiquer: 273c0ab3215b2302
+  deglacer: bfe5ff8fd6066670
+  degorger: bff4e9fc8ec83f84
+  denoyauter: 83ef22fa08bf4404
+  deshydrater: cbbbfee9e3337707
+  dessecher: f96be2bfc3ec8563
+  detacher_feuilles: 55aacd1b4e343fff
+  detailler_bouquets: 99c25892230b9d8f
+  ecosser: 1e2ba6fd71faf7e1
+  ecraser: 45698a7540e8338a
+  ecumer: a530db2dc921daa9
+  effeuiller: 9dcc1496b89c58ba
+  egoutter: ee645f0c247145b7
+  egrainer: 7fdbc3c70303b260
+  emietter: f81ad87a53e0baf1
+  emincer: 402d3f73da4d2869
+  emulsionner: 7141b60dc927e065
+  enrober: 67c443c8f8e6f962
+  envelopper: f48be2aa1645d385
+  epepiner: 364a6ff57aca9e4d
+  eplucher: 8cfd5590a62632a5
+  equeuter: be21ccab41bdd1ac
+  etuver: 177a3f358c98df4a
+  evider: 51d7aea765f299fa
+  faconner: 8afe2a841f193477
+  farcir: 7616737452be02c4
+  fendre: 4b8290a6a3892fff
+  fermenter: ec8af6f1a7026eea
+  filtrer: 982117f3528369e7
+  foisonner: 1dc3f1fc56687246
+  fouetter: 95437f14d2f07e21
+  fouler: b708973c3cc2d5db
+  frire: 1238f90ec8a3c35f
+  fumer: 82713444f6be21bf
+  gelifier: 9f0ee1fe8b66155e
+  glacer: 8f80ac0b7ab96e1f
+  gratiner: e0d0f3f58e407849
+  griller: 5e515639b805871b
+  hacher: 1811553ead503426
+  inciser: 0c65c4f23e2a29b5
+  incorporer: 72fc7750e279054c
+  infuser: f2427e639c88f2ef
+  julienne: e183f49f5bb10948
+  laminer: a928b96592972b21
+  lever_supremes: 92e6e1bc262ed57a
+  lier: 15b7f7397bcd2c72
+  macedoine: 65e1f347c34d3a47
+  macerer: eb0f89c9aa5a777b
+  malaxer: 5a499e3f2e9be61a
+  mariner: 6a02bb3ec9dc035b
+  masser: 3b805c7d06a50663
+  melanger: af9b887d4235286c
+  mijoter: b9fe67d76f32f7be
+  mixer: ae9682096086921b
+  monder: 3d75c5053050a0b8
+  monter_beurre: 2fa611163bcc711e
+  moudre: ecfd117228760e79
+  paner: bb8d48f08bd706b8
+  parer: a0430a24d974b030
+  passer_chinois: 312011cdcba47e04
+  paysanne: 589aa2fcf0c7b936
+  peler: 8e94be745da802cc
+  piler: c24c2daae6378ecf
+  pocher: 28606a9ee31bc2bf
+  presser: f57bd0846e6416a0
+  quartiers: 7fd60ace495444a4
+  raper: d52b8b4d08a77313
+  reduire: aa49d47d19e14553
+  reduire_puree: d64336670310fa98
+  refroidir: 615748ab4baf18b9
+  reposer: 1229c2c570dd69f1
+  revetir: 3953514197813f8c
+  rissoler: 966cf04452962b5d
+  rondelles: 72a1390f817b0e30
+  rotir: 10180a4cb5206c1c
+  rubans: 7d5a082d30093ce5
+  saumurer: e0cea1dea40dc9c9
+  sauter: 74e3fc9d7396b4a3
+  sauter_wok: 8f42ac9d8e3bb318
+  servir_cru: dcaa9240db26c402
+  suer: 8fa080f4a778a146
+  superposer: 0ab27b2e758bc4d9
+  tamiser: 60083a1d23ed1341
+  torrefier: 3c227868bb1a1c3d
+  tourner: 2b3b29815a7b681b
+  tremper: 9cd97abc76d03f36
+  troncons: e572513598688939
+  zester: 22485a5e358b9bb6
+catalogue: b883b01288d65a2a
+property_keys:
+- acidity
+- aerated
+- assembled
+- binder
+- bitterness
+- blanched
+- browned
+- browns_when_cut
+- clear
+- coated
+- cohesive
+- concentrated
+- condition
+- cooked
+- cooled
+- crisp
+- cut
+- emulsified
+- emulsifies
+- fat
+- fermented
+- fibre
+- filled
+- firmness
+- flavour
+- flexible
+- formed
+- gelled
+- glazed
+- halved
+- has_kernels
+- has_outer_layer
+- has_seed_core
+- has_stone
+- headed
+- heat_sensitive
+- holds_shape_cooked
+- hollow
+- infused
+- inner_changes
+- layered
+- leafy
+- liquid
+- mixed
+- name
+- note
+- only_operations
+- only_techniques
+- outer_layer
+- pectin
+- pickled
+- piece
+- pigment
+- podded
+- raw_ok
+- rested
+- salted
+- scored
+- seed_core
+- segmented
+- sets_on_heat
+- shape
+- sheetable
+- skin_slips_when_blanched
+- smoked
+- smooth
+- soaked
+- starch
+- sugar
+- thickened
+- thin
+- toughness
+- umami
+- usually_discarded
+- water
+- water_uptake
+- wrapped
+- zestable
+code:
+  constructions.py: e8b5f0a88f03fb78
+  operations.py: c8446ec2afcfe573

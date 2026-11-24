@@ -935,7 +935,7 @@ operations:
         set: {clear: true, starch: none, usually_discarded: true}
     changes: "A sediment (starch, from potato juice) and a clear liquid poured off"
     applications: "latkes, draniki, gamja-jeon: the settled starch goes back into the mass"
-    documented_in: [E2b, E3a, E4a, E4b, E5a, A10a]
+    documented_in: [E2b, E3a, E4a, E4b, A10a]
     evidence: [larousse]
     confidence: established
 
