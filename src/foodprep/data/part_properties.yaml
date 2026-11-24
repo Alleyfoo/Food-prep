@@ -399,3 +399,280 @@ parts:
         piece: small
         pigment: none
         flavour: [mild]
+
+# Parts used by documented constructions (R3, ADR 0003) that have not been
+# decomposed in tomato.yaml yet (no description, provides or edibility record).
+# The operation engine reads them (foodprep.operations); the family generator
+# and the decomposition UI do not. Same property vocabulary as `parts`.
+# Added for construction (R3):
+#   water_uptake   how much water a dry material takes up when soaked or cooked
+#   sets_on_heat   raw, it sets into a solid in hot fat, oven or steam
+#                  (raw pulse protein and starch, R2 H4; egg, H5)
+#   headed         leaves wrapped into a head (cabbage)
+staged_parts:
+  potato:
+    tuber:
+      water: high
+      fibre: low
+      toughness: high
+      firmness: very_high
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [earthy, mild]
+      shape: round
+      piece: whole
+      flexible: false
+      sheetable: true
+      starch: high
+      pectin: medium
+      emulsifies: false
+      holds_shape_cooked: true
+      note: "Waxy potatoes hold their shape and take up less oil (E4b, M15b); floury ones mash. Variety is not modelled."
+      outer_layer:
+        name: potato_skin
+        edible: "yes"
+        usually_discarded: true
+        water: medium
+        fibre: high
+        toughness: medium
+        firmness: medium
+        fat: none
+        sugar: low
+        acidity: low
+        bitterness: low
+        umami: low
+        raw_ok: false
+        thin: true
+        flexible: true
+        sheetable: false
+        starch: low
+        pectin: medium
+        emulsifies: false
+        holds_shape_cooked: true
+        shape: flat
+        piece: small
+        pigment: none
+        flavour: [earthy]
+        inner_changes: {}
+
+  onion:
+    bulb:
+      water: high
+      fibre: low
+      toughness: medium
+      firmness: high
+      fat: none
+      sugar: medium
+      acidity: low
+      bitterness: low
+      umami: low
+      raw_ok: true
+      pigment: none
+      flavour: [pungent, sweet]
+      shape: round
+      piece: whole
+      flexible: false
+      sheetable: false
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      outer_layer:
+        name: onion_skin
+        edible: "no"
+        usually_discarded: true
+        water: low
+        fibre: high
+        toughness: high
+        firmness: low
+        thin: true
+        flexible: false
+        shape: flat
+        piece: small
+        inner_changes: {}
+
+  cabbage:
+    head:
+      water: high
+      fibre: medium
+      toughness: medium
+      firmness: high
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: low
+      umami: low
+      raw_ok: true
+      leafy: true
+      headed: true
+      pigment: none
+      flavour: [sulfurous, sweet, mild]
+      shape: round
+      piece: whole
+      flexible: false
+      sheetable: false
+      starch: low
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
+
+  aubergine:
+    fruit:
+      water: high
+      fibre: low
+      toughness: low
+      firmness: medium
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: medium
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [mild, bitter]
+      shape: cylindrical
+      piece: whole
+      flexible: false
+      sheetable: true
+      starch: low
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      note: "Spongy flesh that soaks up oil. Not in the ingredient catalogue (Lidl gap, R3)."
+      outer_layer:
+        name: aubergine_skin
+        edible: "yes"
+        usually_discarded: false
+        water: medium
+        fibre: medium
+        toughness: medium
+        firmness: medium
+        thin: true
+        flexible: true
+        shape: flat
+        piece: small
+        pigment: none
+        flavour: [bitter]
+        inner_changes: {}
+
+  rice:
+    grain:
+      water: none
+      fibre: low
+      toughness: very_high
+      firmness: very_high
+      fat: none
+      sugar: none
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [mild]
+      shape: irregular
+      piece: small
+      flexible: false
+      sheetable: false
+      starch: very_high
+      pectin: none
+      emulsifies: false
+      holds_shape_cooked: true
+      water_uptake: high
+      note: "Raw grain. Round or porridge rice for porkkanalaatikko and gemista; arancini use rice boiled and drained or risotto rice."
+
+  chickpea:
+    dried_seed:
+      water: none
+      fibre: medium
+      toughness: very_high
+      firmness: very_high
+      fat: low
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [nutty, earthy]
+      shape: round
+      piece: small
+      flexible: false
+      sheetable: false
+      starch: high
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
+      water_uptake: high
+      sets_on_heat: true
+      note: "Raw dried chickpeas, not in the catalogue (Lidl gap). Soaked raw pulses must be fried through."
+
+  urad_dal:
+    dried_seed:
+      water: none
+      fibre: low
+      toughness: very_high
+      firmness: very_high
+      fat: low
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [earthy]
+      shape: round
+      piece: small
+      flexible: false
+      sheetable: false
+      starch: high
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      water_uptake: high
+      sets_on_heat: true
+      note: "Split, skinned black gram. Not in the catalogue (Lidl gap)."
+
+  black_eyed_bean:
+    dried_seed:
+      water: none
+      fibre: medium
+      toughness: very_high
+      firmness: very_high
+      fat: low
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [earthy]
+      shape: round
+      piece: small
+      flexible: false
+      sheetable: false
+      starch: high
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
+      water_uptake: high
+      sets_on_heat: true
+      note: "Not in the catalogue (Lidl gap)."
+      outer_layer:
+        name: seed_coat
+        edible: "yes"
+        usually_discarded: true
+        water: none
+        fibre: high
+        toughness: high
+        firmness: low
+        thin: true
+        flexible: false
+        shape: flat
+        piece: fine
+        pigment: none
+        inner_changes: {}

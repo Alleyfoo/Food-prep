@@ -147,6 +147,15 @@ def cmd_explore(args: argparse.Namespace) -> int:
     return 1 if out.startswith("No ") else 0
 
 
+def cmd_construction(args: argparse.Namespace) -> int:
+    """A documented dish as materials, R1 operations and structural relations,
+    with every step's applicability and the claims about why it holds (R3)."""
+    from foodprep import constructions
+    out = constructions.render(args.dish) if args.dish else constructions.render_list()
+    print(out.rstrip("\n"))
+    return 1 if out.startswith("No ") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -398,6 +407,11 @@ def build_parser() -> argparse.ArgumentParser:
                      help="sequences per function (default view)")
     pex.add_argument("--top", type=int, default=8, help="sequences to show with --global")
     pex.set_defaults(func=cmd_explore)
+
+    pcon = sub.add_parser("construction",
+                          help="A documented dish: materials, operations, relations, why it holds")
+    pcon.add_argument("dish", nargs="?", help="dish id; omit to list them")
+    pcon.set_defaults(func=cmd_construction)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

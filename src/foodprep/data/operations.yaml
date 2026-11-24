@@ -53,7 +53,11 @@ recorded_only_when_true: [thin, leafy, liquid, browns_when_cut, crisp, smooth, c
                           usually_discarded, salted, clear, glazed, smoked, scored, cut,
                           # structures recorded only where they exist
                           has_outer_layer, has_seed_core, has_stone, podded, zestable,
-                          segmented, has_kernels, skin_slips_when_blanched, heat_sensitive]
+                          segmented, has_kernels, skin_slips_when_blanched, heat_sensitive,
+                          # states and properties of documented constructions (R3, ADR 0003);
+                          # only the construction operations set them, so the generator never sees them
+                          soaked, cooled, rested, halved, formed, assembled, cohesive, aerated,
+                          sets_on_heat, headed, mixed, filled, wrapped, layered]
 
 ordinary_equipment: [knife, peeler, grater, pot, pan, oven, sieve, bowl, colander,
                      baking_tray, whisk, towel, jar, cloth, ladle, blender, spoon, fork]
@@ -744,9 +748,12 @@ operations:
         set: {liquid: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false, has_outer_layer: false}
       - name: pulp
         kind: fraction
-        set: {piece: fine, shape: irregular, binder: true, usually_discarded: true, has_outer_layer: false}
+        set: {piece: fine, shape: irregular, usually_discarded: true, has_outer_layer: false}
         lower: {water: 1, sugar: 1}
         raise: {fibre: 1}
+        # R3: only a starch-rich pulp binds (latkes, rösti); squeezed courgette is
+        # what needs binding (R2 requirements.md, C4)
+        when_set: [{when: {starch: ">=high"}, set: {binder: true}}]
     changes: "Juice with the colour and sugar; pulp with the fibre"
     applications: "juices, reductions; pulp in crackers and fritters"
     established_on: [carrot.root]
@@ -861,10 +868,17 @@ operations:
     categories: [extraction]
     generator: false
     not_generated_because: "a step inside other operations; changes no property worth a step"
-    requires: {}
+    requires:
+      liquid: [false, "drains a solid, a grated mass or a puree"]
+      water: [">=medium", "free water to run off"]
     equipment: [colander]
     effort: 1
-    outputs: []
+    outputs:
+      - {name: drained, kind: state, lower: {water: 1}}
+      - name: liquid
+        kind: fraction
+        set: {liquid: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false, usually_discarded: true}
+    documented_in: [E2b, E4b, A10a, A10b]
     evidence: [larousse]
     confidence: established
 
@@ -907,11 +921,21 @@ operations:
     en: decant, let settle
     categories: [extraction]
     generator: false
-    not_generated_because: "same outcome as filtrer for these materials"
+    not_generated_because: "same outcome as filtrer for the generator's vegetables; only a starchy juice leaves a sediment worth keeping (constructions, R3)"
     requires: {liquid: [true, "settles a liquid"]}
     equipment: [jar]
     effort: 1
-    outputs: []
+    outputs:
+      - name: settled
+        kind: fraction
+        set: {liquid: false, water: medium, piece: powder, shape: none, smooth: true, firmness: low, fibre: none, usually_discarded: false}
+        when_set: [{when: {starch: ">=medium"}, set: {binder: true, starch: very_high}}]
+      - name: clear
+        kind: fraction
+        set: {clear: true, starch: none, usually_discarded: true}
+    changes: "A sediment (starch, from potato juice) and a clear liquid poured off"
+    applications: "latkes, draniki, gamja-jeon: the settled starch goes back into the mass"
+    documented_in: [E2b, E3a, E4a, E4b, E5a, A10a]
     evidence: [larousse]
     confidence: established
 
@@ -1155,10 +1179,14 @@ operations:
     categories: [mechanical]
     generator: false
     not_generated_because: "needs a foam former; outside the vegetable materials"
-    requires: {}
+    requires:
+      smooth: [true, "beats air into a smooth paste or a liquid", {liquid: true}]
     equipment: [whisk]
     effort: 2
-    outputs: []
+    outputs:
+      - {kind: state, set: {aerated: true}}
+    changes: "Air beaten into a paste or egg: lighter after frying or setting"
+    documented_in: [A3a, A18a, A18b, A18c, M12b, M20a]
     evidence: [mcgee]
     confidence: established
 
@@ -1390,9 +1418,9 @@ operations:
     en: brown (shallow-fry to colour)
     categories: [thermal]
     requires:
-      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
-      liquid: [false, "browns a solid"]
-      water: ["<=high", "too much water steams instead of browning"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)", {assembled: true}]
+      liquid: [false, "browns a solid", {sets_on_heat: true, cooked: false}]
+      water: ["<=high", "too much water steams instead of browning", {sets_on_heat: true, cooked: false}]
       piece: ["<=medium", "pieces small enough to colour all over"]
     adds: [fat]
     equipment: [pan]
@@ -1466,10 +1494,10 @@ operations:
     family_state: true
     generator_id: fry
     requires:
-      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
-      liquid: [false, "fries a solid"]
-      water: ["<=medium", "dry enough to crisp; or coated, or cut thin", [{coated: true}, {thin: true}]]
-      smooth: [false, "a puree needs binding or a batter first", {coated: true}]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)", {assembled: true}]
+      liquid: [false, "fries a solid", {sets_on_heat: true, cooked: false}]
+      water: ["<=medium", "dry enough to crisp; or coated, or cut thin", [{coated: true}, {thin: true}, {sets_on_heat: true, cooked: false}]]
+      smooth: [false, "a puree needs binding or a batter first", [{coated: true}, {sets_on_heat: true, cooked: false}]]
     adds: [oil]
     equipment: [pot]
     effort: 2
@@ -1479,7 +1507,9 @@ operations:
         set: {cooked: true, browned: true, crisp: true, flexible: false}
         lower: {water: 1}
         raise: {fat: 2}
-        when_set: [{when: {thin: true}, set: {water: none}}]
+        when_set:
+          - {when: {thin: true}, set: {water: none}}
+          - {when: {smooth: true}, set: {smooth: false}}   # a fried paste has a crust (R3)
     effects: [browning, crisp]
     does: "Fried in fat until crisp"
     corpus: fry
@@ -1534,7 +1564,10 @@ operations:
     effort: 2
     mechanisms: [cell_softening, extraction]
     outputs:
-      - {kind: state, set: {cooked: true}, lower: {firmness: 2}}
+      - kind: state
+        set: {cooked: true}
+        lower: {firmness: 2}
+        when_set: [{when: {water_uptake: ">=medium"}, set: {water: medium}}]   # rice, pulses (R3)
     effects: [softens, extracts]
     does: "Simmered in a stock or sauce"
     corpus: boil
@@ -1558,7 +1591,10 @@ operations:
     effort: 1
     mechanisms: [cell_softening]
     outputs:
-      - {kind: state, set: {cooked: true, salted: true}, lower: {firmness: 2, sugar: 1}}
+      - kind: state
+        set: {cooked: true, salted: true}
+        lower: {firmness: 2, sugar: 1}
+        when_set: [{when: {water_uptake: ">=medium"}, set: {water: medium}}]   # rice, pulses (R3)
     changes: "Soft; some flavour leaches into the water"
     applications: "plain vegetables, before puree"
     established_on: [carrot.root, broccoli.florets]
@@ -1572,8 +1608,8 @@ operations:
     technique: bake
     requires:
       heat_sensitive: [false, "turns bitter with long heat"]
-      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
-      liquid: [false, "bakes a solid or set mixture"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)", {assembled: true}]
+      liquid: [false, "bakes a solid or set mixture", {sets_on_heat: true, cooked: false}]
     equipment: [oven]
     effort: 1
     mechanisms: [dehydration_surface]
@@ -1932,7 +1968,7 @@ operations:
     categories: [chemical]
     requires:
       liquid: [false, "coats a solid"]
-      cooked: [false, "coat before cooking; blanched is fine"]
+      cooked: [false, "coat before cooking; blanched is fine", {assembled: true}]
       smooth: [false, "batter clings to pieces, not to a puree"]
       coated: [false, "already coated"]
     adds: [batter]
@@ -1952,7 +1988,7 @@ operations:
     categories: [chemical]
     requires:
       liquid: [false, "breads a solid"]
-      cooked: [false, "bread before cooking; blanched is fine"]
+      cooked: [false, "bread before cooking; blanched is fine", {assembled: true}]
       smooth: [false, "crumbs coat pieces, not a puree"]
       firmness: [">=low", "holds the coating"]
       coated: [false, "already coated"]
@@ -2011,6 +2047,336 @@ operations:
     effort: 3
     outputs: []
     evidence: [nchfp, usda_tomato]
+    confidence: established
+
+  # ======================= construction (R3, ADR 0003) =======================
+  # Operations that documented constructions need (docs/research/
+  # r3-construction-modelling/). None is generated: the bounded search and the
+  # family generator never take them. `documented_in` lists R2 recipe ids
+  # (docs/research/r2-construction-patterns/recipes.md). The six joins carry an
+  # `assembly` block: the relation, the role whose state the result takes
+  # (`carrier`), and each role's requirements in the syntax of `requires`.
+  # Role requirements check that a member can do what the dish says it does;
+  # they are not rules about which dishes work.
+
+  tremper:
+    fr: tremper
+    en: soak, rehydrate
+    categories: [chemical]
+    generator: false
+    not_generated_because: "dried seeds are outside the generator's vegetables; constructions use it (R3)"
+    requires:
+      water: ["<=low", "a dry material that takes up water"]
+      liquid: [false, "soaks a solid"]
+      soaked: [false, "already soaked"]
+    adds: [water]
+    equipment: [bowl]
+    effort: 1
+    parameters: "15 min (to loosen skins) to 24 h; R2 found the soak time is the control (A3a: not over 4 h)"
+    mechanisms: [rehydration]
+    outputs:
+      - {kind: state, set: {soaked: true, water: medium}, lower: {firmness: 1}}
+    changes: "A dry seed swells and softens enough to grind, and stays raw"
+    applications: "falafel, medu vada, akara: raw pulse pastes"
+    documented_in: [M2a, M2b, M2c, A3a, A3b, A18b, A18c]
+    evidence: [larousse]
+    confidence: established
+
+  refroidir:
+    fr: refroidir
+    en: cool, chill (after cooking)
+    categories: [thermal]
+    generator: false
+    not_generated_because: "a waiting step; it changes structure only inside constructions (R3)"
+    requires:
+      cooked: [true, "cools a cooked material"]
+      cooled: [false, "already cooled"]
+    equipment: [baking_tray]
+    effort: 1
+    parameters: "spread out to cool and let steam go; overnight to two days in the fridge (R2 convergence 9)"
+    mechanisms: [retrogradation]
+    outputs:
+      - kind: state
+        set: {cooled: true}
+        when_set:
+          - {when: {starch: ">=medium"}, set: {cohesive: true}}
+          - {when: {starch: ">=medium", thickened: true}, set: {liquid: false, gelled: true}}
+    changes: "Cooked starch firms and holds together when pressed; a starch-thickened sauce sets"
+    applications: "boiled rösti, aloo tikki, korokke, arancini, croquetas; cut a gratin cold"
+    documented_in: [E1a, E1c, A2b, A6a, M11a, M11b, M13a, M13b, E17c, M15b]
+    evidence: [mcgee]
+    confidence: established
+
+  reposer:
+    fr: reposer
+    en: rest (let a mixture stand)
+    categories: [chemical]
+    generator: false
+    not_generated_because: "a waiting step inside constructions (R3)"
+    requires:
+      rested: [false, "already rested"]
+    equipment: [bowl]
+    effort: 1
+    parameters: "5 min to a few hours, by recipe"
+    mechanisms: [hydration]
+    outputs:
+      - {kind: state, set: {rested: true}}
+    changes: "A dry phase takes up the liquid; a paste firms; pieces take up egg"
+    applications: "mücver, patties, raggmunk, tortilla, falafel paste"
+    documented_in: [M3b, E18c, E6b, M12a, M12b, M12c, M2b, M2c, M7a, A7a]
+    evidence: [mcgee]
+    confidence: established
+
+  creuser:
+    fr: creuser (vider)
+    en: scoop out the flesh (make a vessel)
+    categories: [separation, geometry]
+    generator: false
+    not_generated_because: "makes a vessel for a filling; only constructions use it (R3)"
+    requires:
+      piece: ["medium|large|whole", "a body or half large enough to hold a filling"]
+      firmness: [">=low", "the wall must stand once the flesh is out"]
+      liquid: [false, "scoops a solid"]
+      hollow: [false, "already hollow"]
+      cut: [false, "hollow whole pieces or halves, not cut pieces"]
+    equipment: [spoon]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: shell, kind: state, set: {hollow: true}}
+      - {name: flesh, kind: fraction, set: {piece: small, shape: irregular}}
+    changes: "A shell to fill and the scooped flesh, which usually goes back into the filling"
+    applications: "zucchine ripiene, gemista, farcis"
+    limitations: "evider removes only a seed core; recipes scoop ordinary flesh (R2 requirements.md)"
+    documented_in: [M17a, M17b, M7a, M7b]
+    evidence: [larousse]
+    confidence: established
+
+  fendre:
+    fr: fendre (couper en deux)
+    en: halve lengthwise
+    categories: [geometry]
+    generator: false
+    not_generated_because: "a halving towards a vessel; only constructions use it (R3)"
+    requires:
+      piece: ["large|whole", "a whole body to halve"]
+      liquid: [false, "a liquid cannot be cut"]
+      halved: [false, "already halved"]
+    equipment: [knife]
+    effort: 1
+    outputs:
+      - {kind: geometry, set: {piece: large, halved: true}}
+    changes: "Two halves, each a boat to hollow"
+    documented_in: [M17a, M17b, M7b]
+    evidence: [larousse]
+    confidence: established
+
+  decortiquer:
+    fr: décortiquer
+    en: rub the skins off soaked pulses
+    categories: [separation]
+    generator: false
+    not_generated_because: "dried pulses are outside the generator's vegetables; constructions use it (R3)"
+    requires:
+      soaked: [true, "the seed coats loosen only after soaking"]
+      has_outer_layer: [true, "a seed coat to remove"]
+    equipment: [bowl]
+    effort: 2
+    parameters: "pulse or rub, swirl in water, skim the floating skins; repeat"
+    outputs:
+      - {name: inner, kind: state, from: self, set: {has_outer_layer: false}}
+      - {name: skins, kind: fraction, from: outer_layer}
+    changes: "Skinned pulses that grind to a pale, smooth paste"
+    documented_in: [A18a, A18b, A18c]
+    evidence: [larousse]
+    confidence: established
+
+  detacher_feuilles:
+    fr: détacher les feuilles
+    en: separate a head's leaves from its heart
+    categories: [separation]
+    generator: false
+    not_generated_because: "separates wrapper leaves for constructions (R3)"
+    requires:
+      headed: [true, "leaves wrapped into a head"]
+      cut: [false, "the head must be whole"]
+      flexible: [true, "soften the head first (blanch it), or the leaves tear instead of coming off whole"]
+    equipment: [knife, pot]
+    effort: 2
+    outputs:
+      - {name: leaves, kind: state, set: {headed: false, piece: large, shape: flat, thin: true}}
+      - {name: heart, kind: fraction, set: {headed: false, piece: medium, shape: irregular}, lower: {toughness: 1}}
+    changes: "Whole outer leaves to wrap with, and the small inner leaves"
+    applications: "cabbage rolls: the heart is chopped into the filling (E12a)"
+    documented_in: [E12a, E12b]
+    evidence: [larousse]
+    confidence: established
+
+  faconner:
+    fr: façonner
+    en: shape (patties, balls, a cake in the pan)
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "shapes a mass a construction made (R3)"
+    requires:
+      liquid: [false, "a pourable batter is poured, not shaped"]
+    equipment: [spoon]
+    effort: 1
+    outputs:
+      - {kind: state, set: {formed: true, assembled: true, piece: medium}}
+    changes: "Pieces of a mass, ready for a coat or the pan"
+    documented_in: [E1a, E1b, E4a, A10a, A2a, M11a, M13a, M2a, A3a, A18b, M3a, E18a, A6a, A1a]
+    evidence: [cia]
+    confidence: established
+
+  melanger:
+    fr: mélanger
+    en: combine into one mass, filling or batter
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "joins several materials; only constructions use it (R3), never the single-material search"
+    requires: {}
+    assembly:
+      relation: mix
+      carrier: body
+      roles:
+        body: {min: 1, note: "the main material; the mix takes its state"}
+        starch: {requires: {starch: [">=high", "supplies starch that sets on heating"]}}
+        dry_phase: {requires: {water_uptake: [">=medium", "takes up free water"]}}
+        coagulant: {requires: {sets_on_heat: [true, "sets on heating and holds the mix"]}}
+        liquid: {requires: {liquid: [true, "a liquid, or a juicy material whose water hydrates the rest", {water: ">=high"}]}}
+        thickener: {note: "mucilage (grated yam) is not a property yet"}
+        fat: {requires: {fat: [">=high", "a fat"]}}
+        leavening: {}
+        flavour: {}
+        inclusion: {}
+    equipment: [bowl]
+    effort: 1
+    outputs:
+      - {kind: state, set: {mixed: true, assembled: true}}
+    changes: "One phase from several separately processed materials"
+    documented_in: [E4a, M3b, A1a, M17a, E12a]
+    evidence: [cia]
+    confidence: established
+
+  incorporer:
+    fr: incorporer
+    en: fold pieces into a matrix (batter, beaten egg)
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "joins several materials; only constructions use it (R3)"
+    requires: {}
+    assembly:
+      relation: matrix
+      carrier: matrix
+      roles:
+        matrix: {min: 1, max: 1, requires: {sets_on_heat: [true, "a matrix that sets around the pieces on heating"], liquid: [true, "a pourable matrix"]}}
+        inclusion: {min: 1}
+    equipment: [bowl]
+    effort: 1
+    outputs:
+      - {kind: state, set: {assembled: true}}
+    changes: "Pieces held in a continuous phase that sets in the pan or oven"
+    documented_in: [E6a, A7a, M12a, M20a, E14a]
+    evidence: [cia]
+    confidence: established
+
+  farcir:
+    fr: farcir
+    en: fill a vessel
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "joins several materials; only constructions use it (R3)"
+    requires: {}
+    assembly:
+      relation: contains
+      carrier: container
+      roles:
+        container:
+          min: 1
+          max: 1
+          requires:
+            hollow: [true, "a hollow to fill"]
+            holds_shape_cooked: [true, "stands through the cooking that follows; a large shell does even when cut pieces go soft", {piece: "large|whole"}]
+        filling: {min: 1, max: 1, requires: {liquid: [false, "a filling, not a sauce"]}}
+    equipment: [spoon]
+    effort: 1
+    outputs:
+      - {kind: state, set: {filled: true, assembled: true}}
+    changes: "A filled vessel; the filling need not hold together by itself"
+    documented_in: [M17a, M17b, M7a, M7b]
+    evidence: [larousse]
+    confidence: established
+
+  envelopper:
+    fr: envelopper (rouler)
+    en: wrap or roll a filling (leaf, sheet, mouldable mass)
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "joins several materials; only constructions use it (R3)"
+    requires: {}
+    assembly:
+      relation: wraps
+      carrier: wrapper
+      roles:
+        wrapper:
+          min: 1
+          max: 1
+          requires:
+            flexible: [true, "bends around the filling without tearing; or a cohesive mass pressed around it", {cohesive: true}]
+            piece: ["large|whole", "large enough to close around the filling; or a cohesive mass", {cohesive: true}]
+        filling: {min: 1, max: 1, requires: {liquid: [false, "a filling, not a sauce"]}}
+    equipment: []
+    effort: 2
+    outputs:
+      - {kind: state, set: {wrapped: true, assembled: true}}
+    changes: "A closed parcel; the wrapper does the holding"
+    documented_in: [E12a, E12b, M11a, M11b]
+    evidence: [larousse]
+    confidence: established
+
+  superposer:
+    fr: superposer (monter en couches)
+    en: layer
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "joins several materials; only constructions use it (R3)"
+    requires: {}
+    assembly:
+      relation: layers
+      carrier: layer
+      roles:
+        layer: {min: 1, requires: {liquid: [false, "a layer is a solid piece"]}}
+        binding: {}
+    equipment: [baking_tray]
+    effort: 1
+    outputs:
+      - {kind: state, set: {layered: true, assembled: true}}
+    changes: "Layers held by a phase that thickens or sets around them, and by the dish"
+    documented_in: [M15a, M15b, M9a, M9b]
+    evidence: [escoffier]
+    confidence: established
+
+  revetir:
+    fr: revêtir (fariner, tremper, paner)
+    en: coat a piece in order (dry, wet, dry)
+    categories: [chemical]
+    generator: false
+    not_generated_because: "joins several materials; only constructions use it (R3); paner and enrober stay the single-material coats"
+    requires: {}
+    assembly:
+      relation: coats
+      carrier: piece
+      roles:
+        piece: {min: 1, max: 1, requires: {liquid: [false, "coats a solid piece"], coated: [false, "already coated"]}}
+        coat: {min: 1, ordered: true, note: "listed in the order applied"}
+    equipment: [bowl]
+    effort: 2
+    outputs:
+      - {kind: state, set: {coated: true, assembled: true}}
+    changes: "A coat that sets in hot fat before the inside can break out"
+    documented_in: [A4a, A6a, A9a, M11a, M13a, M13b, M9a]
+    evidence: [cia]
     confidence: established
 
 # What a material is FOR. Separate from roles (what a plate lacks) and flavour
