@@ -149,9 +149,9 @@ covered rest (M6b). The structure is held from outside until the rice has
 swollen and set.
 
 **H9. A crust as a structural shell.** Frying or baking forms a dry surface
-that holds the piece before the inside has set. Seven sources say not to
+that holds the piece before the inside has set. Eight sources say not to
 turn or touch until the crust has formed, or the cake breaks: E4a, E5a, E7a,
-E19a, M3b, A4a, A6a. A cold pan or cold oil gives fat uptake and breaking
+E19a, M3b, A4a, A6a, A10a. A cold pan or cold oil gives fat uptake and breaking
 (E7a, E19a, M3b, A13b, M13b). A lid traps steam that softens the crust
 (E5c). A second fry re-crisps a crust softened by a wet inside (A12b, A13b-c,
 A3b). In korokke the inside fails the crust: steam from a wet filling bursts

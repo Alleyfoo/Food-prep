@@ -12,7 +12,7 @@ food blogs), so it is one tradition with many voices, not a world sample.
   (gitignored, because it holds recipe sentences): 15 sampled sentences
   per dish and feature.
 - **Run:** 2026-11-24, all 2,231,142 recipes, 149 s. 27 dishes chosen by
-  title, 59,000 recipes in all (largest: vegetable casseroles set with egg,
+  title, 55,036 recipes in all (largest: vegetable casseroles set with egg,
   11,647; smallest: pakora/bhaji, 251).
 
 ## How the rules were checked
