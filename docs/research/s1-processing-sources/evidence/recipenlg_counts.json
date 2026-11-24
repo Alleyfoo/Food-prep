@@ -1,0 +1,68 @@
+{
+ "tomato: in ingredients (baseline)": {
+  "rows": 312317
+ },
+ "tomato: 'concasse'": {
+  "rows": 133
+ },
+ "tomato: blanch + tomato in directions": {
+  "rows": 1892
+ },
+ "tomato: score an X": {
+  "rows": 234
+ },
+ "tomato: 'tomato skin(s)'": {
+  "rows": 329
+ },
+ "tomato: peel tomatoes (directions)": {
+  "rows": 882
+ },
+ "tomato: peeled tomatoes (ingredients)": {
+  "rows": 46811
+ },
+ "tomato: seeded (ingredients)": {
+  "rows": 27316
+ },
+ "tomato: seed/deseed in directions": {
+  "rows": 424
+ },
+ "tomato: cored": {
+  "rows": 5326
+ },
+ "tomato: 'tomato water'": {
+  "rows": 108
+ },
+ "tomato: seeds/pulp/gel kept": {
+  "rows": 3359
+ },
+ "tomato: skins dried or used": {
+  "rows": 57
+ },
+ "tomato: grate (skin left behind)": {
+  "rows": 560
+ },
+ "broccoli: in ingredients (baseline)": {
+  "rows": 52147
+ },
+ "broccoli: florets": {
+  "rows": 10817
+ },
+ "broccoli: stems/stalks": {
+  "rows": 856
+ },
+ "broccoli: stems peeled": {
+  "rows": 203
+ },
+ "broccoli: stems discarded": {
+  "rows": 285
+ },
+ "broccoli: 'broccoli slaw'": {
+  "rows": 565
+ },
+ "broccoli: leaves": {
+  "rows": 36
+ },
+ "broccoli: stems cooked first/longer": {
+  "rows": 50
+ }
+}

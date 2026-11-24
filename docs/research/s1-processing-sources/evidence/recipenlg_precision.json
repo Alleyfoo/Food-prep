@@ -1,0 +1,106 @@
+{
+ "tomato: 'concasse'": {
+  "rows_total": 133,
+  "sampled": 100,
+  "precision": 1.0,
+  "estimated_true": 133,
+  "share_removed": 0.02,
+  "share_canned": 0.06
+ },
+ "tomato: blanch + tomato in directions": {
+  "rows_total": 1892,
+  "sampled": 100,
+  "precision": 0.25,
+  "estimated_true": 473,
+  "share_removed": 0.04,
+  "share_canned": 0.0
+ },
+ "tomato: score an X": {
+  "rows_total": 234,
+  "sampled": 100,
+  "precision": 0.85,
+  "estimated_true": 199,
+  "share_removed": 0.12,
+  "share_canned": 0.01
+ },
+ "tomato: peel tomatoes (directions)": {
+  "rows_total": 882,
+  "sampled": 100,
+  "precision": 1.0,
+  "estimated_true": 882,
+  "share_removed": 0.05,
+  "share_canned": 0.01
+ },
+ "tomato: peeled tomatoes (ingredients)": {
+  "rows_total": 46811,
+  "sampled": 100,
+  "precision": 0.53,
+  "estimated_true": 24810,
+  "share_removed": 0.0,
+  "share_canned": 0.23
+ },
+ "tomato: seeded (ingredients)": {
+  "rows_total": 27316,
+  "sampled": 100,
+  "precision": 0.62,
+  "estimated_true": 16936,
+  "share_removed": 0.0,
+  "share_canned": 0.03
+ },
+ "tomato: cored": {
+  "rows_total": 5326,
+  "sampled": 100,
+  "precision": 0.67,
+  "estimated_true": 3568,
+  "share_removed": 0.01,
+  "share_canned": 0.03
+ },
+ "tomato: 'tomato skin(s)'": {
+  "rows_total": 329,
+  "sampled": 100,
+  "precision": 1.0,
+  "estimated_true": 329,
+  "share_removed": 0.33,
+  "share_canned": 0.02
+ },
+ "tomato: grate (skin left behind)": {
+  "rows_total": 560,
+  "sampled": 100,
+  "precision": 0.1,
+  "estimated_true": 56,
+  "share_removed": 0.3,
+  "share_canned": 0.0
+ },
+ "broccoli: stems/stalks": {
+  "rows_total": 856,
+  "sampled": 100,
+  "precision": 1.0,
+  "estimated_true": 856,
+  "share_removed": 0.1,
+  "share_canned": 0.04
+ },
+ "broccoli: stems peeled": {
+  "rows_total": 203,
+  "sampled": 100,
+  "precision": 1.0,
+  "estimated_true": 203,
+  "share_removed": 0.03,
+  "share_canned": 0.0
+ },
+ "broccoli: stems discarded": {
+  "rows_total": 285,
+  "sampled": 100,
+  "precision": 0.9,
+  "estimated_true": 256,
+  "share_removed": 0.97,
+  "share_canned": 0.0
+ },
+ "broccoli: leaves": {
+  "rows_total": 36,
+  "sampled": 36,
+  "precision": 1.0,
+  "estimated_true": 36,
+  "share_removed": 0.5,
+  "share_canned": 0.06
+ }
+}
