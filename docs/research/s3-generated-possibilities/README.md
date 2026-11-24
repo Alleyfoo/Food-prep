@@ -130,6 +130,28 @@ Pairs listed together, against chance:
 
 ## Limits
 
+These were sharpened by the review of PR #4 (2026-11-24).
+
+- **A label is evidence about the pair, not the preparation.** `label()` uses
+  the ingredient-member count over all recipes. A pair that is common in
+  soups is labelled common when it is suggested for roasting, even if no
+  recipe roasts it. The per-technique counts shown in brackets are recipes
+  whose directions mention the technique *anywhere*, not necessarily for the
+  target ingredient. The output states this scope (`LABEL_SCOPE`) wherever a
+  label appears; a UI must show it too. Labelling per technique would need
+  techniques tied to the ingredient in the directions, which the sentence
+  rules of S2 could provide later.
+- **"Already has it" is an assumption, not a fact.** `already_has()` drops a
+  whole family when the part supplies it at a high level: avocado gets no
+  fat ideas. But sesame oil would still bring an aroma, and another fat can
+  do a different job (crisping, carrying a spice). The rule is deliberate
+  and tested; it should be revisited, for example by keeping members whose
+  mechanism is not the family's main effect.
+- **Counts must match the ontology they were made from.** Both generated
+  files record `families_sha256`, a checksum of the content of
+  families.yaml. The output warns when they differ, and a test fails, so an
+  edited family definition forces a recount (scripts/count_family_pairs.py,
+  ~28 min) before the labels are trusted again.
 - **Counts are co-occurrence, not use.** "Cranberry with broccoli" in 48
   recipes says they share a list (often a salad), not that cranberry acts
   as the acid. Rare and not seen are what this method trusts; common means
