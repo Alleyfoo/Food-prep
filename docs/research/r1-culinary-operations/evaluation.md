@@ -184,6 +184,10 @@ combination. The web check is the better judge of established practice.
   "no evidence found" in English but is a documented Portuguese preparation
   (*esparguete verde*). Every "no evidence found" here is provisional until
   searched in other culinary languages.
+- **"Established path" overstates.** The label means every operation is
+  documented on the starting material, not that the whole sequence is a
+  documented preparation. The term should be refined (raised in the PR #5
+  review).
 - **No recombination.** The engine branches materials but cannot put
   processed materials back together: stuffed courgette, peel cake, farces,
   fritters. Two of the four Portuguese preparations need it (`benchmark.md`).
