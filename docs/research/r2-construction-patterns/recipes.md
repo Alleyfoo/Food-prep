@@ -101,10 +101,10 @@ Corpus evidence (RecipeNLG, mostly North American) is separate:
 ### E3a. "wg Magdy Gessler" (smaker.pl user recipe, Polish)
 1. Grate 1 kg potatoes and 2 onions on a **fine** grater.
 2. Tip onto a sieve over a bowl and press gently.
-3. Pour off the liquid. Return the starch from the bottom to the mass.
-4. Add 2 eggs, 2–3 tbsp wheat flour per kg, optional garlic.
-5. Add 1 tbsp sour cream. **Source says** it "zapobiegnie jej ciemnieniu" (prevents darkening).
-6. Fry in oil or lard, golden on both sides.
+3. Mix the potato with 2 eggs, 2–3 tbsp wheat flour per kg, optional garlic.
+4. Pour the juice off the bowl gently, leaving the potato starch at the bottom. Add that starch to the mass with 1 tbsp sour cream. **Source says** the sour cream "zapobiegnie jej ciemnieniu" (prevents darkening).
+5. Season and fry in oil or lard, golden on both sides.
+- *Spot check 2026-11-24 (raw page text): step order corrected; egg and flour go in before the starch is returned.*
 - **Holding:** returned starch + egg + flour.
 
 ### E3b. "Chrupiące placki ziemniaczane" (smaker.pl user recipe, Polish)
@@ -144,10 +144,11 @@ Corpus evidence (RecipeNLG, mostly North American) is separate:
 1. Grate potato and onion coarse.
 2. **Salt, cover and rest 5–7 min.**
 3. Press through a colander or cheesecloth and keep the juice. **Source says** "Важно хорошо отжать жидкость", so they cook evenly and don't fall apart.
-4. Let the juice stand about 10 min. Pour off the water and return the settled starch. **Source says** it densifies the mass so the draniki hold.
-5. Add 1 egg and 1 tbsp flour per 600 g potato. The flour is kept low on purpose so the potato taste dominates.
-6. Pan with oil, about 1 tbsp of mass each, pressed lightly. Medium heat, 4–5 min per side. Don't turn before the crust forms.
-- **Reader comments (not the author's method):** Belarusian commenters describe potato + salt only, and say egg and flour turn draniki into "оладьи" (pancakes). They prefer the finest grater.
+4. Mix the potato with 1 egg, 1 tbsp flour per 600 g potato and salt. The flour is kept low on purpose so the potato taste dominates.
+5. When a sediment has formed in the juice, pour off the liquid and stir the starch into the potato. No reason is given for this step.
+6. Pan with oil, about 1 tbsp of mass each, pressed lightly. Medium heat, 4–5 min per side. Don't turn before the golden crust forms.
+- *Spot check 2026-11-24 (raw page text): step order corrected; an earlier "about 10 min" standing time and a stated reason for returning the starch ("densifies the mass") are not on the page and were removed.*
+- **Reader comments (not the author's method; not visible in the raw re-read, so unverified):** Belarusian commenters describe potato + salt only, and say egg and flour turn draniki into "оладьи" (pancakes). They prefer the finest grater.
 
 ### E5b. AiF (aif.ru, Russian, 2014), presented as the Belarusian classic
 1. Have everything ready before you start. Grate the potato **last**, on the **finest** grater, together with onion. **Source says** "Луковый сок не даст картошке потемнеть".
@@ -979,8 +980,10 @@ URL: https://www.directoalpaladar.com/recetas-de-aperitivos/croquetas-jamon-iber
 7. Fry 4-5 at a time in very hot oil.
 - Source says: milk in small additions avoids lumps; small batches in very hot oil keep them from
   bursting.
-- Caution: the fetch rendered the flour as "1 heaping tablespoon" for 600 ml milk, which is far
-  too little for a shapeable dough; treat that quantity as unverified.
+- Source also says: cover the béchamel with film so it does not form a skin.
+- Quantity: the page itself lists "1 cucharada sopera colmada" (1 heaping tablespoon) of flour
+  for 600 ml milk (confirmed in the raw page text, 2026-11-24). The rendering was faithful; the
+  quantity is far too little for a shapeable dough, so it is probably an error in the source.
 
 ### M13b. Directo al Paladar, "Arguiñano tiene la clave para que las croquetas no se te rompan"
 (Spanish)

@@ -54,7 +54,7 @@ successfully for other pastes.
 | --- | --- | --- |
 | canned white beans (in the catalogue) | **no**: cooked pulses do not make a C3 paste; they become a binder-held mash (C4-like) | evidence: every native falafel recipe uses raw pulses; the cooked American version adds flour/crumbs/egg |
 | dried chickpeas, dried fava | yes, if available | documented: M1, M2. Availability not checked |
-| dried yellow or green split peas (Finnish pea-soup staple) | probably: a soaked raw pulse | **inference**, not searched. Next search: split-pea or chana-dal vadas and fritters in Hindi, Gujarati or Bengali sources |
+| dried yellow or green split peas (Finnish pea-soup staple) | probably: a soaked raw pulse | **inference**, not searched. One weak hint: a reader comment on A18a reports akara made from red lentils. Next search: split-pea, chana-dal or lentil vadas and fritters in Hindi, Gujarati or Bengali sources |
 
 ### C4. Bound watery vegetable (water >= high, starch low; water removed or used; dry phase + usually egg)
 

@@ -53,11 +53,69 @@ evidence.
   pulse paste (3 regions), cooling before shaping (13 traditions) and not
   turning before the crust has set (7 traditions).
 
+## Spot check of `recipes.md` against the source pages
+
+On 2026-11-24, 12 recipes were re-read as **raw page text** in the built-in
+browser (`get_page_text`, or a DOM text extract with `javascript_exec` where
+the page text was too long). No summarising tool was used, and every page
+loaded. The sample was stratified:
+- 3 E, 4 M, 5 A recipes, in 10 languages;
+- M13a, the quantity flagged earlier;
+- the recipes behind the strongest convergences: settled starch returned
+  (German, Polish, Russian, Korean) and raw pulse paste without binder
+  (falafel, vada, akara);
+- the salt-and-squeeze courgette filling;
+- the own-juice batter;
+- a stuffed vegetable that gets its own flesh back.
+
+Each was checked for the operation sequence and its order, the essential
+steps, the quantities behind a claim, and the stated reasons. A **major**
+discrepancy would be one that changes a mechanism, pattern or convergence
+claim.
+
+| Id | URL | Language | Read as | Result | Correction |
+| --- | --- | --- | --- | --- | --- |
+| E2b | https://www.koeln.de/?p=76323 | German | raw page text | match | none. Sieve, 15 min, settled starch returned, 2 eggs + 2 tbsp flour or oats per kg; no reason given, as recorded |
+| E3a | smaker.pl …placki-ziemniaczane-wg-magdy-gessler… | Polish | raw page text | minor | order: egg and flour are mixed in **before** the starch is returned (with the sour cream). Starch return, quantities and the sour-cream reason confirmed |
+| E5a | https://t-j.ru/draniki/ | Russian | raw page text (after a bot-check redirect) | minor | order: egg and flour before the starch. "About 10 min" standing time and the stated reason "densifies the mass" are **not on the page**; removed. Salt 5-7 min, squeeze reason, 1 egg + 1 tbsp flour per 600 g, crust before turning confirmed. Reader comments not visible in the raw read: marked unverified |
+| M2a | mawdoo3.com …الفلافل_الشامية | Arabic | raw page text | match | raw chickpeas soaked overnight; canned as an alternative in the list; blend, spices, baking powder, shape, fry; no egg, flour or bread |
+| M12c | https://andaluciainforma.es/?p=14348 | Spanish | DOM text extract | match | 135-140 °C 15 min "to dehydrate the potato"; hot potato into 9 beaten eggs; rest 15 min so it "drinks" the egg |
+| M13a | directoalpaladar.com …croquetas-jamon-iberico-huevo-duro… | Spanish | raw page text | minor | the page itself says "1 cucharada sopera colmada" of flour for 600 ml milk: the rendering was faithful, and the error is probably the source's. Omitted stated reason added: film so the béchamel does not form a skin |
+| M17a | gustoblog.it …zucchine-ripiene-alla-ligure… | Italian | DOM text extract | match | blanch 10 min, scoop, chop, cook the flesh with onion, eggs + parmesan + ricotta, crumbs "per compattare", bake 200 °C 30 min |
+| A3a | hebbarskitchen.com/hi/medu-vada-recipe-medhu-vadai/ | Hindi | DOM text extract | match | 3 h soak, longer absorbs oil (more than 4 h watery), 4 tbsp water, beat in circles for air, 2 tbsp rice flour, salt just before frying |
+| A9b | https://www.10000recipe.com/recipe/6855442 | Korean | DOM text extract | match | shred, salt, 5 min until water comes out, add (wheat) flour, "물은 넣지 마세요"; a reviewer added egg when it fell apart |
+| A10a | https://www.10000recipe.com/recipe/6850115 | Korean | DOM text extract | match | blend with water, sieve, settle, pour off, starch "핵심 포인트", salt only, flip once |
+| A11a | https://post.smzdm.com/p/ak852x3r/ | Chinese | DOM text extract | match | salt 10 min "非常关键" against wrapper splitting, squeeze hard, rough chop, cooled scrambled egg, stir one way, salt last |
+| A18a | https://ounjealadun.com/2015/03/14/secret-to-great-akara-balls/ | English | raw page text | match | never too much water, aerate until doubled, fold pepper in three additions, salt last, deep pan; eggs tried and dropped |
+
+**Effect on the findings: none.**
+- No mechanism, pattern or convergence changes. Convergence 1 (settled
+  starch returned) stands on the step itself, which all four sampled
+  recipes confirm. E5a was never cited for a stated reason in
+  `mechanisms.md`.
+- The order corrections do not touch any claim: no finding depends on
+  whether egg goes in before or after the starch.
+
+One useful side note from A18a's comments: a reader reports making akara
+from red lentils. It is weak evidence, but it bears on the split-pea row in
+`transfers.md`.
+
 ## Limits of this round
 
-- **Read through summaries.** Agents read pages through a fetch tool that
-  summarises; the paraphrases rest on that. A spot check by re-reading a page
-  was not done this round. One implausible quantity is flagged (M13a).
+- **Read through summaries, spot-checked.** Agents read pages through a
+  fetch tool that summarises, and the paraphrases rest on that. A stratified
+  sample of 12 of the 127 was re-read as raw page text (see "Spot check"
+  below). 9 matched, 3 had minor discrepancies, none major. The errors found
+  were a changed step order (twice), a standing time and a stated reason that
+  the page does not give (E5a), and an omitted stated reason (M13a).
+  - The summariser tends to **smooth sequences into a tidier order** and,
+    once in the sample, **supplied a plausible reason** the page does not
+    state.
+  - The other 115 recipes were not re-read. Treat their step order and
+    "source says" reasons as reliable to roughly this level. The steps
+    themselves and the quantities matched in every sampled case.
+  - The M13a flour quantity is on the page itself, so the error is the
+    source's, not the tool's.
 - **Independence is uneven.** Some sites contribute several recipes
   (yemek.com, Mawdoo3, 10000recipe, mtvuutiset.fi), and some witnesses are
   copies or diffusion (M19b, A2b, A18c). `sources.md` lists them.

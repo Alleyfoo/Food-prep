@@ -9,8 +9,10 @@
   recipe behind a URL) are listed (here, or for E under "Gaps and caveats (E)"
   in `recipes.md`) and not used. Pages were read through a
   fetch tool that renders and summarises a page; the recipe paraphrases in
-  `recipes.md` rest on that rendering, and one quantity it rendered
-  implausibly (M13a flour) is marked unverified there.
+  `recipes.md` rest on that rendering. A stratified sample of 12 was re-read
+  as raw page text on 2026-11-24 (`evaluation.md`, "Spot check"): 9 matched,
+  3 had minor discrepancies, none major. The implausible M13a flour quantity
+  is on the page itself.
 - **Independence.** Several pages are not independent witnesses, and are
   counted as one: M19b copies M19a; A2b closely follows A2a; three
   karnıyarık recipes (M5) come from one site; several Mawdoo3 pages share a
