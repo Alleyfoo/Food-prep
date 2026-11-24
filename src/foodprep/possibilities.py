@@ -4,7 +4,8 @@ The idea (ADR 0002, S2 and S3 notes): recipes only tell us what cooks already
 do. Possibilities come from three hand-curated tables instead:
 
 - part_properties.yaml: what a part physically is (water, fibre, fat, ...);
-- technique_rules.yaml: what a technique needs from a part and what it does;
+- operations.yaml: what a technique needs from a part and what it does (the
+  operations marked family_state, under their generator_id);
 - families.yaml: families of what an ingredient brings (acid, fat, salt,
   umami, sweet, protein, carb), their members, and the mechanisms by which a
   member changes or completes a part in a given state.
@@ -72,6 +73,29 @@ def _edibility() -> dict[tuple[str, str], tuple[str, str | None]]:
             for p in data.get("parts", [])}
 
 
+def family_techniques() -> dict[str, dict]:
+    """The family generator's techniques: the operations marked family_state,
+    keyed by generator_id, with each requirement reduced to its test. The
+    operation model's `why` texts and waivers are not used here, so the family
+    generator behaves exactly as with the former technique_rules.yaml."""
+    data = pc.load_yaml(DATA / "operations.yaml")
+    by_id = {op["generator_id"]: op for op in data["operations"].values()
+             if op.get("family_state")}
+    out = {}
+    for gid in data["family_states"]:
+        op = by_id[gid]
+        requires = {k: (v[0] if isinstance(v, list) else v)
+                    for k, v in (op.get("requires") or {}).items()}
+        out[op["generator_id"]] = {
+            "requires": requires,
+            "effects": op.get("effects", []),
+            "does": op["does"],
+            "corpus": op["corpus"],
+            **({"except": op["except"]} if op.get("except") else {}),
+        }
+    return out
+
+
 @lru_cache(maxsize=1)
 def load_tables() -> Tables:
     props = pc.load_yaml(DATA / "part_properties.yaml")["parts"]
@@ -84,7 +108,7 @@ def load_tables() -> Tables:
     fam = pc.load_yaml(pc.FAMILIES_PATH)
     return Tables(
         parts=parts,
-        techniques=pc.load_yaml(DATA / "technique_rules.yaml")["techniques"],
+        techniques=family_techniques(),
         families=fam["families"],
         members=fam["members"],
         notes=fam.get("pairing_notes", []),

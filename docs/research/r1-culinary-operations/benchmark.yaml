@@ -1,0 +1,108 @@
+# Benchmark: established preparations the generator should recover.
+#
+# Each item is a preparation documented outside the model: the web check of
+# existing practice (sources.md, web_… ids) or the curated transformations in
+# tomato.yaml (curated:…). An item is a starting part and an operation
+# sequence; benchmark.py applies the sequence, identifies the final material,
+# and looks for it in the generator's output.
+#
+# Not every item is a fair test, and the score must say so:
+# - The property values in part_properties.yaml were written by the same author
+#   who knew these preparations. That leakage cannot be removed, only named.
+# - `established_on` in operations.yaml was filled partly from the same web
+#   check. benchmark.py ranks with it switched off (use_established=False) to
+#   remove that leak.
+# - `expect: blocked` marks items the model is known to reject, with the reason.
+# - `expect: beyond_depth` marks items longer than the generator's depth (3).
+# - `expect: not_representable` marks items that need an operation the engine
+#   does not have (recombining processed materials, mixing into a batter); they
+#   are listed for the record and not evaluated.
+#
+# Matching is by final MATERIAL, not by exact sequence: an item counts as
+# recovered when the generator reaches the same material (same part, fraction,
+# properties and added ingredients), whichever path it shows. That is the right
+# test for material discovery, and it is stated in the results.
+
+items:
+  # ---- broccoli --------------------------------------------------------------
+  - {id: brocc_steam, ingredient: broccoli, part: florets, sequence: [cuire_vapeur], source: curated:steam}
+  - {id: brocc_roast, ingredient: broccoli, part: florets, sequence: [rotir], source: curated:roast}
+  - {id: brocc_stirfry, ingredient: broccoli, part: florets, sequence: [sauter_wok], source: curated:stir_fry}
+  - {id: brocc_puree, ingredient: broccoli, part: florets, sequence: [blanchir, reduire_puree, "passer_chinois:passed"], source: web_b5}
+  - {id: stem_noodles, ingredient: broccoli, part: stems, sequence: ["eplucher:inner", rubans], source: web_b1}
+  - {id: stem_slaw, ingredient: broccoli, part: stems, sequence: ["eplucher:inner", julienne], source: curated:raw_slaw}
+  - {id: stem_stirfry, ingredient: broccoli, part: stems, sequence: ["eplucher:inner", emincer, sauter_wok], source: curated:stir_fry}
+  - {id: stem_pickle, ingredient: broccoli, part: stems, sequence: ["eplucher:inner", emincer, acidifier], source: web_b4}
+  - {id: stem_ferment, ingredient: broccoli, part: stems, sequence: ["eplucher:inner", emincer, fermenter], source: web_b6}
+  - {id: leaf_saute, ingredient: broccoli, part: leaves, sequence: [sauter], source: curated:saute}
+  - {id: leaf_chips, ingredient: broccoli, part: leaves, sequence: ["equeuter:blades", rotir], source: web_b3}
+
+  # ---- carrot ----------------------------------------------------------------
+  - {id: carrot_juice, ingredient: carrot, part: root, sequence: [raper, "presser:juice"], source: web_c5}
+  - {id: carrot_glaze, ingredient: carrot, part: root, sequence: ["presser:juice", reduire, monter_beurre], source: web_c5}
+  - {id: pulp_crackers, ingredient: carrot, part: root, sequence: [raper, "presser:pulp", cuire_four], source: web_c1}
+  - {id: carrot_ribbons, ingredient: carrot, part: root, sequence: [rubans], source: web_c3}
+  - {id: carottes_glacees, ingredient: carrot, part: root, sequence: [rondelles, glacer], source: escoffier}
+  - {id: carrot_roast, ingredient: carrot, part: root, sequence: [batonnet, rotir], source: cia}
+  - {id: top_pesto, ingredient: carrot, part: greens, sequence: ["effeuiller:fronds", hacher, piler], source: web_c4}
+  - {id: peel_crisps, ingredient: carrot, part: root, sequence: ["eplucher:peel", frire], source: web_c2}
+  - {id: peel_powder, ingredient: carrot, part: root, sequence: ["eplucher:peel", deshydrater, moudre], source: web_c6}
+
+  # ---- courgette -------------------------------------------------------------
+  - {id: zoodles, ingredient: courgette, part: fruit, sequence: [rubans], source: web_z4}
+  - {id: fritter_base, ingredient: courgette, part: fruit, sequence: [raper, "degorger:drained"], source: web_z2}
+  - {id: courgette_water, ingredient: courgette, part: fruit, sequence: [raper, "degorger:vegetable_water"], source: web_z3}
+  - {id: courgette_chips, ingredient: courgette, part: fruit, sequence: [emincer, deshydrater], source: web_z5}
+  - {id: stuffed, ingredient: courgette, part: fruit, sequence: ["evider:shell", cuire_four], source: larousse}
+  - {id: courgette_saute, ingredient: courgette, part: fruit, sequence: [rondelles, sauter], source: cia}
+  - {id: courgette_grill, ingredient: courgette, part: fruit, sequence: [quartiers, griller], source: cia}
+
+  # ---- tomato ----------------------------------------------------------------
+  - {id: skin_powder, ingredient: tomato, part: skin, sequence: [deshydrater, moudre], source: web_t1}
+  - {id: skin_crisps, ingredient: tomato, part: skin, sequence: [frire], source: web_t4}
+  - {id: tomato_water, ingredient: tomato, part: seeds_and_gel, sequence: [filtrer], source: web_t2}
+  - {id: consomme, ingredient: tomato, part: seeds_and_gel, sequence: [clarifier], source: web_t2}
+  - {id: core_stock, ingredient: tomato, part: core, sequence: ["decocter:decoction"], source: web_t5}
+  - {id: tomato_roast, ingredient: tomato, part: flesh, sequence: [rotir], source: curated:roast}
+  - {id: tomato_sauce, ingredient: tomato, part: flesh, sequence: [mijoter], source: curated:simmer}
+  - {id: salted_tomato, ingredient: tomato, part: flesh, sequence: ["degorger:drained"], source: curated:salt_and_drain}
+  - {id: concasse, ingredient: tomato, part: flesh, sequence: [concasser], source: escoffier}
+  - {id: tomato_confit, ingredient: tomato, part: flesh, sequence: [confire], source: larousse}
+
+  # ---- avocado ---------------------------------------------------------------
+  - {id: avocado_fries, ingredient: avocado, part: flesh, sequence: [paner, frire], source: web_a4}
+  - {id: grilled_avocado, ingredient: avocado, part: flesh, sequence: [quartiers, griller], source: web_a3}
+  - {id: guacamole_base, ingredient: avocado, part: flesh, sequence: [ecraser], source: cia}
+  - {id: avocado_mayo, ingredient: avocado, part: flesh, sequence: [reduire_puree, emulsionner], source: web_a1}
+  # ---- Portuguese preparations (supplied by the user, 2026-11-24) -------------
+  # Found after the English-only web check had called Z-1 "no evidence found".
+  - {id: esparguete_verde, ingredient: courgette, part: fruit, sequence: ["eplucher:peel", sauter], source: pt_esparguete_verde}
+  - id: esparregado_curgete
+    ingredient: courgette
+    part: fruit
+    sequence: [raper, "degorger:drained", sauter, mixer]
+    source: pt_esparregado
+    expect: beyond_depth
+    why: "four steps (grate, squeeze, saute, partly blend); the generator stops at three"
+  - id: curgete_recheada
+    ingredient: courgette
+    part: fruit
+    sequence: ["evider:shell"]
+    source: pt_recheada
+    expect: not_representable
+    why: "hollow, then combine the scooped flesh with a filling, reassemble and bake: needs recombination"
+  - id: bolo_casca_curgete
+    ingredient: courgette
+    part: fruit
+    sequence: ["eplucher:peel", broyer]
+    source: pt_bolo_casca
+    expect: not_representable
+    why: "separate and grind the peel, then mix into a cake batter and bake: needs incorporation into a composite"
+
+  - id: pickled_avocado
+    ingredient: avocado
+    part: flesh
+    sequence: [acidifier]
+    source: web_a2
+    expect: blocked
+    why: "established only for firm, underripe fruit; the model holds ripe flesh and has no ripeness property"

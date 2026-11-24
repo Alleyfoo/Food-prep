@@ -125,6 +125,28 @@ def cmd_family_profile(args: argparse.Namespace) -> int:
     return 1 if out.startswith("No ") else 0
 
 
+def cmd_applicability(args: argparse.Namespace) -> int:
+    """Which culinary operations apply to each part of an ingredient, and why."""
+    from foodprep import operations
+    out = operations.render_applicability(args.ingredient, args.part)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
+
+
+def cmd_explore(args: argparse.Namespace) -> int:
+    """Bounded operation sequences (depth 3); hypotheses, not recipes.
+
+    Default: grouped by culinary function, simplest first (the benchmark's best
+    view). --global gives the global ranking, kept for research and diagnosis."""
+    from foodprep import operations
+    if args.global_ranking:
+        out = operations.render_explore(args.ingredient, args.part, top=args.top)
+    else:
+        out = operations.render_by_function(args.ingredient, args.part, k=args.top_per_function)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -356,6 +378,26 @@ def build_parser() -> argparse.ArgumentParser:
                          help="Families cooks add to an ingredient, against the model's gaps")
     pfp.add_argument("ingredient", nargs="?", default="broccoli")
     pfp.set_defaults(func=cmd_family_profile)
+
+    pap = sub.add_parser("applicability",
+                         help="Which culinary operations apply to an ingredient's parts, and why")
+    pap.add_argument("ingredient", nargs="?", default="broccoli")
+    pap.add_argument("--part", help="only this part, e.g. stems")
+    pap.set_defaults(func=cmd_applicability)
+
+    pex = sub.add_parser("explore",
+                         help="Operation sequences (depth 3) by culinary function, simplest first")
+    pex.add_argument("ingredient", nargs="?", default="broccoli")
+    pex.add_argument("--part", help="only this part")
+    view = pex.add_mutually_exclusive_group()
+    view.add_argument("--by-function", action="store_true",
+                      help="group by culinary function, simplest first (the default)")
+    view.add_argument("--global", dest="global_ranking", action="store_true",
+                      help="global ranking instead (research and diagnostic view)")
+    pex.add_argument("--top-per-function", type=int, default=3,
+                     help="sequences per function (default view)")
+    pex.add_argument("--top", type=int, default=8, help="sequences to show with --global")
+    pex.set_defaults(func=cmd_explore)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

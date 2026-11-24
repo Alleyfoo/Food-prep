@@ -10,6 +10,18 @@ preparations:
   - {id: separated, name: Separated, definition: Divided along meaningful anatomical parts such as stems and florets.}
   - {id: peeled, name: Peeled, definition: Outer skin or layer removed.}
   - {id: scored, name: Scored, definition: Surface cut shallowly to alter heat or seasoning penetration.}
+  # Classical French cuts (Culinary Operations R1, operations.yaml).
+  - {id: julienne, name: Julienne, definition: "Matchsticks about 3 x 3 mm x 4-6 cm."}
+  - {id: brunoise, name: Brunoise, definition: "Fine dice about 3 mm, cut across julienne."}
+  - {id: batonnet, name: Batonnet, definition: "Sticks about 6 x 6 mm x 5-6 cm."}
+  - {id: macedoine, name: Macedoine, definition: "Small dice about 5 mm."}
+  - {id: paysanne, name: Paysanne, definition: "Thin flat pieces about 12 x 12 x 3 mm."}
+  - {id: chiffonade, name: Chiffonade, definition: "Leaves rolled and cut into fine ribbons."}
+  - {id: tourne, name: Tourne, definition: "Carved seven-sided barrels about 5 cm long."}
+  - {id: rondelles, name: Rondelles, definition: "Discs cut across a cylinder."}
+  - {id: ribbons, name: Ribbons, definition: "Long thin strips from a peeler, mandoline or spiraliser."}
+  - {id: wedges, name: Wedges, definition: "Lengthwise wedges of a round or cylindrical body."}
+  - {id: troncons, name: Troncons, definition: "Thick sections cut across an elongated body."}
 
 # When a filler meets the food. The distinction matters because it tracks
 # whether anyone can taste the choice: what you roast IN is often

@@ -23,7 +23,7 @@ Three hand-curated tables, none of them built from recipes:
 | Table | Holds | Example |
 | --- | --- | --- |
 | `part_properties.yaml` | What a part physically is: water, fibre, toughness, fat, sugar, acidity, bitterness, pigment, flavour | Broccoli stems: medium water, high fibre, sweet, mild, green |
-| `technique_rules.yaml` | What a technique needs from a part, and what it does | Frying needs medium water or less; it browns and crisps |
+| `technique_rules.yaml` (since Culinary Operations R1: the family states of `operations.yaml`) | What a technique needs from a part, and what it does | Frying needs medium water or less; it browns and crisps |
 | `families.yaml` | Families (acid, fat, salt, umami, sweet, protein, carb), their members with a level in each family, and the mechanisms by which a member changes or completes a part | Lingonberry: acid very high, astringent, keeps raw; `quick_pickle` needs a firm part and a strong liquid acid |
 
 part × technique gives a state. state × acid mechanism × acid source gives
