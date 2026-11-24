@@ -100,6 +100,15 @@ def cmd_parts(args: argparse.Namespace) -> int:
     return 0 if d else 1
 
 
+def cmd_possible(args: argparse.Namespace) -> int:
+    """Part x technique x acid ideas, labelled (not chosen) by RecipeNLG."""
+    from foodprep import possibilities
+    out = possibilities.render(args.ingredient, part=args.part,
+                               show_all=args.all, limit=args.limit)
+    print(out, end="")
+    return 1 if out.startswith("No part properties") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -312,6 +321,15 @@ def build_parser() -> argparse.ArgumentParser:
     ppt = sub.add_parser("parts", help="What an ingredient holds and what each part becomes")
     ppt.add_argument("ingredient", nargs="?", default="broccoli")
     ppt.set_defaults(func=cmd_parts)
+
+    ppo = sub.add_parser("possible",
+                         help="What each part could become with acid, beyond what recipes show")
+    ppo.add_argument("ingredient", nargs="?", default="broccoli")
+    ppo.add_argument("--part", help="only this part, e.g. stems")
+    ppo.add_argument("--all", action="store_true",
+                     help="also show what recipes already do")
+    ppo.add_argument("--limit", type=int, default=8, help="ideas per part")
+    ppo.set_defaults(func=cmd_possible)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

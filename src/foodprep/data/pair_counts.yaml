@@ -1,0 +1,459 @@
+# How often RecipeNLG lists each target ingredient with each acid source:
+# GENERATED, do not hand-edit.
+#
+# Regenerate: py -3.11 scripts/count_acid_pairs.py [path-to-full_dataset.csv]
+#
+# Counts recipes, from the ingredient list (targets, sources) and the
+# directions (techniques, as in part_evidence.TECHNIQUES). foodprep.possibilities
+# uses them only to label generated ideas as common, rare or not seen.
+# Mostly American home cooking: absence means not done here, never not good.
+#
+# RecipeNLG's terms allow non-commercial research and educational use only.
+# Only counts are kept here, never recipe text.
+corpus:
+  corpus_id: recipenlg
+  name: RecipeNLG
+  source_path: data/corpus/recipenlg
+  terms: non-commercial research and educational use only; counts only
+  search_date: '2026-11-24'
+recipes: 2231142
+targets:
+  tomato: 312317
+  broccoli: 49247
+  avocado: 26840
+sources:
+  lemon: 239743
+  lime: 74602
+  vinegar: 197827
+  lingonberry: 222
+  cranberry: 24440
+  sea_buckthorn: 4
+  redcurrant: 1207
+  rhubarb: 6600
+  sorrel: 413
+  sumac: 877
+  tamarind: 2116
+  green_mango: 532
+  tomato_gel: 312317
+pairs:
+  tomato:
+    lemon: 31103
+    lime: 15909
+    vinegar: 41224
+    lingonberry: 1
+    cranberry: 391
+    sea_buckthorn: 0
+    redcurrant: 61
+    rhubarb: 34
+    sorrel: 43
+    sumac: 280
+    tamarind: 525
+    green_mango: 118
+    tomato_gel: 312317
+  broccoli:
+    lemon: 4680
+    lime: 584
+    vinegar: 5200
+    lingonberry: 0
+    cranberry: 48
+    sea_buckthorn: 0
+    redcurrant: 9
+    rhubarb: 1
+    sorrel: 5
+    sumac: 4
+    tamarind: 17
+    green_mango: 1
+    tomato_gel: 5191
+  avocado:
+    lemon: 6917
+    lime: 9416
+    vinegar: 4067
+    lingonberry: 0
+    cranberry: 41
+    sea_buckthorn: 0
+    redcurrant: 1
+    rhubarb: 3
+    sorrel: 10
+    sumac: 14
+    tamarind: 21
+    green_mango: 4
+    tomato_gel: 12855
+techniques:
+  tomato:
+    stir_fry: 5043
+    steam: 6268
+    roast: 14198
+    saute: 58165
+    boil: 143824
+    bake: 89859
+    grill: 23524
+    fry: 22558
+    soup: 67997
+    raw: 24045
+    dry: 74996
+  broccoli:
+    stir_fry: 3005
+    steam: 3315
+    roast: 947
+    saute: 7472
+    boil: 14721
+    bake: 23395
+    grill: 1083
+    fry: 2215
+    soup: 16201
+    raw: 3502
+    dry: 5171
+  avocado:
+    stir_fry: 190
+    steam: 426
+    roast: 1127
+    saute: 2184
+    boil: 5095
+    bake: 3946
+    grill: 3311
+    fry: 1846
+    soup: 7014
+    raw: 4765
+    dry: 5269
+triples:
+  tomato:
+    stir_fry:
+      lemon: 499
+      lime: 377
+      vinegar: 708
+      cranberry: 2
+      rhubarb: 1
+      sorrel: 2
+      sumac: 5
+      tamarind: 74
+      green_mango: 11
+      tomato_gel: 5043
+    steam:
+      lemon: 917
+      lime: 404
+      vinegar: 943
+      cranberry: 10
+      redcurrant: 1
+      sorrel: 4
+      sumac: 5
+      tamarind: 35
+      green_mango: 8
+      tomato_gel: 6268
+    roast:
+      lemon: 1935
+      lime: 976
+      vinegar: 2965
+      cranberry: 32
+      redcurrant: 8
+      rhubarb: 4
+      sorrel: 3
+      sumac: 23
+      tamarind: 57
+      green_mango: 15
+      tomato_gel: 14198
+    saute:
+      lemon: 4993
+      lime: 2363
+      vinegar: 5125
+      cranberry: 74
+      redcurrant: 10
+      rhubarb: 6
+      sorrel: 9
+      sumac: 35
+      tamarind: 117
+      green_mango: 20
+      tomato_gel: 58165
+    boil:
+      lemon: 12498
+      lime: 5295
+      vinegar: 17344
+      lingonberry: 1
+      cranberry: 237
+      redcurrant: 42
+      rhubarb: 16
+      sorrel: 20
+      sumac: 65
+      tamarind: 358
+      green_mango: 60
+      tomato_gel: 143824
+    bake:
+      lemon: 6094
+      lime: 2276
+      vinegar: 7094
+      cranberry: 99
+      redcurrant: 24
+      rhubarb: 12
+      sorrel: 3
+      sumac: 83
+      tamarind: 49
+      green_mango: 10
+      tomato_gel: 89859
+    grill:
+      lemon: 4088
+      lime: 2649
+      vinegar: 5040
+      cranberry: 26
+      redcurrant: 10
+      rhubarb: 1
+      sorrel: 2
+      sumac: 50
+      tamarind: 43
+      green_mango: 5
+      tomato_gel: 23524
+    fry:
+      lemon: 2108
+      lime: 1187
+      vinegar: 2241
+      cranberry: 24
+      redcurrant: 9
+      rhubarb: 3
+      sorrel: 5
+      sumac: 18
+      tamarind: 144
+      green_mango: 37
+      tomato_gel: 22558
+    soup:
+      lemon: 7009
+      lime: 4567
+      vinegar: 9300
+      cranberry: 123
+      redcurrant: 20
+      rhubarb: 9
+      sorrel: 14
+      sumac: 46
+      tamarind: 209
+      green_mango: 30
+      tomato_gel: 67997
+    raw:
+      lemon: 5292
+      lime: 1998
+      vinegar: 7050
+      lingonberry: 1
+      cranberry: 37
+      redcurrant: 4
+      rhubarb: 4
+      sorrel: 11
+      sumac: 112
+      tamarind: 53
+      green_mango: 16
+      tomato_gel: 24045
+    dry:
+      lemon: 6612
+      lime: 3923
+      vinegar: 8217
+      lingonberry: 1
+      cranberry: 108
+      redcurrant: 12
+      rhubarb: 12
+      sorrel: 9
+      sumac: 105
+      tamarind: 282
+      green_mango: 72
+      tomato_gel: 74996
+  broccoli:
+    stir_fry:
+      lemon: 161
+      lime: 118
+      vinegar: 431
+      tamarind: 8
+      tomato_gel: 199
+    steam:
+      lemon: 508
+      lime: 70
+      vinegar: 380
+      cranberry: 4
+      redcurrant: 3
+      sorrel: 1
+      sumac: 2
+      tamarind: 4
+      green_mango: 1
+      tomato_gel: 329
+    roast:
+      lemon: 221
+      lime: 50
+      vinegar: 161
+      cranberry: 2
+      redcurrant: 3
+      sumac: 1
+      tamarind: 1
+      tomato_gel: 171
+    saute:
+      lemon: 469
+      lime: 93
+      vinegar: 337
+      cranberry: 3
+      redcurrant: 2
+      rhubarb: 1
+      sorrel: 1
+      tamarind: 5
+      tomato_gel: 844
+    boil:
+      lemon: 1579
+      lime: 290
+      vinegar: 1092
+      cranberry: 8
+      redcurrant: 3
+      rhubarb: 1
+      sorrel: 4
+      sumac: 2
+      tamarind: 13
+      tomato_gel: 2003
+    bake:
+      lemon: 2327
+      lime: 86
+      vinegar: 326
+      cranberry: 12
+      redcurrant: 7
+      sumac: 2
+      tamarind: 1
+      tomato_gel: 1598
+    grill:
+      lemon: 133
+      lime: 47
+      vinegar: 130
+      redcurrant: 1
+      sumac: 1
+      tomato_gel: 167
+    fry:
+      lemon: 163
+      lime: 49
+      vinegar: 316
+      cranberry: 6
+      redcurrant: 1
+      rhubarb: 1
+      sorrel: 1
+      sumac: 1
+      tamarind: 6
+      tomato_gel: 234
+    soup:
+      lemon: 2001
+      lime: 135
+      vinegar: 666
+      cranberry: 12
+      redcurrant: 1
+      sorrel: 2
+      sumac: 1
+      tamarind: 7
+      tomato_gel: 893
+    raw:
+      lemon: 413
+      lime: 131
+      vinegar: 1413
+      cranberry: 19
+      redcurrant: 2
+      tamarind: 2
+      tomato_gel: 713
+    dry:
+      lemon: 1006
+      lime: 122
+      vinegar: 466
+      cranberry: 11
+      redcurrant: 2
+      sorrel: 1
+      sumac: 2
+      tamarind: 5
+      tomato_gel: 842
+  avocado:
+    stir_fry:
+      lemon: 20
+      lime: 70
+      vinegar: 22
+      tamarind: 1
+      green_mango: 1
+      tomato_gel: 76
+    steam:
+      lemon: 113
+      lime: 171
+      vinegar: 95
+      cranberry: 1
+      sumac: 1
+      tamarind: 1
+      tomato_gel: 152
+    roast:
+      lemon: 244
+      lime: 487
+      vinegar: 251
+      cranberry: 5
+      rhubarb: 1
+      sorrel: 2
+      sumac: 2
+      tomato_gel: 475
+    saute:
+      lemon: 353
+      lime: 883
+      vinegar: 261
+      cranberry: 1
+      rhubarb: 1
+      sumac: 1
+      tamarind: 5
+      tomato_gel: 1169
+    boil:
+      lemon: 1056
+      lime: 1909
+      vinegar: 983
+      cranberry: 4
+      rhubarb: 1
+      sorrel: 2
+      sumac: 5
+      tamarind: 7
+      green_mango: 1
+      tomato_gel: 2652
+    bake:
+      lemon: 758
+      lime: 1367
+      vinegar: 501
+      cranberry: 8
+      sorrel: 2
+      sumac: 3
+      tamarind: 2
+      tomato_gel: 1797
+    grill:
+      lemon: 590
+      lime: 1651
+      vinegar: 558
+      cranberry: 4
+      redcurrant: 1
+      sorrel: 1
+      tamarind: 1
+      tomato_gel: 1638
+    fry:
+      lemon: 324
+      lime: 677
+      vinegar: 246
+      cranberry: 2
+      rhubarb: 1
+      sorrel: 2
+      sumac: 2
+      tamarind: 5
+      tomato_gel: 860
+    soup:
+      lemon: 1875
+      lime: 2842
+      vinegar: 1058
+      cranberry: 9
+      rhubarb: 2
+      sorrel: 4
+      sumac: 2
+      tamarind: 6
+      green_mango: 2
+      tomato_gel: 2941
+    raw:
+      lemon: 1450
+      lime: 1552
+      vinegar: 1519
+      cranberry: 15
+      rhubarb: 2
+      sorrel: 4
+      sumac: 8
+      tamarind: 6
+      green_mango: 1
+      tomato_gel: 2188
+    dry:
+      lemon: 1000
+      lime: 2038
+      vinegar: 770
+      cranberry: 12
+      sorrel: 4
+      sumac: 6
+      tamarind: 4
+      tomato_gel: 2651
