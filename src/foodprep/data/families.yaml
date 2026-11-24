@@ -1,6 +1,6 @@
 # Families: what an ingredient brings to a dish — the third input of the
 # possibility generator (foodprep.possibilities), after part_properties.yaml
-# and technique_rules.yaml.
+# and the family states of operations.yaml.
 #
 # A family is one of the ontology's roles (tomato.yaml `roles` and
 # `base_roles`): acid, fat, salt, umami, sweet, protein, carb. Ideas are

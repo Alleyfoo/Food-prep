@@ -1,0 +1,2039 @@
+# Culinary operations: one reusable definition per operation, independent of
+# any ingredient. Replaces technique_rules.yaml (Culinary Operations R1,
+# docs/research/r1-culinary-operations/model-design.md).
+#
+# Read by foodprep.operations (applicability, outputs, bounded sequences) and
+# by foodprep.possibilities (the family generator uses the operations marked
+# family_state, under their generator_id, exactly as before).
+#
+# Fields
+#   fr, en, aliases      names; the id is the French name in ASCII
+#   categories           geometry | separation | extraction | mechanical |
+#                        thermal | chemical (several when several apply)
+#   technique            the tomato.yaml technique this operation is, if any
+#   preparation          the vocabularies.yaml `preparations` id a cut produces
+#   requires             property: [test, why] or [test, why, waived_when]
+#                        (waived_when: one condition, or a list of which any may hold).
+#                        Tests: true/false, "x", ">=x", "<=x", "a|b" (any of).
+#                        A property the material does not state is UNKNOWN,
+#                        never false (except `recorded_only_when_true` below).
+#   conditional          [{when, note}]: applicable only if the note is followed
+#   unsafe_when          [{when, note}]: never generated
+#   except               ingredient.part a cook would not do this to
+#   adds                 ingredients the operation brings (makes a composite)
+#   equipment, effort    effort 1 (minutes) .. 3 (long or skilled)
+#   parameters, mechanisms, changes, applications, limitations, safety
+#   outputs              [{name, kind, from, set, raise, lower, add_flavour,
+#                        when_set, terminal}]; kind: geometry | state | fraction;
+#                        from: self (default) | outer_layer | seed_core;
+#                        terminal: the output is exhausted (spent solids) and
+#                        no sequence continues from it
+#   established_on       ingredient.part where this operation is documented
+#   evidence             source ids (docs/research/r1-culinary-operations/sources.md)
+#   confidence           established (the operation is documented)
+#   generator            false when the bounded generator never takes it, with why
+#   family_state         true for the states the family generator pairs with
+#                        families; generator_id, effects, corpus and does are its
+#                        fields (formerly technique_rules.yaml)
+
+# The family generator's states, in the order it lists them (the order of the
+# former technique_rules.yaml). Each is the generator_id of a family_state
+# operation.
+family_states: [raw, massage, steam, roast, stir_fry, fry, braise, simmer, dry, puree]
+
+scales:
+  levels: [none, low, medium, high, very_high]
+  piece: [powder, fine, small, medium, large, whole]
+
+# Flags part_properties.yaml records only when true, and state flags that only
+# an operation can set. A raw part without them really does not have them.
+recorded_only_when_true: [thin, leafy, liquid, browns_when_cut, crisp, smooth, cooked,
+                          blanched, concentrated, browned, infused, gelled, pickled,
+                          fermented, binder, coated, hollow, emulsified, thickened,
+                          usually_discarded, salted, clear, glazed, smoked, scored, cut,
+                          # structures recorded only where they exist
+                          has_outer_layer, has_seed_core, has_stone, podded, zestable,
+                          segmented, has_kernels, skin_slips_when_blanched, heat_sensitive]
+
+ordinary_equipment: [knife, peeler, grater, pot, pan, oven, sieve, bowl, colander,
+                     baking_tray, whisk, towel, jar, cloth, ladle, blender, spoon, fork]
+
+# tomato.yaml techniques no operation stands for, and why.
+unlinked_techniques:
+  dice: "generic; brunoise, macedoine and paysanne are its classical forms"
+  salsa: "a dish, not an operation"
+  soup: "a dish, not an operation"
+  salad: "a dish, not an operation"
+  hash: "a dish, not an operation"
+  smash_roast: "a sequence: boil, crush, roast"
+  brown: "acts on butter's milk solids; beurre noisette, outside the vegetable set"
+  raw_slaw: "a dish, not an operation"
+
+operations:
+
+  # ======================= geometry and cutting ==========================
+  julienne:
+    fr: julienne
+    en: julienne (matchsticks)
+    aliases: [allumette, matchstick]
+    categories: [geometry]
+    preparation: julienne
+    requires:
+      shape: ["cylindrical|round|irregular", "a solid body to square off; not branched, leafy or feathery"]
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=medium", "firm enough to hold a narrow strip"]
+      liquid: [false, "a liquid cannot be cut"]
+      piece: [">=medium", "starts larger than a matchstick"]
+    conditional:
+      - when: {has_outer_layer: true, outer_layer_toughness: ">=high"}
+        note: "peel first: the outer layer is too tough to cut fine"
+    equipment: [knife]
+    effort: 2
+    parameters: "about 3 x 3 mm x 4-6 cm; fine julienne 1.5 mm; Escoffier longer"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: strips, thin: true}}
+    changes: "Far more surface: cooks in seconds, takes dressing, stays crisp raw"
+    applications: "slaws, garnish, stir-fries, consomme garnish"
+    limitations: "soft or leafy materials tear instead of cutting clean"
+    established_on: [carrot.root, broccoli.stems, courgette.fruit]
+    evidence: [escoffier, cia, wiki_knife_cuts]
+    confidence: established
+
+  brunoise:
+    fr: brunoise
+    en: brunoise (fine dice)
+    categories: [geometry]
+    preparation: brunoise
+    requires:
+      shape: ["cylindrical|round|irregular", "a solid body to square off; not branched, leafy or feathery"]
+      cut: [false, "already cut: one cut per sequence (brunoise refines julienne)", {form: julienne}]
+      firmness: [">=medium", "holds a 3 mm cube"]
+      liquid: [false, "a liquid cannot be cut"]
+      piece: ["small|medium|large|whole", "cut from julienne or a larger piece"]
+    conditional:
+      - when: {has_outer_layer: true, outer_layer_toughness: ">=high"}
+        note: "peel first: tough skin breaks a 3 mm cube"
+    equipment: [knife]
+    effort: 2
+    parameters: "about 3 mm cubes (fine brunoise 1.5 mm), cut across julienne"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: fine, shape: cubes}}
+    changes: "Disperses through a sauce or garnish; softens almost at once"
+    applications: "garnish, sauce bases, mirepoix-like seasoning"
+    limitations: "only firm materials; watery ones bleed"
+    established_on: [carrot.root, courgette.fruit]
+    evidence: [escoffier, cia, wiki_knife_cuts]
+    confidence: established
+
+  batonnet:
+    fr: bâtonnet
+    en: baton
+    aliases: [baton]
+    categories: [geometry]
+    preparation: batonnet
+    requires:
+      shape: ["cylindrical|round|irregular", "a solid body to square off; not branched, leafy or feathery"]
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=medium", "holds a stick shape"]
+      liquid: [false, "a liquid cannot be cut"]
+      piece: [">=medium", "starts larger than a stick"]
+    equipment: [knife]
+    effort: 2
+    parameters: "about 6 x 6 mm x 5-6 cm; sources disagree (some 1 cm thick)"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: sticks}}
+    changes: "Even sticks that cook evenly; enough mass to stay tender inside"
+    applications: "crudites, fries, glazed vegetables"
+    limitations: "needs a long enough piece"
+    established_on: [carrot.root, courgette.fruit]
+    evidence: [cia, wiki_knife_cuts]
+    confidence: established
+
+  macedoine:
+    fr: macédoine
+    en: small dice
+    categories: [geometry]
+    preparation: macedoine
+    requires:
+      shape: ["cylindrical|round|irregular", "a solid body to square off; not branched, leafy or feathery"]
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=medium", "holds a cube"]
+      liquid: [false, "a liquid cannot be cut"]
+      piece: [">=medium", "starts larger than a cube"]
+    equipment: [knife]
+    effort: 2
+    parameters: "about 5 mm cubes (one source 4 mm)"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: cubes}}
+    changes: "Bite-size cubes; even cooking"
+    applications: "vegetable salads (macedoine), soups, fillings"
+    established_on: [carrot.root, courgette.fruit]
+    evidence: [escoffier, wiki_knife_cuts]
+    confidence: established
+
+  paysanne:
+    fr: paysanne
+    en: paysanne (thin flat pieces)
+    categories: [geometry]
+    preparation: paysanne
+    requires:
+      shape: ["cylindrical|round|irregular", "a solid body to square off; not branched, leafy or feathery"]
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=medium", "holds a thin flat piece"]
+      liquid: [false, "a liquid cannot be cut"]
+      piece: [">=medium", "starts larger than the piece"]
+    equipment: [knife]
+    effort: 2
+    parameters: "about 12 x 12 x 3 mm; square, round or triangular by source"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: flat, thin: true}}
+    changes: "Thin and flat: quick, even cooking in soups"
+    applications: "rustic soups (potage paysanne)"
+    established_on: [carrot.root]
+    evidence: [escoffier, wiki_knife_cuts]
+    confidence: established
+
+  chiffonade:
+    fr: chiffonnade
+    en: chiffonade (fine ribbons of leaves)
+    categories: [geometry]
+    preparation: chiffonade
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      leafy: [true, "needs a leaf"]
+      shape: ["flat", "the leaf must be a continuous sheet that can be rolled"]
+      flexible: [true, "rolled before slicing"]
+    equipment: [knife]
+    effort: 1
+    parameters: "leaves stacked, rolled and cut 1-3 mm across"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: fine, shape: ribbons, thin: true}}
+    changes: "Fine ribbons that wilt instantly in heat"
+    applications: "garnish, soups, quick sautes of greens"
+    limitations: "feathery or tiny leaves cannot be rolled; chop them instead"
+    established_on: [broccoli.leaves]
+    evidence: [cia, wiki_knife_cuts]
+    confidence: established
+
+  tourner:
+    fr: tourner (légumes tournés)
+    en: tourne (turned)
+    categories: [geometry]
+    preparation: tourne
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=high", "carved with a paring knife into a seven-sided barrel"]
+      shape: ["cylindrical|round", "needs a solid body to carve"]
+      piece: [">=medium", "starts larger than the barrel"]
+    equipment: [knife]
+    effort: 3
+    parameters: "about 5 cm long, 7 faces, 2 cm wide"
+    mechanisms: [shape_uniformity]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: medium, shape: barrels}}
+      - {name: trimmings, kind: fraction, set: {piece: small, shape: irregular, usually_discarded: true}}
+    changes: "Identical pieces that cook evenly and glaze well; leaves many trimmings"
+    applications: "classical garnish, glazed carrots"
+    limitations: "wasteful; skill-heavy"
+    established_on: [carrot.root]
+    evidence: [escoffier, cia, wiki_knife_cuts]
+    confidence: established
+
+  rondelles:
+    fr: rondelles
+    en: rounds (coins)
+    categories: [geometry]
+    preparation: rondelles
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      shape: ["cylindrical", "a round cross-section"]
+      firmness: [">=medium", "holds a disc"]
+    equipment: [knife]
+    effort: 1
+    parameters: "2-10 mm discs across a cylinder"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: discs}}
+    changes: "Discs that stay juicy; thin slices are emincer"
+    applications: "sautes, chips (thin), steaming"
+    established_on: [carrot.root, courgette.fruit, broccoli.stems]
+    evidence: [cia]
+    confidence: established
+
+  emincer:
+    fr: émincer
+    en: slice thinly
+    categories: [geometry]
+    technique: slice
+    preparation: sliced
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=low", "holds a slice"]
+      liquid: [false, "a liquid cannot be cut"]
+    equipment: [knife]
+    effort: 1
+    parameters: "thin slices, 1-3 mm"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: flat, thin: true}}
+    changes: "Thin slices that cook fast and brown at the edges"
+    applications: "sautes, stir-fries, carpaccio-style salads"
+    established_on: [broccoli.stems, courgette.fruit, carrot.root]
+    evidence: [cia, larousse]
+    confidence: established
+
+  hacher:
+    fr: hacher
+    en: chop
+    categories: [geometry]
+    preparation: chopped
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      liquid: [false, "a liquid cannot be chopped"]
+    equipment: [knife]
+    effort: 1
+    parameters: "irregular pieces, coarse to fine"
+    mechanisms: [surface_area_increase, cell_rupture]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: fine, shape: irregular}}
+    changes: "Irregular fine pieces; releases juice and aroma"
+    applications: "herb pastes, salsas, fillings"
+    established_on: [carrot.greens, broccoli.leaves]
+    evidence: [cia, larousse]
+    confidence: established
+
+  ciseler:
+    fr: ciseler
+    en: finely mince (shallots, herbs)
+    categories: [geometry]
+    preparation: finely_chopped
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      leafy: [true, "herbs and leaves are sliced fine without bruising"]
+    equipment: [knife]
+    effort: 1
+    parameters: "very fine, clean cuts that do not bruise"
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: fine, shape: irregular}}
+    changes: "Fine pieces that stay fresh instead of bruised and dark"
+    applications: "herb garnish, sauces"
+    limitations: "classically for shallots and herbs; alliums are outside this set"
+    established_on: [carrot.greens]
+    evidence: [larousse, cia]
+    confidence: established
+
+  concasser:
+    fr: concasser
+    en: rough-chop (concassé)
+    categories: [geometry]
+    technique: crush
+    preparation: crushed
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: ["<=medium", "classically soft flesh (tomato) or brittle seeds"]
+      liquid: [false, "a liquid cannot be chopped"]
+    equipment: [knife]
+    effort: 1
+    parameters: "rough pieces about 5-10 mm"
+    mechanisms: [cell_rupture]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small, shape: irregular}}
+    changes: "Rough pieces; for tomato, peeled and seeded flesh that holds its shape"
+    applications: "tomato concasse, sauces"
+    established_on: [tomato.flesh]
+    evidence: [escoffier, larousse]
+    confidence: established
+
+  raper:
+    fr: râper
+    en: grate
+    categories: [geometry, mechanical]
+    technique: grate
+    preparation: grated
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      firmness: [">=medium", "must resist the grater"]
+      liquid: [false, "a liquid cannot be grated"]
+    conditional:
+      - when: {has_outer_layer: true, outer_layer_toughness: ">=high"}
+        note: "peel first: the tough layer shreds into strings"
+    equipment: [grater]
+    effort: 1
+    parameters: "coarse or fine grater"
+    mechanisms: [surface_area_increase, cell_rupture]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: fine, shape: shreds}}
+    changes: "Shreds that release juice; watery materials weep"
+    applications: "slaws, fritters, cakes"
+    established_on: [carrot.root, courgette.fruit]
+    evidence: [cia]
+    confidence: established
+
+  rubans:
+    fr: tailler en rubans
+    en: ribbons
+    aliases: [spiralise]
+    categories: [geometry]
+    preparation: ribbons
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      sheetable: [true, "must give long continuous strips without breaking"]
+      firmness: [">=medium", "a peeler or spiraliser needs resistance"]
+    conditional:
+      - when: {has_outer_layer: true, outer_layer_toughness: ">=high"}
+        note: "peel first: ribbons with a tough edge stay stringy"
+    equipment: [peeler]
+    effort: 1
+    parameters: "peeler or mandoline ribbons 1-2 mm thick; spiraliser for noodles"
+    mechanisms: [shape_transformation]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: medium, shape: ribbons, thin: true, flexible: true}}
+    changes: "Long flexible ribbons: eaten raw, blanched, or as noodles"
+    applications: "vegetable noodles, salads, wraps"
+    established_on: [courgette.fruit, carrot.root, broccoli.stems]
+    evidence: [cia, web_b1, web_c3, web_z4]
+    confidence: established
+
+  quartiers:
+    fr: tailler en quartiers
+    en: wedges
+    categories: [geometry]
+    preparation: wedges
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      shape: ["round|cylindrical", "a body to cut lengthwise into wedges"]
+      piece: [">=medium", "starts larger than a wedge"]
+      liquid: [false, "a liquid cannot be cut"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [shape_transformation]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: medium, shape: wedges}}
+    changes: "Large pieces with a cut face to brown and a skin side to hold"
+    applications: "roasting, grilling"
+    established_on: [avocado.flesh, courgette.fruit]
+    evidence: [cia]
+    confidence: established
+
+  troncons:
+    fr: tailler en tronçons
+    en: chunks (sections)
+    categories: [geometry]
+    preparation: troncons
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      shape: ["cylindrical", "an elongated body to cut across"]
+      piece: [">=large", "starts long"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [shape_transformation]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: medium, shape: sections}}
+    changes: "Thick sections for long cooking or stuffing"
+    applications: "braises, stuffed sections"
+    established_on: [carrot.root, courgette.fruit]
+    evidence: [larousse]
+    confidence: established
+
+  inciser:
+    fr: inciser (ciseler la surface)
+    en: score
+    categories: [geometry]
+    preparation: scored
+    generator: false
+    not_generated_because: "changes little on its own; a detail of grilling or roasting halves"
+    requires:
+      piece: [">=medium", "a surface to score"]
+      firmness: [">=low", "holds a shallow cut"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [surface_area_increase]
+    outputs:
+      - {kind: geometry, set: {scored: true}}
+    changes: "Shallow cuts let heat and seasoning in; cut faces brown"
+    applications: "grilled avocado, roasted halves"
+    limitations: "changes little on its own"
+    established_on: [avocado.flesh]
+    evidence: [larousse]
+    confidence: established
+
+  detailler_bouquets:
+    fr: détailler en bouquets
+    en: cut into florets
+    categories: [geometry, separation]
+    requires:
+      cut: [false, "already cut: one cut per sequence"]
+      shape: ["tree", "a branched head"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [shape_transformation]
+    outputs:
+      - {kind: geometry, set: {cut: true, piece: small}}
+    changes: "Small florets that cook evenly"
+    applications: "steaming, roasting, stir-frying"
+    established_on: [broccoli.florets]
+    evidence: [cia]
+    confidence: established
+
+  # ======================= separation ======================================
+  eplucher:
+    fr: éplucher
+    en: peel (with a peeler or knife)
+    categories: [separation]
+    technique: peel
+    requires:
+      has_outer_layer: [true, "needs an outer layer that is not a part of its own"]
+      firmness: [">=medium", "a peeler needs a firm body"]
+      cut: [false, "peel before cutting, not each piece after"]
+      cooked: [false, "a peeler works on raw produce; skin cooked produce with peler"]
+    equipment: [peeler]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: inner, kind: state, from: self, set: {has_outer_layer: false}}
+      - {name: peel, kind: fraction, from: outer_layer}
+    changes: "Two materials: the peeled body (often more tender) and the peel"
+    applications: "broccoli stems before slicing, carrots for a smooth finish"
+    limitations: "a peel is only a residue if nothing is done with it"
+    established_on: [broccoli.stems, carrot.root]
+    evidence: [cia, pepin]
+    confidence: established
+
+  peler:
+    fr: peler
+    en: skin (after cooking or blanching)
+    categories: [separation]
+    requires:
+      has_outer_layer: [true, "needs a skin"]
+      cooked: [true, "the skin slips off only after heat"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: inner, kind: state, from: self, set: {has_outer_layer: false}}
+      - {name: skin, kind: fraction, from: outer_layer, set: {cooked: true}}
+    changes: "Removes a skin loosened by heat"
+    applications: "roasted peppers, beetroot, cooked carrots"
+    evidence: [larousse]
+    confidence: established
+
+  monder:
+    fr: monder
+    en: blanch and skin
+    categories: [separation, thermal]
+    requires:
+      skin_slips_when_blanched: [true, "a skin that loosens after seconds in boiling water"]
+    equipment: [pot]
+    effort: 1
+    parameters: "10-30 s in boiling water, then iced"
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: inner, kind: state, set: {has_outer_layer: false}}
+      - {name: skin, kind: fraction, from: outer_layer}
+    changes: "Clean skinning without cooking the flesh"
+    applications: "tomatoes, peaches, almonds"
+    limitations: "needs the whole fruit: in this model tomato skin and flesh are already parts"
+    evidence: [escoffier, larousse]
+    confidence: established
+
+  parer:
+    fr: parer
+    en: trim
+    categories: [separation, geometry]
+    technique: trim
+    requires:
+      firmness: [">=medium", "trimmed to a neat shape"]
+      piece: [">=medium", "large enough to trim"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [shape_uniformity]
+    outputs:
+      - {name: trimmed, kind: state, set: {}}
+      - {name: trimmings, kind: fraction, set: {piece: small, shape: irregular, usually_discarded: true}}
+    changes: "A neat piece plus trimmings (parures) for stock or puree"
+    applications: "classical prep; parures go to stocks and purees"
+    established_on: [broccoli.stems, carrot.root]
+    evidence: [escoffier, larousse]
+    confidence: established
+
+  epepiner:
+    fr: épépiner
+    en: deseed
+    categories: [separation]
+    technique: deseed
+    requires:
+      has_seed_core: [true, "needs a seed region to remove"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: flesh, kind: state, set: {has_seed_core: false}, lower: {water: 1}}
+      - {name: seeds, kind: fraction, from: seed_core}
+    changes: "Drier flesh that holds its shape; a seed fraction"
+    applications: "large courgettes, cucumbers, tomatoes"
+    established_on: [courgette.fruit]
+    evidence: [larousse]
+    confidence: established
+
+  evider:
+    fr: évider
+    en: hollow out (core)
+    categories: [separation, geometry]
+    technique: core
+    requires:
+      has_seed_core: [true, "needs a soft centre to scoop"]
+      firmness: [">=medium", "the shell must stand up"]
+      cut: [false, "hollow the whole fruit or halves before cutting"]
+    equipment: [spoon]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: shell, kind: state, set: {has_seed_core: false, hollow: true}}
+      - {name: core, kind: fraction, from: seed_core}
+    changes: "A shell to fill and a soft core"
+    applications: "stuffed courgettes (courgettes farcies)"
+    established_on: [courgette.fruit]
+    evidence: [larousse, escoffier]
+    confidence: established
+
+  equeuter:
+    fr: équeuter
+    en: de-stem, remove the midrib
+    categories: [separation]
+    requires:
+      leafy: [true, "a leaf with a stalk or rib"]
+      shape: ["flat", "a broad leaf with a rib"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: blades, kind: state, lower: {toughness: 1, fibre: 1}}
+      - {name: ribs, kind: fraction, set: {leafy: false, thin: false, flexible: false, shape: strips, usually_discarded: true}, raise: {fibre: 1, firmness: 2}}
+    changes: "Tender leaf blades and the crunchy ribs"
+    applications: "kale, chard, broccoli leaves"
+    established_on: [broccoli.leaves]
+    evidence: [cia, web_b3]
+    confidence: established
+
+  effeuiller:
+    fr: effeuiller
+    en: strip leaves from stalks
+    categories: [separation]
+    requires:
+      leafy: [true, "leaves on stalks"]
+      shape: ["feathery", "small leaves or fronds on thin stalks"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: fronds, kind: state, lower: {toughness: 1}}
+      - {name: stalks, kind: fraction, set: {leafy: false, shape: strips, usually_discarded: true}, raise: {fibre: 1}}
+    changes: "Tender fronds; fibrous stalks for stock"
+    applications: "herbs, carrot tops"
+    established_on: [carrot.greens]
+    evidence: [cia]
+    confidence: established
+
+  ecosser:
+    fr: écosser
+    en: shell (pods)
+    categories: [separation]
+    requires:
+      podded: [true, "seeds in a pod"]
+    equipment: []
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: seeds, kind: state}
+    applications: "peas, broad beans"
+    limitations: "nothing in this research set grows in a pod"
+    evidence: [larousse]
+    confidence: established
+
+  denoyauter:
+    fr: dénoyauter
+    en: stone, pit
+    categories: [separation]
+    technique: stone
+    requires:
+      has_stone: [true, "a single stone inside"]
+    equipment: [knife]
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: flesh, kind: state}
+    applications: "avocados, olives, stone fruit"
+    limitations: "in this model the avocado stone is already a part of its own"
+    evidence: [larousse]
+    confidence: established
+
+  zester:
+    fr: zester
+    en: zest
+    categories: [separation, extraction]
+    requires:
+      zestable: [true, "a thin rind full of aromatic oil (citrus)"]
+    equipment: [grater]
+    effort: 1
+    mechanisms: [oil_release]
+    outputs:
+      - {name: zest, kind: fraction}
+    applications: "citrus"
+    limitations: "vegetable peels are not zest: they hold no aromatic oil glands"
+    evidence: [larousse, mcgee]
+    confidence: established
+
+  lever_supremes:
+    fr: lever les suprêmes
+    en: segment (supremes)
+    categories: [separation]
+    requires:
+      segmented: [true, "fruit in membrane-bound segments"]
+    equipment: [knife]
+    effort: 2
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: segments, kind: state}
+    applications: "citrus"
+    limitations: "nothing in this research set is segmented"
+    evidence: [larousse]
+    confidence: established
+
+  egrainer:
+    fr: égrainer
+    en: remove grains or kernels
+    categories: [separation]
+    requires:
+      has_kernels: [true, "kernels or arils to free"]
+    equipment: []
+    effort: 1
+    mechanisms: [layer_separation]
+    outputs:
+      - {name: kernels, kind: state}
+    applications: "pomegranate, corn, grapes"
+    limitations: "nothing in this research set has kernels"
+    evidence: [larousse]
+    confidence: established
+
+  # ======================= extraction and fractionation =====================
+  presser:
+    fr: presser
+    en: press, juice
+    categories: [extraction]
+    requires:
+      water: [">=high", "enough free water to give juice"]
+      liquid: [false, "already a liquid"]
+      gelled: [false, "needs plant tissue, not a gel"]
+      firmness: [">=low", "solid tissue to press"]
+    conditional:
+      - when: {piece: "medium|large|whole"}
+        note: "grate first, or use a juicer"
+    equipment: [grater, cloth]
+    effort: 2
+    mechanisms: [fractionation]
+    outputs:
+      - name: juice
+        kind: fraction
+        set: {liquid: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false, has_outer_layer: false}
+      - name: pulp
+        kind: fraction
+        set: {piece: fine, shape: irregular, binder: true, usually_discarded: true, has_outer_layer: false}
+        lower: {water: 1, sugar: 1}
+        raise: {fibre: 1}
+    changes: "Juice with the colour and sugar; pulp with the fibre"
+    applications: "juices, reductions; pulp in crackers and fritters"
+    established_on: [carrot.root]
+    evidence: [cia, web_c1, web_c5]
+    confidence: established
+
+  filtrer:
+    fr: filtrer
+    en: strain, filter
+    categories: [extraction]
+    requires:
+      liquid: [true, "filters a liquid"]
+      clear: [false, "already clear"]
+    equipment: [sieve, cloth]
+    effort: 1
+    mechanisms: [fractionation]
+    outputs:
+      - {name: filtered, kind: state, set: {clear: true}, lower: {fibre: 1}}
+    changes: "A clear liquid"
+    applications: "tomato water, clarified juices"
+    established_on: [tomato.seeds_and_gel]
+    evidence: [web_t2]
+    confidence: established
+
+  tamiser:
+    fr: tamiser (passer au tamis)
+    en: sieve, sift
+    categories: [extraction, mechanical]
+    requires:
+      piece: ["powder", "sifts a ground powder; wet purees go through the chinois"]
+      water: ["<=low", "sifts dry material"]
+      liquid: [false, "use passer au chinois for liquids"]
+    equipment: [sieve]
+    effort: 1
+    mechanisms: [fractionation]
+    outputs:
+      - {name: fine, kind: state, set: {piece: powder, smooth: true}}
+      - {name: coarse, kind: fraction, set: {piece: fine, smooth: false, usually_discarded: true}}
+    changes: "An even powder or puree, and a coarse fraction to regrind"
+    applications: "powders, flours, fine purees"
+    evidence: [escoffier, cia]
+    confidence: established
+
+  passer_chinois:
+    fr: passer au chinois
+    en: pass through a conical sieve
+    categories: [extraction]
+    requires:
+      smooth: [true, "a puree or sauce"]
+    equipment: [sieve]
+    effort: 1
+    mechanisms: [fractionation]
+    outputs:
+      - {name: passed, kind: state, set: {piece: fine, smooth: true}, lower: {fibre: 1}}
+      - {name: residue, kind: fraction, set: {smooth: false, usually_discarded: true}, raise: {fibre: 1}}
+    changes: "A silky sauce and a fibrous residue"
+    applications: "veloutes, green purees, coulis"
+    established_on: [broccoli.florets]
+    evidence: [escoffier, web_b5]
+    confidence: established
+
+  fouler:
+    fr: fouler
+    en: press through a sieve with a ladle
+    categories: [extraction, mechanical]
+    requires:
+      cooked: [true, "softened first"]
+      liquid: [false, "pushes solids, not a liquid"]
+      water: [">=medium", "moist enough to push through; crisp material only crumbles"]
+      firmness: ["<=low", "soft enough to push through"]
+    equipment: [sieve, ladle]
+    effort: 1
+    mechanisms: [fractionation]
+    outputs:
+      - {name: coulis, kind: state, set: {smooth: true, piece: fine}}
+      - {name: residue, kind: fraction, set: {usually_discarded: true}, raise: {fibre: 1}}
+    changes: "A coulis without skins or seeds"
+    applications: "tomato coulis, fruit coulis"
+    evidence: [escoffier]
+    confidence: established
+
+  degorger:
+    fr: dégorger
+    en: salt and drain
+    categories: [extraction, chemical]
+    technique: salt_and_drain
+    requires:
+      water: [">=high", "draws out free water"]
+      liquid: [false, "a liquid cannot be drained"]
+      smooth: [false, "needs intact pieces, not a puree"]
+      gelled: [false, "needs plant tissue, not a gel"]
+      piece: ["<=medium", "cut first so salt reaches the cells"]
+    adds: [salt]
+    equipment: [colander, towel]
+    effort: 1
+    parameters: "salt 1-2% of weight, 10-30 min, then squeeze"
+    mechanisms: [osmosis]
+    outputs:
+      - {name: drained, kind: state, set: {salted: true}, lower: {water: 1}, raise: {firmness: 1}}
+      - name: vegetable_water
+        kind: fraction
+        set: {liquid: true, salted: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false, usually_discarded: true}
+    changes: "Firmer, less watery pieces and a salty vegetable water"
+    applications: "courgette fritters, tomato water, cucumber salads"
+    established_on: [courgette.fruit, tomato.flesh]
+    evidence: [web_z2, web_z3, web_t2]
+    confidence: established
+
+  egoutter:
+    fr: égoutter
+    en: drain
+    categories: [extraction]
+    generator: false
+    not_generated_because: "a step inside other operations; changes no property worth a step"
+    requires: {}
+    equipment: [colander]
+    effort: 1
+    outputs: []
+    evidence: [larousse]
+    confidence: established
+
+  clarifier:
+    fr: clarifier
+    en: clarify
+    categories: [extraction]
+    technique: clarify
+    requires:
+      liquid: [true, "clarifies a liquid"]
+      clear: [false, "already clear"]
+    adds: [egg_white_or_agar]
+    equipment: [pot, cloth]
+    effort: 3
+    parameters: "egg-white raft, or agar gel then drained (gel filtration)"
+    mechanisms: [fractionation, protein_coagulation]
+    outputs:
+      - {name: clarified, kind: state, set: {clear: true}, lower: {fibre: 1}}
+    changes: "A brilliant clear liquid (consomme)"
+    applications: "consommes, clear tomato water"
+    established_on: [tomato.seeds_and_gel]
+    evidence: [escoffier, web_t2]
+    confidence: established
+
+  ecumer:
+    fr: écumer
+    en: skim
+    categories: [extraction]
+    generator: false
+    not_generated_because: "keeps a simmering liquid clean; no new material"
+    requires: {liquid: [true, "skims a liquid"]}
+    equipment: [ladle]
+    effort: 1
+    outputs: []
+    evidence: [escoffier]
+    confidence: established
+
+  decanter:
+    fr: décanter
+    en: decant, let settle
+    categories: [extraction]
+    generator: false
+    not_generated_because: "same outcome as filtrer for these materials"
+    requires: {liquid: [true, "settles a liquid"]}
+    equipment: [jar]
+    effort: 1
+    outputs: []
+    evidence: [larousse]
+    confidence: established
+
+  infuser:
+    fr: infuser
+    en: infuse, steep
+    categories: [extraction]
+    requires:
+      liquid: [false, "steeps a solid"]
+      smooth: [false, "a puree is strained, not steeped"]
+      gelled: [false, "a gel is not steeped"]
+      water: ["<=medium", "dry or aromatic material flavours the liquid; watery pieces only dilute it"]
+      fat: ["<=low", "fat-rich flesh does not give its flavour to water"]
+      piece: ["<=small", "small or dried pieces give flavour quickly"]
+    adds: [hot_water_or_oil]
+    equipment: [pot, sieve]
+    effort: 1
+    mechanisms: [extraction]
+    outputs:
+      - name: infusion
+        kind: fraction
+        set: {liquid: true, infused: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false, crisp: false}
+      - {name: spent, kind: fraction, terminal: true, set: {usually_discarded: true}, lower: {umami: 1, sugar: 1}}
+    changes: "A flavoured liquid; the solids give up their flavour"
+    applications: "teas, broths, flavoured oils and vinegars"
+    safety: "Fresh low-acid vegetables in oil can carry botulism: refrigerate and use within 4 days (CDC)"
+    evidence: [mcgee, cdc_botulism]
+    confidence: established
+
+  decocter:
+    fr: décocter
+    en: decoct (simmer to extract)
+    categories: [extraction, thermal]
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      liquid: [false, "simmers a solid"]
+      fibre: [">=medium", "tough, fibrous material gives flavour only to long simmering"]
+    adds: [water]
+    equipment: [pot, sieve]
+    effort: 2
+    mechanisms: [extraction]
+    outputs:
+      - name: decoction
+        kind: fraction
+        set: {liquid: true, infused: true, cooked: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false, crisp: false}
+      - {name: spent, kind: fraction, terminal: true, set: {cooked: true, usually_discarded: true}, lower: {umami: 1, sugar: 1, firmness: 2}}
+    changes: "A vegetable broth from parts too tough to eat"
+    applications: "vegetable stocks from scraps"
+    established_on: [tomato.core]
+    evidence: [escoffier, web_t5]
+    confidence: established
+
+  # ======================= mechanical ======================================
+  ecraser:
+    fr: écraser
+    en: crush, mash
+    categories: [mechanical]
+    technique: mash
+    requires:
+      firmness: ["<=medium", "soft or cooked enough to crush"]
+      liquid: [false, "already liquid"]
+    equipment: [fork]
+    effort: 1
+    mechanisms: [cell_rupture]
+    outputs:
+      - {kind: state, set: {piece: fine, shape: irregular, firmness: low, flexible: false, thin: false}}
+    changes: "A coarse mash with texture left in"
+    applications: "guacamole, crushed vegetables"
+    established_on: [avocado.flesh]
+    evidence: [cia]
+    confidence: established
+
+  reduire_puree:
+    fr: réduire en purée
+    en: puree
+    categories: [mechanical]
+    family_state: true
+    generator_id: puree
+    requires:
+      toughness: ["<=low", "soft enough to puree"]
+      coated: [false, "a coated piece is fried or baked, not pureed"]
+    equipment: [blender]
+    effort: 1
+    mechanisms: [cell_rupture, dispersion]
+    outputs:
+      - {kind: state, set: {smooth: true, piece: fine, shape: none, crisp: false, firmness: none, flexible: false, thin: false}}
+    effects: [smooth]
+    does: "Blended or mashed smooth"
+    corpus: soup
+    changes: "Smooth and spoonable"
+    applications: "purees, soups, spreads"
+    established_on: [broccoli.florets, avocado.flesh]
+    evidence: [cia, escoffier]
+    confidence: established
+
+  mixer:
+    fr: mixer
+    en: blend
+    categories: [mechanical]
+    technique: blend
+    requires:
+      water: [">=medium", "enough water to blend, or add liquid"]
+      liquid: [false, "already liquid"]
+      coated: [false, "a coated piece is fried or baked, not blended"]
+    equipment: [blender]
+    effort: 1
+    mechanisms: [dispersion]
+    outputs:
+      - {kind: state, set: {smooth: true, piece: fine, shape: none, crisp: false, firmness: none, flexible: false, thin: false}}
+    changes: "A smooth blend, raw or cooked"
+    applications: "raw purees, pestos, drinks"
+    established_on: [carrot.greens, avocado.flesh]
+    evidence: [cia, web_c4]
+    confidence: established
+
+  broyer:
+    fr: broyer
+    en: grind coarsely
+    categories: [mechanical]
+    requires:
+      firmness: [">=low", "solid enough to grind"]
+      liquid: [false, "already liquid"]
+      smooth: [false, "already smooth"]
+    equipment: [food_processor]
+    effort: 1
+    mechanisms: [particle_size_reduction]
+    outputs:
+      - {kind: state, set: {piece: fine, shape: irregular}}
+    changes: "Coarse crumbs or paste"
+    applications: "crumbs, rice-like grains (riced vegetables)"
+    evidence: [cia]
+    confidence: established
+
+  piler:
+    fr: piler
+    en: pound (mortar)
+    categories: [mechanical]
+    requires:
+      piece: ["<=small", "pounded in small pieces"]
+      liquid: [false, "already liquid"]
+    equipment: [mortar]
+    effort: 2
+    mechanisms: [cell_rupture, oil_release]
+    outputs:
+      - {kind: state, set: {piece: fine, shape: none, smooth: true, firmness: none, flexible: false, thin: false}}
+    changes: "A coarse aromatic paste; pounding releases more aroma than blades"
+    applications: "pesto, herb pastes"
+    evidence: [larousse, mcgee]
+    confidence: established
+
+  emietter:
+    fr: émietter
+    en: crumble
+    categories: [mechanical]
+    requires:
+      crisp: [true, "only brittle material crumbles"]
+    equipment: []
+    effort: 1
+    mechanisms: [particle_size_reduction]
+    outputs:
+      - {kind: state, set: {piece: fine, shape: irregular}}
+    changes: "Crisp crumbs to scatter"
+    applications: "toppings, coatings"
+    evidence: [larousse]
+    confidence: established
+
+  moudre:
+    fr: moudre
+    en: grind to a powder
+    categories: [mechanical]
+    requires:
+      water: ["<=low", "only dry, brittle material becomes powder"]
+      crisp: [true, "brittle enough to shatter"]
+      fat: ["<=medium", "fat-rich material turns to paste instead of powder"]
+    equipment: [spice_grinder]
+    effort: 1
+    mechanisms: [particle_size_reduction]
+    outputs:
+      - {kind: state, set: {piece: powder, shape: none, thin: false, flexible: false}}
+    changes: "A powder that disperses flavour and colour"
+    applications: "spice blends, vegetable powders"
+    established_on: [tomato.skin]
+    evidence: [web_t1, web_c6]
+    confidence: established
+
+  abaisser:
+    fr: abaisser
+    en: roll out
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "works on doughs; outside the vegetable materials"
+    requires: {}
+    equipment: [rolling_pin]
+    effort: 2
+    outputs: []
+    evidence: [larousse]
+    confidence: established
+
+  laminer:
+    fr: laminer
+    en: laminate, sheet
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "works on doughs; outside the vegetable materials"
+    requires: {}
+    equipment: [pasta_machine]
+    effort: 3
+    outputs: []
+    evidence: [larousse]
+    confidence: established
+
+  malaxer:
+    fr: malaxer
+    en: knead, work
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "works on doughs and butter; masser covers leaves"
+    requires: {}
+    equipment: []
+    effort: 2
+    outputs: []
+    evidence: [larousse]
+    confidence: established
+
+  fouetter:
+    fr: fouetter
+    en: whisk
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "needs a protein or fat foam former (egg, cream)"
+    requires: {}
+    equipment: [whisk]
+    effort: 1
+    outputs: []
+    evidence: [mcgee]
+    confidence: established
+
+  foisonner:
+    fr: foisonner
+    en: aerate, increase volume
+    categories: [mechanical]
+    generator: false
+    not_generated_because: "needs a foam former; outside the vegetable materials"
+    requires: {}
+    equipment: [whisk]
+    effort: 2
+    outputs: []
+    evidence: [mcgee]
+    confidence: established
+
+  emulsionner:
+    fr: émulsionner
+    en: emulsify
+    categories: [mechanical]
+    requires:
+      smooth: [true, "a smooth base to carry the emulsion"]
+      fat: [">=medium", "fat to disperse; or a pectin-rich base that holds added oil", [{emulsifies: true}, {pectin: ">=medium"}]]
+    adds: [oil_or_water]
+    equipment: [blender]
+    effort: 1
+    mechanisms: [emulsification]
+    outputs:
+      - {kind: state, set: {emulsified: true}, raise: {fat: 1}}
+    changes: "A creamy sauce that holds fat in suspension"
+    applications: "mayonnaise-like sauces"
+    limitations: "an avocado 'mayonnaise' is closer to a puree than a true emulsion (web_a1)"
+    established_on: [avocado.flesh]
+    evidence: [mcgee, web_a1]
+    confidence: established
+
+  # ======================= thermal =========================================
+  servir_cru:
+    fr: cru
+    en: raw (no operation)
+    categories: [thermal]
+    technique: raw_assemble
+    family_state: true
+    generator_id: raw
+    generator: false
+    not_generated_because: "eating raw is the starting state, not a transformation"
+    requires:
+      raw_ok: [true, "pleasant to eat raw"]
+    outputs: []
+    effects: []
+    does: "Cut and eaten raw"
+    corpus: raw
+    evidence: [cia]
+    confidence: established
+
+  masser:
+    fr: masser
+    en: massage (leaves)
+    categories: [mechanical, chemical]
+    technique: massage
+    family_state: true
+    generator_id: massage
+    requires:
+      leafy: [true, "a leaf"]
+      toughness: [">=medium", "only sturdy leaves need it"]
+      raw_ok: [true, "eaten raw after"]
+    adds: [salt, oil]
+    equipment: [bowl]
+    effort: 1
+    mechanisms: [cell_rupture, osmosis]
+    outputs:
+      - {kind: state, set: {salted: true}, lower: {toughness: 1, firmness: 1}}
+    effects: [softens]
+    does: "Worked raw with salt and oil until the leaves darken and soften"
+    corpus: raw
+    changes: "Raw leaves that soften and darken without heat"
+    applications: "kale salads"
+    established_on: [broccoli.leaves]
+    evidence: [web_b3]
+    confidence: established
+
+  blanchir:
+    fr: blanchir
+    en: blanch
+    categories: [thermal]
+    requires:
+      liquid: [false, "blanches a solid"]
+      cooked: [false, "already cooked"]
+      crisp: [false, "dried or crisp material would only rehydrate"]
+      smooth: [false, "blanches pieces, not a puree"]
+    equipment: [pot]
+    effort: 1
+    parameters: "seconds to 2 min in boiling salted water, then iced"
+    mechanisms: [enzyme_inactivation, colour_fixing, cell_softening]
+    outputs:
+      - {kind: state, set: {blanched: true, flexible: true}, lower: {firmness: 1, bitterness: 1}}
+    changes: "Brighter green, slightly softer, pliable; enzymes stopped"
+    applications: "before freezing, purees, wraps from leaves"
+    established_on: [broccoli.florets, carrot.root]
+    evidence: [cia, steam_culinary]
+    confidence: established
+
+  cuire_vapeur:
+    fr: cuire à la vapeur
+    en: steam
+    categories: [thermal]
+    technique: steam
+    family_state: true
+    generator_id: steam
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "steams a solid"]
+      fibre: [">=medium", "holds together in steam"]
+      toughness: ["<=medium", "tender enough to steam through"]
+    except: [tomato.skin]
+    equipment: [pot]
+    effort: 1
+    mechanisms: [cell_softening]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {firmness: 1, toughness: 1}}
+    effects: [softens]
+    does: "Steamed until just tender"
+    corpus: steam
+    changes: "Tender-crisp, flavour kept in"
+    applications: "side dishes"
+    established_on: [broccoli.florets, carrot.root]
+    evidence: [cia, steam_culinary]
+    confidence: established
+
+  pocher:
+    fr: pocher
+    en: poach
+    categories: [thermal]
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      liquid: [false, "poaches a solid"]
+      cooked: [false, "already cooked"]
+    adds: [stock_or_water]
+    equipment: [pot]
+    effort: 1
+    mechanisms: [cell_softening]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {firmness: 1}}
+    changes: "Gently cooked in a flavoured liquid it absorbs"
+    applications: "delicate vegetables, fruit"
+    evidence: [escoffier]
+    confidence: established
+
+  etuver:
+    fr: étuver
+    en: stew in own juices (covered)
+    categories: [thermal]
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      water: [">=medium", "cooks in its own water"]
+      liquid: [false, "stews a solid"]
+      cooked: [false, "already cooked"]
+    adds: [butter]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [cell_softening]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {firmness: 2}}
+    changes: "Soft, concentrated, pale"
+    applications: "courgettes, leeks, greens"
+    established_on: [courgette.fruit]
+    evidence: [escoffier, larousse]
+    confidence: established
+
+  suer:
+    fr: suer
+    en: sweat
+    categories: [thermal]
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      piece: ["<=small", "small pieces release water"]
+      liquid: [false, "sweats a solid"]
+      cooked: [false, "already cooked"]
+    adds: [fat]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [cell_softening]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {firmness: 1, water: 1}, add_flavour: [sweet]}
+    changes: "Soft and sweet without colour"
+    applications: "soup and sauce bases"
+    established_on: [carrot.root]
+    evidence: [cia]
+    confidence: established
+
+  sauter:
+    fr: sauter
+    en: saute
+    categories: [thermal]
+    technique: saute
+    requires:
+      liquid: [false, "sautes a solid"]
+      piece: ["<=medium", "pieces small enough to toss"]
+      cooked: [false, "already cooked"]
+    adds: [fat]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [maillard, dehydration_surface]
+    outputs:
+      - {kind: state, set: {cooked: true, browned: true}, lower: {water: 1, firmness: 1}, add_flavour: [toasted]}
+    changes: "Lightly browned outside, tender-crisp inside"
+    applications: "side dishes"
+    established_on: [broccoli.leaves, courgette.fruit]
+    evidence: [cia]
+    confidence: established
+
+  sauter_wok:
+    fr: sauter au wok
+    en: stir-fry
+    categories: [thermal]
+    technique: stir_fry
+    family_state: true
+    generator_id: stir_fry
+    requires:
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "stir-fries a solid"]
+      toughness: ["<=medium", "tender enough for fast heat"]
+    except: [avocado.flesh]
+    adds: [fat]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [maillard]
+    outputs:
+      - {kind: state, set: {cooked: true, browned: true}, lower: {water: 1, firmness: 1}, add_flavour: [toasted]}
+    effects: [browning]
+    does: "Cut thin and stir-fried over high heat"
+    corpus: stir_fry
+    changes: "Browned edges, crisp-tender"
+    applications: "stir-fries"
+    established_on: [broccoli.florets, broccoli.stems]
+    evidence: [cia]
+    confidence: established
+
+  rissoler:
+    fr: rissoler
+    en: brown (shallow-fry to colour)
+    categories: [thermal]
+    requires:
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "browns a solid"]
+      water: ["<=high", "too much water steams instead of browning"]
+      piece: ["<=medium", "pieces small enough to colour all over"]
+    adds: [fat]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [maillard]
+    outputs:
+      - {kind: state, set: {cooked: true, browned: true}, lower: {water: 1}, add_flavour: [toasted]}
+    changes: "A brown crust"
+    applications: "potatoes, roots"
+    established_on: [carrot.root]
+    evidence: [escoffier, larousse]
+    confidence: established
+
+  rotir:
+    fr: rôtir
+    en: roast
+    categories: [thermal]
+    technique: roast
+    family_state: true
+    generator_id: roast
+    requires:
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "roasts a solid"]
+      water: ["<=high", "too watery to brown"]
+    adds: [fat]
+    equipment: [oven]
+    effort: 1
+    mechanisms: [maillard, caramelisation, dehydration_surface]
+    outputs:
+      - kind: state
+        set: {cooked: true, browned: true, concentrated: true}
+        lower: {water: 1, firmness: 1}
+        add_flavour: [toasted, sweet]
+        when_set: [{when: {thin: true}, set: {crisp: true, flexible: false}}]
+    effects: [browning, concentrates]
+    does: "Roasted hot until the edges brown"
+    corpus: roast
+    changes: "Browned, concentrated, soft inside; thin pieces crisp"
+    applications: "side dishes"
+    established_on: [broccoli.florets, carrot.root]
+    evidence: [cia, roast_culinary]
+    confidence: established
+
+  griller:
+    fr: griller
+    en: grill, char
+    categories: [thermal]
+    technique: char
+    requires:
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "grills a solid"]
+      piece: [">=small", "small pieces fall through the grill"]
+      firmness: [">=low", "holds together on the grill"]
+    adds: [fat]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [maillard, pyrolysis]
+    outputs:
+      - {kind: state, set: {cooked: true, browned: true}, lower: {water: 1}, add_flavour: [smoky, charred]}
+    changes: "Charred stripes and smoke"
+    applications: "grilled vegetables, grilled avocado"
+    established_on: [avocado.flesh, courgette.fruit]
+    evidence: [web_a3]
+    confidence: established
+
+  frire:
+    fr: frire
+    en: deep-fry
+    categories: [thermal]
+    technique: fry
+    family_state: true
+    generator_id: fry
+    requires:
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "fries a solid"]
+      water: ["<=medium", "dry enough to crisp; or coated, or cut thin", [{coated: true}, {thin: true}]]
+      smooth: [false, "a puree needs binding or a batter first", {coated: true}]
+    adds: [oil]
+    equipment: [pot]
+    effort: 2
+    mechanisms: [dehydration_surface, maillard]
+    outputs:
+      - kind: state
+        set: {cooked: true, browned: true, crisp: true, flexible: false}
+        lower: {water: 1}
+        raise: {fat: 2}
+        when_set: [{when: {thin: true}, set: {water: none}}]
+    effects: [browning, crisp]
+    does: "Fried in fat until crisp"
+    corpus: fry
+    changes: "Crisp, golden, fat-rich"
+    applications: "chips, fritters, fries"
+    safety: "Hot oil: never leave unattended; dry the material well"
+    established_on: [carrot.root, tomato.skin]
+    evidence: [cia, web_t4, web_a4]
+    confidence: established
+
+  braiser:
+    fr: braiser
+    en: braise
+    categories: [thermal]
+    technique: braise
+    family_state: true
+    generator_id: braise
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "braises a solid"]
+      fibre: [">=medium", "fibrous enough to need slow cooking"]
+    except: [tomato.skin]
+    adds: [stock_or_water]
+    equipment: [pot]
+    effort: 2
+    mechanisms: [cell_softening]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {firmness: 2, toughness: 2}, add_flavour: [savoury]}
+    effects: [softens]
+    does: "Cooked slowly in a little liquid until soft"
+    corpus: boil
+    changes: "Soft, savoury, glossy"
+    applications: "root vegetables, greens"
+    established_on: [carrot.root]
+    evidence: [escoffier]
+    confidence: established
+
+  mijoter:
+    fr: mijoter
+    en: simmer
+    categories: [thermal]
+    technique: simmer
+    family_state: true
+    generator_id: simmer
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+    except: [avocado.flesh]
+    adds: [stock_or_water]
+    equipment: [pot]
+    effort: 2
+    mechanisms: [cell_softening, extraction]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {firmness: 2}}
+    effects: [softens, extracts]
+    does: "Simmered in a stock or sauce"
+    corpus: boil
+    changes: "Soft, and it flavours its liquid"
+    applications: "sauces, soups"
+    established_on: [tomato.flesh]
+    evidence: [escoffier]
+    confidence: established
+
+  cuire_anglaise:
+    fr: cuire à l'anglaise
+    en: boil in salted water
+    categories: [thermal]
+    technique: boil
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      liquid: [false, "boils a solid"]
+      cooked: [false, "already cooked"]
+    adds: [salted_water]
+    equipment: [pot]
+    effort: 1
+    mechanisms: [cell_softening]
+    outputs:
+      - {kind: state, set: {cooked: true, salted: true}, lower: {firmness: 2, sugar: 1}}
+    changes: "Soft; some flavour leaches into the water"
+    applications: "plain vegetables, before puree"
+    established_on: [carrot.root, broccoli.florets]
+    evidence: [escoffier]
+    confidence: established
+
+  cuire_four:
+    fr: cuire au four
+    en: bake
+    categories: [thermal]
+    technique: bake
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "bakes a solid or set mixture"]
+    equipment: [oven]
+    effort: 1
+    mechanisms: [dehydration_surface]
+    outputs:
+      - {kind: state, set: {cooked: true}, lower: {water: 1, firmness: 1}}
+    changes: "Cooked through in dry heat, less browned than roasting"
+    applications: "gratins, stuffed vegetables, crackers"
+    established_on: [carrot.root]
+    evidence: [cia]
+    confidence: established
+
+  glacer:
+    fr: glacer (à blanc, à brun)
+    en: glaze
+    categories: [thermal, chemical]
+    requires:
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      firmness: [">=medium", "holds its shape while the liquid reduces"]
+      piece: ["<=medium", "pieces small enough to coat"]
+      liquid: [false, "glazes a solid"]
+    adds: [butter, sugar, water]
+    equipment: [pan]
+    effort: 2
+    mechanisms: [reduction, coating]
+    outputs:
+      - {kind: state, set: {cooked: true, glazed: true}, lower: {firmness: 1}, raise: {sugar: 1, fat: 1}}
+    changes: "Tender pieces in a shiny buttery glaze"
+    applications: "carottes glacees, turnips, pearl onions"
+    established_on: [carrot.root]
+    evidence: [escoffier, larousse]
+    confidence: established
+
+  gratiner:
+    fr: gratiner
+    en: gratinate
+    categories: [thermal]
+    technique: gratin
+    requires:
+      cooked: [true, "browns a cooked dish"]
+      liquid: [false, "needs a surface"]
+    adds: [cheese_or_crumbs]
+    equipment: [oven]
+    effort: 1
+    mechanisms: [maillard]
+    outputs:
+      - {kind: state, set: {browned: true}, raise: {fat: 1}, add_flavour: [toasted]}
+    changes: "A browned crust on top"
+    applications: "gratins"
+    evidence: [escoffier]
+    confidence: established
+
+  confire:
+    fr: confire
+    en: confit (slow-cook in fat or sugar)
+    categories: [thermal, chemical]
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      cooked: [false, "already cooked: one primary cooking per sequence (blanching does not count)"]
+      liquid: [false, "confits a solid"]
+      firmness: [">=low", "holds together through long cooking"]
+    adds: [fat_or_syrup]
+    equipment: [pot]
+    effort: 3
+    mechanisms: [cell_softening, osmosis]
+    outputs:
+      - {kind: state, set: {cooked: true, concentrated: true}, lower: {firmness: 2, water: 1}, raise: {fat: 2}}
+    changes: "Meltingly soft, concentrated, preserved in fat or sugar"
+    applications: "tomato confit, candied peel (sugar)"
+    safety: "Vegetables kept in oil: refrigerate and use within 4 days, or freeze (CDC)"
+    established_on: [tomato.flesh]
+    evidence: [larousse, cdc_botulism]
+    confidence: established
+
+  reduire:
+    fr: réduire
+    en: reduce
+    categories: [thermal, extraction]
+    technique: reduce
+    requires:
+      liquid: [true, "reduces a liquid"]
+      concentrated: [false, "already reduced"]
+    equipment: [pan]
+    effort: 2
+    parameters: "simmer until reduced by half or more"
+    mechanisms: [evaporation, concentration]
+    outputs:
+      - kind: state
+        set: {concentrated: true, cooked: true, water: high}
+        raise: {sugar: 1, umami: 1}
+        when_set: [{when: {pectin: ">=medium"}, set: {thickened: true}}]
+    changes: "Concentrated and syrupy: a glaze or sauce"
+    applications: "carrot juice glaze, tomato water reduction"
+    established_on: [carrot.root]
+    evidence: [escoffier, web_c5]
+    confidence: established
+
+  dessecher:
+    fr: dessécher
+    en: dry out over heat
+    categories: [thermal]
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      smooth: [true, "dries a puree in the pan"]
+    equipment: [pan]
+    effort: 2
+    mechanisms: [evaporation]
+    outputs:
+      - {kind: state, set: {concentrated: true, cooked: true}, lower: {water: 2}}
+    changes: "A stiff, concentrated puree"
+    applications: "duchesse-style purees, pastes"
+    evidence: [escoffier]
+    confidence: established
+
+  deshydrater:
+    fr: déshydrater
+    en: dry, dehydrate
+    categories: [thermal]
+    technique: dry
+    family_state: true
+    generator_id: dry
+    requires:
+      thin: [true, "only thin pieces dry through"]
+      water: ["<=medium", "too watery to dry; unless sliced thin", {piece: "<=small"}]
+    unsafe_when:
+      - when: {fat: ">=high"}
+        note: "fat-rich flesh turns bitter and rancid when dried at home (web_a5)"
+    equipment: [oven]
+    effort: 2
+    parameters: "oven 100-120 C for 1-2 h, or a dehydrator 55-60 C for hours"
+    mechanisms: [evaporation, concentration]
+    outputs:
+      - {kind: state, set: {water: none, crisp: true, concentrated: true, flexible: false}}
+    effects: [concentrates, crisp]
+    does: "Dried until brittle; can be ground to a powder"
+    corpus: dry
+    changes: "Brittle, shelf-stable, concentrated"
+    applications: "chips, powders"
+    established_on: [tomato.skin, courgette.fruit, carrot.root]
+    evidence: [web_t1, web_z5, web_c6]
+    confidence: established
+
+  torrefier:
+    fr: torréfier
+    en: toast (dry)
+    categories: [thermal]
+    requires:
+      water: ["<=low", "toasts dry material"]
+      browned: [false, "already toasted"]
+    equipment: [pan]
+    effort: 1
+    mechanisms: [maillard]
+    outputs:
+      - {kind: state, set: {browned: true}, add_flavour: [toasted, nutty]}
+    changes: "Deeper, nuttier aroma"
+    applications: "seeds, spices, powders"
+    evidence: [mcgee]
+    confidence: established
+
+  caramelliser:
+    fr: caraméliser
+    en: caramelise
+    categories: [thermal]
+    technique: caramelize
+    requires:
+      heat_sensitive: [false, "turns bitter with long heat"]
+      sugar: [">=medium", "needs sugar to caramelise"]
+      browned: [false, "already browned"]
+    equipment: [pan]
+    effort: 2
+    mechanisms: [caramelisation]
+    outputs:
+      - {kind: state, set: {browned: true, cooked: true}, lower: {water: 1}, add_flavour: [caramel]}
+    changes: "Sweet, bitter-edged, dark"
+    applications: "onions, roots, glazes"
+    established_on: [carrot.root]
+    evidence: [mcgee]
+    confidence: established
+
+  fumer:
+    fr: fumer
+    en: smoke
+    categories: [thermal, chemical]
+    requires:
+      smoked: [false, "already smoked"]
+    equipment: [smoker]
+    effort: 3
+    mechanisms: [smoke_deposition]
+    outputs:
+      - {kind: state, set: {smoked: true}, add_flavour: [smoky]}
+    changes: "Smoke aroma; hot smoking also cooks"
+    applications: "smoked vegetables, smoked salts"
+    safety: "Use food-safe wood; smoke aroma is strong, so test small"
+    evidence: [modernist]
+    confidence: established
+
+  # ======================= chemical and structural ==========================
+  mariner:
+    fr: mariner
+    en: marinate
+    categories: [chemical]
+    requires:
+      liquid: [false, "marinates a solid"]
+    adds: [acid, oil, aromatics]
+    equipment: [bowl]
+    effort: 1
+    mechanisms: [diffusion]
+    outputs:
+      - {kind: state, lower: {firmness: 1}, add_flavour: [marinated]}
+    changes: "Seasoned through; acid softens slightly"
+    applications: "raw vegetable salads, before grilling"
+    evidence: [cia]
+    confidence: established
+
+  macerer:
+    fr: macérer
+    en: macerate
+    categories: [chemical, extraction]
+    requires:
+      sugar: [">=medium", "sugar draws juice into a syrup"]
+      liquid: [false, "macerates a solid"]
+    adds: [sugar_or_alcohol]
+    equipment: [bowl]
+    effort: 1
+    mechanisms: [osmosis]
+    outputs:
+      - {name: macerated, kind: state, lower: {firmness: 1}, raise: {sugar: 1}}
+      - name: syrup
+        kind: fraction
+        set: {liquid: true, water: very_high, fibre: none, firmness: none, piece: fine, shape: none, thin: false, flexible: false}
+        raise: {sugar: 2}
+    changes: "Softened pieces in their own syrup"
+    applications: "fruit; sweet roots"
+    evidence: [larousse]
+    confidence: established
+
+  saumurer:
+    fr: saumurer
+    en: brine
+    categories: [chemical]
+    requires:
+      liquid: [false, "brines a solid"]
+      firmness: [">=medium", "stays firm in brine"]
+    adds: [brine]
+    equipment: [jar]
+    effort: 1
+    mechanisms: [osmosis, diffusion]
+    outputs:
+      - {kind: state, set: {salted: true}}
+    changes: "Seasoned through, firm"
+    applications: "before fermenting or cooking"
+    evidence: [nchfp]
+    confidence: established
+
+  fermenter:
+    fr: fermenter (lacto-fermentation)
+    en: ferment
+    categories: [chemical]
+    technique: ferment
+    requires:
+      liquid: [false, "ferments a solid in its brine"]
+      sugar: [">=low", "bacteria need some sugar"]
+      firmness: [">=medium", "soft material turns to mush"]
+    adds: [salt]
+    equipment: [jar]
+    effort: 3
+    parameters: "salt about 2-3% of weight (extension sources range 1-5%), 4-14 days"
+    mechanisms: [lactic_fermentation]
+    outputs:
+      - {kind: state, set: {fermented: true, salted: true, acidity: high}, raise: {umami: 1}, add_flavour: [sour, funky]}
+    changes: "Sour, funky, preserved, still crunchy"
+    applications: "sauerkraut, fermented stems"
+    safety: "Weigh the salt (below 2% invites spoilage); keep under brine; discard if slimy or mouldy beyond surface yeast"
+    established_on: [broccoli.stems, carrot.root]
+    evidence: [noma, nchfp, vt_fermentation, web_b6]
+    confidence: established
+
+  acidifier:
+    fr: acidifier (pickles rapides)
+    en: quick-pickle
+    categories: [chemical]
+    technique: pickle
+    requires:
+      liquid: [false, "pickles a solid"]
+      firmness: [">=medium", "stays crunchy in acid"]
+    adds: [vinegar, salt, sugar]
+    equipment: [jar]
+    effort: 1
+    mechanisms: [acidification, osmosis]
+    outputs:
+      - {kind: state, set: {pickled: true, acidity: high}, add_flavour: [sour]}
+    changes: "Crunchy, sour, keeps a week in the fridge"
+    applications: "pickled stems, pickled carrots"
+    safety: "A fridge pickle. Shelf-stable pickling needs a tested recipe; broccoli is not recommended for home canning"
+    established_on: [broccoli.stems, carrot.root, avocado.flesh]
+    evidence: [nchfp, web_b4, web_a2]
+    confidence: established
+
+  gelifier:
+    fr: gélifier
+    en: set as a gel
+    categories: [chemical]
+    requires:
+      liquid: [true, "sets a liquid"]
+    adds: [agar_or_gelatin]
+    equipment: [pot]
+    effort: 2
+    mechanisms: [gelation]
+    outputs:
+      - {kind: state, set: {gelled: true, liquid: false, firmness: low, shape: set}}
+    changes: "A sliceable or spoonable gel"
+    applications: "tomato water gel, vegetable jellies"
+    evidence: [modernist, mcgee]
+    confidence: established
+
+  lier:
+    fr: lier
+    en: thicken, bind
+    categories: [chemical]
+    requires:
+      liquid: [true, "thickens a liquid"]
+      thickened: [false, "already thickened"]
+    adds: [starch_or_yolk_or_butter]
+    equipment: [pot, whisk]
+    effort: 1
+    mechanisms: [starch_gelatinisation]
+    outputs:
+      - {kind: state, set: {thickened: true, smooth: true}}
+    changes: "A coating sauce"
+    applications: "sauces from juices and broths"
+    evidence: [escoffier, peterson]
+    confidence: established
+
+  monter_beurre:
+    fr: monter au beurre
+    en: mount with butter
+    categories: [chemical, mechanical]
+    requires:
+      liquid: [true, "finishes a liquid"]
+      concentrated: [true, "a reduction, so the butter emulsifies"]
+    adds: [butter]
+    equipment: [whisk]
+    effort: 1
+    mechanisms: [emulsification]
+    outputs:
+      - {kind: state, set: {emulsified: true, smooth: true}, raise: {fat: 2}}
+    changes: "A glossy emulsified sauce"
+    applications: "beurre blanc, juice reductions"
+    limitations: "splits if boiled after the butter goes in"
+    established_on: [carrot.root]
+    evidence: [peterson, web_c5]
+    confidence: established
+
+  enrober:
+    fr: enrober
+    en: coat (batter, glaze)
+    categories: [chemical]
+    requires:
+      liquid: [false, "coats a solid"]
+      cooked: [false, "coat before cooking; blanched is fine"]
+      smooth: [false, "batter clings to pieces, not to a puree"]
+      coated: [false, "already coated"]
+    adds: [batter]
+    equipment: [bowl]
+    effort: 1
+    mechanisms: [coating]
+    outputs:
+      - {kind: state, set: {coated: true}}
+    changes: "A coating that protects in the fryer"
+    applications: "tempura, fritters"
+    evidence: [cia]
+    confidence: established
+
+  paner:
+    fr: paner (à l'anglaise)
+    en: bread (flour, egg, crumbs)
+    categories: [chemical]
+    requires:
+      liquid: [false, "breads a solid"]
+      cooked: [false, "bread before cooking; blanched is fine"]
+      smooth: [false, "crumbs coat pieces, not a puree"]
+      firmness: [">=low", "holds the coating"]
+      coated: [false, "already coated"]
+      piece: ["small|medium|large", "pieces to coat"]
+    adds: [flour, egg, crumbs]
+    equipment: [bowl]
+    effort: 2
+    mechanisms: [coating]
+    outputs:
+      - {kind: state, set: {coated: true}}
+    changes: "A crumb coat that crisps in fat or oven"
+    applications: "avocado fries, courgette fries"
+    established_on: [avocado.flesh, courgette.fruit]
+    evidence: [cia, web_a4]
+    confidence: established
+
+  deglacer:
+    fr: déglacer
+    en: deglaze
+    categories: [chemical, extraction]
+    generator: false
+    not_generated_because: "dissolves a pan fond, which is not a material of the part"
+    requires: {}
+    equipment: [pan]
+    effort: 1
+    outputs: []
+    evidence: [escoffier]
+    confidence: established
+
+  congeler:
+    fr: congeler
+    en: freeze
+    categories: [thermal]
+    technique: freeze
+    generator: false
+    not_generated_because: "preservation; ice crystals soften texture but create no new use here"
+    requires: {}
+    equipment: [freezer]
+    effort: 1
+    outputs: []
+    evidence: [nchfp]
+    confidence: established
+
+  appertiser:
+    fr: appertiser
+    en: can (heat-process in jars)
+    categories: [thermal]
+    technique: can
+    generator: false
+    not_generated_because: "preservation; low-acid vegetables need a pressure canner and a tested recipe"
+    requires: {}
+    unsafe_when:
+      - when: {acidity: "<=medium"}
+        note: "low-acid vegetables canned without a pressure canner risk botulism (NCHFP)"
+    equipment: [pressure_canner]
+    effort: 3
+    outputs: []
+    evidence: [nchfp, usda_tomato]
+    confidence: established
+
+# What a material is FOR. Separate from roles (what a plate lacks) and flavour
+# dimensions (what you taste); role_link names the overlap.
+functions:
+  # group: texture | structure | flavour | base | appearance. Usefulness counts
+  # distinct groups (appearance half), so one liquid is not scored three times.
+  crisp_component:   {group: texture, when: {crisp: true}, role_link: crunch}
+  vegetable_noodles: {group: structure, when: {shape: ribbons, flexible: true, piece: "medium|large"}}
+  wrapper:           {group: structure, when: {shape: "flat|ribbons", flexible: true, piece: "medium|large|whole", leafy: true}}
+  edible_vessel:     {group: structure, when: {hollow: true}}
+  thickener:         {group: structure, when: {piece: "fine|powder", smooth: false, liquid: false, gelled: false}, when_any: [{starch: ">=medium"}, {pectin: ">=medium"}, {fibre: ">=high"}], role_link: body}
+  binder:            {group: structure, when: {binder: true}}
+  flavour_concentrate: {group: flavour, when: {concentrated: true}}
+  seasoning_powder:  {group: flavour, when: {piece: powder, water: "<=low"}}
+  colouring:         {group: appearance, when: {pigment: "green|red|orange"}, when_any: [{piece: powder}, {liquid: true}]}
+  sauce_base:        {group: base, when: {smooth: true}}
+  broth_base:        {group: base, when: {liquid: true}, when_any: [{infused: true}, {salted: true}], role_link: hydration}
+  aromatic_infusion: {group: flavour, when: {infused: true}}
+  crunchy_contrast:  {group: texture, when: {firmness: ">=medium", piece: small, smooth: false, coated: false}, when_any: [{pickled: true}, {fermented: true}, {cooked: false}], role_link: crunch}
+  coating:           {group: texture, when: {crisp: true, piece: "fine|powder"}}
+  garnish:           {group: appearance, when: {shape: "ribbons|cubes|strips", piece: "fine|small"}}
+  fat_carrier:       {group: flavour, when: {fat: ">=high"}, when_any: [{smooth: true}, {emulsified: true}], role_link: fat}
+  acid_carrier:      {group: flavour, when: {acidity: ">=high"}, when_any: [{liquid: true}, {gelled: true}, {pickled: true}, {fermented: true}], role_link: acid}
+  moisture_carrier:  {group: structure, when: {gelled: true}}
+  waste_reduction:   {group: none, when: {usually_discarded: true}}

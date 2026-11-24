@@ -294,6 +294,9 @@ ingredients:
   - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
   - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
   - { canonical_name: potato, family: root_tuber,     base_roles: "carb\nmild_base", default_availability_class: very_common, kind: both, aliases: "potatoes\nperuna" }
+  # Culinary Operations R1: decomposed into parts, no curated transformations yet.
+  - { canonical_name: carrot, family: root_tuber, base_roles: "crunch", default_availability_class: very_common, aliases: "carrots\nporkkana" }
+  - { canonical_name: courgette, family: fruit_vegetable, base_roles: "hydration\nmild_base", default_availability_class: very_common, aliases: "courgettes\nzucchini\nkesäkurpitsa" }
   - canonical_name: cabbage
     family: brassica
     aliases: "cabbage\nkaali\nsavoy\nred cabbage\ngreen cabbage"
@@ -613,6 +616,25 @@ parts:
     separated_by: stone
     edible: "no"
     not_food_reason: "Hard and bitter, and not established as safe to eat. Leaving it in guacamole does not stop browning."
+  # Culinary Operations R1. The carrot peel and courgette skin are not parts:
+  # they are outer layers (part_properties.yaml `outer_layer`) that a peeling
+  # operation turns into a fraction. A layer becomes a part when the curated
+  # model processes it as a thing of its own, as with tomato skin.
+  - ingredient: carrot
+    name: root
+    separated_by: trim
+    provides: "crunch\nbody"
+    description: "The sweet orange root. Firm enough for every classical cut; its thin peel is edible."
+  - ingredient: carrot
+    name: greens
+    separated_by: trim
+    provides: "herb"
+    description: "Feathery, parsley-like tops; bitter and grassy. Edible; usually thrown away."
+  - ingredient: courgette
+    name: fruit
+    separated_by: trim
+    provides: "body\nhydration"
+    description: "Mild and very watery. Salt draws the water out; large ones have a soft seedy core."
 
 # ---- Transformations -------------------------------------------------------
 transformations:

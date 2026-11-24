@@ -21,6 +21,23 @@
 # flavour: words matched by the acid mechanisms (mild, sweet, rich, ...)
 # only_techniques: limits a conditional part to the techniques that make it
 #   worth eating (tomato core: only a stock).
+#
+# Added for the operation model (Culinary Operations R1, foodprep.operations).
+# There a property that is not stated is UNKNOWN, never false, except the flags
+# above (recorded only when true) and state flags only an operation sets.
+#   firmness          holds a cut shape (none .. very_high)
+#   shape             cylindrical | round | tree | flat | feathery | irregular
+#   piece             whole | large | medium | small | fine | powder
+#   flexible          bends without breaking
+#   sheetable         gives long continuous ribbons or sheets
+#   starch, pectin    levels; thickening and setting potential
+#   emulsifies        holds fat and water together when blended
+#   holds_shape_cooked  keeps its shape through cooking
+#   usually_discarded cooks mostly throw it away (S2 counts, or common practice)
+#   outer_layer       a peel that is not a part of its own: its properties, and
+#                     `inner_changes` for the body once it is peeled
+#   seed_core         a soft seed region that can be scooped out
+#   heat_sensitive    turns bitter or off with long heat (recorded only when true)
 
 parts:
   broccoli:
@@ -35,6 +52,15 @@ parts:
       raw_ok: true
       pigment: green
       flavour: [green, mild, sulfurous]
+      firmness: medium
+      shape: tree
+      piece: medium
+      flexible: false
+      sheetable: false
+      starch: low
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
     stems:
       water: medium
       fibre: high
@@ -47,6 +73,41 @@ parts:
       pigment: green
       flavour: [sweet, mild, green]
       note: "Peel the tough outer layer first; inside it is dense and sweet, like kohlrabi."
+      firmness: high
+      shape: cylindrical
+      piece: large
+      flexible: false
+      sheetable: true
+      starch: low
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
+      outer_layer:
+        name: stem_peel
+        edible: "yes"
+        usually_discarded: true
+        water: low
+        fibre: very_high
+        toughness: high
+        firmness: medium
+        fat: none
+        sugar: low
+        acidity: low
+        bitterness: low
+        umami: none
+        raw_ok: false
+        thin: true
+        flexible: true
+        sheetable: false
+        starch: low
+        pectin: low
+        emulsifies: false
+        holds_shape_cooked: true
+        shape: strips
+        piece: small
+        pigment: green
+        flavour: [green, bitter]
+        inner_changes: {toughness: low, fibre: medium}
     leaves:
       water: medium
       fibre: high
@@ -60,6 +121,16 @@ parts:
       leafy: true
       pigment: green
       flavour: [green, bitter, cabbage]
+      firmness: low
+      shape: flat
+      piece: large
+      flexible: true
+      sheetable: true
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      usually_discarded: true
 
   tomato:
     flesh:
@@ -74,6 +145,15 @@ parts:
       raw_ok: true
       pigment: red
       flavour: [sweet, sour, fresh]
+      firmness: low
+      shape: irregular
+      piece: medium
+      flexible: false
+      sheetable: false
+      starch: none
+      pectin: medium
+      emulsifies: false
+      holds_shape_cooked: false
     seeds_and_gel:
       water: very_high
       fibre: none
@@ -87,6 +167,16 @@ parts:
       liquid: true
       pigment: red
       flavour: [sour, umami, fresh]
+      firmness: none
+      shape: irregular
+      piece: fine
+      flexible: false
+      sheetable: false
+      starch: none
+      pectin: medium
+      emulsifies: false
+      holds_shape_cooked: false
+      usually_discarded: true
     skin:
       water: low
       fibre: medium
@@ -100,6 +190,16 @@ parts:
       thin: true
       pigment: red
       flavour: [umami]
+      firmness: low
+      shape: flat
+      piece: small
+      flexible: true
+      sheetable: false
+      starch: none
+      pectin: medium
+      emulsifies: false
+      holds_shape_cooked: true
+      usually_discarded: true
     core:
       water: medium
       fibre: medium
@@ -112,6 +212,17 @@ parts:
       pigment: none
       flavour: [mild]
       only_techniques: [simmer]
+      only_operations: [decocter]   # the operation model's other way to make a stock
+      firmness: high
+      shape: irregular
+      piece: small
+      flexible: false
+      sheetable: false
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
+      usually_discarded: true
       note: "Edible but hard; worth it only simmered in a stock or a sieved sauce."
 
   avocado:
@@ -127,5 +238,164 @@ parts:
       browns_when_cut: true
       pigment: none   # pale green, and acid keeps it bright instead of dulling it
       flavour: [rich, mild, grassy]
+      firmness: low
+      shape: round
+      piece: large
+      flexible: false
+      sheetable: false
+      starch: none
+      pectin: low
+      emulsifies: true
+      holds_shape_cooked: true
+      heat_sensitive: true   # long or wet heat turns it bitter; short searing works
     skin: {}
     stone: {}
+
+  carrot:
+    root:
+      water: high
+      fibre: medium
+      toughness: high
+      firmness: very_high
+      fat: none
+      sugar: medium
+      acidity: low
+      bitterness: none
+      umami: none
+      raw_ok: true
+      pigment: orange
+      flavour: [sweet, earthy]
+      shape: cylindrical
+      piece: whole
+      flexible: false
+      sheetable: true
+      starch: low
+      pectin: medium
+      emulsifies: false
+      holds_shape_cooked: true
+      outer_layer:
+        name: carrot_peel
+        edible: "yes"
+        usually_discarded: true
+        water: medium
+        fibre: high
+        toughness: low
+        firmness: medium
+        fat: none
+        sugar: low
+        acidity: low
+        bitterness: low
+        umami: none
+        raw_ok: true
+        thin: true
+        flexible: true
+        sheetable: true
+        starch: low
+        pectin: medium
+        emulsifies: false
+        holds_shape_cooked: true
+        shape: ribbons
+        piece: medium
+        pigment: orange
+        flavour: [earthy, bitter]
+        inner_changes: {}
+    greens:
+      water: medium
+      fibre: high
+      toughness: medium
+      firmness: low
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: high
+      umami: none
+      raw_ok: true
+      thin: true
+      leafy: true
+      pigment: green
+      flavour: [green, bitter, grassy]
+      shape: feathery
+      piece: large
+      flexible: true
+      sheetable: false
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      usually_discarded: true
+      note: "Edible, parsley family; bitter. Do not confuse with wild look-alikes such as hemlock."
+
+  courgette:
+    fruit:
+      water: very_high
+      fibre: low
+      toughness: low
+      firmness: medium
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: none
+      raw_ok: true
+      pigment: green
+      flavour: [mild, green]
+      shape: cylindrical
+      piece: whole
+      flexible: false
+      sheetable: true
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      note: "Taste a tiny raw piece first: discard any very bitter courgette (cucurbitacin; cooking does not remove it)."
+      outer_layer:
+        name: courgette_skin
+        edible: "yes"
+        usually_discarded: false
+        water: medium
+        fibre: medium
+        toughness: low
+        firmness: medium
+        fat: none
+        sugar: low
+        acidity: low
+        bitterness: low
+        umami: none
+        raw_ok: true
+        thin: true
+        flexible: true
+        sheetable: true
+        starch: none
+        pectin: low
+        emulsifies: false
+        holds_shape_cooked: true
+        shape: ribbons
+        piece: medium
+        pigment: green
+        flavour: [green, grassy]
+        inner_changes: {}
+      seed_core:
+        name: seed_core
+        condition: "only large courgettes have a distinct seedy core"
+        edible: "yes"
+        usually_discarded: true
+        water: very_high
+        fibre: low
+        toughness: none
+        firmness: none
+        fat: none
+        sugar: low
+        acidity: low
+        bitterness: low
+        umami: none
+        raw_ok: true
+        flexible: false
+        sheetable: false
+        starch: none
+        pectin: low
+        emulsifies: false
+        holds_shape_cooked: false
+        shape: irregular
+        piece: small
+        pigment: none
+        flavour: [mild]
