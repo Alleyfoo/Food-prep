@@ -7,8 +7,14 @@ say which of those ideas recipes do not show?
 
 Run on 2026-11-24 over the full RecipeNLG `full_dataset.csv`
 (2,231,142 recipes). Code: `src/foodprep/possibilities.py` (generator),
-`src/foodprep/pair_counts.py` and `scripts/count_acid_pairs.py` (counts).
-Try it with `foodprep possible broccoli --part stems`.
+`src/foodprep/pair_counts.py` and `scripts/count_family_pairs.py` (counts).
+Try it with `foodprep possible broccoli --part stems`, one family with
+`--family protein`, and the families themselves with `foodprep families`.
+
+**Update, same day: families.** The first version knew only acid. Ideas are
+now generated and sorted per *family*: what an ingredient brings to a dish.
+The families are the ontology's own roles, so they tie into the existing
+model. See "Families" below.
 
 ## How an idea is made
 
@@ -18,7 +24,7 @@ Three hand-curated tables, none of them built from recipes:
 | --- | --- | --- |
 | `part_properties.yaml` | What a part physically is: water, fibre, toughness, fat, sugar, acidity, bitterness, pigment, flavour | Broccoli stems: medium water, high fibre, sweet, mild, green |
 | `technique_rules.yaml` | What a technique needs from a part, and what it does | Frying needs medium water or less; it browns and crisps |
-| `acid.yaml` | Acid sources with their own character, and the mechanisms by which acid changes a part | Lingonberry: very acid, astringent, keeps raw; `quick_pickle` needs a firm part and a strong liquid acid |
+| `families.yaml` | Families (acid, fat, salt, umami, sweet, protein, carb), their members with a level in each family, and the mechanisms by which a member changes or completes a part | Lingonberry: acid very high, astringent, keeps raw; `quick_pickle` needs a firm part and a strong liquid acid |
 
 part × technique gives a state. state × acid mechanism × acid source gives
 an idea with its reason, its risks (green turns olive, sweet reads as
@@ -39,7 +45,58 @@ acid source are listed together against what chance predicts
 | Untested | chance predicts under 5: the corpus cannot judge | Scout |
 | Own part / Part as acid | the acid is a part, e.g. tomato gel; recipes list only the whole tomato | Scout |
 
-## What the counts say
+## Families
+
+| Family | Kind | Says | Members | Mechanisms |
+| --- | --- | --- | ---: | --- |
+| acid | modifier | brightens and sharpens | 17 | brighten browned, cut fat, slow browning, quick pickle, soften leaves, lift mild |
+| fat | modifier | carries flavour and gives body | 14 | brown in fat, coat raw, round bitter, enrich soft |
+| salt | modifier | seasons and sharpens every other taste | 10 | draw water, suppress bitter, season through, crisp finish |
+| umami | modifier | makes it taste savoury and deep | 13 | deepen mild, echo browning |
+| sweet | modifier | balances sharp and bitter | 6 | balance acid, balance bitter, glaze |
+| protein | partner | makes it a meal | 9 | yolk as sauce, creamy against crisp, crisp against soft, same pan |
+| carb | partner | carries and fills | 9 | soak juice, sauce for starch, base for fast, crunch on soft |
+
+- **A member belongs to every family it brings, with a level in each.** Soy
+  sauce is salt very high and umami high; bacon is fat, salt, umami and
+  protein. A member counts in a family from `medium` up. The output says
+  "also umami", so the cook sees what else it brings.
+- **Members are tied to the ontology.** Where a member is a `tomato.yaml`
+  ingredient, all its `base_roles` that are families must appear in its
+  families (a test checks this).
+- **A part that already has a family gets nothing from it.** Tomato gel gets
+  no acid, avocado flesh no fat, tomato skin no umami. Each is then a member
+  for other parts instead: tomato gel is acid and umami, tomato skin powder
+  is umami. Sweet, in turn, now has something to do for the gel: balance it.
+- **Modifiers change the part, partners complete the plate.** Protein and
+  carb mechanisms are about the state, not the part alone: a soft yolk
+  dresses a softened or browned vegetable, a creamy cheese contrasts crisp
+  edges, bread soaks tomato juice.
+- **Risks travel across families.** A salty member in another family (miso as
+  umami) warns to season after it; a sweet member in another family
+  (balsamic as acid) warns it may read as dessert.
+
+### What the families show for broccoli
+
+| Family | Scout ideas (rare, not seen, untested, part as member) |
+| --- | --- |
+| acid | rhubarb 1 vs 146, cranberry 48 vs 539, green mango, sumac, pomegranate molasses, lingonberry and sea buckthorn (untested), tomato gel |
+| fat | brown butter: 0 vs 5, untested |
+| umami | tomato gel, tomato skin powder |
+| sweet | maple syrup 73 vs 465, sugar, pomegranate molasses |
+| salt, protein, carb | none: every member is common or seen |
+
+- **Protein and carb partners are all familiar.** Eggs, chicken, rice, pasta
+  and the rest are cooked with broccoli, tomato and avocado as often as
+  chance predicts or more. The new ideas sit in the modifiers.
+- **Brown butter on broccoli is untested in the corpus, yet it is the one
+  idea already tasted** (2026-08-12, verdict "works"). That is the kind of
+  idea this method is for.
+- **Avocado with sugar is rare here** (2,459 vs 10,312), though sweet avocado
+  drinks are everyday food in Indonesia, Vietnam and Brazil. Like the banana
+  peel, this is one kitchen culture's absence, not a verdict.
+
+## What the counts say (acid, first version)
 
 Pairs listed together, against chance:
 
@@ -77,8 +134,12 @@ Pairs listed together, against chance:
   recipes says they share a list (often a salad), not that cranberry acts
   as the acid. Rare and not seen are what this method trusts; common means
   little, as in the novelty check on CulinaryDB.
-- **The tables are a first draft.** Ten parts, ten techniques, thirteen acid
-  sources, six mechanisms. Each property is a judgement and needs checking,
+- **Sugar and other baking staples inflate "chance".** Sugar is in a third
+  of all recipes, mostly desserts, so any savoury ingredient looks rare with
+  it. Rare against a baking staple says savoury and sweet are separate
+  sections, not much more.
+- **The tables are a first draft.** Ten parts, ten techniques, seven
+  families with 54 members and 27 mechanisms. Each property is a judgement and needs checking,
   for example that tomato skin should not be steamed.
 - **No tasting yet.** The ideas are hypotheses. The next step for any of them
   is a Scout protocol and a recorded tasting, as for brown butter.
@@ -89,6 +150,7 @@ Pairs listed together, against chance:
 
 - Turn the top Scout ideas into protocols (lingonberry on roasted broccoli
   stems already waits for the picking season).
-- Add more modifier mechanisms beyond acid: fat, salt, sugar, umami, smoke.
+- More families: herb, aromatic, heat, crunch and smoke are roles in the
+  ontology too.
 - Add parts for carrot (tops, peel) and banana (peel), whose properties
   already fit these techniques.
