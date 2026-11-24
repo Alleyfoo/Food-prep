@@ -58,7 +58,10 @@ class Catalogue:
 @lru_cache(maxsize=1)
 def load() -> Catalogue:
     data = pc.load_yaml(DATA / "operations.yaml")
-    props = pc.load_yaml(DATA / "part_properties.yaml")["parts"]
+    pp = pc.load_yaml(DATA / "part_properties.yaml")
+    # staged_parts: construction ingredients (R3, ADR 0003) that the engine
+    # reads but the family generator and the decomposition UI do not.
+    props = {**pp["parts"], **(pp.get("staged_parts") or {})}
     edible = {(p["ingredient"], p["name"]): (str(p.get("edible", "yes")), p.get("not_food_reason"))
               for p in pc.load_yaml(DATA / "tomato.yaml").get("parts", [])}
     parts: dict = {}
@@ -223,6 +226,30 @@ class Assessment:
         return "; ".join(self.failed)
 
 
+def check_requires(requires: dict | None, m: Material, cat: Catalogue | None = None
+                   ) -> tuple[list, list, list]:
+    """(met, failed, unknown) for a `requires` mapping. Used by `assess`, and by
+    foodprep.constructions for the roles of an assembly operation."""
+    cat = cat or load()
+    met, failed, unknown = [], [], []
+    for key, spec in (requires or {}).items():
+        test, why = (spec[0], spec[1]) if isinstance(spec, list) else (spec, key)
+        waiver = spec[2] if isinstance(spec, list) and len(spec) > 2 else None
+        waivers = waiver if isinstance(waiver, list) else [waiver] if waiver else []
+        if any(holds(m, w, cat) for w in waivers):
+            met.append(f"{why} (waived)")
+            continue
+        known, have = value(m, key, cat)
+        if not known:
+            unknown.append(key)
+        elif passes(key, have, test, cat):
+            if test is not False:      # a 'must not be X' rule explains failures only
+                met.append(why)
+        else:
+            failed.append(why)
+    return met, failed, unknown
+
+
 def assess(op_id: str, m: Material, cat: Catalogue | None = None) -> Assessment:
     cat = cat or load()
     op = cat.operations[op_id]
@@ -248,21 +275,7 @@ def assess(op_id: str, m: Material, cat: Catalogue | None = None) -> Assessment:
             a.status = "unsafe"
             a.notes.append(rule["note"])
             return a
-    for key, spec in (op.get("requires") or {}).items():
-        test, why = (spec[0], spec[1]) if isinstance(spec, list) else (spec, key)
-        waiver = spec[2] if isinstance(spec, list) and len(spec) > 2 else None
-        waivers = waiver if isinstance(waiver, list) else [waiver] if waiver else []
-        if any(holds(m, w, cat) for w in waivers):
-            a.met.append(f"{why} (waived)")
-            continue
-        known, have = value(m, key, cat)
-        if not known:
-            a.unknown.append(key)
-        elif passes(key, have, test, cat):
-            if test is not False:      # a 'must not be X' rule explains failures only
-                a.met.append(why)
-        else:
-            a.failed.append(why)
+    a.met, a.failed, a.unknown = check_requires(op.get("requires"), m, cat)
     if a.failed:
         a.status = "inapplicable"
         return a

@@ -216,11 +216,18 @@ def test_cut_names_a_preparation_and_changes_geometry(cat):
 
 
 def test_pressing_gives_juice_and_pulp(cat):
+    """R3 changed this deliberately (ADR 0003, R2 requirements.md): the pulp
+    binds only when the material is starch-rich. Squeezed carrot or courgette is
+    what needs binding (every C4 recipe adds egg and flour); squeezed raw potato
+    binds through its starch (C1)."""
     grated = out("raper", start("carrot", "root", cat))[0]
     juice, pulp = o.apply("presser", grated)
     assert juice.props["liquid"] is True and juice.props["fibre"] == "none"
-    assert pulp.props["binder"] is True and pulp.props["fibre"] == "high"
-    assert "binder" in o.functions(pulp)
+    assert not pulp.props.get("binder") and pulp.props["fibre"] == "high"
+    assert "binder" not in o.functions(pulp)
+    potato = out("raper", out("eplucher", start("potato", "tuber", cat))[0])[0]
+    _, potato_pulp = o.apply("presser", potato)
+    assert potato_pulp.props["binder"] is True and "binder" in o.functions(potato_pulp)
 
 
 def test_drying_then_grinding_makes_a_seasoning_powder(cat):

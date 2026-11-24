@@ -1,0 +1,50 @@
+# Documented amendments to the R3 schema freeze (construction_freeze.yaml).
+#
+# construction_freeze.yaml is the historical record of the R3 experiment: it
+# was written at commit e8a2e54, before any held-out dish was represented, and
+# must never be overwritten or regenerated. A later correction is recorded
+# here instead: what changed, why, and the hashes after the change.
+# tests/test_constructions.py accepts exactly the original manifest plus these
+# amendments, applied in order, and fails on any undocumented change.
+#
+# Amendment fields: id, date, reason, changed (what and why), effect (on R3's
+# results), and the manifest entries it replaces (only `code`, `schema`,
+# `vocabulary`, `catalogue` or `operations`).
+
+original_manifest_sha256: 741c285b2c05cc44c37732f0cd693cec3fa1c568b7d1cbe6891bd4ac51aa557b
+original_commit: e8a2e54
+
+# The original R3 result tables (docs/research/r3-construction-modelling/),
+# kept unchanged as historical evidence. Results under an amended validator go
+# to separately named files (validation-tables-a1.md, generalisation-tables-a1.md).
+original_tables_sha256:
+  validation-tables.md: 8c9a41e185985600073b901df328ac9443c2969b08ca05085893680e9bf80c51        # e8a2e54
+  generalisation-tables.md: 736cbbe556d36a1cfafd939237b12afc6e4e1778ca0cb0585411466c4f616baa    # 6beda68
+
+amendments:
+  - id: A1
+    date: 2026-11-24
+    reason: >
+      PR #7 review (static inspection of src/foodprep/constructions.py),
+      reproduced with tests before the fix.
+    changed:
+      - >
+        Recombination detection. A fraction and its source were both counted
+        as reaching the result because reachability follows a fraction back to
+        its source, so extraction alone (a material pressed and only its juice
+        used) would have counted as recombination. Now recombination needs two
+        materials of the same origin, each entering the construction by its
+        own route (through an assembly role or as the result); intermediates
+        that never enter the dish are walked through.
+      - >
+        Edibility at joins. An assembly took its carrier's edibility only. Now
+        a join is not food if any member is not food, with R1's reason, so the
+        steps after it are unsafe or inapplicable exactly as R1's assess would
+        judge the member; each such member is a failure.
+    effect: >
+      No verdict and no recombination link changed for any of the 35 dishes:
+      every link already joined two materials entering by their own routes, and
+      no documented dish has a non-food member. Design 13 fully / 14 partly,
+      held-out 2 fully / 6 partly, 13 recombination links, before and after.
+    code:
+      constructions.py: 7460afb887cda037

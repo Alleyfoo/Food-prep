@@ -1,0 +1,108 @@
+# Research roadmap: from ingredients to dinner
+
+Where the culinary research stands, which questions are answered, and what
+comes next. Written at the start of R3 (2026-11-24) as a consolidation, so the
+next rounds build on the answers instead of reopening them.
+
+The goal, in the user's words: food-prep should eventually "help us make
+dinner rather than giving us homework about dinner".
+
+The method, unchanged since R1:
+- documented dishes first ("has anybody actually eaten this before?");
+- the evidence decides the ontology;
+- multilingual sources;
+- Lidl Finland ingredients and a home kitchen;
+- practical usefulness before novelty;
+- no new scoring;
+- represent why a dish works, not the recipe.
+
+## The research questions so far
+
+| # | Question | Status | Where |
+| --- | --- | --- | --- |
+| 1 | **Decomposition.** What separable parts does an ingredient have, and is each one food? | answered, implemented | ADR 0002, `tomato.yaml` parts, `part_properties.yaml` |
+| 2 | **Operations.** What does one culinary operation do to one material, and when does it apply? | answered, implemented | R1: 95 operations in `operations.yaml`, three-valued applicability with reasons |
+| 3 | **Materials and secondary outputs.** Which operations give a second useful material (peel, juice and pulp, vegetable water, core)? | answered, implemented | R1: multi-output separations in `operations.py` |
+| 4 | **Bounded sequences.** What can two or three operations in a row make, and how should it be shown? | answered | R1 benchmark: per-function, simplest-first lists recover about 40% of established preparations; a global score recovers almost none, so scoring stopped |
+| 5 | **Construction patterns and holding mechanisms.** How do cooks build a dish from separately processed materials, and what holds it together? | answered within scope | R2: nine patterns C1-C9, mechanisms H1-H11, water routes W1-W9, recombination is ordinary practice |
+| 6 | **Representing complete constructions.** Can the model describe a real dish from raw parts to its finished structure, and show why it works? | partial, R3 | R2 recommended Option D; R3 implements and tests it |
+| 7 | **Discovering useful unfamiliar preparations.** Can a documented construction be carried over to another Lidl ingredient with a physical reason, and does it work? | open, R4 | |
+| 8 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations and constructions answer "what can I make with this tonight"? | open, R5 | |
+
+### What each finished round established
+
+- **R1, culinary operations** (`r1-culinary-operations/`, PR #5).
+  - Operations are defined once, independent of ingredients, and applied by
+    material properties. Every result carries its reasons ("firm enough to
+    hold a narrow strip", "peel first").
+  - The most productive operations make a second material: peel, juice and
+    pulp, drained pieces and vegetable water.
+  - Enumeration works; ranking does not. The global ranking recovered 0-2 of
+    42 established preparations; per-function lists ordered simplest-first
+    recover 14-17. That list is now the default `foodprep explore` view, and
+    scoring work has stopped.
+  - The two established preparations the engine could not reach both needed
+    recombination (stuffed courgette, courgette peel cake).
+- **R2, construction patterns** (`r2-construction-patterns/`, PR #6).
+  - 127 recipe pages for 59 dishes, read in 20 languages besides English,
+    plus RecipeNLG counts for 27 dishes.
+  - Dishes hold together in nine ways, grouped by the mechanism whose removal
+    makes them fail: released starch (C1), cooked starch (C2), raw pulse paste
+    (C3), bound watery vegetable (C4), batter matrix (C5), egg matrix (C6),
+    container and filling (C7), layered assembly (C8), coated piece (C9).
+  - A binder is needed only for watery, starch-poor vegetables. Every pattern
+    manages a water budget, by one of nine routes. Patterns nest.
+  - The model already produces most components, but lacks recombination,
+    assembly, a cooled state, water uptake, settled starch and a soak, and
+    disagrees with the recipes in two places (squeezed pulp marked as a
+    binder; courgette "does not hold its shape cooked").
+  - Recommendation (Option D): record documented constructions as data
+    before writing any rules.
+
+## The agreed roadmap
+
+No further theoretical research round. The next three rounds implement and
+validate, each against documented dishes.
+
+### R3: represent documented dishes
+
+Can food-prep represent an existing dish from raw ingredients through to its
+finished construction, in a way that shows it understands why the
+preparation works? About 27 design dishes from R2 (three per pattern) and a
+held-out set chosen before the schema is designed. It answers three
+questions:
+- **expressiveness:** established preparations are described accurately;
+- **generalisability:** held-out dishes need no schema change;
+- **traceability:** every construction traces to R2 recipe ids and URLs.
+
+Representing a dish is not reproducing a recipe: quantities and conditions
+are evidence attached to relationships, not steps to follow. No construction
+rules, no generator, no scoring. Results: `r3-construction-modelling/`.
+
+### R4: controlled transfers
+
+Carry a documented construction over to another Lidl ingredient: rösti from
+another root, other leaves as wrappers, other vegetables as containers,
+Finnish dried peas as falafel, rutabaga in a gratin. For each candidate, in
+this order:
+1. search whether someone already makes it, in the relevant languages;
+2. only then give the physical rationale, from the R3 representation: which
+   component requirement the new ingredient meets, and which it does not.
+
+Novelty comes last, and every transfer stays marked as inference until it is
+found in practice or cooked.
+
+### R5: integrate into the interface
+
+Make it useful in the app: the Taste Circle, ingredient families, operations
+and constructions working together, so the app can answer:
+- what can I make with this vegetable;
+- what to do with its discarded parts;
+- what role it can fill in a dish;
+- safe substitutions;
+- how to improve the flavour.
+
+The sensory and pairing system complements constructions; it is not replaced.
+
+The split into R3-R5 is a proposal; rounds may merge if the work shows they
+should.
