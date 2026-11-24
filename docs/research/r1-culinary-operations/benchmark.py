@@ -18,6 +18,11 @@ F  purpose-specific, simplest first (fewest steps, least effort and equipment)
 G  purpose-specific, simplest first, with the sensory term (flavour_shift)
 H  global ranking B cut to F's length, and I global D cut to G's length: the
    fair controls for F and G, whose lists come out longer than C's
+J  global B through diverse() at F's length, and K global D through diverse()
+   at G's length: the global view as the CLI shows it (one per part, fraction,
+   function and last operation, fair share per part)
+
+Items are matched by final MATERIAL, not exact sequence (see benchmark.yaml).
 
 A list is only as useful as it is short, so every variant is compared at the
 same budget: the number of distinct sequences the purpose-specific lists
@@ -73,7 +78,7 @@ def main() -> int:
     items = pc.load_yaml(HERE / "benchmark.yaml")["items"]
     ingredients = list(dict.fromkeys(i["ingredient"] for i in items))
     rows, summary = [], []
-    totals = {v: 0 for v in "ABCDEFGHI"}
+    totals = {v: 0 for v in "ABCDEFGHIJK"}
     fair = 0
     for ing in ingredients:
         ex = o.explore(ing, cat=cat)
@@ -97,13 +102,18 @@ def main() -> int:
         }
         shown["H"] = shown_global(lists["B"], len(shown["F"]))
         shown["I"] = shown_global(lists["D"], len(shown["G"]))
+        shown["J"] = o.diverse(lists["B"], len(shown["F"]))
+        shown["K"] = o.diverse(lists["D"], len(shown["G"]))
         shown_ids = {v: {id(x.result) for x in xs} for v, xs in shown.items()}
         pos = {v: {id(x.result): i for i, x in enumerate(lists[v])} for v in "ABD"}
         summary.append((ing, len(ex.results), {v: len(lists[v]) for v in "ABD"},
                         budget, len(purpose_d), len(shown["F"]), len(shown["G"])))
         for item in (i for i in items if i["ingredient"] == ing):
+            if item.get("expect") == "not_representable":
+                rows.append((item, "not representable", "", {}, True))
+                continue
             m, why = final_material(item, cat)
-            expected_block = item.get("expect") == "blocked"
+            expected_block = item.get("expect") in ("blocked", "beyond_depth")
             if m is None:
                 rows.append((item, "blocked", why, {}, expected_block))
                 continue
@@ -114,8 +124,9 @@ def main() -> int:
             if not expected_block:
                 fair += 1
             hits = {}
-            for v in "ABCDEFGHI":
-                base = {"C": "B", "E": "D", "F": "B", "G": "D", "H": "B", "I": "D"}.get(v, v)
+            for v in "ABCDEFGHIJK":
+                base = {"C": "B", "E": "D", "F": "B", "G": "D", "H": "B", "I": "D",
+                        "J": "B", "K": "D"}.get(v, v)
                 rank = pos[base].get(id(r))
                 hits[v] = (rank, id(r) in shown_ids[v])
                 if id(r) in shown_ids[v] and not expected_block:
@@ -138,6 +149,11 @@ def main() -> int:
            "- **G:** purpose-specific, simplest first, + sensory",
            "- **H:** global B cut to F's length; **I:** global D cut to G's length "
            "(fair controls)",
+           "- **J:** global B through `diverse()` at F's length; **K:** global D through "
+           "`diverse()` at G's length (the global view as the CLI shows it)",
+           "",
+           "Items are matched by final **material**, not by exact sequence: an item counts as "
+           "recovered when the generator reaches the same material, whichever path it shows.",
            "",
            "F and G show the same number of lists as C and E (one per part and function, "
            f"{K} each), so their budgets are close to C's and E's and are listed below.",
@@ -147,8 +163,9 @@ def main() -> int:
            "",
            "## Summary",
            "",
-           f"{fair} benchmark items reachable by the generator (blocked or expected-blocked "
-           "items excluded).",
+           f"{fair} benchmark items reachable by the generator. Excluded: items the model "
+           "blocks, items expected to be blocked or beyond depth, and items that need "
+           "operations the engine lacks (listed at the end of the table).",
            "",
            "| Variant | found within budget | share |",
            "| --- | ---: | ---: |"]
@@ -158,7 +175,9 @@ def main() -> int:
                      ("F", "purpose-specific, simplest first"),
                      ("G", "purpose-specific, simplest first, + sensory"),
                      ("H", "global B at F's length (control)"),
-                     ("I", "global D at G's length (control)")):
+                     ("I", "global D at G's length (control)"),
+                     ("J", "global B, diverse(), at F's length (CLI view)"),
+                     ("K", "global D, diverse(), at G's length (CLI view)")):
         out.append(f"| {v} {label} | {totals[v]} | {totals[v] / fair:.0%} |")
     out += ["", "| Ingredient | distinct materials | ranked A / B / D | budget A,B,C | budget D,E | shown F | shown G |",
             "| --- | ---: | --- | ---: | ---: | ---: | ---: |"]
@@ -168,15 +187,15 @@ def main() -> int:
             "Rank is the position in the full global list (0 = first; - = generated but not "
             "ranked). Found: ✓ within the budget, · not.",
             "",
-            "| Item | Source | Status | A rank | B rank | D rank | A | B | C | D | E | F | G |",
-            "| --- | --- | --- | ---: | ---: | ---: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |"]
+            "| Item | Source | Status | A rank | B rank | D rank | A | B | C | D | E | F | G | J | K |",
+            "| --- | --- | --- | ---: | ---: | ---: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |"]
     for item, status, why, hits, expected in rows:
         name = f"{item['id']} ({item['ingredient']} {item['part']})"
         if status != "generated":
             note = why or ""
             if expected:
                 note = f"expected: {item['why']}"
-            out.append(f"| {name} | {item['source']} | {status}: {note} | | | | | | | | | | |")
+            out.append(f"| {name} | {item['source']} | {status}: {note} | | | | | | | | | | | | |")
             continue
 
         def rk(v):
@@ -186,7 +205,7 @@ def main() -> int:
         def ok(v):
             return "✓" if hits[v][1] else "·"
         out.append(f"| {name} | {item['source']} | generated | {rk('A')} | {rk('B')} | {rk('D')} | "
-                   + " | ".join(ok(v) for v in "ABCDEFG") + " |")
+                   + " | ".join(ok(v) for v in "ABCDEFGJK") + " |")
     (HERE / "benchmark-results.md").write_text("\n".join(out) + "\n", encoding="utf-8")
     print("\n".join(out[:30]))
     return 0

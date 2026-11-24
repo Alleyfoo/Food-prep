@@ -66,7 +66,7 @@ Status, as the research agent judged it from what it found:
 | `web_c4` | Carrot-top chimichurri or pesto | established | https://www.loveandlemons.com/carrot-greens-chimichurri/ |
 | `web_c5` | Carrot juice reduced and mounted with butter | established (chef technique) | https://foragerchef.com/carrots-glazed-in-carrot-juice-with-wild-carrot-flowers-and-seeds/ ; https://www.gastronomixs.com/en/components/carrot-reduction |
 | `web_c6` | Carrot peel powder | niche | https://www.healthycanning.com/carrot-peel-powder |
-| `web_z1` | Courgette **skin** ribbons as a component of their own | no evidence found (the all-skin first strip is usually discarded) | https://www.thewickednoodle.com/zucchini-ribbons/ |
+| `web_z1` | Courgette **skin** ribbons as a component of their own | no evidence found **in English**; documented in Portuguese (`pt_esparguete_verde`) | https://www.thewickednoodle.com/zucchini-ribbons/ |
 | `web_z2` | Grated courgette salted and squeezed | established | https://www.foodnetwork.com/recipes/food-network-kitchen/zucchini-fritters-13025807 |
 | `web_z3` | Liquid from salted courgette as broth or drink | niche | https://www.sevendaysvt.com/food-drink/farmers-market-kitchen-nutty-carrot-zucchini-water-soup-2424257/ |
 | `web_z4` | Courgette noodles | established | https://inspiralized.com/how-to-avoid-watery-and-soggy-zucchini-noodles/ |
@@ -82,6 +82,38 @@ Status, as the research agent judged it from what it found:
 | `web_a3` | Grilled avocado | established | https://www.fifteenspatulas.com/grilled-avocado/ |
 | `web_a4` | Breaded fried avocado | established | https://www.loveandlemons.com/avocado-fries ; https://en.wikipedia.org/wiki/Deep-fried_avocado |
 | `web_a5` | Dried avocado | contradicted at home (bitter, rancid) | https://www.tastingtable.com/1172723/is-it-possible-to-make-dehydrated-avocado |
+
+## Portuguese sources (supplied by the user, 2026-11-24)
+
+The user searched in Portuguese after the English-only check, and found
+documented preparations for courgette parts that the English search had
+missed. They were supplied as titles, with veolia.pt among the sites. A
+follow-up search by Claude in Portuguese did not locate these exact pages, so
+no URLs are given for them here rather than guessed. The user reports that
+the PDF page image of "Receitas sem sobras" could not be retrieved, but its
+recipe text was accessible.
+
+| Id | Source | Preparation | Physical operations |
+| --- | --- | --- | --- |
+| `pt_esparguete_verde` | *Receitas sem sobras* (veolia.pt), "Esparguete verde" | Noodles made specifically from courgette and cucumber **skins** | peel → ribbons → sauté |
+| `pt_esparregado` | "Esparregado de curgete" | Thick vegetable side with garlic, olive oil and coriander. The courgette water is removed and the flavour comes from garlic, oil and vinegar | grate → squeeze → sauté → partly blend |
+| `pt_recheada` | "Curgete recheada com arroz selvagem e shitake" | Stuffed courgette with wild rice, mushrooms and walnuts | hollow → combine the flesh with the filling → reassemble → bake |
+| `pt_bolo_casca` | "Bolo de casca de curgete" | Courgette **peel** and nut cake | separate the peel → grind → mix → bake |
+
+Related Portuguese and Brazilian practice that the follow-up search did find:
+
+- courgette cake made with the skin on: https://ruralea.com/bolo-de-courgette ;
+- stuffed courgette with shiitake:
+  https://www.tudogostoso.com.br/receita/160428-abobrinha-recheada-com-shitake.html ;
+- courgette spaghetti keeping the skin: https://ruralea.com/esparguete-de-courgette
+
+**Methodological finding.** Searching in English only creates **false
+novelty**. Z-1 (courgette skin ribbons) was reported as "no evidence found"
+(`web_z1`). It is a documented Portuguese preparation. Every "no evidence
+found" in this file is therefore provisional until it has been searched in
+other culinary languages: at least Portuguese, Spanish, Italian and French,
+and the cuisines of the ingredient's main producers. Spanish has not been
+searched yet.
 
 ## Within the project
 

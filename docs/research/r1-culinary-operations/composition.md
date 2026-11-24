@@ -1,7 +1,8 @@
 # Composition: operation sequences and generation rules
 
 Code: `foodprep.operations.explore` and `ranked`. Try it:
-`foodprep explore courgette --top 8`.
+`foodprep explore courgette` (by function, the default since the review) or
+`foodprep explore courgette --global --top 8` (the global ranking described below).
 
 ## How a sequence is built
 

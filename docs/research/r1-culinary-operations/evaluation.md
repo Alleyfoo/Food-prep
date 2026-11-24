@@ -180,6 +180,13 @@ combination. The web check is the better judge of established practice.
   12 h.
 - **No interaction between materials.** Composites only record added
   ingredients. A-4 combines two materials outside the generator.
+- **False novelty from English-only search** (found 2026-11-24). Z-1 was
+  "no evidence found" in English but is a documented Portuguese preparation
+  (*esparguete verde*). Every "no evidence found" here is provisional until
+  searched in other culinary languages.
+- **No recombination.** The engine branches materials but cannot put
+  processed materials back together: stuffed courgette, peel cake, farces,
+  fritters. Two of the four Portuguese preparations need it (`benchmark.md`).
 - **Sources.**
   - Reference works are cited as where a definition is standard, without page
     numbers.

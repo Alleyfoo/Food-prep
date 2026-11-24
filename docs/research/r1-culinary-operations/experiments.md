@@ -199,6 +199,20 @@ Safety for every experiment:
 
 ## Courgette
 
+> **Practitioner feedback (2026-11-24), recorded separately from tastings.**
+> Seasonal quality matters, so these notes are not a substitute for a
+> controlled tasting, and none is in `tastings.yaml`.
+>
+> | Experiment | Feedback | Documented counterpart (Portuguese) |
+> | --- | --- | --- |
+> | Z-1 skin ribbons | A familiar preparation, not a discovery | *Esparguete verde*: peel → ribbons → sauté (`pt_esparguete_verde`) |
+> | Z-2 reduced courgette water | Low expected value: the water's flavour is weak | *Esparregado de curgete* does the **opposite**: it throws the water away, concentrates on the squeezed flesh, and takes its flavour from garlic, oil and vinegar (`pt_esparregado`) |
+> | Z-3 the scooped interior | Established alternative: combine the flesh with filling ingredients, reassemble and bake | *Curgete recheada* (`pt_recheada`) |
+>
+> Also documented: *bolo de casca de curgete*, a cake from ground courgette
+> peel (`pt_bolo_casca`). It is a use of the peel the model cannot express:
+> mixing a processed material into a batter.
+
 ### Z-1 Courgette skin ribbons as a component of their own (two arms)
 - **Start:** 2 firm courgettes
 - **Sequence:**
@@ -210,8 +224,9 @@ Safety for every experiment:
 - **Function:** vegetable noodles; acid carrier (arm B)
 - **Limitations:** the skin of large fruit is tough or bitter (`web_z1`)
 - **Equipment:** peeler, pan, jar
-- **Prior practice:** **no evidence found**. The all-skin first strip is
-  usually discarded (`web_z1`)
+- **Prior practice:** "no evidence found" in the English check (`web_z1`),
+  but **documented in Portuguese** as *esparguete verde* (`pt_esparguete_verde`).
+  It was false novelty: see the methodological finding in `sources.md`.
 - **Generator rank:**
   - arm B: 211 of 1,926;
   - arm A: unranked. Sautéing adds no function to a "noodle" the model already
@@ -233,8 +248,12 @@ Safety for every experiment:
   may be faint
 - **Equipment:** grater, colander, pan
 - **Prior practice:** the water as broth or drink is niche (`web_z3`);
-  reduction not found
-- **Generator rank:** 60 of 1,926, the highest of the courgette experiments
+  reduction not found. Practitioner feedback: low expected value, weak flavour.
+  *Esparregado de curgete* (`pt_esparregado`) shows the established direction
+  is the reverse: discard the water and season the flesh.
+- **Generator rank:** 60 of 1,926, the highest of the courgette experiments.
+  The generator rated the residue above the dish cooks actually make from
+  this step.
 - **Test:**
   1. Salt the grated courgette at 1.5% by weight.
   2. Squeeze after 20 min.
@@ -259,6 +278,10 @@ Safety for every experiment:
 - **Judge:** thicker without sliminess or bitterness. Expect failure. A
   failure tells the model that the core needs properties it lacks (slime,
   bitterness risk).
+- **Established alternative (practitioner feedback):** cooks put the scooped
+  interior back. They combine it with a filling, refill the shell and bake
+  (*curgete recheada*, `pt_recheada`). The engine can branch a material into
+  shell and core, but it cannot recombine them. See `benchmark.md`.
 
 ### Z-4 Pressed courgette pulp, roasted into crumbs
 - **Start:** pulp from Z-2 (or pressed grated courgette)

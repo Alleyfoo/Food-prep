@@ -49,8 +49,8 @@ Branch `research/culinary-operations`, from main after PR #4 (04ced4e).
 
   It writes nothing.
 - **CLI:** `foodprep applicability <ingredient> [--part]` and
-  `foodprep explore <ingredient> [--part] [--top]`.
-- **Tests:** `tests/test_operations.py` (45 tests); the full suite passes.
+  `foodprep explore <ingredient> [--part]` (by culinary function, simplest first; `--global` for the global ranking).
+- **Tests:** `tests/test_operations.py` (47 tests); the full suite passes.
 
 ## Findings
 
@@ -84,17 +84,25 @@ Branch `research/culinary-operations`, from main after PR #4 (04ced4e).
 
 ## Follow-up (after review)
 
-See `benchmark.md`. Of 42 established preparations, 41 are generated; the
-missing one needs a ripeness property.
+See `benchmark.md`. Of 46 established preparations, 42 are generated. Of
+the other four:
 
-- **The global ranking recovers none of them** in a short list, with or
-  without the `established_on` hints.
-- **Per-function lists ordered simplest-first recover 14** (34%), **and 17
-  (41%)** with a sensory term reused from the curated transformations'
-  `tags_after` and the Taste Circle dimensions. At the same list length the
-  global ranking finds 0–1.
-- That view is available as `foodprep explore <ingredient> --by-function`.
-  Making it the default is the recommended next decision.
+- one needs a ripeness property (pickled avocado);
+- one is longer than three steps (*esparregado*);
+- two need recombination, which the engine lacks (stuffed courgette, peel
+  cake).
+
+- **The global ranking recovers almost none of them** in a short list:
+  0–2 of 42, with or without the `established_on` hints or `diverse()`.
+- **Per-function lists ordered simplest-first recover 14 (33%), and 17
+  (40%)** with a sensory term reused from the curated transformations'
+  `tags_after` and the Taste Circle dimensions.
+- **That view is now the default** of `foodprep explore`; `--global` keeps the
+  global ranking for research and diagnosis.
+- **Portuguese sources** (supplied by the user) showed two things:
+  - Z-1 was false novelty from searching in English only;
+  - recombination of processed materials is the next research direction,
+    rather than more ranking.
 
 ## Recommendation
 
