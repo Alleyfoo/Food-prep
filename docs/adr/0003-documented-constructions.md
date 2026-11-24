@@ -79,9 +79,16 @@ recipe ids. The model does not derive mixture chemistry.
 
 ### 4. Recombination is derived, not labelled
 
-A material that starts from a fraction of another material in the same
-route, and reaches the result, is a recombination link. The validator lists
-them. Every fraction a step produces must be used, or listed in that step's
+Two materials of the same origin, each entering the construction by its own
+route (through an assembly role or as the result), form a recombination link:
+one starts from a fraction of the other, directly or through intermediates
+that never enter the dish. A fraction whose source only feeds it is
+extraction, not recombination. The validator lists the links. (Corrected
+after the freeze, amendment A1.)
+
+A join is food only if every member is: a member that is not food makes the
+assembly not food, with R1's reason, so later steps are unsafe or
+inapplicable (amendment A1). Every fraction a step produces must be used, or listed in that step's
 `discard`, or the validator reports it as unaccounted.
 
 ### 5. "Why it works" is checkable claims, each cited
@@ -143,7 +150,9 @@ them. Every fraction a step produces must be used, or listed in that step's
   `src/foodprep/data/construction_freeze.yaml` records the schema fields,
   the operation definitions and property keys at the freeze, and
   `tests/test_constructions.py` fails if a held-out dish depends on
-  anything changed after it. A later round that changes the schema on
+  anything changed after it. The manifest is never rewritten: corrections
+  are documented amendments (`construction_freeze_amendments.yaml`; A1 is the
+  PR #7 validator correction). A later round that changes the schema on
   purpose records a new freeze and keeps R3's results as history.
 - Existing behaviour is unchanged: the new operations are outside the
   generator, the waivers name states only the new operations set, and the

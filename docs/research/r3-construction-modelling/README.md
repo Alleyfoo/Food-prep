@@ -16,7 +16,7 @@ Branch `claude/objective-sanderson-dddccc`, from main after PR #6 (ae959af).
 | Question | Success criterion | Answer |
 | --- | --- | --- |
 | **Expressiveness** | The model describes established preparations accurately | **Yes for materials and structure; partly for what happens inside an assembly.** All 27 design dishes (43 routes, nine patterns) are described from raw parts: every one of 236 main-path steps is an applicable R1 operation, 66 documented claims hold on the computed states, and 9 recombination links are found. 13 dishes are fully represented, 14 partly, 0 not. Every "partly" names what is missing (`validation.md`) |
-| **Generalisability** | Previously unmodelled dishes need no structural (schema) changes | **Mostly.** 8 held-out dishes chosen before design were represented after a schema freeze with data only: no new field, relation or code. 2 fit fully, 6 partly. Their failures need operation-level changes (steaming a setting liquid, doughs, a hinged pocket, two R1 state updates) and one schema-level change (several containers per filling) (`generalisation.md`) |
+| **Generalisability** | Previously unmodelled dishes need no structural (schema) changes | **Mostly.** 8 held-out dishes chosen before design were represented after a schema freeze with data only: no new field, relation or code. A later validator correction (amendment A1, PR #7 review) changed no result. 2 fit fully, 6 partly. Their failures need operation-level changes (steaming a setting liquid, doughs, a hinged pocket, two R1 state updates) and one schema-level change (several containers per filling) (`generalisation.md`) |
 | **Traceability** | Every construction traces to documented practice | **Yes.** Every route, material and join cites R2 recipe ids; every id resolves to a recipe in `recipes.md` with a URL that was read; a test enforces it. Quantities and conditions appear only as evidence on the relation they support |
 
 **What the model now understands about why a dish works**, using the brief's
@@ -56,10 +56,16 @@ remains a recorded claim, here and in every layered dish.
   aubergine, rice, chickpea, urad dal, black-eyed bean, spinach and bread
   (read by the operation engine, not by the family generator or the UI).
 - **CLI:** `foodprep construction [dish]`.
-- **Tests:** `tests/test_constructions.py` (30 tests): well-formed data,
-  pinned verdicts, recombination, structure, moisture and heat vocabulary,
-  traceability against R2, the validator catching malformed and false data,
-  the freeze. The full suite passes.
+- **Tests:** `tests/test_constructions.py` (38 tests): well-formed data,
+  pinned verdicts, recombination (and extraction that is not), structure,
+  edibility at joins, moisture and heat vocabulary, traceability against R2,
+  the validator catching malformed and false data, the freeze and its
+  documented amendments. The full suite passes.
+- **Post-freeze amendment A1** (PR #7 review): two validator corrections
+  (recombination needs two routes; edibility checked at every join), recorded
+  in `src/foodprep/data/construction_freeze_amendments.yaml` without touching
+  the original freeze manifest. No verdict or recombination link changed
+  (`generalisation.md`).
 
 ## Documents
 

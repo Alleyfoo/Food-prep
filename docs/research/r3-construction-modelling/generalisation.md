@@ -26,6 +26,34 @@ So a "fit" below means the dish was expressed in the vocabulary that existed
 before the dish was seen. Where it does not fit, the change it would need is
 named and **not made**.
 
+### Post-freeze amendment A1 (validator correction, PR #7 review)
+
+After the held-out step, review of PR #7 found two faults in the validator
+(`constructions.py`) by static inspection. Both were reproduced with tests
+that failed on the frozen code before it was changed:
+- **Recombination** was counted whenever a fraction reached the result,
+  because reachability follows a fraction back to its source; extraction alone
+  (potato pressed, only its juice used) would have counted. It now needs two
+  materials of the same origin, each entering the dish by its own route.
+- **Edibility at joins**: an assembly took only its carrier's edibility, so an
+  edible shell could hide a non-food filling. A join is now not food if any
+  member is not food, with R1's reason (unsafe or inapplicable).
+
+The original manifest `construction_freeze.yaml` is unchanged and its bytes
+are pinned by a test. The correction is recorded as amendment A1 in
+`src/foodprep/data/construction_freeze_amendments.yaml` (date, reason, what
+changed, effect, the new hash of `constructions.py`). The freeze test accepts
+exactly the original manifest plus documented amendments and still fails on
+any undocumented change; `run.py --freeze` refuses to overwrite the original.
+
+**Effect: none on the results.** Rerun with the corrected validator, every
+verdict and every recombination link is the same for all 35 dishes: design 13
+fully / 14 partly, held-out 2 fully / 6 partly, 13 links (9 design, 4
+held-out). Every link already joined two materials entering by their own
+routes, and no documented dish has a non-food member. The amendment touches
+the checker, not the vocabulary the held-out dishes were expressed in:
+operations, schema, property keys and `operations.py` are as frozen.
+
 ## Results
 
 8 held-out dishes, 14 routes: 2 dishes fully represented, 6 partly, 0 not.

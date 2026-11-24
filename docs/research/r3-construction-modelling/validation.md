@@ -18,7 +18,11 @@ shown with `foodprep construction <dish>`.
 2. **Recombination and structure recorded.** Each join is one of six assembly
    operations with roles; each role's requirements are checked on the member
    (a container is hollow, a coagulant sets on heat, a dry phase takes up
-   water). Recombination links are derived, not labelled. Every fraction a
+   water). A join is food only if every member is: a non-food member makes
+   the whole assembly not food, with R1's reason, so the steps after it are
+   unsafe or inapplicable. Recombination links are derived, not labelled: two
+   materials of the same origin, each entering the dish by its own route (a
+   fraction whose source only feeds it is extraction). Every fraction a
    step makes is used, discarded in the data, or marked `usually_discarded` by
    the model (peels); anything else is "unaccounted".
 3. **The final state is consistent with documented practice.** Each route's
@@ -31,6 +35,11 @@ shown with `foodprep construction <dish>`.
    `sources.md`). `tests/test_constructions.py` checks all of this.
 
 ## Results
+
+The validator was corrected after the freeze (amendment A1, from the PR #7
+review: recombination needed two routes, and edibility is now checked at
+every join). Rerunning both sets with the corrected validator changed no
+verdict and no recombination link; the numbers below hold before and after.
 
 - **27 dishes, 43 routes.** 13 dishes fully represented, 14 partly, 0 not.
   By route: 26 fully, 17 partly, 0 not.
