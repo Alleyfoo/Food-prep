@@ -1049,7 +1049,7 @@ Generated from `src/foodprep/data/operations.yaml` by `run.py`; edit the YAML, n
 | --- | --- |
 | Categories | thermal |
 | Ontology technique | `saute` |
-| Requires | liquid False (sautes a solid); piece <=medium (pieces small enough to toss); cooked False (already cooked) |
+| Requires | liquid False (sautes a solid); piece <=medium (pieces small enough to toss; leaves wilt whole); cooked False (already cooked) |
 | Adds | fat |
 | Equipment | pan |
 | Effort | 1 |

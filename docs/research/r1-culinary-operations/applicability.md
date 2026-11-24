@@ -13,9 +13,9 @@ Try it: `foodprep applicability broccoli --part stems`.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | broccoli florets | 34 | 0 | 48 | 0 | 0 |
 | broccoli stems | 36 | 4 | 42 | 0 | 0 |
-| broccoli leaves | 29 | 0 | 53 | 0 | 0 |
+| broccoli leaves | 30 | 0 | 52 | 0 | 0 |
 | carrot root | 36 | 1 | 45 | 0 | 0 |
-| carrot greens | 28 | 0 | 54 | 0 | 0 |
+| carrot greens | 29 | 0 | 53 | 0 | 0 |
 | courgette fruit | 34 | 3 | 45 | 0 | 0 |
 | tomato flesh | 26 | 1 | 55 | 0 | 0 |
 | tomato seeds and gel | 8 | 0 | 74 | 0 | 0 |

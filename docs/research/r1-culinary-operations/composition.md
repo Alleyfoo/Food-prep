@@ -79,8 +79,8 @@ From `results.md`:
 
 | Ingredient | distinct materials | merged as equivalent | no culinary function | ranked |
 | --- | ---: | ---: | ---: | ---: |
-| broccoli | 17,532 | 16,347 | 5,223 | 5,090 |
-| carrot | 11,963 | 12,246 | 3,064 | 3,912 |
+| broccoli | 17,532 | 16,384 | 5,223 | 5,090 |
+| carrot | 11,963 | 12,283 | 3,064 | 3,912 |
 | courgette | 7,530 | 7,799 | 2,679 | 1,926 |
 | tomato | 6,117 | 5,097 | 1,436 | 1,933 |
 | avocado | 573 | 654 | 296 | 115 |

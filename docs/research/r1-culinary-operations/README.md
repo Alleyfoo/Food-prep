@@ -24,6 +24,8 @@ Branch `research/culinary-operations`, from main after PR #4 (04ced4e).
 | `experiments.md` | 24 kitchen experiments and the negative findings |
 | `evaluation.md` | The model's corrections, answers to the ten research questions, limitations, recommendation |
 | `run.py` | Regenerates the generated files: `py -3.11 docs/research/r1-culinary-operations/run.py` |
+| `benchmark.md` | **Follow-up:** benchmark of 42 established preparations, purpose-specific lists, reuse of the existing sensory model |
+| `benchmark.yaml`, `benchmark.py`, `benchmark-results.md` | The benchmark items, script and generated results |
 
 ## What was built
 
@@ -48,7 +50,7 @@ Branch `research/culinary-operations`, from main after PR #4 (04ced4e).
   It writes nothing.
 - **CLI:** `foodprep applicability <ingredient> [--part]` and
   `foodprep explore <ingredient> [--part] [--top]`.
-- **Tests:** `tests/test_operations.py` (40 tests); the full suite passes.
+- **Tests:** `tests/test_operations.py` (45 tests); the full suite passes.
 
 ## Findings
 
@@ -79,6 +81,20 @@ Branch `research/culinary-operations`, from main after PR #4 (04ced4e).
    operation does to firmness, moisture, flexibility and state.
 6. **Missing properties, found by failures:** ripeness, fibre stringiness,
    mucilage, and a sensory term for heat.
+
+## Follow-up (after review)
+
+See `benchmark.md`. Of 42 established preparations, 41 are generated; the
+missing one needs a ripeness property.
+
+- **The global ranking recovers none of them** in a short list, with or
+  without the `established_on` hints.
+- **Per-function lists ordered simplest-first recover 14** (34%), **and 17
+  (41%)** with a sensory term reused from the curated transformations'
+  `tags_after` and the Taste Circle dimensions. At the same list length the
+  global ranking finds 0–1.
+- That view is available as `foodprep explore <ingredient> --by-function`.
+  Making it the default is the recommended next decision.
 
 ## Recommendation
 
