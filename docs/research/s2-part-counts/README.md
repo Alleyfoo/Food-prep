@@ -2,7 +2,7 @@
 
 **Question.** S1 found that RecipeNLG holds the decomposition steps of
 ADR 0002 in its directions, but its keyword counts were rough. With the
-official download in hand: for each part of a **tomato** and **broccoli**,
+official download in hand: for each part of a **tomato**, **broccoli** and **avocado**,
 how often do cooks keep it, trim it, remove it, or buy the step done?
 
 Run on 2026-11-24 over the full `full_dataset.csv` (2,231,142 recipes).
@@ -17,16 +17,20 @@ Code: `src/foodprep/part_evidence.py`. Run it with
 | broccoli florets | 13,613 | 13,542 | 0 | 8 | 0 | default |
 | broccoli stems | 2,873 | 1,848 | 655 | 320 | 0 | used |
 | broccoli leaves | 206 | 69 | 0 | 130 | 0 | removed |
-| tomato flesh | 483 | 450 | 0 | 4 | 0 | default |
-| tomato seeds and gel | 16,869 | 467 | 0 | 16,356 | 0 | removed |
-| tomato skin | 17,232 | 916 | 0 | 12,922 | 3,021 | removed |
-| tomato core | 4,293 | 44 | 0 | 4,242 | 0 | removed |
+| tomato flesh | 483 | 456 | 0 | 4 | 0 | default |
+| tomato seeds and gel | 16,869 | 473 | 0 | 16,355 | 0 | removed |
+| tomato skin | 17,232 | 911 | 0 | 12,927 | 3,021 | removed |
+| tomato core | 4,293 | 46 | 0 | 4,242 | 0 | removed |
+| avocado flesh | 1,440 | 1,402 | 0 | 1 | 0 | default |
+| avocado skin | 10,154 | 235 | 0 | 9,891 | 0 | removed |
+| avocado stone | 7,988 | 291 | 0 | 7,674 | 0 | removed |
 
 Baselines:
 - 49,246 recipes list broccoli. Broccoli rabe, broccolini and Chinese
   broccoli are excluded.
 - 312,317 list tomato; 240,796 list the fruit rather than only a sauce,
   paste or juice.
+- 26,838 list avocado (avocado oil excluded).
 
 Each recipe is counted once, under the strongest class it shows, in the
 order kept > trimmed > removed > cue > bought done > unclear. The table
@@ -51,6 +55,13 @@ YAML file.
     recipes, stems in only 2,873. A recipe that says "cut into florets" and
     never mentions the stems has most likely thrown them away. The text
     cannot show that, so it is not counted.
+- **Avocado: skin and stone go, as expected for parts that are not food.**
+  - The few "kept" skins are shells reused as serving cups, or dicing the
+    flesh in its skin.
+  - The few "kept" stones are mostly pits put back in guacamole "to keep it
+    green". The curated note on the stone says this does not stop browning.
+    So the corpus records a common belief that the model already corrects:
+    a case where practice and method disagree.
 - **Broccoli leaves are rare and usually trimmed off.** That matches the
   curated description, "Usually thrown away".
 - **Florets and flesh are what the ingredient means.** Recipes rarely name
@@ -60,7 +71,7 @@ YAML file.
 **For the app.** `foodprep parts broccoli` now shows a practice line under
 each part, for example:
 
-> Cooks mostly remove it (RecipeNLG: kept in 916, removed in 12,922, bought
+> Cooks mostly remove it (RecipeNLG: kept in 911, removed in 12,927, bought
 > done in 3,021 of 17,232 recipes naming it).
 
 This line is practice, not edibility. Tomato skin is edible, and its curated
@@ -111,13 +122,29 @@ sentences whose class Claude judged right.
 | broccoli leaves, kept | ~1/15 | ~6/15 | ~5/15 |
 | broccoli florets, removed | 0/15 | ~4/15 | (8 recipes left) |
 
+Avocado was added afterwards with two rounds of its own:
+
+| Part, class | Round 1 | Round 2 (final rules) |
+| --- | --- | --- |
+| avocado skin, removed | 15/15 | not resampled |
+| avocado stone, removed | 15/15 | not resampled |
+| avocado flesh, kept | ~13/15 | ~15/15 |
+| avocado flesh, removed | 0/15 | (1 recipe left) |
+| avocado skin, kept | ~8/15 | ~11/15 |
+| avocado stone, kept | ~5/15 | ~5/15 |
+
+The avocado changes also touched shared rules: "no skin or pit" counts as a
+removal, and "scoop" and "mash" mean a part is used. Tomato counts moved by
+six recipes at most; broccoli did not move.
+
 What this means for the table:
 - The big numbers are reliable to within about a tenth. They come from the
   classes that scored 13–15 of 15: tomato removals, stems kept and
   removed, leaves removed.
 - The small "kept" counts for tomato seeds, tomato core and broccoli leaves
   are about half wrong. Read them as an upper bound: tomato seeds are kept
-  in at most ~470 recipes, probably half that.
+  in at most ~470 recipes, probably half that. The same holds for avocado
+  skin and stone kept.
 - The method fixed rules against one sample, so the next sample can show
   new errors. Round 3 drew a fresh sample to check that.
 
@@ -142,7 +169,5 @@ What this means for the table:
 
 ## Next
 
-- Avocado has parts but no counting rules yet. The same rule shape fits
-  (flesh, skin, stone or pit).
 - Named preparations (concassé) are still a separate decision. Concassé
   currently counts toward skin removal.
