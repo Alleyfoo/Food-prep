@@ -482,7 +482,67 @@ def explore(ingredient: str | None = None, part: str | None = None,
 # ---- ranking -------------------------------------------------------------------
 
 WEIGHTS = {"useful": 3.0, "difference": 1.0, "utilisation": 0.5, "experimental": 0.5,
-           "effort": -1.0, "equipment": -0.5}
+           "effort": -1.0, "equipment": -0.5, "sensory": 1.0}
+
+# ---- sensory effects, reused from the curated transformations --------------------
+# No new flavour model: a technique's sensory effect is what the curated
+# transformations that use it record in `tags_after` (flavour and texture gains),
+# and the Taste Circle dimensions their state profiles provide. An effect counts
+# when at least half of the technique's curated transformations show it.
+
+SENSORY_SHARE = 0.5
+
+
+@lru_cache(maxsize=1)
+def technique_effects() -> dict[str, dict]:
+    """technique -> {"tags": {family:value, ...}, "dimensions": {...}, "n": count}."""
+    data = pc.load_yaml(DATA / "tomato.yaml")
+    tags: dict[str, Counter] = {}
+    dims: dict[str, Counter] = {}
+    n: Counter = Counter()
+    for tr in data["transformations"]:
+        t = tr["technique"]
+        n[t] += 1
+        for tag in tr.get("tags_after") or []:
+            if tag.get("family") in ("flavour", "texture") and tag.get("polarity", "gain") == "gain":
+                tags.setdefault(t, Counter())[f"{tag['family']}:{tag['value']}"] += 1
+        flav = str((tr.get("state_profile") or {}).get("flavour") or "").split("\n")
+        for d in (x.strip() for x in flav if x.strip()):
+            dims.setdefault(t, Counter())[d] += 1
+    out = {}
+    for t, count in n.items():
+        out[t] = {
+            "n": count,
+            "tags": sorted(k for k, c in (tags.get(t) or {}).items() if c / count >= SENSORY_SHARE),
+            "dimensions": sorted(k for k, c in (dims.get(t) or {}).items() if c / count >= SENSORY_SHARE),
+        }
+    return out
+
+
+def sensory_gains(path: tuple, cat: Catalogue | None = None) -> list[str]:
+    """Flavour and texture gains of a path, from its operations' linked techniques."""
+    cat = cat or load()
+    eff = technique_effects()
+    gains: list[str] = []
+    for s in path:
+        t = cat.operations[s.operation].get("technique")
+        for g in (eff.get(t) or {}).get("tags", []):
+            if g not in gains:
+                gains.append(g)
+    return gains
+
+
+def taste_dimensions(path: tuple, cat: Catalogue | None = None) -> list[str]:
+    """Taste Circle dimensions the path's techniques typically provide."""
+    cat = cat or load()
+    eff = technique_effects()
+    out: list[str] = []
+    for s in path:
+        t = cat.operations[s.operation].get("technique")
+        for d in (eff.get(t) or {}).get("dimensions", []):
+            if d not in out:
+                out.append(d)
+    return out
 
 
 @dataclass
@@ -498,6 +558,7 @@ class Ranked:
     effort: float
     equipment: list
     score: float
+    sensory: list = field(default_factory=list)
 
     @property
     def evidence(self) -> str:
@@ -508,42 +569,63 @@ def _origin(m: Material) -> str:
     return f"{m.ingredient}.{m.part}"
 
 
-def rank(r: Result, start: Material, cat: Catalogue | None = None) -> Ranked | None:
+def rank(r: Result, start: Material, cat: Catalogue | None = None, *,
+         use_established: bool = True, sensory: bool = False) -> Ranked | None:
     """Transparent scores. None (never ranked) when the material has no culinary
     function, when it is an exhausted output (spent solids), or when its last
     step adds no function its input did not already have: a longer path must
-    earn its extra step."""
+    earn its extra step.
+
+    use_established=False ignores the catalogue's `established_on` lists, so a
+    benchmark of established preparations is not ranked with its own answers.
+    sensory=True adds the flavour and texture gains of the curated
+    transformations (`sensory_gains`): a gain counts as the function
+    `flavour_shift`, and a step that adds a new gain earns its place."""
     cat = cat or load()
     m = r.material
     funcs = useful_functions(m, cat)
+    gains = sensory_gains(r.path, cat) if sensory else []
+    if gains:
+        funcs = funcs + ["flavour_shift"]
     if not funcs or r.path[-1].terminal:
         return None
-    if r.parent is not None and r.parent.path and set(funcs) <= set(useful_functions(r.parent, cat)):
-        return None
+    if r.parent is not None and r.parent.path:
+        parent_funcs = set(useful_functions(r.parent, cat))
+        parent_gains = set(sensory_gains(r.parent.path, cat)) if sensory else set()
+        if parent_gains:
+            parent_funcs.add("flavour_shift")
+        if set(funcs) <= parent_funcs and set(gains) <= parent_gains:
+            return None
     ops = [cat.operations[s.operation] for s in r.path]
     plaus = 0.8 ** sum(1 for s in r.path if s.status == "conditional")
-    useful = usefulness(funcs, cat)
+    useful = usefulness([f for f in funcs if f != "flavour_shift"], cat)
     diff = min(len(changed(start, m)), 6) / 6
     discarded = bool(start.props.get("usually_discarded") or m.props.get("usually_discarded"))
-    est = sum(1 for op in ops if _origin(m) in (op.get("established_on") or [])) / len(ops)
+    est = (sum(1 for op in ops if _origin(m) in (op.get("established_on") or [])) / len(ops)
+           if use_established else 0.0)
+    sens = min(len(gains), 3) / 3
     experimental = useful * (1 - est)
     effort = sum(op.get("effort", 1) for op in ops) / 9
     equipment = sorted({e for op in ops for e in op.get("equipment") or []} - cat.ordinary)
     score = (WEIGHTS["useful"] * plaus * useful + WEIGHTS["difference"] * diff
              + WEIGHTS["utilisation"] * discarded + WEIGHTS["experimental"] * experimental
-             + WEIGHTS["effort"] * effort + WEIGHTS["equipment"] * len(equipment))
+             + WEIGHTS["effort"] * effort + WEIGHTS["equipment"] * len(equipment)
+             + WEIGHTS["sensory"] * sens)
     return Ranked(r, funcs, plaus, useful, diff, float(discarded), est, experimental,
-                  effort, equipment, round(score, 3))
+                  effort, equipment, round(score, 3), gains)
 
 
 def ranked(ingredient: str, part: str | None = None, depth: int = MAX_DEPTH,
-           cat: Catalogue | None = None) -> tuple[list[Ranked], Exploration]:
+           cat: Catalogue | None = None, *, use_established: bool = True,
+           sensory: bool = False, exploration: Exploration | None = None
+           ) -> tuple[list[Ranked], Exploration]:
     cat = cat or load()
-    ex = explore(ingredient, part, depth, cat)
+    ex = exploration or explore(ingredient, part, depth, cat)
     starts = {(s.ingredient, s.part): s for s in ex.starts}
     out = []
     for r in ex.results:
-        rk = rank(r, starts[(r.material.ingredient, r.material.part)], cat)
+        rk = rank(r, starts[(r.material.ingredient, r.material.part)], cat,
+                  use_established=use_established, sensory=sensory)
         if rk:
             out.append(rk)
     out.sort(key=lambda x: (-x.score, len(x.result.path), describe_path(x.result.material)))
@@ -567,6 +649,36 @@ def diverse(rs: list[Ranked], n: int) -> list[Ranked]:
         if len(picked) == n:
             break
     return picked
+
+
+def simplicity(x: Ranked, cat: Catalogue | None = None) -> tuple:
+    """How simply a sequence reaches its material: fewer steps, less effort,
+    less special equipment, fewer conditions; ties by score."""
+    cat = cat or load()
+    path = x.result.path
+    return (len(path), sum(cat.operations[s.operation].get("effort", 1) for s in path),
+            len(x.equipment), sum(1 for s in path if s.status == "conditional"), -x.score)
+
+
+def by_function(rs: list[Ranked], k: int = 3, order: str = "score"
+                ) -> dict[tuple[str, str], list[Ranked]]:
+    """Purpose-specific discovery: for each starting part and culinary function,
+    the k sequences that serve it, best first. order="score" keeps the ranking's
+    order; order="simple" puts the simplest way to reach the function first.
+    A sequence appears under every function it serves."""
+    if order == "simple":
+        cat = load()
+        rs = sorted(rs, key=lambda x: simplicity(x, cat))
+    elif order != "score":
+        raise ValueError(f"order must be 'score' or 'simple', not {order!r}")
+    out: dict[tuple[str, str], list[Ranked]] = {}
+    for x in rs:
+        for f in x.functions:
+            key = (x.result.material.part, f)
+            lst = out.setdefault(key, [])
+            if len(lst) < k:
+                lst.append(x)
+    return out
 
 
 # ---- rendering -----------------------------------------------------------------
@@ -604,6 +716,43 @@ def render_applicability(ingredient: str, part: str | None = None) -> str:
             out.append(f"  {status} ({len(by[status])})")
             for op_id, op, a in by[status]:
                 out.append(f"    {op['fr']} ({op['en']}): {a.explain()}")
+        out.append("")
+    return "\n".join(out)
+
+
+def render_by_function(ingredient: str, part: str | None = None, k: int = 3,
+                       sensory: bool = True) -> str:
+    """Purpose-specific view: for each part and culinary function, the simplest
+    ways to get there (fewest steps, least effort and equipment). The benchmark
+    (docs/research/r1-culinary-operations/benchmark-results.md) found this
+    recovers far more established preparations than the global ranking."""
+    cat = load()
+    if ingredient not in cat.parts:
+        return f"No materials for {ingredient!r}. Known: {', '.join(sorted(cat.parts))}.\n"
+    rs, _ = ranked(ingredient, part, cat=cat, use_established=False, sensory=sensory)
+    lists = by_function(rs, k, "simple")
+    out = [f"{ingredient.capitalize()} by purpose: the simplest ways to each culinary function "
+           "(hypotheses, not recipes)", ""]
+    parts = list(dict.fromkeys(p for p, _ in lists))
+    fn_order = list(cat.functions) + ["flavour_shift"]
+    for p in parts:
+        out.append(p.replace("_", " ").capitalize())
+        for f in fn_order:
+            xs = lists.get((p, f))
+            if not xs:
+                continue
+            out.append(f"  {f.replace('_', ' ')}")
+            for x in xs:
+                m = x.result.material
+                line = f"    {describe_path(m)}"
+                if m.fraction:
+                    line += f"  ({m.fraction.replace('_', ' ')})"
+                if f == "flavour_shift" and x.sensory:
+                    line += f"  [{', '.join(g.split(':')[1] for g in x.sensory)}]"
+                notes = [n for st in x.result.path for n in st.notes]
+                if notes:
+                    line += f"  - {'; '.join(dict.fromkeys(notes))}"
+                out.append(line)
         out.append("")
     return "\n".join(out)
 

@@ -136,7 +136,10 @@ def cmd_applicability(args: argparse.Namespace) -> int:
 def cmd_explore(args: argparse.Namespace) -> int:
     """Bounded operation sequences (depth 3), ranked; hypotheses, not recipes."""
     from foodprep import operations
-    out = operations.render_explore(args.ingredient, args.part, top=args.top)
+    if args.by_function:
+        out = operations.render_by_function(args.ingredient, args.part, k=args.top_per_function)
+    else:
+        out = operations.render_explore(args.ingredient, args.part, top=args.top)
     print(out, end="")
     return 1 if out.startswith("No ") else 0
 
@@ -384,6 +387,10 @@ def build_parser() -> argparse.ArgumentParser:
     pex.add_argument("ingredient", nargs="?", default="broccoli")
     pex.add_argument("--part", help="only this part")
     pex.add_argument("--top", type=int, default=8, help="sequences to show")
+    pex.add_argument("--by-function", action="store_true",
+                     help="group by culinary function, simplest first (with sensory effects)")
+    pex.add_argument("--top-per-function", type=int, default=3,
+                     help="sequences per function with --by-function")
     pex.set_defaults(func=cmd_explore)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")

@@ -355,6 +355,49 @@ def test_usefulness_counts_groups_not_overlapping_functions(cat):
     assert o.usefulness(["crisp_component"]) == pytest.approx(1 / 3)
 
 
+# ---- benchmark follow-up: purpose-specific lists and the sensory term ---------------
+
+def test_technique_effects_come_from_curated_transformations():
+    eff = o.technique_effects()
+    assert "flavour:concentrated" in eff["roast"]["tags"]
+    assert "flavour:smoky" in eff["char"]["tags"]
+    assert "nutty_toasted" in eff["roast"]["dimensions"]      # Taste Circle dimension
+    assert "slice" not in eff                                  # cutting has no curated effect
+
+
+def test_sensory_gains_follow_the_path(cat):
+    grilled = out("griller", start("avocado", "flesh", cat))[0]
+    assert "flavour:smoky" in o.sensory_gains(grilled.path)
+    assert o.sensory_gains(out("julienne", start("carrot", "root", cat))[0].path) == []
+
+
+def test_sensory_term_ranks_preparations_without_a_structural_function(cat):
+    ex = o.explore("avocado", "flesh")
+    plain, _ = o.ranked("avocado", "flesh", exploration=ex, use_established=False)
+    sens, _ = o.ranked("avocado", "flesh", exploration=ex, use_established=False, sensory=True)
+    def ops(x):
+        return [s.operation for s in x.result.path]
+    assert not any(ops(x) == ["griller"] for x in plain)
+    assert any(ops(x) == ["griller"] and "flavour_shift" in x.functions for x in sens)
+
+
+def test_use_established_false_removes_the_answers_from_the_score(cat):
+    rs, _ = o.ranked("tomato", "skin", use_established=False)
+    assert all(x.established == 0.0 for x in rs)
+
+
+def test_by_function_simplest_first(cat):
+    rs, _ = o.ranked("broccoli", "stems", use_established=False, sensory=True)
+    lists = o.by_function(rs, 3, "simple")
+    noodles = lists[("stems", "vegetable_noodles")]
+    assert [s.operation for s in noodles[0].result.path] == ["rubans"]
+    assert len(noodles) <= 3
+    assert all(len(x.result.path) <= len(y.result.path)
+               for x, y in zip(noodles, noodles[1:]))
+    with pytest.raises(ValueError):
+        o.by_function(rs, 3, "random")
+
+
 # ---- output ---------------------------------------------------------------------
 
 def test_cli(capsys):
@@ -363,3 +406,5 @@ def test_cli(capsys):
     assert main(["explore", "tomato", "--part", "skin", "--top", "3"]) == 0
     assert "hypotheses, not recipes" in capsys.readouterr().out
     assert main(["explore", "kale"]) == 1
+    assert main(["explore", "courgette", "--by-function"]) == 0
+    assert "vegetable noodles" in capsys.readouterr().out

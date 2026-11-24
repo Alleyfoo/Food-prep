@@ -1344,7 +1344,7 @@ operations:
     technique: saute
     requires:
       liquid: [false, "sautes a solid"]
-      piece: ["<=medium", "pieces small enough to toss"]
+      piece: ["<=medium", "pieces small enough to toss; leaves wilt whole", {leafy: true}]
       cooked: [false, "already cooked"]
     adds: [fat]
     equipment: [pan]
