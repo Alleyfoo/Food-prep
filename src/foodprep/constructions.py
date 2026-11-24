@@ -384,8 +384,9 @@ def validate_route(dish_id: str, route_id: str, cat: o.Catalogue | None = None,
                 rep.errors.append(f"{where}: unknown mechanism {h!r}")
         added = tuple(dict.fromkeys(a for mm in members.values() for a in
                                     ((mm.ingredient,) if mm.kind == "addition" else mm.adds)))
+        edible, reason = _join_edibility(rep, where, carrier, members)
         m = o.Material(carrier.ingredient, carrier.part, props, carrier.fraction, "assembly",
-                       carrier.edible, carrier.edible_reason, added, ())
+                       edible, reason, added, ())
         m = _run_steps(rep, aid, m, _steps(spec.get("steps")), route_ids, cat, outputs)
         rep.states[aid] = m
         computing.discard(aid)
@@ -401,17 +402,27 @@ def validate_route(dish_id: str, route_id: str, cat: o.Catalogue | None = None,
     for aid in asms:
         assembly(aid)
 
-    used = _reached(res, mats, asms)
+    used = _reached(res, mats, asms)                       # including sources of fractions
+    direct = _reached(res, mats, asms, follow_sources=False)  # entering by their own route
     for mid in mats:
         if mid not in used:
             rep.errors.append(f"material {mid} does not reach the result")
     for aid in asms:
         if aid not in used:
             rep.errors.append(f"assembly {aid} does not reach the result")
-    for mid, spec in mats.items():
-        src = spec.get("from")
-        if isinstance(src, dict) and src.get("material") in used and mid in used:
-            rep.recombinations.append((src["material"], src.get("step"), src.get("output"), mid))
+    # Recombination (PR #7 review): two materials of the same origin, each entering
+    # the construction by its own route. A fraction whose source only feeds it is
+    # extraction. Walk up through intermediates that never enter the dish.
+    for mid in mats:
+        if mid not in direct:
+            continue
+        link = mats[mid].get("from")
+        while isinstance(link, dict) and link.get("material") in mats:
+            anc = link["material"]
+            if anc in direct:
+                rep.recombinations.append((anc, link.get("step"), link.get("output"), mid))
+                break
+            link = mats[anc].get("from")     # the hop out of the next ancestor
     taken = {(s["material"], s.get("step"), s.get("output")) for s in
              (spec.get("from") for spec in mats.values()) if isinstance(s, dict)}
     for (owner, *rest), outs in list(outputs.items()):
@@ -444,7 +455,26 @@ def validate_route(dish_id: str, route_id: str, cat: o.Catalogue | None = None,
     return rep
 
 
-def _reached(res: str, mats: dict, asms: dict) -> set:
+def _join_edibility(rep: RouteReport, where: str, carrier: o.Material,
+                    members: dict) -> tuple[str, str | None]:
+    """A join is food only if every member is (PR #7 review): an edible shell
+    must not make a non-food filling look edible. A member that is not food
+    makes the join not food, with R1's reason, so the steps that follow are
+    unsafe (reason mentions safety, as R1's assess reads it) or inapplicable."""
+    bad = [(ref, mm) for ref, mm in members.items() if mm.edible == "no"]
+    for ref, mm in bad:
+        why = mm.edible_reason or "not food"
+        kind = "unsafe" if "safe" in why.lower() else "inapplicable"
+        rep.failures.append(f"{where}: member {ref} is not food ({kind}): {why}")
+    if not bad:
+        return carrier.edible, carrier.edible_reason
+    bad.sort(key=lambda x: "safe" not in (x[1].edible_reason or "").lower())
+    return "no", bad[0][1].edible_reason or "not food"
+
+
+def _reached(res: str, mats: dict, asms: dict, follow_sources: bool = True) -> set:
+    """Ids the result reaches through assembly roles, and (follow_sources) the
+    materials whose fractions they were made from."""
     seen: set = set()
     todo = [res]
     while todo:
@@ -455,7 +485,7 @@ def _reached(res: str, mats: dict, asms: dict) -> set:
         if x in asms:
             for raw in (asms[x].get("roles") or {}).values():
                 todo += [m.get("use") for m in _members(raw)]
-        elif x in mats and isinstance(mats[x].get("from"), dict):
+        elif follow_sources and x in mats and isinstance(mats[x].get("from"), dict):
             todo.append(mats[x]["from"].get("material"))
     return seen
 

@@ -359,19 +359,124 @@ def test_unknown_fields_are_errors():
     assert any("unknown assembly field" in e for e in r.errors)
 
 
+# ---- PR #7 review: recombination needs two routes; edibility is checked at joins --------
+
+def test_extraction_alone_is_not_recombination():
+    """Potato pressed and only its settled juice used: the potato never enters
+    the dish by its own route, so this is extraction, not recombination."""
+    def edit(rt):
+        mass = rt["assemblies"]["mass"]
+        mass["roles"]["body"] = "onion"                          # the pulp no longer enters
+        mass["roles"]["flavour"] = ["salt", "spices"]
+        mass["expects"] = [e for e in mass["expects"] if e.get("member") != "potato"]
+    r = _mutated("latkes", "settled_starch", edit)
+    assert r.errors == []
+    assert r.recombinations == []
+
+
+def test_pulp_and_its_own_starch_together_are_recombination():
+    r = c.validate_route("latkes", "settled_starch")
+    assert [(s, o_, m) for s, _, o_, m in r.recombinations] == [("potato", "juice", "settled")]
+
+
+def test_recombination_through_an_intermediate_material():
+    """potato -> juice (an intermediate that never enters the dish) -> settled
+    starch, with the pulp in the mass: the link is found through the
+    intermediate, back to the potato."""
+    def edit(rt):
+        mats = rt["materials"]
+        mats["juice"] = {"from": {"material": "potato", "step": "presser", "output": "juice"},
+                         "recipes": ["E4a"],
+                         "steps": [{"op": "decanter", "keep": "clear"}]}
+        mats["settled"] = {"from": {"material": "juice", "step": "decanter", "output": "settled"},
+                           "recipes": ["E4a"]}
+    r = _mutated("latkes", "settled_starch", edit)
+    assert r.errors == []
+    assert [(s, m) for s, _, _, m in r.recombinations] == [("potato", "settled")]
+
+
+def test_a_non_food_member_makes_the_join_inedible():
+    """An edible shell must not make a filling with a non-food member look
+    edible (avocado stone: R1 says not established as safe, so unsafe)."""
+    def edit(rt):
+        rt["materials"]["stone"] = {"from": "avocado.stone", "recipes": ["M17a"]}
+        rt["assemblies"]["filling"]["roles"]["flavour"].append("stone")
+    r = _mutated("zucchine_ripiene", "cooked_flesh", edit)
+    assert r.verdict != "fully"
+    assert any("stone" in f and "not food" in f for f in r.failures)
+    assert r.states["filling"].edible == "no"
+    assert r.states["stuffed"].edible == "no"             # the edible shell does not hide it
+    bake = [s for s in r.steps if s.owner == "stuffed" and s.op == "cuire_four"][0]
+    assert bake.status == "unsafe"
+
+
+def test_an_inedible_member_makes_the_join_inapplicable():
+    def edit(rt):
+        rt["materials"]["skin"] = {"from": "avocado.skin", "recipes": ["M17a"]}
+        rt["assemblies"]["filling"]["roles"]["flavour"].append("skin")
+    r = _mutated("zucchine_ripiene", "cooked_flesh", edit)
+    assert any("skin" in f and "not food" in f for f in r.failures)
+    bake = [s for s in r.steps if s.owner == "stuffed" and s.op == "cuire_four"][0]
+    assert bake.status == "inapplicable"
+
+
+def test_no_documented_dish_has_a_non_food_member(reports):
+    for d, rep in reports.items():
+        for rid, r in rep.routes.items():
+            assert r.result.edible != "no", (d, rid)
+            assert not any("not food" in f for f in r.failures), (d, rid)
+
+
 # ---- the freeze ------------------------------------------------------------------------
+
+AMENDMENT_KEYS = {"code", "schema", "vocabulary", "catalogue", "operations"}
+
+
+def _amendments() -> dict:
+    return pc.load_yaml(c.FREEZE_PATH.with_name("construction_freeze_amendments.yaml"))
+
+
+def _effective_freeze() -> dict:
+    """The original R3 manifest plus each documented amendment, in order."""
+    frozen = copy.deepcopy(pc.load_yaml(c.FREEZE_PATH))
+    for a in _amendments()["amendments"]:
+        for key in set(a) & AMENDMENT_KEYS:
+            frozen[key] = {**frozen[key], **a[key]}
+    return frozen
+
+
+def test_the_original_freeze_manifest_is_preserved():
+    """construction_freeze.yaml is the record of the experiment (e8a2e54): its
+    bytes must not change. Corrections go into the amendments file."""
+    import hashlib
+    raw = c.FREEZE_PATH.read_bytes().replace(b"\r\n", b"\n")
+    assert hashlib.sha256(raw).hexdigest() == _amendments()["original_manifest_sha256"]
+
+
+def test_freeze_amendments_are_documented():
+    ids = []
+    for a in _amendments()["amendments"]:
+        assert {"id", "date", "reason", "changed", "effect"} <= set(a), a.get("id")
+        assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(a["date"])), a["id"]
+        assert set(a) - {"id", "date", "reason", "changed", "effect"} <= AMENDMENT_KEYS, a["id"]
+        ids.append(a["id"])
+    assert len(ids) == len(set(ids))
+
 
 def test_held_out_dishes_rely_on_nothing_changed_after_the_freeze():
     """The schema was frozen before the held-out dishes were represented
     (construction_freeze.yaml, written by the R3 run script). A held-out dish
     may use only operations whose definition is unchanged since the freeze,
     property keys that existed at the freeze, and the frozen schema and code.
-    Adding new parts or additions with existing keys is data, and allowed."""
-    frozen = pc.load_yaml(c.FREEZE_PATH)
+    Adding new parts or additions with existing keys is data, and allowed.
+
+    The original manifest is never rewritten: later corrections are documented
+    amendments (construction_freeze_amendments.yaml), applied on top of it."""
+    frozen = _effective_freeze()
     now = c.freeze_manifest()
     assert now["schema"] == frozen["schema"]
     assert now["vocabulary"] == frozen["vocabulary"]
-    assert now["code"] == frozen["code"], "constructions.py or operations.py changed after the freeze"
+    assert now["code"] == frozen["code"],         "constructions.py or operations.py changed after the freeze without a documented amendment"
     assert now["catalogue"] == frozen["catalogue"]
     held = c.dish_ids("held_out")
     assert set(held) == set(frozen["held_out"]), "the held-out set is the one recorded before design"

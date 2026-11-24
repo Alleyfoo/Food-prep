@@ -3,9 +3,12 @@
     py -3.11 docs/research/r3-construction-modelling/run.py            # validation.md, generalisation tables
     py -3.11 docs/research/r3-construction-modelling/run.py --freeze   # also write construction_freeze.yaml
 
---freeze is run once, when the schema is frozen before the held-out dishes
-are represented. Running it again later would move the freeze; do that only
-in a later round that changes the schema on purpose, and say so.
+--freeze was run once (commit e8a2e54), when the schema was frozen before the
+held-out dishes were represented. It refuses to overwrite that manifest: it is
+the record of the experiment. A later correction is a documented amendment in
+src/foodprep/data/construction_freeze_amendments.yaml (see amendment A1, the
+PR #7 review). A later round that changes the schema on purpose writes a new
+freeze under a new name and says so.
 """
 
 from __future__ import annotations
@@ -82,6 +85,9 @@ def write_tables() -> None:
 
 
 def write_freeze() -> None:
+    if c.FREEZE_PATH.exists():
+        raise SystemExit(f"{c.FREEZE_PATH.name} exists and is the R3 record; record a documented "
+                         "amendment in construction_freeze_amendments.yaml instead")
     m = c.freeze_manifest()
     m = {"note": "R3 schema freeze: written by docs/research/r3-construction-modelling/run.py "
                  "--freeze before any held-out dish was represented. tests/test_constructions.py "
