@@ -16,6 +16,7 @@ corpus:
   source_path: data/corpus/recipenlg
   terms: non-commercial research and educational use only; counts only
   search_date: '2026-11-24'
+  families_sha256: 2e7cd18023d984192b41601007c426ed1e6ea52791cdb0cf4afb9b840c7d9eb3
 recipes: 2231142
 targets:
   tomato: 312317

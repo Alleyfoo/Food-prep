@@ -48,6 +48,12 @@ RARE_RATIO = 0.3      # seen in under 30% of the recipes chance predicts is rare
 COMMON_COUNT = 100    # not rare, and seen in 100+ recipes
 SCOUT_LABELS = ("not_seen", "own_part", "part_acid", "rare", "untested")
 
+# What the corpus label is evidence of. Stated wherever a label is shown.
+LABEL_SCOPE = ("Labels count recipes that list the ingredient and the member together, "
+               "whatever the technique. Technique counts in brackets are recipes whose "
+               "directions mention that technique anywhere, not necessarily for the "
+               "ingredient.")
+
 
 @dataclass(frozen=True)
 class Tables:
@@ -269,7 +275,13 @@ def family_ideas(t: Tables, family: str, ingredient: str, part: str,
 
 
 def label(t: Tables, idea: Idea) -> Idea:
-    """Attach the corpus label. Ideas without a member are left unlabelled."""
+    """Attach the corpus label. Ideas without a member are left unlabelled.
+
+    Scope (LABEL_SCOPE): the label is set by the ingredient-member pair over all
+    recipes, never by the technique. A pair common in soups is labelled common
+    for roasting too. `with_technique` is recorded for display only, and its
+    technique is detected anywhere in the directions, not tied to the target.
+    """
     if idea.member is None:
         return idea
     m = t.members[idea.member]
@@ -387,7 +399,7 @@ def _corpus_phrase(i: Idea) -> str:
     if i.label == "untested":
         return (f"corpus too small to judge: chance predicts {i.expected:.1f} "
                 f"recipes, {i.observed} seen")
-    return (f"RecipeNLG lists them together in {i.observed:,} recipes; "
+    return (f"RecipeNLG lists them together in {i.observed:,} recipes (any technique); "
             f"chance alone predicts {i.expected:,.0f}")
 
 
@@ -406,7 +418,8 @@ def render_pairing(pr: Pairing, t: Tables | None = None) -> str:
     head = f"[{LABEL_WORDS.get(pr.label, '')}] + {_name(pr.member)} ({_name(first.form)})"
     if also:
         head += f", also {', '.join(also)}"
-    lines = [head, f"    {_corpus_phrase(first)}", f"    Techniques: {techs}"]
+    lines = [head, f"    {_corpus_phrase(first)}",
+             f"    Techniques (recipes also mentioning it anywhere): {techs}"]
     by_mech: dict[str, list[str]] = {}
     for i in pr.ideas:
         for m in i.mechanisms:
@@ -433,7 +446,11 @@ def render(ingredient: str, *, part: str | None = None, family: str | None = Non
         return f"No family {family!r}. Families: {', '.join(t.families)}.\n"
     prs = pairings(generate(ingredient, part, family, t))
     out = [f"What {ingredient} could become, by family. The ideas come from part properties,",
-           "techniques and family mechanisms; RecipeNLG only labels them.", ""]
+           "techniques and family mechanisms; RecipeNLG only labels them.",
+           LABEL_SCOPE]
+    if (warn := pc.stale_warning(t.counts)):
+        out.append(warn)
+    out.append("")
     for pname, p in t.parts[ingredient].items():
         if part and pname != part:
             continue

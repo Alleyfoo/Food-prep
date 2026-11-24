@@ -318,3 +318,51 @@ def test_cli(capsys):
     assert main(["possible", "broccoli", "--family", "nope"]) == 1
     assert main(["families", "carb"]) == 0
     assert "Carb (partner" in capsys.readouterr().out
+
+
+# ---- evidence scope and governance (PR #4 review) --------------------------------
+
+def test_label_scope_is_stated_wherever_labels_are_shown():
+    out = po.render("broccoli", part="stems", family="acid", limit=1)
+    assert po.LABEL_SCOPE in out
+    assert "anywhere" in out
+
+
+def test_label_ignores_the_technique():
+    """The label is set by the ingredient-member pair, not by the technique;
+    the scope text says so. Same pair, two techniques, same label."""
+    t = po.load_tables()
+    [roast] = ideas_for(t, "acid", "broccoli", "stems", "roast", "lemon")
+    [steam] = ideas_for(t, "acid", "broccoli", "stems", "steam", "lemon")
+    assert po.label(t, roast).label == po.label(t, steam).label
+
+
+def test_families_checksum_ignores_formatting(tmp_path):
+    a, b = tmp_path / "a.yaml", tmp_path / "b.yaml"
+    a.write_text("families: {acid: {kind: modifier}}\nmembers: {}\n", encoding="utf-8")
+    b.write_text("# comment\nmembers: {}\nfamilies:\n  acid:\n    kind: modifier\n",
+                 encoding="utf-8")
+    assert pc.families_checksum(a) == pc.families_checksum(b)
+    b.write_text("families: {acid: {kind: partner}}\nmembers: {}\n", encoding="utf-8")
+    assert pc.families_checksum(a) != pc.families_checksum(b)
+
+
+def test_stale_warning(tmp_path):
+    f = tmp_path / "f.yaml"
+    f.write_text("families: {}\nmembers: {}\n", encoding="utf-8")
+    good = {"corpus": {"families_sha256": pc.families_checksum(f)}}
+    assert pc.stale_warning(good, f) is None
+    assert "different family definitions" in pc.stale_warning(
+        {"corpus": {"families_sha256": "0" * 64}}, f)
+    assert "no checksum" in pc.stale_warning({"corpus": {}}, f)
+    assert pc.stale_warning({}, f) is None
+
+
+def test_committed_counts_match_the_current_family_definitions():
+    """Editing families.yaml makes the committed counts stale: rerun
+    scripts/count_family_pairs.py (~28 min) and commit both outputs."""
+    from foodprep import family_profiles as fp
+    for record in (pc.load_counts(), fp.load_profiles()):
+        if not record:
+            pytest.skip("counts not generated")
+        assert pc.stale_warning(record) is None

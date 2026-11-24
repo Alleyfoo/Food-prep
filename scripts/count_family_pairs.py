@@ -43,6 +43,7 @@ def main() -> int:
         "source_path": portable_source(path.parent),
         "terms": "non-commercial research and educational use only; counts only",
         "search_date": date.today().isoformat(),
+        "families_sha256": pc.families_checksum(),
     }
     record = {"corpus": corpus, **counts.to_record()}
     pc.write_counts(record)

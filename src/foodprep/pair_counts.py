@@ -17,6 +17,8 @@ text: RecipeNLG's terms allow non-commercial research use only.
 from __future__ import annotations
 
 import csv
+import hashlib
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -32,6 +34,29 @@ PAIR_COUNTS_PATH = DATA / "pair_counts.yaml"
 def load_yaml(path: Path) -> dict:
     import yaml
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def families_checksum(path: Path = FAMILIES_PATH) -> str:
+    """SHA-256 of the family definitions' content (not their formatting), so
+    generated counts can say which ontology they were made from."""
+    data = load_yaml(path)
+    canon = json.dumps(data, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+
+def stale_warning(record: dict, path: Path = FAMILIES_PATH) -> str | None:
+    """A warning when counts were made from other family definitions than the
+    current families.yaml (or carry no checksum), else None."""
+    if not record:
+        return None
+    made_from = (record.get("corpus") or {}).get("families_sha256")
+    if made_from == families_checksum(path):
+        return None
+    why = ("carry no checksum of the family definitions they were made from"
+           if not made_from else "were made from different family definitions than "
+           "the current families.yaml")
+    return (f"Warning: the corpus counts {why}; "
+            f"rerun scripts/count_family_pairs.py before trusting the labels.")
 
 
 def source_patterns(families: dict | None = None) -> dict[str, re.Pattern[str]]:

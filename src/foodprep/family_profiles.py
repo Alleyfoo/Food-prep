@@ -236,7 +236,10 @@ def render_profile(ingredient: str, profiles: dict | None = None) -> str:
     if not target:
         return f"No family profile for {ingredient!r}. Known: {', '.join(prof['targets'])}.\n"
     fams = list(target["families"])
-    out = [f"Families cooks put with {ingredient} (RecipeNLG, {target['recipes']:,} recipes)", ""]
+    out = [f"Families cooks put with {ingredient} (RecipeNLG, {target['recipes']:,} recipes)"]
+    if (warn := pc.stale_warning(prof)):
+        out.append(warn)
+    out.append("")
     head = f"  {'technique':10} {'recipes':>8} " + " ".join(f"{f:>7}" for f in fams)
     out.append(head)
     allr = prof["all_recipes"]
