@@ -101,12 +101,20 @@ def cmd_parts(args: argparse.Namespace) -> int:
 
 
 def cmd_possible(args: argparse.Namespace) -> int:
-    """Part x technique x acid ideas, labelled (not chosen) by RecipeNLG."""
+    """Part x technique x family ideas, labelled (not chosen) by RecipeNLG."""
     from foodprep import possibilities
-    out = possibilities.render(args.ingredient, part=args.part,
+    out = possibilities.render(args.ingredient, part=args.part, family=args.family,
                                show_all=args.all, limit=args.limit)
     print(out, end="")
-    return 1 if out.startswith("No part properties") else 0
+    return 1 if out.startswith("No ") else 0
+
+
+def cmd_families(args: argparse.Namespace) -> int:
+    """The families (acid, fat, salt, umami, sweet, protein, carb) and their members."""
+    from foodprep import possibilities
+    out = possibilities.render_families(args.family)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
 
 
 def cmd_hypotheses(args: argparse.Namespace) -> int:
@@ -323,13 +331,18 @@ def build_parser() -> argparse.ArgumentParser:
     ppt.set_defaults(func=cmd_parts)
 
     ppo = sub.add_parser("possible",
-                         help="What each part could become with acid, beyond what recipes show")
+                         help="What each part could become, by family, beyond what recipes show")
     ppo.add_argument("ingredient", nargs="?", default="broccoli")
     ppo.add_argument("--part", help="only this part, e.g. stems")
+    ppo.add_argument("--family", help="only this family, e.g. acid or protein")
     ppo.add_argument("--all", action="store_true",
                      help="also show what recipes already do")
-    ppo.add_argument("--limit", type=int, default=8, help="ideas per part")
+    ppo.add_argument("--limit", type=int, default=3, help="ideas shown in full per family")
     ppo.set_defaults(func=cmd_possible)
+
+    pfam = sub.add_parser("families", help="Families (acid, fat, protein, ...) and their members")
+    pfam.add_argument("family", nargs="?")
+    pfam.set_defaults(func=cmd_families)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

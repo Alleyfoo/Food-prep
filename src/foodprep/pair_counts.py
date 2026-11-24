@@ -1,13 +1,13 @@
-"""How often RecipeNLG cooks each ingredient with each acid source.
+"""How often RecipeNLG cooks each ingredient with each family member.
 
 The possibility generator (foodprep.possibilities) builds its ideas from part
-properties, technique rules and acid mechanisms, never from recipes. These
+properties, technique rules and family mechanisms, never from recipes. These
 counts only label each idea afterwards: common, rare, or never seen although
 chance alone would put it in some recipes.
 
 One pass over the corpus counts, per recipe:
 - which target ingredients it lists (part_evidence.INGREDIENTS),
-- which acid sources it lists (acid.yaml `corpus` regexes),
+- which family members it lists (families.yaml `corpus` regexes),
 - which techniques its directions use (part_evidence.TECHNIQUES).
 
 Only counts are written (src/foodprep/data/pair_counts.yaml), never recipe
@@ -25,7 +25,7 @@ from typing import Iterable
 from foodprep import part_evidence as pe
 
 DATA = Path(__file__).with_name("data")
-ACID_PATH = DATA / "acid.yaml"
+FAMILIES_PATH = DATA / "families.yaml"
 PAIR_COUNTS_PATH = DATA / "pair_counts.yaml"
 
 
@@ -34,9 +34,9 @@ def load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
-def source_patterns(acid: dict | None = None) -> dict[str, re.Pattern[str]]:
-    acid = acid if acid is not None else load_yaml(ACID_PATH)
-    return {name: re.compile(s["corpus"], re.I) for name, s in acid["sources"].items()}
+def source_patterns(families: dict | None = None) -> dict[str, re.Pattern[str]]:
+    families = families if families is not None else load_yaml(FAMILIES_PATH)
+    return {name: re.compile(m["corpus"], re.I) for name, m in families["members"].items()}
 
 
 class Counts:
@@ -91,8 +91,8 @@ def count_row(counts: Counts, ingredients: str, directions: str,
     counts.add(found_t, found_s, techs)
 
 
-def count_csv(path: Path | str, acid: dict | None = None) -> Counts:
-    sources = source_patterns(acid)
+def count_csv(path: Path | str, families: dict | None = None) -> Counts:
+    sources = source_patterns(families)
     targets = {name: ing.listed for name, ing in pe.INGREDIENTS.items()}
     any_source = re.compile("|".join(f"(?:{rx.pattern})" for rx in sources.values()), re.I)
     counts = Counts(targets, sources)
@@ -107,10 +107,10 @@ def count_csv(path: Path | str, acid: dict | None = None) -> Counts:
 
 
 HEADER = """\
-# How often RecipeNLG lists each target ingredient with each acid source:
+# How often RecipeNLG lists each target ingredient with each family member
 # GENERATED, do not hand-edit.
 #
-# Regenerate: py -3.11 scripts/count_acid_pairs.py [path-to-full_dataset.csv]
+# Regenerate: py -3.11 scripts/count_family_pairs.py [path-to-full_dataset.csv]
 #
 # Counts recipes, from the ingredient list (targets, sources) and the
 # directions (techniques, as in part_evidence.TECHNIQUES). foodprep.possibilities

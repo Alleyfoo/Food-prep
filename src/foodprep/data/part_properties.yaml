@@ -9,7 +9,8 @@
 #   water       how much free water it holds (decides frying, drying)
 #   fibre       how fibrous it is (decides braising, pickling crunch)
 #   toughness   how hard it is to bite raw (decides raw use, massage)
-#   fat, sugar, acidity, bitterness   taste-relevant composition
+#   fat, sugar, acidity, bitterness, umami   taste-relevant composition
+#   (salt, protein and carb are none unless given)
 # Flags (true/false):
 #   raw_ok            pleasant to eat raw
 #   thin              thin sheets or leaves (dries and crisps fast)
@@ -69,6 +70,7 @@ parts:
       sugar: medium
       acidity: medium
       bitterness: none
+      umami: low
       raw_ok: true
       pigment: red
       flavour: [sweet, sour, fresh]
@@ -80,6 +82,7 @@ parts:
       sugar: low
       acidity: high
       bitterness: none
+      umami: medium
       raw_ok: true
       liquid: true
       pigment: red
@@ -92,6 +95,7 @@ parts:
       sugar: low
       acidity: low
       bitterness: low
+      umami: high
       raw_ok: true
       thin: true
       pigment: red

@@ -1,8 +1,8 @@
-"""Count how often RecipeNLG cooks each ingredient with each acid source.
+"""Count how often RecipeNLG cooks each ingredient with each family member.
 
 Writes src/foodprep/data/pair_counts.yaml (counts only, no recipe text).
 
-Run:  py -3.11 scripts/count_acid_pairs.py [path-to-full_dataset.csv]
+Run:  py -3.11 scripts/count_family_pairs.py [path-to-full_dataset.csv]
 
 Without a path it uses $FOODPREP_RECIPENLG, then
 data/corpus/recipenlg/full_dataset.csv (see foodprep.part_evidence.resolve_csv).

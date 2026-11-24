@@ -1,7 +1,7 @@
-# How often RecipeNLG lists each target ingredient with each acid source:
+# How often RecipeNLG lists each target ingredient with each family member
 # GENERATED, do not hand-edit.
 #
-# Regenerate: py -3.11 scripts/count_acid_pairs.py [path-to-full_dataset.csv]
+# Regenerate: py -3.11 scripts/count_family_pairs.py [path-to-full_dataset.csv]
 #
 # Counts recipes, from the ingredient list (targets, sources) and the
 # directions (techniques, as in part_evidence.TECHNIQUES). foodprep.possibilities
@@ -35,6 +35,47 @@ sources:
   tamarind: 2116
   green_mango: 532
   tomato_gel: 312317
+  olive_oil: 292260
+  rapeseed_oil: 43438
+  butter: 593851
+  brown_butter: 224
+  ghee: 4107
+  sesame_oil: 25024
+  cream: 296753
+  tahini: 4623
+  walnut: 67575
+  bacon: 90856
+  sea_salt: 1083150
+  soy_sauce: 85044
+  fish_sauce: 10232
+  miso: 3640
+  anchovy: 7775
+  capers: 13142
+  olives: 52462
+  parmesan: 122020
+  dried_mushroom: 3641
+  tomato_skin_powder: 312317
+  stock: 190462
+  honey: 80008
+  sugar: 857216
+  maple_syrup: 21051
+  pomegranate_molasses: 895
+  balsamic_vinegar: 28196
+  eggs: 651758
+  chickpeas: 14763
+  tofu: 10785
+  white_beans: 14738
+  goat_cheese: 10456
+  yogurt: 48573
+  smoked_fish: 3859
+  chicken: 201195
+  bread: 90326
+  rye_crumbs: 2933
+  croutons: 76345
+  rice: 107174
+  pasta: 136792
+  potato: 129305
+  grains: 19951
 pairs:
   tomato:
     lemon: 31103
@@ -50,6 +91,47 @@ pairs:
     tamarind: 525
     green_mango: 118
     tomato_gel: 312317
+    olive_oil: 96275
+    rapeseed_oil: 6709
+    butter: 35827
+    brown_butter: 7
+    ghee: 975
+    sesame_oil: 1142
+    cream: 29186
+    tahini: 532
+    walnut: 1489
+    bacon: 19416
+    sea_salt: 190419
+    soy_sauce: 7414
+    fish_sauce: 1178
+    miso: 212
+    anchovy: 2473
+    capers: 4969
+    olives: 25891
+    parmesan: 35907
+    dried_mushroom: 666
+    tomato_skin_powder: 312317
+    stock: 51271
+    honey: 5220
+    sugar: 46339
+    maple_syrup: 638
+    pomegranate_molasses: 167
+    balsamic_vinegar: 9176
+    eggs: 35389
+    chickpeas: 6045
+    tofu: 1565
+    white_beans: 6566
+    goat_cheese: 2683
+    yogurt: 5886
+    smoked_fish: 411
+    chicken: 37248
+    bread: 18143
+    rye_crumbs: 358
+    croutons: 13662
+    rice: 27243
+    pasta: 48658
+    potato: 23071
+    grains: 6579
   broccoli:
     lemon: 4680
     lime: 584
@@ -64,6 +146,47 @@ pairs:
     tamarind: 17
     green_mango: 1
     tomato_gel: 5191
+    olive_oil: 6144
+    rapeseed_oil: 936
+    butter: 11224
+    brown_butter: 0
+    ghee: 30
+    sesame_oil: 1427
+    cream: 5061
+    tahini: 90
+    walnut: 482
+    bacon: 3975
+    sea_salt: 17060
+    soy_sauce: 3932
+    fish_sauce: 247
+    miso: 114
+    anchovy: 165
+    capers: 112
+    olives: 1526
+    parmesan: 5536
+    dried_mushroom: 55
+    tomato_skin_powder: 5191
+    stock: 7337
+    honey: 767
+    sugar: 5271
+    maple_syrup: 73
+    pomegranate_molasses: 5
+    balsamic_vinegar: 441
+    eggs: 8243
+    chickpeas: 284
+    tofu: 578
+    white_beans: 185
+    goat_cheese: 93
+    yogurt: 619
+    smoked_fish: 29
+    chicken: 10318
+    bread: 1344
+    rye_crumbs: 27
+    croutons: 3556
+    rice: 7803
+    pasta: 7219
+    potato: 2855
+    grains: 442
   avocado:
     lemon: 6917
     lime: 9416
@@ -78,6 +201,47 @@ pairs:
     tamarind: 21
     green_mango: 4
     tomato_gel: 12855
+    olive_oil: 8052
+    rapeseed_oil: 1116
+    butter: 1572
+    brown_butter: 0
+    ghee: 39
+    sesame_oil: 402
+    cream: 5665
+    tahini: 131
+    walnut: 338
+    bacon: 1785
+    sea_salt: 16621
+    soy_sauce: 981
+    fish_sauce: 137
+    miso: 89
+    anchovy: 135
+    capers: 204
+    olives: 2501
+    parmesan: 543
+    dried_mushroom: 4
+    tomato_skin_powder: 12855
+    stock: 2242
+    honey: 1406
+    sugar: 2459
+    maple_syrup: 230
+    pomegranate_molasses: 16
+    balsamic_vinegar: 762
+    eggs: 2868
+    chickpeas: 407
+    tofu: 240
+    white_beans: 196
+    goat_cheese: 321
+    yogurt: 1185
+    smoked_fish: 261
+    chicken: 3552
+    bread: 1870
+    rye_crumbs: 52
+    croutons: 532
+    rice: 1286
+    pasta: 621
+    potato: 590
+    grains: 616
 techniques:
   tomato:
     stir_fry: 5043
@@ -128,6 +292,46 @@ triples:
       tamarind: 74
       green_mango: 11
       tomato_gel: 5043
+      olive_oil: 1510
+      rapeseed_oil: 291
+      butter: 574
+      ghee: 108
+      sesame_oil: 212
+      cream: 377
+      tahini: 4
+      walnut: 18
+      bacon: 196
+      sea_salt: 3123
+      soy_sauce: 1060
+      fish_sauce: 250
+      miso: 15
+      anchovy: 26
+      capers: 44
+      olives: 191
+      parmesan: 377
+      dried_mushroom: 18
+      tomato_skin_powder: 5043
+      stock: 1101
+      honey: 119
+      sugar: 1174
+      maple_syrup: 5
+      pomegranate_molasses: 1
+      balsamic_vinegar: 93
+      eggs: 528
+      chickpeas: 115
+      tofu: 181
+      white_beans: 50
+      goat_cheese: 15
+      yogurt: 229
+      smoked_fish: 2
+      chicken: 1078
+      bread: 104
+      rye_crumbs: 1
+      croutons: 84
+      rice: 824
+      pasta: 787
+      potato: 427
+      grains: 90
     steam:
       lemon: 917
       lime: 404
@@ -139,6 +343,46 @@ triples:
       tamarind: 35
       green_mango: 8
       tomato_gel: 6268
+      olive_oil: 2684
+      rapeseed_oil: 202
+      butter: 1085
+      ghee: 79
+      sesame_oil: 62
+      cream: 524
+      tahini: 14
+      walnut: 48
+      bacon: 322
+      sea_salt: 4422
+      soy_sauce: 341
+      fish_sauce: 80
+      miso: 11
+      anchovy: 81
+      capers: 152
+      olives: 445
+      parmesan: 692
+      dried_mushroom: 33
+      tomato_skin_powder: 6268
+      stock: 1379
+      honey: 138
+      sugar: 909
+      maple_syrup: 22
+      pomegranate_molasses: 7
+      balsamic_vinegar: 224
+      eggs: 792
+      chickpeas: 189
+      tofu: 95
+      white_beans: 120
+      goat_cheese: 68
+      yogurt: 199
+      smoked_fish: 14
+      chicken: 922
+      bread: 260
+      rye_crumbs: 1
+      croutons: 251
+      rice: 1015
+      pasta: 680
+      potato: 697
+      grains: 233
     roast:
       lemon: 1935
       lime: 976
@@ -151,6 +395,47 @@ triples:
       tamarind: 57
       green_mango: 15
       tomato_gel: 14198
+      olive_oil: 7849
+      rapeseed_oil: 506
+      butter: 1947
+      brown_butter: 2
+      ghee: 75
+      sesame_oil: 72
+      cream: 1148
+      tahini: 53
+      walnut: 140
+      bacon: 807
+      sea_salt: 10416
+      soy_sauce: 418
+      fish_sauce: 77
+      miso: 23
+      anchovy: 243
+      capers: 391
+      olives: 1141
+      parmesan: 1644
+      dried_mushroom: 75
+      tomato_skin_powder: 14198
+      stock: 3292
+      honey: 536
+      sugar: 2376
+      maple_syrup: 64
+      pomegranate_molasses: 15
+      balsamic_vinegar: 1023
+      eggs: 1424
+      chickpeas: 336
+      tofu: 68
+      white_beans: 281
+      goat_cheese: 328
+      yogurt: 359
+      smoked_fish: 20
+      chicken: 1630
+      bread: 1300
+      rye_crumbs: 34
+      croutons: 687
+      rice: 810
+      pasta: 1435
+      potato: 1635
+      grains: 399
     saute:
       lemon: 4993
       lime: 2363
@@ -163,6 +448,47 @@ triples:
       tamarind: 117
       green_mango: 20
       tomato_gel: 58165
+      olive_oil: 28551
+      rapeseed_oil: 2190
+      butter: 12282
+      brown_butter: 3
+      ghee: 342
+      sesame_oil: 185
+      cream: 6354
+      tahini: 52
+      walnut: 242
+      bacon: 4183
+      sea_salt: 39605
+      soy_sauce: 1431
+      fish_sauce: 188
+      miso: 51
+      anchovy: 568
+      capers: 1262
+      olives: 3940
+      parmesan: 9131
+      dried_mushroom: 263
+      tomato_skin_powder: 58165
+      stock: 16734
+      honey: 954
+      sugar: 7886
+      maple_syrup: 152
+      pomegranate_molasses: 28
+      balsamic_vinegar: 1504
+      eggs: 6225
+      chickpeas: 1482
+      tofu: 502
+      white_beans: 1885
+      goat_cheese: 528
+      yogurt: 1134
+      smoked_fish: 56
+      chicken: 8891
+      bread: 2490
+      rye_crumbs: 31
+      croutons: 2856
+      rice: 6941
+      pasta: 11322
+      potato: 4450
+      grains: 1358
     boil:
       lemon: 12498
       lime: 5295
@@ -176,6 +502,47 @@ triples:
       tamarind: 358
       green_mango: 60
       tomato_gel: 143824
+      olive_oil: 51117
+      rapeseed_oil: 3683
+      butter: 20584
+      brown_butter: 2
+      ghee: 678
+      sesame_oil: 481
+      cream: 13548
+      tahini: 111
+      walnut: 488
+      bacon: 8201
+      sea_salt: 96178
+      soy_sauce: 3657
+      fish_sauce: 659
+      miso: 118
+      anchovy: 1328
+      capers: 2383
+      olives: 8583
+      parmesan: 19214
+      dried_mushroom: 572
+      tomato_skin_powder: 143824
+      stock: 39617
+      honey: 2260
+      sugar: 25183
+      maple_syrup: 329
+      pomegranate_molasses: 71
+      balsamic_vinegar: 3082
+      eggs: 13086
+      chickpeas: 3473
+      tofu: 770
+      white_beans: 4484
+      goat_cheese: 788
+      yogurt: 2488
+      smoked_fish: 130
+      chicken: 19229
+      bread: 4786
+      rye_crumbs: 47
+      croutons: 4762
+      rice: 16708
+      pasta: 29485
+      potato: 13240
+      grains: 4726
     bake:
       lemon: 6094
       lime: 2276
@@ -188,6 +555,47 @@ triples:
       tamarind: 49
       green_mango: 10
       tomato_gel: 89859
+      olive_oil: 26507
+      rapeseed_oil: 1598
+      butter: 14016
+      brown_butter: 3
+      ghee: 169
+      sesame_oil: 140
+      cream: 9904
+      tahini: 165
+      walnut: 527
+      bacon: 5706
+      sea_salt: 54637
+      soy_sauce: 1241
+      fish_sauce: 79
+      miso: 58
+      anchovy: 608
+      capers: 1156
+      olives: 7682
+      parmesan: 16002
+      dried_mushroom: 188
+      tomato_skin_powder: 89859
+      stock: 10062
+      honey: 1377
+      sugar: 12393
+      maple_syrup: 211
+      pomegranate_molasses: 57
+      balsamic_vinegar: 2268
+      eggs: 19658
+      chickpeas: 876
+      tofu: 455
+      white_beans: 1105
+      goat_cheese: 1218
+      yogurt: 1411
+      smoked_fish: 92
+      chicken: 10654
+      bread: 6754
+      rye_crumbs: 139
+      croutons: 8255
+      rice: 8275
+      pasta: 15338
+      potato: 7322
+      grains: 1127
     grill:
       lemon: 4088
       lime: 2649
@@ -200,6 +608,46 @@ triples:
       tamarind: 43
       green_mango: 5
       tomato_gel: 23524
+      olive_oil: 11866
+      rapeseed_oil: 852
+      butter: 3226
+      ghee: 60
+      sesame_oil: 171
+      cream: 1764
+      tahini: 85
+      walnut: 162
+      bacon: 1792
+      sea_salt: 15301
+      soy_sauce: 1031
+      fish_sauce: 160
+      miso: 11
+      anchovy: 322
+      capers: 669
+      olives: 1930
+      parmesan: 2946
+      dried_mushroom: 44
+      tomato_skin_powder: 23524
+      stock: 2240
+      honey: 1017
+      sugar: 2861
+      maple_syrup: 89
+      pomegranate_molasses: 25
+      balsamic_vinegar: 1806
+      eggs: 2482
+      chickpeas: 266
+      tofu: 106
+      white_beans: 318
+      goat_cheese: 536
+      yogurt: 951
+      smoked_fish: 28
+      chicken: 3875
+      bread: 4148
+      rye_crumbs: 63
+      croutons: 1368
+      rice: 822
+      pasta: 1382
+      potato: 1121
+      grains: 432
     fry:
       lemon: 2108
       lime: 1187
@@ -212,6 +660,47 @@ triples:
       tamarind: 144
       green_mango: 37
       tomato_gel: 22558
+      olive_oil: 6789
+      rapeseed_oil: 941
+      butter: 3672
+      brown_butter: 2
+      ghee: 378
+      sesame_oil: 151
+      cream: 2306
+      tahini: 49
+      walnut: 128
+      bacon: 3218
+      sea_salt: 15203
+      soy_sauce: 1004
+      fish_sauce: 166
+      miso: 25
+      anchovy: 189
+      capers: 386
+      olives: 1303
+      parmesan: 2250
+      dried_mushroom: 52
+      tomato_skin_powder: 22558
+      stock: 3982
+      honey: 426
+      sugar: 3652
+      maple_syrup: 54
+      pomegranate_molasses: 16
+      balsamic_vinegar: 467
+      eggs: 5391
+      chickpeas: 529
+      tofu: 193
+      white_beans: 317
+      goat_cheese: 186
+      yogurt: 735
+      smoked_fish: 28
+      chicken: 3242
+      bread: 1512
+      rye_crumbs: 20
+      croutons: 1757
+      rice: 2230
+      pasta: 2299
+      potato: 2276
+      grains: 267
     soup:
       lemon: 7009
       lime: 4567
@@ -224,6 +713,47 @@ triples:
       tamarind: 209
       green_mango: 30
       tomato_gel: 67997
+      olive_oil: 21461
+      rapeseed_oil: 1837
+      butter: 8935
+      brown_butter: 1
+      ghee: 311
+      sesame_oil: 264
+      cream: 7714
+      tahini: 233
+      walnut: 472
+      bacon: 3578
+      sea_salt: 43198
+      soy_sauce: 1679
+      fish_sauce: 305
+      miso: 79
+      anchovy: 536
+      capers: 788
+      olives: 3808
+      parmesan: 7242
+      dried_mushroom: 202
+      tomato_skin_powder: 67997
+      stock: 16873
+      honey: 1375
+      sugar: 10429
+      maple_syrup: 203
+      pomegranate_molasses: 24
+      balsamic_vinegar: 1699
+      eggs: 7830
+      chickpeas: 1602
+      tofu: 437
+      white_beans: 2104
+      goat_cheese: 542
+      yogurt: 1686
+      smoked_fish: 80
+      chicken: 9051
+      bread: 3815
+      rye_crumbs: 52
+      croutons: 2854
+      rice: 5736
+      pasta: 9909
+      potato: 6437
+      grains: 1340
     raw:
       lemon: 5292
       lime: 1998
@@ -237,6 +767,46 @@ triples:
       tamarind: 53
       green_mango: 16
       tomato_gel: 24045
+      olive_oil: 10594
+      rapeseed_oil: 669
+      butter: 1520
+      ghee: 64
+      sesame_oil: 217
+      cream: 1787
+      tahini: 111
+      walnut: 328
+      bacon: 1947
+      sea_salt: 14092
+      soy_sauce: 688
+      fish_sauce: 215
+      miso: 32
+      anchovy: 461
+      capers: 714
+      olives: 3852
+      parmesan: 2342
+      dried_mushroom: 31
+      tomato_skin_powder: 24045
+      stock: 1732
+      honey: 1046
+      sugar: 3398
+      maple_syrup: 103
+      pomegranate_molasses: 42
+      balsamic_vinegar: 1902
+      eggs: 2971
+      chickpeas: 764
+      tofu: 167
+      white_beans: 516
+      goat_cheese: 378
+      yogurt: 820
+      smoked_fish: 70
+      chicken: 3262
+      bread: 1933
+      rye_crumbs: 32
+      croutons: 1081
+      rice: 1252
+      pasta: 3278
+      potato: 1461
+      grains: 855
     dry:
       lemon: 6612
       lime: 3923
@@ -250,6 +820,47 @@ triples:
       tamarind: 282
       green_mango: 72
       tomato_gel: 74996
+      olive_oil: 24089
+      rapeseed_oil: 2266
+      butter: 9251
+      brown_butter: 3
+      ghee: 521
+      sesame_oil: 271
+      cream: 8040
+      tahini: 155
+      walnut: 481
+      bacon: 4006
+      sea_salt: 50473
+      soy_sauce: 1951
+      fish_sauce: 324
+      miso: 58
+      anchovy: 583
+      capers: 1085
+      olives: 5538
+      parmesan: 8893
+      dried_mushroom: 377
+      tomato_skin_powder: 74996
+      stock: 13386
+      honey: 1369
+      sugar: 11742
+      maple_syrup: 205
+      pomegranate_molasses: 65
+      balsamic_vinegar: 1854
+      eggs: 10157
+      chickpeas: 1639
+      tofu: 521
+      white_beans: 1453
+      goat_cheese: 745
+      yogurt: 2096
+      smoked_fish: 76
+      chicken: 8936
+      bread: 3768
+      rye_crumbs: 42
+      croutons: 3451
+      rice: 7205
+      pasta: 11892
+      potato: 5265
+      grains: 1600
   broccoli:
     stir_fry:
       lemon: 161
@@ -257,6 +868,43 @@ triples:
       vinegar: 431
       tamarind: 8
       tomato_gel: 199
+      olive_oil: 451
+      rapeseed_oil: 346
+      butter: 165
+      ghee: 4
+      sesame_oil: 694
+      cream: 48
+      tahini: 3
+      walnut: 25
+      bacon: 40
+      sea_salt: 893
+      soy_sauce: 1891
+      fish_sauce: 113
+      miso: 14
+      anchovy: 3
+      capers: 2
+      olives: 25
+      parmesan: 125
+      dried_mushroom: 16
+      tomato_skin_powder: 199
+      stock: 960
+      honey: 156
+      sugar: 820
+      maple_syrup: 7
+      balsamic_vinegar: 33
+      eggs: 207
+      chickpeas: 8
+      tofu: 238
+      white_beans: 3
+      goat_cheese: 2
+      yogurt: 14
+      chicken: 960
+      bread: 16
+      croutons: 21
+      rice: 782
+      pasta: 640
+      potato: 37
+      grains: 30
     steam:
       lemon: 508
       lime: 70
@@ -268,6 +916,45 @@ triples:
       tamarind: 4
       green_mango: 1
       tomato_gel: 329
+      olive_oil: 811
+      rapeseed_oil: 114
+      butter: 836
+      ghee: 6
+      sesame_oil: 230
+      cream: 345
+      tahini: 19
+      walnut: 49
+      bacon: 112
+      sea_salt: 1609
+      soy_sauce: 502
+      fish_sauce: 30
+      miso: 18
+      anchovy: 15
+      capers: 24
+      olives: 89
+      parmesan: 490
+      dried_mushroom: 6
+      tomato_skin_powder: 329
+      stock: 591
+      honey: 107
+      sugar: 292
+      maple_syrup: 15
+      balsamic_vinegar: 61
+      eggs: 433
+      chickpeas: 34
+      tofu: 86
+      white_beans: 12
+      goat_cheese: 13
+      yogurt: 83
+      smoked_fish: 4
+      chicken: 661
+      bread: 81
+      rye_crumbs: 3
+      croutons: 220
+      rice: 373
+      pasta: 534
+      potato: 266
+      grains: 69
     roast:
       lemon: 221
       lime: 50
@@ -277,6 +964,45 @@ triples:
       sumac: 1
       tamarind: 1
       tomato_gel: 171
+      olive_oil: 581
+      rapeseed_oil: 40
+      butter: 161
+      ghee: 2
+      sesame_oil: 57
+      cream: 64
+      tahini: 22
+      walnut: 24
+      bacon: 29
+      sea_salt: 660
+      soy_sauce: 99
+      fish_sauce: 14
+      miso: 11
+      anchovy: 18
+      capers: 9
+      olives: 33
+      parmesan: 188
+      dried_mushroom: 1
+      tomato_skin_powder: 171
+      stock: 158
+      honey: 59
+      sugar: 81
+      maple_syrup: 8
+      pomegranate_molasses: 1
+      balsamic_vinegar: 54
+      eggs: 81
+      chickpeas: 33
+      tofu: 16
+      white_beans: 11
+      goat_cheese: 7
+      yogurt: 26
+      smoked_fish: 2
+      chicken: 138
+      bread: 38
+      croutons: 57
+      rice: 64
+      pasta: 158
+      potato: 113
+      grains: 39
     saute:
       lemon: 469
       lime: 93
@@ -287,6 +1013,45 @@ triples:
       sorrel: 1
       tamarind: 5
       tomato_gel: 844
+      olive_oil: 1853
+      rapeseed_oil: 211
+      butter: 2928
+      ghee: 15
+      sesame_oil: 248
+      cream: 768
+      tahini: 4
+      walnut: 52
+      bacon: 239
+      sea_salt: 3345
+      soy_sauce: 656
+      fish_sauce: 49
+      miso: 18
+      anchovy: 46
+      capers: 21
+      olives: 102
+      parmesan: 1158
+      dried_mushroom: 12
+      tomato_skin_powder: 844
+      stock: 1988
+      honey: 98
+      sugar: 329
+      maple_syrup: 11
+      balsamic_vinegar: 73
+      eggs: 785
+      chickpeas: 53
+      tofu: 139
+      white_beans: 61
+      goat_cheese: 30
+      yogurt: 67
+      smoked_fish: 5
+      chicken: 1290
+      bread: 143
+      rye_crumbs: 5
+      croutons: 380
+      rice: 2119
+      pasta: 1564
+      potato: 502
+      grains: 96
     boil:
       lemon: 1579
       lime: 290
@@ -298,6 +1063,46 @@ triples:
       sumac: 2
       tamarind: 13
       tomato_gel: 2003
+      olive_oil: 3228
+      rapeseed_oil: 397
+      butter: 4192
+      ghee: 20
+      sesame_oil: 659
+      cream: 1648
+      tahini: 38
+      walnut: 148
+      bacon: 554
+      sea_salt: 6936
+      soy_sauce: 1834
+      fish_sauce: 145
+      miso: 66
+      anchovy: 114
+      capers: 55
+      olives: 346
+      parmesan: 2474
+      dried_mushroom: 45
+      tomato_skin_powder: 2003
+      stock: 5056
+      honey: 282
+      sugar: 1112
+      maple_syrup: 36
+      pomegranate_molasses: 2
+      balsamic_vinegar: 178
+      eggs: 1274
+      chickpeas: 124
+      tofu: 313
+      white_beans: 135
+      goat_cheese: 43
+      yogurt: 213
+      smoked_fish: 15
+      chicken: 3717
+      bread: 294
+      rye_crumbs: 8
+      croutons: 854
+      rice: 2102
+      pasta: 3781
+      potato: 1558
+      grains: 311
     bake:
       lemon: 2327
       lime: 86
@@ -307,6 +1112,46 @@ triples:
       sumac: 2
       tamarind: 1
       tomato_gel: 1598
+      olive_oil: 1554
+      rapeseed_oil: 136
+      butter: 6834
+      ghee: 4
+      sesame_oil: 127
+      cream: 2872
+      tahini: 32
+      walnut: 94
+      bacon: 588
+      sea_salt: 7326
+      soy_sauce: 372
+      fish_sauce: 20
+      miso: 20
+      anchovy: 34
+      capers: 24
+      olives: 353
+      parmesan: 2263
+      dried_mushroom: 8
+      tomato_skin_powder: 1598
+      stock: 1338
+      honey: 124
+      sugar: 385
+      maple_syrup: 17
+      pomegranate_molasses: 4
+      balsamic_vinegar: 84
+      eggs: 6539
+      chickpeas: 46
+      tofu: 102
+      white_beans: 26
+      goat_cheese: 40
+      yogurt: 176
+      smoked_fish: 10
+      chicken: 5557
+      bread: 971
+      rye_crumbs: 9
+      croutons: 3039
+      rice: 5120
+      pasta: 1584
+      potato: 1054
+      grains: 107
     grill:
       lemon: 133
       lime: 47
@@ -314,6 +1159,46 @@ triples:
       redcurrant: 1
       sumac: 1
       tomato_gel: 167
+      olive_oil: 362
+      rapeseed_oil: 35
+      butter: 294
+      ghee: 1
+      sesame_oil: 53
+      cream: 147
+      tahini: 5
+      walnut: 5
+      bacon: 52
+      sea_salt: 550
+      soy_sauce: 117
+      fish_sauce: 9
+      miso: 5
+      anchovy: 10
+      capers: 6
+      olives: 21
+      parmesan: 236
+      dried_mushroom: 1
+      tomato_skin_powder: 167
+      stock: 174
+      honey: 45
+      sugar: 80
+      maple_syrup: 5
+      pomegranate_molasses: 2
+      balsamic_vinegar: 29
+      eggs: 136
+      chickpeas: 9
+      tofu: 12
+      white_beans: 3
+      goat_cheese: 3
+      yogurt: 41
+      smoked_fish: 2
+      chicken: 317
+      bread: 70
+      rye_crumbs: 3
+      croutons: 96
+      rice: 122
+      pasta: 167
+      potato: 121
+      grains: 20
     fry:
       lemon: 163
       lime: 49
@@ -325,6 +1210,45 @@ triples:
       sumac: 1
       tamarind: 6
       tomato_gel: 234
+      olive_oil: 363
+      rapeseed_oil: 81
+      butter: 437
+      ghee: 7
+      sesame_oil: 116
+      cream: 283
+      tahini: 2
+      walnut: 27
+      bacon: 421
+      sea_salt: 874
+      soy_sauce: 358
+      fish_sauce: 34
+      miso: 8
+      anchovy: 21
+      capers: 10
+      olives: 26
+      parmesan: 199
+      dried_mushroom: 9
+      tomato_skin_powder: 234
+      stock: 368
+      honey: 62
+      sugar: 409
+      maple_syrup: 3
+      balsamic_vinegar: 14
+      eggs: 497
+      chickpeas: 13
+      tofu: 80
+      white_beans: 14
+      goat_cheese: 4
+      yogurt: 29
+      smoked_fish: 5
+      chicken: 482
+      bread: 48
+      rye_crumbs: 1
+      croutons: 135
+      rice: 350
+      pasta: 295
+      potato: 216
+      grains: 22
     soup:
       lemon: 2001
       lime: 135
@@ -335,6 +1259,46 @@ triples:
       sumac: 1
       tamarind: 7
       tomato_gel: 893
+      olive_oil: 1178
+      rapeseed_oil: 177
+      butter: 4734
+      ghee: 9
+      sesame_oil: 180
+      cream: 2105
+      tahini: 38
+      walnut: 97
+      bacon: 529
+      sea_salt: 4915
+      soy_sauce: 615
+      fish_sauce: 40
+      miso: 40
+      anchovy: 25
+      capers: 14
+      olives: 162
+      parmesan: 1469
+      dried_mushroom: 16
+      tomato_skin_powder: 893
+      stock: 2879
+      honey: 122
+      sugar: 617
+      maple_syrup: 11
+      pomegranate_molasses: 3
+      balsamic_vinegar: 50
+      eggs: 2185
+      chickpeas: 67
+      tofu: 116
+      white_beans: 68
+      goat_cheese: 26
+      yogurt: 170
+      smoked_fish: 5
+      chicken: 4741
+      bread: 389
+      rye_crumbs: 7
+      croutons: 2044
+      rice: 3276
+      pasta: 1524
+      potato: 1304
+      grains: 88
     raw:
       lemon: 413
       lime: 131
@@ -343,6 +1307,44 @@ triples:
       redcurrant: 2
       tamarind: 2
       tomato_gel: 713
+      olive_oil: 610
+      rapeseed_oil: 141
+      butter: 217
+      sesame_oil: 178
+      cream: 246
+      tahini: 17
+      walnut: 111
+      bacon: 869
+      sea_salt: 1145
+      soy_sauce: 327
+      fish_sauce: 32
+      miso: 23
+      anchovy: 23
+      capers: 19
+      olives: 319
+      parmesan: 334
+      tomato_skin_powder: 713
+      stock: 189
+      honey: 174
+      sugar: 1176
+      maple_syrup: 22
+      pomegranate_molasses: 2
+      balsamic_vinegar: 126
+      eggs: 301
+      chickpeas: 58
+      tofu: 46
+      white_beans: 18
+      goat_cheese: 8
+      yogurt: 120
+      smoked_fish: 10
+      chicken: 505
+      bread: 78
+      rye_crumbs: 2
+      croutons: 107
+      rice: 171
+      pasta: 753
+      potato: 111
+      grains: 52
     dry:
       lemon: 1006
       lime: 122
@@ -353,6 +1355,46 @@ triples:
       sumac: 2
       tamarind: 5
       tomato_gel: 842
+      olive_oil: 1138
+      rapeseed_oil: 183
+      butter: 1230
+      ghee: 13
+      sesame_oil: 214
+      cream: 536
+      tahini: 13
+      walnut: 59
+      bacon: 255
+      sea_salt: 2406
+      soy_sauce: 610
+      fish_sauce: 48
+      miso: 14
+      anchovy: 28
+      capers: 27
+      olives: 161
+      parmesan: 802
+      dried_mushroom: 29
+      tomato_skin_powder: 842
+      stock: 1000
+      honey: 129
+      sugar: 486
+      maple_syrup: 13
+      pomegranate_molasses: 2
+      balsamic_vinegar: 67
+      eggs: 698
+      chickpeas: 68
+      tofu: 132
+      white_beans: 24
+      goat_cheese: 21
+      yogurt: 129
+      smoked_fish: 7
+      chicken: 1663
+      bread: 187
+      rye_crumbs: 3
+      croutons: 620
+      rice: 557
+      pasta: 1041
+      potato: 361
+      grains: 105
   avocado:
     stir_fry:
       lemon: 20
@@ -361,6 +1403,40 @@ triples:
       tamarind: 1
       green_mango: 1
       tomato_gel: 76
+      olive_oil: 63
+      rapeseed_oil: 18
+      butter: 16
+      sesame_oil: 14
+      cream: 52
+      tahini: 1
+      walnut: 1
+      bacon: 11
+      sea_salt: 117
+      soy_sauce: 29
+      fish_sauce: 4
+      miso: 2
+      olives: 9
+      parmesan: 7
+      dried_mushroom: 1
+      tomato_skin_powder: 76
+      stock: 30
+      honey: 9
+      sugar: 32
+      balsamic_vinegar: 6
+      eggs: 18
+      chickpeas: 3
+      tofu: 10
+      white_beans: 2
+      goat_cheese: 1
+      yogurt: 10
+      smoked_fish: 1
+      chicken: 57
+      bread: 3
+      croutons: 4
+      rice: 25
+      pasta: 9
+      potato: 13
+      grains: 5
     steam:
       lemon: 113
       lime: 171
@@ -369,6 +1445,43 @@ triples:
       sumac: 1
       tamarind: 1
       tomato_gel: 152
+      olive_oil: 180
+      rapeseed_oil: 23
+      butter: 37
+      ghee: 3
+      sesame_oil: 13
+      cream: 76
+      tahini: 5
+      walnut: 5
+      bacon: 14
+      sea_salt: 289
+      soy_sauce: 44
+      fish_sauce: 1
+      miso: 7
+      capers: 7
+      olives: 17
+      parmesan: 12
+      tomato_skin_powder: 152
+      stock: 57
+      honey: 16
+      sugar: 54
+      maple_syrup: 3
+      pomegranate_molasses: 1
+      balsamic_vinegar: 16
+      eggs: 48
+      chickpeas: 9
+      tofu: 8
+      white_beans: 8
+      goat_cheese: 6
+      yogurt: 19
+      smoked_fish: 3
+      chicken: 52
+      bread: 16
+      croutons: 7
+      rice: 56
+      pasta: 9
+      potato: 32
+      grains: 26
     roast:
       lemon: 244
       lime: 487
@@ -378,6 +1491,46 @@ triples:
       sorrel: 2
       sumac: 2
       tomato_gel: 475
+      olive_oil: 585
+      rapeseed_oil: 82
+      butter: 84
+      ghee: 2
+      sesame_oil: 20
+      cream: 205
+      tahini: 14
+      walnut: 22
+      bacon: 79
+      sea_salt: 877
+      soy_sauce: 39
+      fish_sauce: 10
+      miso: 5
+      anchovy: 6
+      capers: 8
+      olives: 33
+      parmesan: 27
+      dried_mushroom: 1
+      tomato_skin_powder: 475
+      stock: 167
+      honey: 93
+      sugar: 130
+      maple_syrup: 19
+      pomegranate_molasses: 1
+      balsamic_vinegar: 50
+      eggs: 107
+      chickpeas: 38
+      tofu: 10
+      white_beans: 12
+      goat_cheese: 41
+      yogurt: 51
+      smoked_fish: 8
+      chicken: 180
+      bread: 109
+      rye_crumbs: 1
+      croutons: 25
+      rice: 64
+      pasta: 25
+      potato: 45
+      grains: 48
     saute:
       lemon: 353
       lime: 883
@@ -387,6 +1540,44 @@ triples:
       sumac: 1
       tamarind: 5
       tomato_gel: 1169
+      olive_oil: 1146
+      rapeseed_oil: 206
+      butter: 363
+      ghee: 17
+      sesame_oil: 26
+      cream: 678
+      tahini: 12
+      walnut: 19
+      bacon: 140
+      sea_salt: 1556
+      soy_sauce: 83
+      fish_sauce: 10
+      miso: 9
+      anchovy: 3
+      capers: 16
+      olives: 125
+      parmesan: 69
+      tomato_skin_powder: 1169
+      stock: 641
+      honey: 99
+      sugar: 195
+      maple_syrup: 11
+      pomegranate_molasses: 1
+      balsamic_vinegar: 37
+      eggs: 313
+      chickpeas: 47
+      tofu: 33
+      white_beans: 43
+      goat_cheese: 42
+      yogurt: 93
+      smoked_fish: 9
+      chicken: 574
+      bread: 81
+      croutons: 75
+      rice: 170
+      pasta: 60
+      potato: 108
+      grains: 84
     boil:
       lemon: 1056
       lime: 1909
@@ -398,6 +1589,46 @@ triples:
       tamarind: 7
       green_mango: 1
       tomato_gel: 2652
+      olive_oil: 2074
+      rapeseed_oil: 335
+      butter: 463
+      ghee: 12
+      sesame_oil: 95
+      cream: 1201
+      tahini: 33
+      walnut: 52
+      bacon: 275
+      sea_salt: 3529
+      soy_sauce: 270
+      fish_sauce: 38
+      miso: 36
+      anchovy: 24
+      capers: 59
+      olives: 263
+      parmesan: 139
+      dried_mushroom: 3
+      tomato_skin_powder: 2652
+      stock: 1574
+      honey: 250
+      sugar: 655
+      maple_syrup: 54
+      pomegranate_molasses: 3
+      balsamic_vinegar: 126
+      eggs: 707
+      chickpeas: 113
+      tofu: 52
+      white_beans: 81
+      goat_cheese: 50
+      yogurt: 209
+      smoked_fish: 48
+      chicken: 1233
+      bread: 195
+      rye_crumbs: 6
+      croutons: 80
+      rice: 551
+      pasta: 325
+      potato: 315
+      grains: 366
     bake:
       lemon: 758
       lime: 1367
@@ -407,6 +1638,46 @@ triples:
       sumac: 3
       tamarind: 2
       tomato_gel: 1797
+      olive_oil: 1392
+      rapeseed_oil: 238
+      butter: 445
+      ghee: 3
+      sesame_oil: 52
+      cream: 1216
+      tahini: 27
+      walnut: 60
+      bacon: 283
+      sea_salt: 2541
+      soy_sauce: 138
+      fish_sauce: 11
+      miso: 12
+      anchovy: 16
+      capers: 27
+      olives: 427
+      parmesan: 141
+      dried_mushroom: 1
+      tomato_skin_powder: 1797
+      stock: 366
+      honey: 233
+      sugar: 495
+      maple_syrup: 59
+      pomegranate_molasses: 4
+      balsamic_vinegar: 89
+      eggs: 783
+      chickpeas: 60
+      tofu: 47
+      white_beans: 30
+      goat_cheese: 73
+      yogurt: 196
+      smoked_fish: 40
+      chicken: 758
+      bread: 353
+      rye_crumbs: 2
+      croutons: 177
+      rice: 192
+      pasta: 83
+      potato: 158
+      grains: 103
     grill:
       lemon: 590
       lime: 1651
@@ -416,6 +1687,46 @@ triples:
       sorrel: 1
       tamarind: 1
       tomato_gel: 1638
+      olive_oil: 1494
+      rapeseed_oil: 211
+      butter: 255
+      ghee: 8
+      sesame_oil: 40
+      cream: 544
+      tahini: 8
+      walnut: 16
+      bacon: 302
+      sea_salt: 2309
+      soy_sauce: 148
+      fish_sauce: 23
+      miso: 11
+      anchovy: 18
+      capers: 23
+      olives: 96
+      parmesan: 82
+      dried_mushroom: 1
+      tomato_skin_powder: 1638
+      stock: 187
+      honey: 239
+      sugar: 329
+      maple_syrup: 20
+      pomegranate_molasses: 2
+      balsamic_vinegar: 118
+      eggs: 297
+      chickpeas: 20
+      tofu: 22
+      white_beans: 17
+      goat_cheese: 54
+      yogurt: 134
+      smoked_fish: 10
+      chicken: 724
+      bread: 423
+      rye_crumbs: 10
+      croutons: 87
+      rice: 98
+      pasta: 28
+      potato: 62
+      grains: 50
     fry:
       lemon: 324
       lime: 677
@@ -426,6 +1737,46 @@ triples:
       sumac: 2
       tamarind: 5
       tomato_gel: 860
+      olive_oil: 552
+      rapeseed_oil: 216
+      butter: 271
+      ghee: 9
+      sesame_oil: 39
+      cream: 452
+      tahini: 5
+      walnut: 20
+      bacon: 224
+      sea_salt: 1300
+      soy_sauce: 91
+      fish_sauce: 20
+      miso: 6
+      anchovy: 12
+      capers: 9
+      olives: 80
+      parmesan: 49
+      dried_mushroom: 1
+      tomato_skin_powder: 860
+      stock: 264
+      honey: 107
+      sugar: 288
+      maple_syrup: 21
+      pomegranate_molasses: 2
+      balsamic_vinegar: 31
+      eggs: 655
+      chickpeas: 21
+      tofu: 20
+      white_beans: 8
+      goat_cheese: 30
+      yogurt: 66
+      smoked_fish: 16
+      chicken: 366
+      bread: 154
+      rye_crumbs: 6
+      croutons: 128
+      rice: 101
+      pasta: 33
+      potato: 81
+      grains: 37
     soup:
       lemon: 1875
       lime: 2842
@@ -437,6 +1788,46 @@ triples:
       tamarind: 6
       green_mango: 2
       tomato_gel: 2941
+      olive_oil: 2139
+      rapeseed_oil: 355
+      butter: 411
+      ghee: 10
+      sesame_oil: 85
+      cream: 1641
+      tahini: 59
+      walnut: 92
+      bacon: 271
+      sea_salt: 4697
+      soy_sauce: 206
+      fish_sauce: 32
+      miso: 38
+      anchovy: 61
+      capers: 44
+      olives: 346
+      parmesan: 140
+      dried_mushroom: 2
+      tomato_skin_powder: 2941
+      stock: 1352
+      honey: 516
+      sugar: 822
+      maple_syrup: 129
+      pomegranate_molasses: 1
+      balsamic_vinegar: 132
+      eggs: 632
+      chickpeas: 128
+      tofu: 71
+      white_beans: 69
+      goat_cheese: 82
+      yogurt: 508
+      smoked_fish: 26
+      chicken: 1072
+      bread: 282
+      rye_crumbs: 5
+      croutons: 131
+      rice: 249
+      pasta: 152
+      potato: 175
+      grains: 107
     raw:
       lemon: 1450
       lime: 1552
@@ -448,6 +1839,46 @@ triples:
       tamarind: 6
       green_mango: 1
       tomato_gel: 2188
+      olive_oil: 2198
+      rapeseed_oil: 251
+      butter: 157
+      ghee: 13
+      sesame_oil: 120
+      cream: 518
+      tahini: 24
+      walnut: 141
+      bacon: 460
+      sea_salt: 3066
+      soy_sauce: 231
+      fish_sauce: 44
+      miso: 29
+      anchovy: 53
+      capers: 57
+      olives: 368
+      parmesan: 137
+      dried_mushroom: 1
+      tomato_skin_powder: 2188
+      stock: 118
+      honey: 487
+      sugar: 678
+      maple_syrup: 47
+      pomegranate_molasses: 7
+      balsamic_vinegar: 311
+      eggs: 522
+      chickpeas: 115
+      tofu: 51
+      white_beans: 31
+      goat_cheese: 103
+      yogurt: 237
+      smoked_fish: 39
+      chicken: 775
+      bread: 238
+      rye_crumbs: 3
+      croutons: 112
+      rice: 170
+      pasta: 116
+      potato: 112
+      grains: 169
     dry:
       lemon: 1000
       lime: 2038
@@ -457,3 +1888,43 @@ triples:
       sumac: 6
       tamarind: 4
       tomato_gel: 2651
+      olive_oil: 1923
+      rapeseed_oil: 354
+      butter: 451
+      ghee: 11
+      sesame_oil: 90
+      cream: 1283
+      tahini: 19
+      walnut: 87
+      bacon: 306
+      sea_salt: 3683
+      soy_sauce: 221
+      fish_sauce: 33
+      miso: 22
+      anchovy: 29
+      capers: 32
+      olives: 384
+      parmesan: 114
+      dried_mushroom: 2
+      tomato_skin_powder: 2651
+      stock: 689
+      honey: 317
+      sugar: 691
+      maple_syrup: 83
+      pomegranate_molasses: 5
+      balsamic_vinegar: 141
+      eggs: 716
+      chickpeas: 113
+      tofu: 72
+      white_beans: 59
+      goat_cheese: 72
+      yogurt: 301
+      smoked_fish: 35
+      chicken: 878
+      bread: 315
+      rye_crumbs: 9
+      croutons: 151
+      rice: 298
+      pasta: 110
+      potato: 138
+      grains: 183

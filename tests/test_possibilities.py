@@ -1,5 +1,5 @@
 """The possibility generator: ideas come from part properties, techniques and
-acid mechanisms; RecipeNLG counts only label them."""
+family mechanisms; RecipeNLG counts only label them."""
 
 from __future__ import annotations
 
@@ -13,14 +13,18 @@ from foodprep import part_evidence as pe
 from foodprep import possibilities as po
 from foodprep.cli import main
 
+FORMS = {"juice", "vinegar", "liquid", "crushed_raw", "puree", "cooked_sauce", "jelly",
+         "paste", "oil", "solid_fat", "cream", "crystal", "powder", "crumble",
+         "raw_shred", "raw_leaf", "whole"}
+
 
 @pytest.fixture(scope="module")
 def t():
     return po.load_tables()
 
 
-def ideas_for(t, ing, part, tech, source):
-    return [i for i in po.acid_ideas(t, ing, part, tech) if i.source == source]
+def ideas_for(t, family, ing, part, tech, member):
+    return [i for i in po.family_ideas(t, family, ing, part, tech) if i.member == member]
 
 
 # ---- tables -------------------------------------------------------------------
@@ -38,16 +42,44 @@ def test_technique_corpus_keys_exist_in_part_evidence(t):
         assert rule["corpus"] in keys, name
 
 
-def test_sources_have_valid_forms_and_patterns(t):
-    allowed = po.WET_FORMS | {"powder", "raw_shred", "raw_leaf"}
-    for name, s in t.sources.items():
-        assert set(s["forms"]) <= allowed, name
-        re.compile(s["corpus"])
+def test_families_are_ontology_roles(t):
+    data = pc.load_yaml(po.DATA / "tomato.yaml")
+    roles = {r["name"] for r in data["roles"]}
+    used = {r for i in data["ingredients"] for r in (i.get("base_roles") or "").split("\n")}
+    for fam in t.families:
+        assert fam in roles | used, fam
 
 
-def test_mechanism_timings_are_known(t):
-    for name, m in t.mechanisms.items():
-        assert m["timing"] in {"finish", "dress", "marinate"}, name
+def test_members_carry_their_ontology_roles(t):
+    """A member's tomato.yaml base_roles that are families appear in its families."""
+    data = pc.load_yaml(po.DATA / "tomato.yaml")
+    roles = {i["canonical_name"]: set((i.get("base_roles") or "").split("\n"))
+             for i in data["ingredients"]}
+    for name, m in t.members.items():
+        if "ingredient" not in m:
+            continue
+        assert m["ingredient"] in roles, f"{name}: no ingredient {m['ingredient']}"
+        missing = (roles[m["ingredient"]] & set(t.families)) - set(m["families"])
+        assert not missing, f"{name} lacks {missing}"
+
+
+def test_members_have_valid_levels_forms_and_patterns(t):
+    for name, m in t.members.items():
+        assert m["families"] and set(m["families"]) <= set(t.families), name
+        assert all(v in po.LEVELS for v in m["families"].values()), name
+        assert set(m["forms"]) <= FORMS, name
+        re.compile(m["corpus"])
+
+
+def test_every_family_has_members_and_mechanisms(t):
+    for fam, spec in t.families.items():
+        assert po.members_of(t, fam), fam
+        assert spec["mechanisms"], fam
+        assert spec["kind"] in {"modifier", "partner"}
+        for name, m in spec["mechanisms"].items():
+            assert m["timing"] in {"finish", "dress", "marinate", "cook", "serve"}, name
+            for form in m.get("member_needs", {}).get("forms_any", []):
+                assert form in FORMS, (name, form)
 
 
 @pytest.mark.parametrize("cond, ok", [
@@ -88,55 +120,105 @@ def test_except_list_removes_a_technique(t):
     assert "simmer" not in po.techniques_for(t, "avocado", "flesh")
 
 
-# ---- acid mechanisms -------------------------------------------------------------
+# ---- a part that already has a family gets none of it ----------------------------
 
-def test_an_acid_part_gets_no_more_acid(t):
-    for tech in po.techniques_for(t, "tomato", "seeds_and_gel"):
-        assert po.acid_ideas(t, "tomato", "seeds_and_gel", tech) == []
+@pytest.mark.parametrize("ing, part, family", [
+    ("tomato", "seeds_and_gel", "acid"),
+    ("avocado", "flesh", "fat"),
+    ("tomato", "skin", "umami"),
+])
+def test_a_part_gets_nothing_from_a_family_it_already_has(t, ing, part, family):
+    assert po.already_has(t, t.parts[ing][part], family)
+    for tech in po.techniques_for(t, ing, part):
+        assert po.family_ideas(t, family, ing, part, tech) == []
 
+
+# ---- acid ---------------------------------------------------------------------
 
 def test_avocado_raw_lemon_slows_browning_and_cuts_fat(t):
-    [i] = ideas_for(t, "avocado", "flesh", "raw", "lemon")
+    [i] = ideas_for(t, "acid", "avocado", "flesh", "raw", "lemon")
     assert {"slow_browning", "cut_fat"} <= set(i.mechanisms)
     assert not any("olive" in r for r in i.risks)
 
 
 def test_a_dry_acid_cannot_coat_against_browning(t):
-    [i] = ideas_for(t, "avocado", "flesh", "raw", "sumac")
-    assert "slow_browning" not in i.mechanisms
-    assert "cut_fat" in i.mechanisms
+    [i] = ideas_for(t, "acid", "avocado", "flesh", "raw", "sumac")
+    assert "slow_browning" not in i.mechanisms and "cut_fat" in i.mechanisms
 
 
 def test_quick_pickle_needs_a_strong_liquid_acid(t):
-    [ling] = ideas_for(t, "broccoli", "stems", "raw", "lingonberry")
-    assert "quick_pickle" in ling.mechanisms and ling.form == "juice"
-    assert ling.safety
-    assert ideas_for(t, "broccoli", "stems", "raw", "sumac") == []
+    [ling] = ideas_for(t, "acid", "broccoli", "stems", "raw", "lingonberry")
+    assert "quick_pickle" in ling.mechanisms and ling.form == "juice" and ling.safety
+    assert ideas_for(t, "acid", "broccoli", "stems", "raw", "sumac") == []
 
 
 def test_lingonberry_on_roasted_stems_gets_its_reasons_and_risks(t):
-    [i] = ideas_for(t, "broccoli", "stems", "roast", "lingonberry")
+    [i] = ideas_for(t, "acid", "broccoli", "stems", "roast", "lingonberry")
     assert i.mechanisms == ["brighten_browned"]
     assert any("astringency" in r for r in i.reasons)
     assert any("olive" in r for r in i.risks)
 
 
-def test_bitter_acid_on_bitter_leaves_is_a_risk(t):
-    [i] = ideas_for(t, "broccoli", "leaves", "massage", "lingonberry")
+def test_bitter_member_on_bitter_leaves_is_a_risk(t):
+    [i] = ideas_for(t, "acid", "broccoli", "leaves", "massage", "lingonberry")
     assert any("stacks the bitterness" in r for r in i.risks)
 
 
 def test_sorrel_warns_about_heat(t):
-    [i] = ideas_for(t, "broccoli", "stems", "roast", "sorrel")
+    [i] = ideas_for(t, "acid", "broccoli", "stems", "roast", "sorrel")
     assert any("khaki" in r for r in i.risks)
 
 
 def test_tomato_gel_is_an_acid_for_other_parts_not_for_itself(t):
-    [i] = ideas_for(t, "tomato", "flesh", "roast", "tomato_gel")
+    [i] = ideas_for(t, "acid", "tomato", "flesh", "roast", "tomato_gel")
     assert po.label(t, i).label == "own_part"
-    assert ideas_for(t, "tomato", "seeds_and_gel", "raw", "tomato_gel") == []
-    [b] = ideas_for(t, "broccoli", "stems", "roast", "tomato_gel")
+    [b] = ideas_for(t, "acid", "broccoli", "stems", "roast", "tomato_gel")
     assert po.label(t, b).label == "part_acid" and b.scout
+
+
+# ---- other families ------------------------------------------------------------
+
+def test_fat_browns_roasted_stems_and_rounds_bitter_leaves(t):
+    [oil] = ideas_for(t, "fat", "broccoli", "stems", "roast", "olive_oil")
+    assert "brown_in_fat" in oil.mechanisms
+    [walnut] = ideas_for(t, "fat", "broccoli", "leaves", "raw", "walnut")
+    assert walnut.mechanisms == ["round_bitter"]          # a crumble cannot coat
+
+
+def test_salt_draws_water_from_raw_tomato_flesh(t):
+    [s] = ideas_for(t, "salt", "tomato", "flesh", "raw", "sea_salt")
+    assert "draw_water" in s.mechanisms
+    assert ideas_for(t, "salt", "tomato", "flesh", "raw", "soy_sauce") == []
+
+
+def test_a_salty_member_in_another_family_warns_about_salt(t):
+    [miso] = ideas_for(t, "umami", "broccoli", "stems", "roast", "miso")
+    assert any("salty too" in r for r in miso.risks)
+
+
+def test_sweet_balances_the_acid_tomato_gel(t):
+    [h] = ideas_for(t, "sweet", "tomato", "seeds_and_gel", "raw", "honey")
+    assert h.mechanisms == ["balance_acid"]
+
+
+def test_sweet_acid_in_the_acid_family_reads_as_dessert(t):
+    [b] = ideas_for(t, "acid", "broccoli", "stems", "roast", "balsamic_vinegar")
+    assert any("dessert" in r for r in b.risks)
+
+
+def test_protein_partners_follow_the_state(t):
+    [egg] = ideas_for(t, "protein", "broccoli", "stems", "roast", "eggs")
+    assert "yolk_as_sauce" in egg.mechanisms
+    [goat] = ideas_for(t, "protein", "broccoli", "stems", "roast", "goat_cheese")
+    assert goat.mechanisms == ["creamy_against_crisp"]
+    [tofu] = ideas_for(t, "protein", "broccoli", "stems", "stir_fry", "tofu")
+    assert tofu.mechanisms == ["same_pan"]
+
+
+def test_carb_soaks_tomato_juice(t):
+    [bread] = ideas_for(t, "carb", "tomato", "flesh", "raw", "bread")
+    assert bread.mechanisms == ["soak_juice"]
+    assert ideas_for(t, "carb", "broccoli", "stems", "raw", "bread") == []
 
 
 # ---- labels -------------------------------------------------------------------
@@ -156,8 +238,8 @@ def counts(pair, n_t=50_000, n_s=1_000, n=2_000_000):
 ])
 def test_labels(t, pair, n_s, want):
     tables = dataclasses.replace(t, counts=counts(pair, n_s=n_s))
-    i = po.Idea("broccoli", "stems", "roast", source="lingonberry", form="juice",
-                mechanisms=["brighten_browned"])
+    i = po.Idea("broccoli", "stems", "roast", family="acid", member="lingonberry",
+                form="juice", mechanisms=["brighten_browned"])
     po.label(tables, i)
     assert i.label == want
     assert i.scout is (want not in ("seen", "common"))
@@ -165,15 +247,21 @@ def test_labels(t, pair, n_s, want):
 
 def test_without_counts_everything_is_untested(t):
     tables = dataclasses.replace(t, counts={})
-    i = po.label(tables, po.Idea("broccoli", "stems", "roast", source="lemon"))
+    i = po.label(tables, po.Idea("broccoli", "stems", "roast", family="acid", member="lemon"))
     assert i.label == "untested"
 
 
 def test_scout_rank_puts_a_loud_absence_first():
-    loud = po.Idea("a", "p", "raw", source="x", label="not_seen", observed=0, expected=40)
-    quiet = po.Idea("a", "p", "raw", source="y", label="not_seen", observed=0, expected=6)
-    rare = po.Idea("a", "p", "raw", source="z", label="rare", observed=1, expected=40)
+    loud = po.Idea("a", "p", "raw", member="x", label="not_seen", observed=0, expected=40)
+    quiet = po.Idea("a", "p", "raw", member="y", label="not_seen", observed=0, expected=6)
+    rare = po.Idea("a", "p", "raw", member="z", label="rare", observed=1, expected=40)
     assert sorted([rare, quiet, loud], key=po.scout_rank) == [loud, quiet, rare]
+
+
+def test_committed_counts_cover_every_member(t):
+    if not t.counts:
+        pytest.skip("pair_counts.yaml not generated")
+    assert set(t.counts["sources"]) == set(t.members)
 
 
 # ---- counting -----------------------------------------------------------------
@@ -186,28 +274,47 @@ def test_count_row_counts_pairs_and_techniques():
     pc.count_row(c, '["1 head broccoli", "1/2 c. lingonberries"]', '["Roast the broccoli."]',
                  targets, sources, any_s)
     pc.count_row(c, '["2 avocados", "1 tsp lemon pepper"]', '["Mash."]', targets, sources, any_s)
-    pc.count_row(c, '["1 c. dried cranberries"]', '["Mix."]', targets, sources, any_s)
+    pc.count_row(c, '["1 c. dried cranberries", "1 can butter beans"]', '["Mix."]',
+                 targets, sources, any_s)
     rec = c.to_record()
     assert rec["recipes"] == 3
     assert rec["pairs"]["broccoli"]["lingonberry"] == 1
     assert rec["triples"]["broccoli"]["roast"] == {"lingonberry": 1}
     assert rec["sources"]["lemon"] == 0 and rec["sources"]["cranberry"] == 0
+    assert rec["sources"]["butter"] == 0
     assert rec["targets"]["avocado"] == 1
 
 
 # ---- output -------------------------------------------------------------------
 
-def test_render_avocado_shows_flesh_ideas_and_not_food_parts():
+def test_render_groups_by_family():
+    out = po.render("broccoli", part="stems")
+    for fam in ("Acid", "Fat", "Salt", "Umami", "Protein"):
+        assert f"  {fam} (" in out
+
+
+def test_render_avocado_says_it_already_has_fat():
     out = po.render("avocado", show_all=True, limit=50)
     assert "Skin: not food." in out and "Stone: not food." in out
+    assert "Fat: already has it" in out
     assert "+ lemon (juice)" in out
 
 
-def test_render_says_acid_parts_need_no_acid():
-    assert "Already acid" in po.render("tomato", part="seeds_and_gel")
+def test_render_one_family():
+    out = po.render("tomato", part="seeds_and_gel", family="sweet", show_all=True)
+    assert "Sweet (" in out and "Acid (" not in out
 
 
-def test_cli_possible(capsys):
-    assert main(["possible", "broccoli", "--part", "stems", "--limit", "2"]) == 0
-    assert "Stems." in capsys.readouterr().out
+def test_render_families_lists_members_with_their_other_families():
+    out = po.render_families("salt")
+    assert out.startswith("Salt (modifier")
+    assert "soy sauce" in out and "also umami" in out
+
+
+def test_cli(capsys):
+    assert main(["possible", "broccoli", "--part", "stems", "--family", "protein"]) == 0
+    assert "Protein (" in capsys.readouterr().out
     assert main(["possible", "kale"]) == 1
+    assert main(["possible", "broccoli", "--family", "nope"]) == 1
+    assert main(["families", "carb"]) == 0
+    assert "Carb (partner" in capsys.readouterr().out
