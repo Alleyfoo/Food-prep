@@ -104,6 +104,33 @@ The most frequent exact sets for broccoli are fat + salt + umami + protein
 is 7%. For avocado the top set already includes acid (21%), and acid with
 only salt and umami (guacamole-like) is 4%.
 
+## Decision: umami joins the missing roles (2026-11-24)
+
+The user chose to make the curated missing roles describe practice. Umami
+was added (priority medium) to the six broccoli states where most recipes
+add it and the state does not supply umami itself:
+
+| State | Recipes adding umami | Umami filler added |
+| --- | ---: | --- |
+| raw florets | 69% | parmesan |
+| steamed florets | 62% | parmesan |
+| soup | 67% | stock |
+| raw stem slaw | 69% | fish sauce |
+| stir-fried stems | 85% | soy sauce |
+| sautéed leaves | 77% | anchovy |
+
+- **States that already supply umami were left alone.** Roasted and
+  stir-fried florets and the cooked tomato states (roast, simmer, reduce,
+  soup) list umami in their `state_profile.provides`. The check now reports
+  these as "supplied by the state itself" instead of "not listed".
+- **Miso on steamed broccoli was not added as a pairing.** It is an open
+  Scout idea, and a curated pairing would quietly turn the hypothesis into an
+  established fact.
+- **Meal repair follows.** Steamed broccoli now asks for umami, and parmesan
+  covers both protein and umami there. Pairings cite a new evidence source,
+  `recipenlg_families`.
+- After the change no broccoli or tomato state shows umami as "not listed".
+
 ## Limits
 
 - **Co-occurrence, not use.** A family in the ingredient list may sit in a
@@ -119,8 +146,6 @@ only salt and umami (guacamole-like) is 4%.
 
 ## Next
 
-- Decide whether umami should join the curated missing roles where cooks
-  usually add it, or whether missing roles are meant to be a minimum.
 - Point the acid Scout ideas at the states where acid is least common in
   practice (baked and soup broccoli) rather than where it is already usual.
 - Derive `INGREDIENT_FLAVOUR_DIMENSIONS` from families.yaml so membership
