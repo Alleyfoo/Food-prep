@@ -15,7 +15,8 @@ Three questions:
    broccoli florets miss salt, fat, acid, herb, protein, carb). Do cooks add
    those families? A curated gap that cooks rarely fill is a family-level
    Scout idea; a family cooks nearly always add but the model does not list
-   is a curation hint.
+   is a curation hint, unless the state supplies it itself (its
+   state_profile `provides`), which is reported as "provided".
 3. Combinations: which sets of families appear together, e.g. fat + salt
    only versus fat + salt + acid.
 
@@ -174,12 +175,16 @@ def curated_states(ingredient: str) -> list[dict]:
                 missing[m["role"]] = m.get("priority", "")
             else:
                 missing[str(m)] = ""
+        provides = str((tr.get("state_profile") or {}).get("provides") or "").split("\n")
         out.append({"technique": tr["technique"], "part": tr.get("part"),
-                    "component": tr.get("output_component"), "missing": missing})
+                    "component": tr.get("output_component"), "missing": missing,
+                    "provides": {x.strip() for x in provides if x.strip()}})
     return out
 
 
-def verdict(curated: str | None, s: float) -> str:
+def verdict(curated: str | None, s: float, provided: bool = False) -> str:
+    if curated is None and provided:
+        return "provided"         # the state supplies the family itself
     if curated is not None:
         if s >= USUAL:
             return "agrees"
@@ -214,7 +219,7 @@ def check(ingredient: str, profiles: dict | None = None,
                 "technique": st["technique"], "part": st["part"], "corpus": key,
                 "recipes": tech["recipes"], "family": f, "curated": curated,
                 "share": s, "ingredient_share": share(target["families"][f], target["recipes"]),
-                "verdict": verdict(curated, s),
+                "verdict": verdict(curated, s, f in st["provides"]),
             })
     return rows
 
@@ -255,7 +260,8 @@ def render_profile(ingredient: str, profiles: dict | None = None) -> str:
             for label, test in (("Agrees, cooks add it", "agrees"),
                                 ("Partly", "partly"),
                                 ("Gap: listed as missing, cooks rarely add it", "gap"),
-                                ("Cooks usually add it, not listed as missing", "unlisted")):
+                                ("Cooks usually add it, not listed as missing", "unlisted"),
+                                ("Supplied by the state itself", "provided")):
                 hit = [f"{r['family']} {_pct(r['share'])}" for r in rs if r["verdict"] == test]
                 if hit:
                     out.append(f"    {label}: {', '.join(hit)}")

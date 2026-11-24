@@ -855,9 +855,10 @@ def test_available_filter_covers_held_fillers(conn):
     held = {g["filler"]: set(g["roles"]) for g in part["available_now"]}
     assert held == {
         "butter": {"fat"}, "lemon": {"acid"},
-        "parmesan": {"protein"}, "rice": {"carb"},
+        "parmesan": {"protein", "umami"}, "rice": {"carb"},
     }
-    assert part["covered_roles"] == ["acid", "carb", "fat", "protein"]
+    # parmesan also covers umami, a missing role since S4
+    assert part["covered_roles"] == ["acid", "carb", "fat", "protein", "umami"]
     # salt is the only unmet role, and its curated filler is sea_salt
     missing = {m["role"]: m["fillers"] for m in part["missing_but_useful"]}
     assert missing == {"salt": ["sea_salt"]}
@@ -955,7 +956,8 @@ def test_broccoli_steam_branch_filtered_by_available_fillers(conn):
     part = query.available_filter(conn, tid, ["butter", "lemon", "rice"])
     assert part["covered_roles"] == ["acid", "carb", "fat"]
     missing = {m["role"]: m["fillers"] for m in part["missing_but_useful"]}
-    assert missing == {"salt": ["sea_salt"], "protein": ["parmesan", "tofu"]}
+    assert missing == {"salt": ["sea_salt"], "protein": ["parmesan", "tofu"],
+                       "umami": ["parmesan"]}
     # the held fillers cover exactly the roles their Cook pairings promise
     held = {g["filler"]: set(g["roles"]) for g in part["available_now"]}
     assert held == {"butter": {"fat"}, "lemon": {"acid"}, "rice": {"carb"}}

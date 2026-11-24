@@ -65,6 +65,23 @@ def test_verdict(curated, s, want):
     assert fp.verdict(curated, s) == want
 
 
+def test_a_family_the_state_supplies_is_provided_not_unlisted():
+    assert fp.verdict(None, 0.8, provided=True) == "provided"
+    roast = next(s for s in fp.curated_states("broccoli")
+                 if s["technique"] == "roast" and s["part"] == "florets")
+    assert "umami" in roast["provides"]
+
+
+def test_umami_is_curated_where_cooks_usually_add_it():
+    """S4: umami joined the missing roles of the broccoli states that do not
+    supply it themselves and where most recipes add it."""
+    prof = fp.load_profiles()
+    if not prof:
+        pytest.skip("family_profiles.yaml not generated")
+    rows = [r for r in fp.check("broccoli", prof) if r["family"] == "umami"]
+    assert rows and not [r for r in rows if r["verdict"] == "unlisted"]
+
+
 def test_curated_states_read_missing_roles():
     states = {(s["technique"], s["part"]): s for s in fp.curated_states("broccoli")}
     roast = states[("roast", "florets")]
@@ -90,7 +107,7 @@ def test_check_marks_gaps_agreements_and_unlisted_families():
     assert rows["acid"]["verdict"] == "gap"         # curated missing, 10% add it
     assert rows["fat"]["verdict"] == "agrees"       # curated missing, 90% add it
     assert rows["sweet"]["verdict"] == "unlisted"   # not curated, 70% add it
-    assert rows["umami"]["verdict"] == ""
+    assert rows["umami"]["verdict"] == "provided"   # roasted florets supply umami
 
 
 def test_render_profile_shows_table_check_and_sets():

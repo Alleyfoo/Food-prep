@@ -62,6 +62,11 @@ evidence_sources:
     title: "Steam & blanch technique — green-veg color/texture lock"
     license: n/a
     citation_text: "brief wet heat sets bright green + tender-crisp; overcook → drab + sulfurous"
+  - id: recipenlg_families
+    source_type: dataset
+    title: "RecipeNLG family profiles (S4)"
+    license: non-commercial research
+    citation_text: "share of RecipeNLG recipes per ingredient and technique that list any member of a family (acid, fat, salt, umami, sweet, protein, carb); docs/research/s4-family-analysis"
   - id: nordic_root
     source_type: culinary
     title: "Nordic root vegetable traditions"
@@ -1644,6 +1649,7 @@ transformations:
       - { role: fat,     priority: high,   note: "dip — oil/mayo/cheese" }
       - { role: acid,    priority: medium, note: "lemon/vinegar lift" }
       - { role: protein, priority: low,    note: "egg/cheese/nuts to make a meal" }
+      - { role: umami,   priority: medium, note: "parmesan, bacon or an anchovy dressing" }
     uses: [salad, dip, bowl, sandwich]
     evidence:
       - { source: recipedb, scope: "raw broccoli in crudités/salads with dip" }
@@ -1676,6 +1682,7 @@ transformations:
       - { role: acid,    priority: medium, note: "lemon to lift" }
       - { role: protein, priority: medium, note: "egg/cheese/nuts/tofu" }
       - { role: carb,    priority: low,    note: "rice/pasta host" }
+      - { role: umami,   priority: medium, note: "parmesan, soy or miso butter" }
     uses: [bowl, rice, eggs, pasta, salad]
     evidence:
       - { source: steam_culinary, scope: "brief steam + shock locks bright green and tender-crisp" }
@@ -1764,6 +1771,7 @@ transformations:
       - { role: crunch,  priority: medium, note: "croutons/rye_crumbs/nuts" }
       - { role: protein, priority: low,    note: "bacon/cheese/beans" }
       - { role: body,    priority: medium, note: "potato to thicken" }
+      - { role: umami,   priority: medium, note: "stock or a parmesan rind" }
     uses: [soup, chilled_soup, bowl]
     evidence:
       - { source: recipedb, scope: "cream of broccoli / green soup — vegetal + cream + herb" }
@@ -1786,6 +1794,7 @@ transformations:
       - { role: salt,  priority: high,   note: "seasoning" }
       - { role: fat,   priority: medium, note: "oil or mayo" }
       - { role: herb,  priority: low,    note: "dill or parsley" }
+      - { role: umami,   priority: medium, note: "fish sauce or parmesan" }
     uses: [slaw, salad, sandwich, taco]
     evidence:
       - { source: recipedb, scope: "broccoli slaw from shredded stems" }
@@ -1808,6 +1817,7 @@ transformations:
       - { role: aromatic, priority: medium, note: "garlic or ginger" }
       - { role: acid,     priority: medium, note: "rice vinegar" }
       - { role: carb,     priority: low,    note: "rice or noodles" }
+      - { role: umami,   priority: medium, note: "soy or fish sauce" }
     uses: [rice, bowl, eggs, grains]
     evidence:
       - { source: recipedb, scope: "stir-fried broccoli stems with soy and garlic" }
@@ -1828,6 +1838,7 @@ transformations:
       - { role: salt,     priority: high,   note: "seasoning" }
       - { role: aromatic, priority: medium, note: "garlic" }
       - { role: acid,     priority: low,    note: "lemon" }
+      - { role: umami,   priority: medium, note: "anchovy, soy or parmesan" }
     uses: [eggs, pasta, grains, toast]
     evidence:
       - { source: recipedb, scope: "broccoli leaves cooked like kale or collards" }
@@ -3211,6 +3222,15 @@ pairings:
   - { for_ingredient: broccoli, filler: croutons,   role: crunch,  works_best_with: soup, context: "crisp contrast",     availability: common,      confidence: medium, evidence: [recipedb] }
   - { for_ingredient: broccoli, filler: potato,      role: body,    works_best_with: soup, context: "thicken",            availability: very_common, confidence: medium, evidence: [recipedb] }
   - { for_ingredient: broccoli, filler: bacon,      role: protein, works_best_with: soup, context: "garnish",            availability: common,      confidence: medium, evidence: [recipedb] }
+  # Umami fillers (S4): cooks add umami to most broccoli states that do not
+  # supply it themselves (62-85% of recipes), so umami joined their missing roles.
+  # Miso on steamed broccoli is left out on purpose: it is an open Scout idea.
+  - { for_ingredient: broccoli, filler: parmesan,   role: umami,   works_best_with: raw_assemble, context: "shaved over raw florets", availability: common,      confidence: medium, evidence: [recipenlg_families] }
+  - { for_ingredient: broccoli, filler: parmesan,   role: umami,   works_best_with: steam,   context: "savoury depth over steamed", availability: common,  confidence: medium, evidence: [recipenlg_families] }
+  - { for_ingredient: broccoli, filler: stock,      role: umami,   works_best_with: soup,    context: "simmer in stock, not water", availability: common, confidence: high,   evidence: [recipenlg_families] }
+  - { for_ingredient: broccoli, filler: fish_sauce, role: umami,   works_best_with: raw_slaw, context: "a few drops in the stem slaw dressing", availability: common, confidence: medium, evidence: [recipenlg_families] }
+  - { for_ingredient: broccoli, filler: soy_sauce,  role: umami,   works_best_with: stir_fry, context: "savoury glaze on stems",  availability: very_common, confidence: high, evidence: [recipenlg_families] }
+  - { for_ingredient: broccoli, filler: anchovy,    role: umami,   works_best_with: saute,   context: "melted into the oil before the leaves", availability: common, confidence: medium, evidence: [recipenlg_families] }
   # ---- experimental / scout pairings for broccoli (Nordic-plausible, not classic) ----
   - { for_ingredient: broccoli, filler: lingonberry_vinegar, role: acid,   works_best_with: steam, context: "Nordic berry-bright steamed", availability: common,      confidence: experimental, evidence: [], notes: "lingonberry vinegar: acid + berry; experimental with steamed broccoli" }
   - { for_ingredient: broccoli, filler: walnut,             role: crunch, works_best_with: steam, context: "nut crunch over steamed",     availability: common,      confidence: experimental, evidence: [], notes: "walnut: crunch + fat; experimental with steamed broccoli" }
