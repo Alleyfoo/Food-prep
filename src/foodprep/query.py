@@ -2258,6 +2258,8 @@ def decomposition(conn: sqlite3.Connection, ingredient: str) -> dict[str, Any] |
     if row is None:
         return None
     ing_id, canonical = row[0], row[1]
+    from . import part_evidence
+    practice = part_evidence.load_evidence()
     parts = []
     for p in conn.execute(
         """
@@ -2272,6 +2274,7 @@ def decomposition(conn: sqlite3.Connection, ingredient: str) -> dict[str, Any] |
         d = dict(p)
         d["provides"] = _split_list(d["provides"])
         d["paths"] = _paths(conn, ing_id, d.pop("part_id"))
+        d["practice"] = practice.get((canonical, d["name"]))
         parts.append(d)
     return {"ingredient": canonical, "parts": parts, "whole": _paths(conn, ing_id, None)}
 
@@ -2299,6 +2302,8 @@ def render_decomposition(d: dict[str, Any] | None, ingredient: str = "") -> str:
             lines.append(f"    Provides: {', '.join(_label(r) for r in p['provides'])}")
         if p["description"]:
             lines.append(f"    {p['description']}")
+        if p.get("practice"):
+            lines.append(f"    {_render_practice(p['practice'])}")
         if not p["paths"]:
             lines.append("    No processing recorded yet.")
         for path in p["paths"]:
@@ -2309,6 +2314,26 @@ def render_decomposition(d: dict[str, Any] | None, ingredient: str = "") -> str:
         for path in d["whole"]:
             lines.append(_render_path(path))
     return "\n".join(lines)
+
+
+PRACTICE_WORDS = {
+    "default": "What recipes mean by the ingredient",
+    "used": "Cooks keep it",
+    "rarely_used": "Cooks rarely use it",
+    "removed": "Cooks mostly remove it",
+    "not_found": "Recipes never mention it",
+}
+
+
+def _render_practice(pr: dict[str, Any]) -> str:
+    """One line of RecipeNLG practice. Practice, never edibility."""
+    r = pr["recipes"]
+    kept = r["used"] + r["trimmed"]
+    bits = [f"kept in {kept:,}", f"removed in {r['removed']:,}"]
+    if r["canned"]:
+        bits.append(f"bought done in {r['canned']:,}")
+    return (f"{PRACTICE_WORDS[pr['evidence_level']]} "
+            f"(RecipeNLG: {', '.join(bits)} of {pr['recipes_mentioning']:,} recipes naming it).")
 
 
 def _render_path(path: dict[str, Any]) -> str:
