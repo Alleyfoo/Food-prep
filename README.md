@@ -98,6 +98,7 @@ pip install -e ".[dev]"
 foodprep build                                   # compile YAML into foodprep.sqlite
 
 foodprep ask "i roasted broccoli now what"       # missing roles and what to add
+foodprep parts broccoli                          # florets, stems, leaves: what each becomes
 foodprep journey broccoli                        # complete cook paths
 foodprep plate "mashed potatoes and chickpea patty"
 foodprep hypotheses roasted_broccoli_component   # Scout, with novelty and protocol

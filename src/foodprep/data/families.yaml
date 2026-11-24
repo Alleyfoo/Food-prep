@@ -1,0 +1,711 @@
+# Families: what an ingredient brings to a dish — the third input of the
+# possibility generator (foodprep.possibilities), after part_properties.yaml
+# and technique_rules.yaml.
+#
+# A family is one of the ontology's roles (tomato.yaml `roles` and
+# `base_roles`): acid, fat, salt, umami, sweet, protein, carb. Ideas are
+# generated and sorted per family, so "what acids could go on roasted
+# broccoli stems" and "what proteins" are separate, comparable lists.
+#
+# families   kind: modifier (changes the part: acid, fat, salt, umami, sweet)
+#                  or partner (completes a plate with it: protein, carb).
+#            part_property: the part property that already supplies the
+#                  family. A part at `high` or above gets nothing from that
+#                  family (tomato gel is already acid).
+#            mechanisms: WHY a member does something to a part in a given
+#                  state. `when` holds conditions on the part and technique;
+#                  `member_needs` on the member (strength = its level in this
+#                  family; forms_any; any member property).
+#
+# members    Everything that can fill a family, once, with its level in each
+#            family it belongs to. Soy sauce is salt very_high and umami high.
+#            A member counts in a family at medium or above. `ingredient`
+#            names the tomato.yaml ingredient when there is one; its
+#            base_roles must all appear here (tests check this).
+#            `from_part` marks a part of one of our own ingredients used as a
+#            member (tomato gel, tomato skin powder).
+#            `corpus` is a regex over a RecipeNLG ingredient field
+#            (scripts/count_acid_pairs.py counts every member).
+#
+# Levels as in part_properties.yaml: none < low < medium < high < very_high.
+# Forms, best first: juice, vinegar, liquid, crushed_raw, puree, cooked_sauce,
+#   jelly, paste (wet); oil, solid_fat, cream (fats); crystal, powder,
+#   crumble, raw_shred, raw_leaf, whole (dry or solid).
+
+families:
+  acid:
+    kind: modifier
+    part_property: acidity
+    says: "brightens and sharpens"
+    mechanisms:
+      brighten_browned:
+        when: {effects_any: [browning]}
+        timing: finish
+        does: "Acid at the end lifts the deep, sweet-bitter notes of browning."
+      cut_fat:
+        when: {part: {fat: ">=high"}}
+        timing: dress
+        does: "Acid cuts the richness of the fat, so each bite stays light."
+      slow_browning:
+        when: {part: {browns_when_cut: true}, techniques: [raw, puree]}
+        member_needs: {forms_any: [juice, vinegar, liquid, crushed_raw, puree]}
+        timing: dress
+        does: "A wet acid coating slows the browning of the cut flesh."
+      quick_pickle:
+        when:
+          part: {liquid: false, thin: false, water: "<=high"}
+          part_any: {fibre: ">=high", toughness: ">=medium"}
+          techniques: [raw]
+        member_needs: {strength: ">=high", forms_any: [juice, vinegar, liquid]}
+        timing: marinate
+        does: "Firm, fibrous pieces keep their crunch in acid while it seasons them through."
+        safety: "A fridge pickle eaten within days. Shelf-stable pickling needs a tested vinegar recipe."
+      soften_leaves:
+        when: {techniques: [massage]}
+        member_needs: {forms_any: [juice, vinegar, liquid, crushed_raw]}
+        timing: marinate
+        does: "Acid helps salt break down the tough raw leaves."
+      lift_mild:
+        when: {part_flavour_any: [mild, sweet], effects_any: [softens, smooth]}
+        timing: finish
+        does: "A mild, soft state tastes flat without acid; a little defines it."
+
+  fat:
+    kind: modifier
+    part_property: fat
+    says: "carries flavour and gives body"
+    mechanisms:
+      brown_in_fat:
+        when: {effects_any: [browning]}
+        member_needs: {forms_any: [oil, solid_fat]}
+        timing: cook
+        does: "Fat carries the heat into every surface, so the edges brown instead of drying."
+      coat_raw:
+        when: {techniques: [raw, massage], part: {fat: "<=low", liquid: false}}
+        member_needs: {forms_any: [oil, cream, paste]}
+        timing: dress
+        does: "Fat clings to lean raw pieces and carries the aromas that only dissolve in fat."
+      round_bitter:
+        when: {part: {bitterness: ">=medium"}}
+        timing: dress
+        does: "Fat coats the tongue and rounds off bitterness."
+      enrich_soft:
+        when: {effects_any: [softens, smooth], part: {fat: "<=low"}}
+        member_needs: {forms_any: [solid_fat, oil, cream, paste]}
+        timing: finish
+        does: "A soft, lean state gets body and gloss from fat stirred in at the end."
+
+  salt:
+    kind: modifier
+    part_property: salt
+    says: "seasons and sharpens every other taste"
+    mechanisms:
+      draw_water:
+        when: {techniques: [raw], part: {water: ">=high", liquid: false}}
+        member_needs: {forms_any: [crystal]}
+        timing: marinate
+        does: "Salt pulls water out of watery pieces; drained, they taste stronger and stop diluting the dish."
+      suppress_bitter:
+        when: {part: {bitterness: ">=medium"}}
+        timing: dress
+        does: "Salt suppresses bitterness more than any other taste does."
+      season_through:
+        when: {techniques: [steam, braise, simmer]}
+        member_needs: {forms_any: [crystal, liquid, paste]}
+        timing: cook
+        does: "Salt in the cooking liquid seasons the inside, not only the surface."
+      crisp_finish:
+        when: {effects_any: [crisp]}
+        member_needs: {forms_any: [crystal, crumble]}
+        timing: finish
+        does: "Salt on a crisp surface lands in bursts instead of dissolving."
+
+  umami:
+    kind: modifier
+    part_property: umami
+    says: "makes it taste savoury and deep"
+    mechanisms:
+      deepen_mild:
+        when: {part_flavour_any: [mild, sweet]}
+        timing: dress
+        does: "Umami gives a mild part depth, so it reads as savoury instead of bland."
+      echo_browning:
+        when: {effects_any: [browning]}
+        timing: finish
+        does: "Umami stacks on the savoury notes that browning already makes."
+
+  sweet:
+    kind: modifier
+    part_property: sugar
+    says: "balances sharp and bitter"
+    mechanisms:
+      balance_acid:
+        when: {part: {acidity: ">=high"}}
+        timing: dress
+        does: "A little sweetness takes the edge off a sharp acid without hiding it."
+      balance_bitter:
+        when: {part: {bitterness: ">=medium"}}
+        timing: dress
+        does: "Sweetness balances bitterness, as in the honey on a bitter-leaf salad."
+      glaze:
+        when: {techniques: [roast]}
+        member_needs: {forms_any: [liquid, crystal]}
+        timing: cook
+        does: "Sugar on the surface caramelises into a glaze in the oven's heat."
+
+  protein:
+    kind: partner
+    part_property: protein
+    says: "makes it a meal"
+    mechanisms:
+      yolk_as_sauce:
+        when: {effects_any: [softens, browning]}
+        member_needs: {runny_yolk: true}
+        timing: serve
+        does: "A soft yolk breaks over the vegetable and dresses it like a sauce."
+      creamy_against_crisp:
+        when: {effects_any: [browning, crisp]}
+        member_needs: {texture: creamy}
+        timing: serve
+        does: "A creamy protein against browned, crisp edges gives the plate contrast."
+      crisp_against_soft:
+        when: {effects_any: [softens, smooth]}
+        member_needs: {texture: crisp}
+        timing: serve
+        does: "A crisp protein gives a soft state the bite it lacks."
+      same_pan:
+        when: {techniques: [stir_fry]}
+        member_needs: {pan_cooked: true}
+        timing: cook
+        does: "Cooks in the same pan at the same heat, so the meal is one step."
+
+  carb:
+    kind: partner
+    part_property: carb
+    says: "carries and fills"
+    mechanisms:
+      soak_juice:
+        when: {part_any: {liquid: true, water: ">=high"}}
+        member_needs: {absorbent: true}
+        timing: serve
+        does: "Soaks up the juice instead of leaving it on the plate."
+      sauce_for_starch:
+        when: {techniques: [puree, simmer]}
+        member_needs: {takes_sauce: true}
+        timing: serve
+        does: "A smooth or simmered state becomes the sauce for the starch."
+      base_for_fast:
+        when: {techniques: [stir_fry]}
+        member_needs: {absorbent: true}
+        timing: serve
+        does: "A plain base catches the pan juices of a fast, hot dish."
+      crunch_on_soft:
+        when: {effects_any: [softens, smooth]}
+        member_needs: {texture: crisp}
+        timing: serve
+        does: "Crisp crumbs on a soft state give it texture."
+
+members:
+  # ---- acid -----------------------------------------------------------------
+  lemon:
+    ingredient: lemon
+    families: {acid: very_high}
+    forms: [juice]
+    character: [citrus, fresh]
+    corpus: "(?<!pickling )\\blemons?\\b(?!\\s*(pepper|extract|zest|peel|rind|grass|curd|jell|gelatin|cake|pudding|yogh?urt|sherbet|soda|flavou?r|instant|pie filling))"
+  lime:
+    ingredient: lime
+    families: {acid: very_high}
+    forms: [juice]
+    character: [citrus, fresh]
+    corpus: "(?<!pickling )(?<!slaked )(?<!hydrated )(?<!key )\\blimes?\\b(?!\\s*(zest|peel|rind|leaves|jell|gelatin|sherbet|soda|flavou?r|pickling))|key limes?"
+  vinegar:
+    ingredient: vinegar
+    families: {acid: very_high}
+    forms: [vinegar]
+    character: [sharp]
+    corpus: "vinegar"
+  lingonberry:
+    families: {acid: very_high, sweet: low}
+    bitterness: medium
+    astringent: true
+    forms: [crushed_raw, juice, cooked_sauce, vinegar]
+    character: [berry, astringent, nordic]
+    season: "Late August to September in Finland; frozen all year."
+    note: "Naturally rich in benzoic acid, so berries crushed raw with a little sugar keep in the fridge without cooking."
+    corpus: "lingon|cowberr|partridgeberr|puolukka"
+  cranberry:
+    families: {acid: very_high, sweet: low}
+    bitterness: medium
+    astringent: true
+    forms: [crushed_raw, juice, cooked_sauce]
+    character: [berry, astringent]
+    corpus: "(?<!dried )(?<!sweetened )cranberr(?!y juice cocktail)(?!ies,? dried)"
+  sea_buckthorn:
+    families: {acid: very_high}
+    forms: [juice, puree]
+    character: [tropical, oily, nordic]
+    corpus: "sea[- ]?buckthorn|tyrni"
+  redcurrant:
+    families: {acid: high, sweet: low}
+    forms: [crushed_raw, juice, jelly]
+    character: [berry, bright]
+    corpus: "red currants?|redcurrants?"
+  rhubarb:
+    families: {acid: high}
+    forms: [raw_shred, juice, cooked_sauce]
+    character: [green, sharp]
+    safety: "Stalks only; rhubarb leaves are toxic."
+    corpus: "rhubarb"
+  sorrel:
+    families: {acid: high}
+    forms: [raw_leaf, puree]
+    character: [green, lemony]
+    heat_risk: "Sorrel turns khaki the moment it is heated; use it raw or stirred in off the heat."
+    corpus: "\\bsorrel"
+  sumac:
+    ingredient: sumac
+    families: {acid: medium, umami: low}
+    forms: [powder]
+    character: [fruity, dry]
+    corpus: "\\bsumac|sumach"
+  tamarind:
+    families: {acid: high, sweet: medium}
+    forms: [paste]
+    character: [fruity, dark]
+    corpus: "tamarind"
+  green_mango:
+    families: {acid: high}
+    forms: [raw_shred, powder]
+    character: [green, fruity]
+    corpus: "green mango|unripe mango|raw mango|amch[ou]o?r"
+  tomato_gel:
+    families: {acid: high, umami: medium}
+    forms: [liquid]
+    character: [umami, fresh]
+    from_part: tomato.seeds_and_gel
+    note: "The jelly around tomato seeds, sieved: acid that also brings umami."
+    corpus: "tomato"   # whole tomatoes; a part used as a member is never labelled by counts
+
+  # ---- fat ------------------------------------------------------------------
+  olive_oil:
+    ingredient: olive_oil
+    families: {fat: very_high}
+    forms: [oil]
+    character: [fruity, peppery]
+    corpus: "olive oil"
+  rapeseed_oil:
+    families: {fat: very_high}
+    forms: [oil]
+    character: [neutral, nordic]
+    corpus: "rapeseed|canola"
+  butter:
+    ingredient: butter
+    families: {fat: very_high}
+    forms: [solid_fat]
+    character: [dairy, sweet]
+    corpus: "(?<!peanut )(?<!nut )(?<!apple )(?<!cocoa )(?<!shea )\\bbutter\\b(?!\\s*(milk|scotch|nut|cream|beans?|lettuce|flavou?r))|margarine|\\boleo\\b"
+  brown_butter:
+    ingredient: brown_butter
+    families: {fat: very_high}
+    forms: [solid_fat]
+    character: [nutty, toasted]
+    corpus: "brown(ed)? butter|beurre noisette"
+  ghee:
+    ingredient: ghee
+    families: {fat: very_high}
+    forms: [solid_fat]
+    character: [nutty, clean]
+    corpus: "\\bghee|clarified butter"
+  sesame_oil:
+    families: {fat: very_high}
+    forms: [oil]
+    character: [toasted, nutty]
+    corpus: "sesame oil"
+  cream:
+    ingredient: cream
+    families: {fat: high}
+    forms: [cream]
+    character: [dairy, mild]
+    corpus: "(heavy|whipping|double|light|single|fresh) cream|(?<!sour )(?<!ice )\\bcream\\b(?! cheese| of | soda)"
+  tahini:
+    ingredient: tahini
+    families: {fat: high, umami: medium}
+    forms: [paste]
+    character: [nutty, bitter]
+    corpus: "tahini|tahina|sesame paste"
+  walnut:
+    ingredient: walnut
+    families: {fat: high}
+    forms: [crumble]
+    character: [nutty, bitter, crunchy]
+    corpus: "walnut"
+  bacon:
+    ingredient: bacon
+    families: {fat: high, salt: high, umami: high, protein: medium}
+    forms: [crumble]
+    texture: crisp
+    pan_cooked: true
+    character: [smoky, salty]
+    corpus: "\\bbacon|pancetta|lardons?"
+
+  # ---- salt -----------------------------------------------------------------
+  sea_salt:
+    ingredient: sea_salt
+    families: {salt: very_high}
+    forms: [crystal]
+    character: [clean]
+    corpus: "\\bsalt\\b"
+  soy_sauce:
+    ingredient: soy_sauce
+    families: {salt: very_high, umami: high}
+    forms: [liquid]
+    character: [fermented, dark]
+    corpus: "soy sauce|soya sauce|tamari|shoyu"
+  fish_sauce:
+    ingredient: fish_sauce
+    families: {salt: very_high, umami: very_high}
+    forms: [liquid]
+    character: [fermented, funky]
+    corpus: "fish sauce|nam pla|nuoc mam"
+  miso:
+    ingredient: miso
+    families: {salt: high, umami: very_high}
+    forms: [paste]
+    character: [fermented, sweet]
+    corpus: "\\bmiso"
+  anchovy:
+    ingredient: anchovy
+    families: {salt: high, umami: very_high, protein: low}
+    forms: [whole, paste]
+    character: [briny, funky]
+    corpus: "anchov"
+  capers:
+    ingredient: capers
+    families: {salt: high, acid: medium, umami: medium}
+    forms: [whole]
+    character: [briny, floral]
+    corpus: "\\bcapers?\\b"
+  olives:
+    ingredient: olives
+    families: {salt: high, umami: medium, fat: medium}
+    forms: [whole]
+    character: [briny, fruity]
+    corpus: "\\bolives?\\b(?! oil)"
+  parmesan:
+    ingredient: parmesan
+    families: {umami: very_high, salt: medium, fat: medium, protein: medium}
+    forms: [crumble]
+    texture: crisp
+    character: [aged, nutty]
+    corpus: "parmesan|parmigiano|grana padano|pecorino"
+
+  # ---- umami ----------------------------------------------------------------
+  dried_mushroom:
+    families: {umami: very_high}
+    forms: [powder, liquid]
+    character: [earthy, woody]
+    note: "Soaking liquid or ground to a powder."
+    corpus: "dried (\\w+ )?(mushroom|porcini|shiitake|morel)|mushroom powder"
+  tomato_skin_powder:
+    families: {umami: high}
+    forms: [powder]
+    character: [tomato, toasted]
+    from_part: tomato.skin
+    note: "Tomato skins dried and ground: the curated skin path in the model."
+    corpus: "tomato"
+  stock:
+    ingredient: stock
+    families: {umami: medium}
+    forms: [liquid]
+    character: [savoury]
+    corpus: "\\bstock\\b|\\bbroth\\b|bouillon"
+
+  # ---- sweet ----------------------------------------------------------------
+  honey:
+    ingredient: honey
+    families: {sweet: very_high}
+    forms: [liquid]
+    character: [floral]
+    corpus: "\\bhoney\\b(?!dew)"
+  sugar:
+    ingredient: sugar
+    families: {sweet: very_high}
+    forms: [crystal]
+    character: [neutral]
+    corpus: "\\bsugar\\b(?! snap| peas)"
+  maple_syrup:
+    families: {sweet: very_high}
+    forms: [liquid]
+    character: [woody, caramel]
+    corpus: "maple syrup"
+  pomegranate_molasses:
+    ingredient: pomegranate_molasses
+    families: {acid: high, sweet: high}
+    forms: [liquid]
+    character: [fruity, dark]
+    corpus: "pomegranate molasses|pomegranate syrup|grenadine molasses"
+  balsamic_vinegar:
+    ingredient: balsamic_vinegar
+    families: {acid: high, sweet: medium}
+    forms: [vinegar]
+    character: [dark, sweet]
+    corpus: "balsamic"
+
+  # ---- protein --------------------------------------------------------------
+  eggs:
+    ingredient: eggs
+    families: {protein: high}
+    forms: [whole]
+    runny_yolk: true
+    pan_cooked: true
+    character: [rich]
+    corpus: "\\beggs?\\b(?! ?plant| noodles| roll| substitute| beaters)"
+  chickpeas:
+    families: {protein: medium, carb: medium}
+    forms: [whole]
+    texture: crisp
+    character: [nutty]
+    note: "Roasted or fried until crisp."
+    corpus: "chick ?peas?|garbanzo"
+  tofu:
+    ingredient: tofu
+    families: {protein: high}
+    forms: [whole]
+    pan_cooked: true
+    character: [mild]
+    corpus: "\\btofu|bean curd"
+  white_beans:
+    ingredient: white_beans
+    families: {protein: medium, carb: medium}
+    forms: [whole, puree]
+    texture: creamy
+    absorbent: true
+    character: [mild, creamy]
+    corpus: "white beans?|cannellini|navy beans?|great northern|haricot"
+  goat_cheese:
+    ingredient: goat_cheese
+    families: {protein: medium, fat: high, acid: medium}
+    forms: [crumble]
+    texture: creamy
+    character: [tangy, creamy]
+    corpus: "goat('?s)? cheese|ch[eè]vre"
+  yogurt:
+    ingredient: yogurt
+    families: {protein: medium, fat: low, acid: low}
+    forms: [cream]
+    texture: creamy
+    character: [tangy, cool]
+    corpus: "yogh?urt|skyr"
+  smoked_fish:
+    families: {protein: high, salt: medium, fat: medium}
+    forms: [whole]
+    texture: soft
+    character: [smoky, nordic]
+    corpus: "smoked (salmon|trout|mackerel|fish|whitefish|herring)|lox\\b"
+  chicken:
+    families: {protein: very_high}
+    forms: [whole]
+    pan_cooked: true
+    character: [mild]
+    corpus: "\\bchicken\\b(?! (stock|broth|bouillon|soup|base|fat|gravy|seasoning))"
+
+  # ---- carb -----------------------------------------------------------------
+  bread:
+    ingredient: bread
+    families: {carb: very_high}
+    forms: [whole]
+    absorbent: true
+    character: [wheaty]
+    corpus: "\\bbread\\b(?! ?crumbs| flour| machine)|baguette|ciabatta|sourdough|toast\\b"
+  rye_crumbs:
+    ingredient: rye_crumbs
+    families: {carb: high}
+    forms: [crumble]
+    texture: crisp
+    character: [sour, toasted, nordic]
+    corpus: "rye (bread )?crumbs|rye bread|ruisleip"
+  croutons:
+    ingredient: croutons
+    families: {carb: high}
+    forms: [crumble]
+    texture: crisp
+    character: [toasted]
+    corpus: "crouton|bread ?crumbs|panko"
+  rice:
+    ingredient: rice
+    families: {carb: very_high}
+    forms: [whole]
+    absorbent: true
+    character: [neutral]
+    corpus: "\\brice\\b(?! (vinegar|wine|flour|paper|noodles|milk|krispies|cereal))"
+  pasta:
+    ingredient: pasta
+    families: {carb: very_high}
+    forms: [whole]
+    takes_sauce: true
+    character: [wheaty]
+    corpus: "pasta|spaghetti|penne|linguine|fettuccine|macaroni|orecchiette|rigatoni|noodles"
+  potato:
+    ingredient: potato
+    families: {carb: high}
+    forms: [whole]
+    absorbent: true
+    takes_sauce: true
+    character: [earthy, mild]
+    corpus: "(?<!sweet )potato(es)?\\b(?! chips| starch| flakes)"
+  grains:
+    families: {carb: high, protein: low}
+    forms: [whole]
+    absorbent: true
+    takes_sauce: true
+    character: [nutty]
+    corpus: "barley|farro|bulgur|quinoa|couscous|spelt|freekeh"
+
+  # ---- common members added for family coverage (S3 family analysis) ---------
+  # A family's share of recipes is only as good as its member list, so the
+  # everyday ingredients that bring each family are here even when they make
+  # no Scout idea.
+  orange:
+    families: {acid: medium, sweet: medium}
+    forms: [juice]
+    character: [citrus, sweet]
+    corpus: "orange juice|\\boranges?\\b(?!\\s*(zest|peel|rind|extract|liqueur|marmalade|bell|peppers?|jell|gelatin|soda|flavou?r))"
+  wine:
+    families: {acid: medium}
+    forms: [liquid]
+    character: [fruity, sharp]
+    corpus: "\\bwine\\b(?!\\s*vinegar)|\\bsherry\\b(?!\\s*vinegar)|vermouth"
+  mustard:
+    ingredient: mustard
+    families: {acid: medium, umami: low}
+    forms: [paste]
+    character: [pungent, sharp]
+    corpus: "mustard(?!\\s*(greens?|seeds?|powder|oil))|dijon"
+  pickles:
+    ingredient: pickles
+    families: {acid: high, salt: medium}
+    forms: [whole]
+    texture: crisp
+    character: [sour, crunchy]
+    corpus: "\\bpickles?\\b(?!\\s*juice)|gherkins?|cornichons?|relish"
+  buttermilk:
+    families: {acid: medium, fat: low}
+    forms: [liquid]
+    character: [tangy, dairy]
+    corpus: "buttermilk"
+  sour_cream:
+    families: {fat: high, acid: low}
+    forms: [cream]
+    texture: creamy
+    character: [tangy, dairy]
+    corpus: "sour cream|cr[eè]me fra[iî]che"
+  vegetable_oil:
+    families: {fat: very_high}
+    forms: [oil]
+    character: [neutral]
+    corpus: "(?<!olive )(?<!sesame )(?<!essential )(?<!rapeseed )(?<!canola )(?<!truffle )(?<!avocado )(?<!chili )(?<!coconut )\\boil\\b"
+  mayonnaise:
+    families: {fat: very_high, acid: low}
+    forms: [cream]
+    texture: creamy
+    character: [rich, tangy]
+    corpus: "mayonnaise|\\bmayo\\b|miracle whip|salad dressing"
+  cheese:
+    families: {fat: high, protein: medium, salt: medium, umami: low}
+    forms: [crumble]
+    texture: creamy
+    character: [dairy, salty]
+    corpus: "cheddar|mozzarella|monterey|jack cheese|swiss cheese|american cheese|velveeta|provolone|colby|\\bcheese\\b"
+  beef:
+    families: {protein: very_high, fat: medium}
+    forms: [whole]
+    pan_cooked: true
+    character: [meaty]
+    corpus: "\\bbeef\\b(?!\\s*(broth|stock|bouillon|consomm|gravy))|steak|hamburger|ground chuck|sirloin|brisket"
+  pork:
+    families: {protein: very_high, fat: medium, salt: medium}
+    forms: [whole]
+    pan_cooked: true
+    character: [meaty, salty]
+    corpus: "\\bpork\\b|\\bham\\b|sausage|chorizo|prosciutto|salami|pepperoni|kielbasa"
+  turkey:
+    families: {protein: very_high}
+    forms: [whole]
+    pan_cooked: true
+    character: [mild]
+    corpus: "\\bturkey\\b(?!\\s*(broth|stock|gravy))"
+  shellfish:
+    families: {protein: very_high}
+    forms: [whole]
+    pan_cooked: true
+    character: [sweet, briny]
+    corpus: "shrimp|prawns?|scallops?|\\bcrab|lobster|mussels|clams"
+  fish:
+    families: {protein: very_high}
+    forms: [whole]
+    texture: soft
+    pan_cooked: true
+    character: [mild]
+    corpus: "salmon|tuna|\\bcod\\b|tilapia|halibut|haddock|trout|mackerel|catfish|\\bfish\\b(?!\\s*sauce)"
+  beans:
+    families: {protein: medium, carb: medium}
+    forms: [whole]
+    absorbent: true
+    character: [earthy]
+    corpus: "black beans?|kidney beans?|pinto beans?|lentils?|edamame|refried beans|baked beans"
+  tortilla:
+    ingredient: tortilla
+    families: {carb: very_high}
+    forms: [whole]
+    character: [corn, wheat]
+    corpus: "tortillas?|taco shells?|tostadas?"
+  crackers:
+    families: {carb: high}
+    forms: [crumble]
+    texture: crisp
+    character: [toasted, salty]
+    corpus: "crackers?|saltines?|ritz"
+  mushroom:
+    families: {umami: medium}
+    forms: [whole]
+    character: [earthy]
+    corpus: "(?<!dried )mushrooms?\\b"
+  worcestershire:
+    families: {umami: high, salt: medium, acid: low}
+    forms: [liquid]
+    character: [fermented, dark]
+    corpus: "worcestershire"
+  jam:
+    families: {sweet: very_high, acid: low}
+    forms: [jelly]
+    character: [fruity]
+    corpus: "\\bjam\\b|\\bjelly\\b|preserves|marmalade"
+  dried_fruit:
+    ingredient: dried_cranberries
+    families: {sweet: high, acid: low}
+    forms: [whole]
+    character: [fruity, chewy]
+    corpus: "raisins?|dried cranberr|craisins|dried apricots?|dried cherr|sultanas?"
+
+# Notes the generator adds on top of a mechanism.
+pairing_notes:
+  - id: astringent_with_fat_or_browning
+    when: {member: {astringent: true}, part_or_browning: {fat: ">=high"}}
+    text: "Fat and browning soften the berry's astringency, which is why tart berries traditionally go with roasts and rich food."
+
+# Risks the generator adds. `family` limits a risk to one family; `hot_or_contact`
+# means the technique is hot or the mechanism keeps the member on the part.
+risks:
+  - id: green_turns_olive
+    when: {family: acid, part: {pigment: green}, hot_or_contact: true}
+    text: "Acid turns green chlorophyll olive within minutes of heat or hours of contact. Add it at the very end."
+  - id: reads_as_dessert
+    when: {family_not: sweet, member_family: {sweet: ">=medium"}}
+    text: "A sweet member can make the dish read as dessert. Keep it to a few drops."
+  - id: bitter_on_bitter
+    when: {member: {bitterness: ">=medium"}, part: {bitterness: ">=medium"}}
+    text: "A bitter member on a bitter part stacks the bitterness. Balance with fat or a pinch of sugar."
+  - id: salt_twice
+    when: {family_not: salt, member_family: {salt: ">=high"}}
+    text: "It is salty too; season the rest of the dish after adding it, not before."

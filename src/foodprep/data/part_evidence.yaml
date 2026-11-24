@@ -1,0 +1,465 @@
+# Corpus practice per ingredient part (ADR 0002): GENERATED, do not hand-edit.
+#
+# Regenerate: py -3.11 scripts/count_part_evidence.py [path-to-full_dataset.csv]
+#
+# What each part's sentences say happens to it in RecipeNLG, one sentence at a
+# time: used, trimmed (only ends or tough skin off), removed, cue (a cooking
+# signal only), canned (bought already done) or unclear. `recipes` counts each
+# recipe once, under the strongest class it shows (in that order).
+#
+# This is practice, mostly American home cooking. A part that is removed or
+# rarely used here can still be food; edibility is curated in tomato.yaml.
+# The keyword rules' accuracy is in docs/research/s2-part-counts/README.md.
+#
+# RecipeNLG's terms allow non-commercial research and educational use only.
+# Only counts are kept here, never recipe text.
+corpus:
+  corpus_id: recipenlg
+  name: RecipeNLG
+  scope: 2231142 recipes in full_dataset.csv
+  recipes_by_source:
+    Gathered: 1643098
+    Recipes1M: 588044
+  source_path: data/corpus/recipenlg
+  terms: non-commercial research and educational use only; counts only, no recipe
+    text
+  search_date: '2026-11-24'
+  rules_version: 1
+baselines:
+  tomato: 312317
+  tomato_fruit: 240796
+  broccoli: 49246
+  avocado: 26838
+thresholds:
+  rare_share: 0.01
+  min_used: 30
+parts:
+- ingredient: broccoli
+  part: florets
+  evidence_level: default
+  recipes_mentioning: 13613
+  recipes:
+    used: 13542
+    trimmed: 0
+    removed: 8
+    cue: 0
+    canned: 0
+    unclear: 63
+  by_source:
+    Gathered:
+      used: 8233
+      trimmed: 0
+      removed: 6
+      cue: 0
+      canned: 0
+      unclear: 52
+    Recipes1M:
+      used: 5309
+      trimmed: 0
+      removed: 2
+      cue: 0
+      canned: 0
+      unclear: 11
+  sentences:
+    used: 15879
+    trimmed: 0
+    removed: 15
+    cue: 0
+    canned: 0
+    unclear: 208
+  techniques_when_used:
+    boil: 687
+    steam: 542
+    bake: 152
+    soup: 116
+    raw: 105
+    dry: 73
+    stir_fry: 59
+    roast: 58
+    saute: 43
+    grill: 19
+    fry: 15
+- ingredient: broccoli
+  part: stems
+  evidence_level: used
+  recipes_mentioning: 2873
+  recipes:
+    used: 1848
+    trimmed: 655
+    removed: 320
+    cue: 0
+    canned: 0
+    unclear: 50
+  by_source:
+    Gathered:
+      used: 1161
+      trimmed: 382
+      removed: 228
+      cue: 0
+      canned: 0
+      unclear: 35
+    Recipes1M:
+      used: 687
+      trimmed: 273
+      removed: 92
+      cue: 0
+      canned: 0
+      unclear: 15
+  sentences:
+    used: 2264
+    trimmed: 1035
+    removed: 398
+    cue: 0
+    canned: 0
+    unclear: 157
+  techniques_when_used:
+    boil: 138
+    steam: 69
+    bake: 56
+    raw: 45
+    soup: 31
+    saute: 29
+    stir_fry: 27
+    dry: 26
+    roast: 23
+    fry: 6
+- ingredient: broccoli
+  part: leaves
+  evidence_level: removed
+  recipes_mentioning: 206
+  recipes:
+    used: 69
+    trimmed: 0
+    removed: 130
+    cue: 0
+    canned: 0
+    unclear: 7
+  by_source:
+    Gathered:
+      used: 44
+      trimmed: 0
+      removed: 102
+      cue: 0
+      canned: 0
+      unclear: 6
+    Recipes1M:
+      used: 25
+      trimmed: 0
+      removed: 28
+      cue: 0
+      canned: 0
+      unclear: 1
+  sentences:
+    used: 85
+    trimmed: 0
+    removed: 137
+    cue: 0
+    canned: 0
+    unclear: 7
+  techniques_when_used:
+    stir_fry: 3
+    dry: 3
+    fry: 3
+    raw: 3
+    boil: 2
+    soup: 2
+    steam: 1
+    grill: 1
+    saute: 1
+- ingredient: tomato
+  part: flesh
+  evidence_level: default
+  recipes_mentioning: 483
+  recipes:
+    used: 456
+    trimmed: 0
+    removed: 4
+    cue: 0
+    canned: 0
+    unclear: 23
+  by_source:
+    Gathered:
+      used: 233
+      trimmed: 0
+      removed: 1
+      cue: 0
+      canned: 0
+      unclear: 11
+    Recipes1M:
+      used: 223
+      trimmed: 0
+      removed: 3
+      cue: 0
+      canned: 0
+      unclear: 12
+  sentences:
+    used: 516
+    trimmed: 0
+    removed: 6
+    cue: 0
+    canned: 0
+    unclear: 26
+  techniques_when_used:
+    boil: 23
+    roast: 20
+    bake: 19
+    soup: 17
+    grill: 8
+    dry: 6
+    saute: 4
+    raw: 1
+    stir_fry: 1
+- ingredient: tomato
+  part: seeds_and_gel
+  evidence_level: removed
+  recipes_mentioning: 16869
+  recipes:
+    used: 473
+    trimmed: 0
+    removed: 16355
+    cue: 0
+    canned: 0
+    unclear: 41
+  by_source:
+    Gathered:
+      used: 248
+      trimmed: 0
+      removed: 9023
+      cue: 0
+      canned: 0
+      unclear: 26
+    Recipes1M:
+      used: 225
+      trimmed: 0
+      removed: 7332
+      cue: 0
+      canned: 0
+      unclear: 15
+  sentences:
+    used: 508
+    trimmed: 0
+    removed: 16818
+    cue: 0
+    canned: 0
+    unclear: 53
+  techniques_when_used:
+    soup: 40
+    dry: 27
+    boil: 14
+    roast: 10
+    raw: 8
+    bake: 7
+    saute: 4
+    grill: 3
+    fry: 2
+    stir_fry: 1
+- ingredient: tomato
+  part: skin
+  evidence_level: removed
+  recipes_mentioning: 17232
+  recipes:
+    used: 911
+    trimmed: 0
+    removed: 12927
+    cue: 313
+    canned: 3021
+    unclear: 60
+  by_source:
+    Gathered:
+      used: 497
+      trimmed: 0
+      removed: 7926
+      cue: 187
+      canned: 2082
+      unclear: 32
+    Recipes1M:
+      used: 414
+      trimmed: 0
+      removed: 5001
+      cue: 126
+      canned: 939
+      unclear: 28
+  sentences:
+    used: 956
+    trimmed: 0
+    removed: 13919
+    cue: 496
+    canned: 3164
+    unclear: 111
+  techniques_when_used:
+    bake: 91
+    roast: 63
+    grill: 52
+    boil: 49
+    soup: 29
+    dry: 21
+    saute: 8
+    fry: 8
+    raw: 3
+    steam: 1
+    stir_fry: 1
+- ingredient: tomato
+  part: core
+  evidence_level: removed
+  recipes_mentioning: 4293
+  recipes:
+    used: 46
+    trimmed: 0
+    removed: 4242
+    cue: 0
+    canned: 0
+    unclear: 5
+  by_source:
+    Gathered:
+      used: 24
+      trimmed: 0
+      removed: 2191
+      cue: 0
+      canned: 0
+      unclear: 2
+    Recipes1M:
+      used: 22
+      trimmed: 0
+      removed: 2051
+      cue: 0
+      canned: 0
+      unclear: 3
+  sentences:
+    used: 50
+    trimmed: 0
+    removed: 4381
+    cue: 0
+    canned: 0
+    unclear: 5
+  techniques_when_used:
+    roast: 2
+    boil: 2
+    dry: 2
+    soup: 1
+    bake: 1
+- ingredient: avocado
+  part: flesh
+  evidence_level: default
+  recipes_mentioning: 1440
+  recipes:
+    used: 1402
+    trimmed: 0
+    removed: 1
+    cue: 0
+    canned: 0
+    unclear: 37
+  by_source:
+    Gathered:
+      used: 786
+      trimmed: 0
+      removed: 0
+      cue: 0
+      canned: 0
+      unclear: 21
+    Recipes1M:
+      used: 616
+      trimmed: 0
+      removed: 1
+      cue: 0
+      canned: 0
+      unclear: 16
+  sentences:
+    used: 1518
+    trimmed: 0
+    removed: 1
+    cue: 0
+    canned: 0
+    unclear: 50
+  techniques_when_used:
+    soup: 123
+    grill: 26
+    raw: 14
+    dry: 7
+    roast: 5
+    bake: 4
+    fry: 2
+    saute: 2
+    boil: 2
+- ingredient: avocado
+  part: skin
+  evidence_level: removed
+  recipes_mentioning: 10154
+  recipes:
+    used: 235
+    trimmed: 0
+    removed: 9891
+    cue: 11
+    canned: 0
+    unclear: 17
+  by_source:
+    Gathered:
+      used: 117
+      trimmed: 0
+      removed: 6193
+      cue: 7
+      canned: 0
+      unclear: 7
+    Recipes1M:
+      used: 118
+      trimmed: 0
+      removed: 3698
+      cue: 4
+      canned: 0
+      unclear: 10
+  sentences:
+    used: 269
+    trimmed: 0
+    removed: 10215
+    cue: 20
+    canned: 0
+    unclear: 32
+  techniques_when_used:
+    raw: 15
+    grill: 9
+    bake: 7
+    soup: 3
+    dry: 2
+    saute: 1
+    steam: 1
+- ingredient: avocado
+  part: stone
+  evidence_level: removed
+  recipes_mentioning: 7988
+  recipes:
+    used: 291
+    trimmed: 0
+    removed: 7674
+    cue: 0
+    canned: 0
+    unclear: 23
+  by_source:
+    Gathered:
+      used: 156
+      trimmed: 0
+      removed: 4491
+      cue: 0
+      canned: 0
+      unclear: 10
+    Recipes1M:
+      used: 135
+      trimmed: 0
+      removed: 3183
+      cue: 0
+      canned: 0
+      unclear: 13
+  sentences:
+    used: 330
+    trimmed: 0
+    removed: 7942
+    cue: 0
+    canned: 0
+    unclear: 52
+  techniques_when_used:
+    soup: 10
+    raw: 10
+    dry: 7
+    grill: 2
+    boil: 2
+    fry: 1
+    roast: 1
+    bake: 1

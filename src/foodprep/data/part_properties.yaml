@@ -1,0 +1,131 @@
+# What each ingredient part physically is — the input of the possibility
+# generator (foodprep.possibilities). Hand-curated; no recipe decides it.
+#
+# Whether a part is food is NOT repeated here: it comes from `parts` in
+# tomato.yaml (edible / not_food_reason). A part that is not food gets no
+# techniques, whatever its properties say.
+#
+# Levels: none < low < medium < high < very_high.
+#   water       how much free water it holds (decides frying, drying)
+#   fibre       how fibrous it is (decides braising, pickling crunch)
+#   toughness   how hard it is to bite raw (decides raw use, massage)
+#   fat, sugar, acidity, bitterness, umami   taste-relevant composition
+#   (salt, protein and carb are none unless given)
+# Flags (true/false):
+#   raw_ok            pleasant to eat raw
+#   thin              thin sheets or leaves (dries and crisps fast)
+#   leafy             a leaf, which salt, oil and acid can soften raw
+#   liquid            a liquid or gel rather than a solid
+#   browns_when_cut   enzymatic browning on cut surfaces
+# pigment: green | red | none (green turns olive with acid and time)
+# flavour: words matched by the acid mechanisms (mild, sweet, rich, ...)
+# only_techniques: limits a conditional part to the techniques that make it
+#   worth eating (tomato core: only a stock).
+
+parts:
+  broccoli:
+    florets:
+      water: medium
+      fibre: medium
+      toughness: low
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: low
+      raw_ok: true
+      pigment: green
+      flavour: [green, mild, sulfurous]
+    stems:
+      water: medium
+      fibre: high
+      toughness: medium
+      fat: none
+      sugar: medium
+      acidity: low
+      bitterness: none
+      raw_ok: true
+      pigment: green
+      flavour: [sweet, mild, green]
+      note: "Peel the tough outer layer first; inside it is dense and sweet, like kohlrabi."
+    leaves:
+      water: medium
+      fibre: high
+      toughness: medium
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: medium
+      raw_ok: true
+      thin: true
+      leafy: true
+      pigment: green
+      flavour: [green, bitter, cabbage]
+
+  tomato:
+    flesh:
+      water: high
+      fibre: low
+      toughness: low
+      fat: none
+      sugar: medium
+      acidity: medium
+      bitterness: none
+      umami: low
+      raw_ok: true
+      pigment: red
+      flavour: [sweet, sour, fresh]
+    seeds_and_gel:
+      water: very_high
+      fibre: none
+      toughness: none
+      fat: none
+      sugar: low
+      acidity: high
+      bitterness: none
+      umami: medium
+      raw_ok: true
+      liquid: true
+      pigment: red
+      flavour: [sour, umami, fresh]
+    skin:
+      water: low
+      fibre: medium
+      toughness: medium
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: low
+      umami: high
+      raw_ok: true
+      thin: true
+      pigment: red
+      flavour: [umami]
+    core:
+      water: medium
+      fibre: medium
+      toughness: high
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: none
+      raw_ok: false
+      pigment: none
+      flavour: [mild]
+      only_techniques: [simmer]
+      note: "Edible but hard; worth it only simmered in a stock or a sieved sauce."
+
+  avocado:
+    flesh:
+      water: medium
+      fibre: low
+      toughness: low
+      fat: high
+      sugar: none
+      acidity: none
+      bitterness: none
+      raw_ok: true
+      browns_when_cut: true
+      pigment: none   # pale green, and acid keeps it bright instead of dulling it
+      flavour: [rich, mild, grassy]
+    skin: {}
+    stone: {}

@@ -89,6 +89,42 @@ def cmd_journey(args: argparse.Namespace) -> int:
     return 1 if result.startswith("No journey") else 0
 
 
+def cmd_parts(args: argparse.Namespace) -> int:
+    """Ingredient -> parts -> processing -> use as food (ADR 0002)."""
+    conn = connect(args.db)
+    if not _db_has(conn, "ingredient_parts"):
+        print("Database is empty or predates parts. Run `foodprep build` first.")
+        return 1
+    d = query.decomposition(conn, args.ingredient)
+    print(query.render_decomposition(d, args.ingredient))
+    return 0 if d else 1
+
+
+def cmd_possible(args: argparse.Namespace) -> int:
+    """Part x technique x family ideas, labelled (not chosen) by RecipeNLG."""
+    from foodprep import possibilities
+    out = possibilities.render(args.ingredient, part=args.part, family=args.family,
+                               show_all=args.all, limit=args.limit)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
+
+
+def cmd_families(args: argparse.Namespace) -> int:
+    """The families (acid, fat, salt, umami, sweet, protein, carb) and their members."""
+    from foodprep import possibilities
+    out = possibilities.render_families(args.family)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
+
+
+def cmd_family_profile(args: argparse.Namespace) -> int:
+    """Which families cooks add to an ingredient, against the curated gaps."""
+    from foodprep import family_profiles
+    out = family_profiles.render_profile(args.ingredient)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -297,6 +333,29 @@ def build_parser() -> argparse.ArgumentParser:
     pj.add_argument("slug", nargs="?", default=None,
                     help="optional path id, e.g. steamed_cold_side")
     pj.set_defaults(func=cmd_journey)
+
+    ppt = sub.add_parser("parts", help="What an ingredient holds and what each part becomes")
+    ppt.add_argument("ingredient", nargs="?", default="broccoli")
+    ppt.set_defaults(func=cmd_parts)
+
+    ppo = sub.add_parser("possible",
+                         help="What each part could become, by family, beyond what recipes show")
+    ppo.add_argument("ingredient", nargs="?", default="broccoli")
+    ppo.add_argument("--part", help="only this part, e.g. stems")
+    ppo.add_argument("--family", help="only this family, e.g. acid or protein")
+    ppo.add_argument("--all", action="store_true",
+                     help="also show what recipes already do")
+    ppo.add_argument("--limit", type=int, default=3, help="ideas shown in full per family")
+    ppo.set_defaults(func=cmd_possible)
+
+    pfam = sub.add_parser("families", help="Families (acid, fat, protein, ...) and their members")
+    pfam.add_argument("family", nargs="?")
+    pfam.set_defaults(func=cmd_families)
+
+    pfp = sub.add_parser("family-profile",
+                         help="Families cooks add to an ingredient, against the model's gaps")
+    pfp.add_argument("ingredient", nargs="?", default="broccoli")
+    pfp.set_defaults(func=cmd_family_profile)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

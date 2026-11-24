@@ -442,6 +442,9 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                  avail.get("seasonality_note")),
             )
 
+    # ---- decomposition: what each ingredient physically holds (ADR 0002) ----
+    _load_parts(conn, data.get("parts", []) or [])
+
     # ---- components ----
     for c in data.get("components", []):
         conn.execute(
@@ -487,21 +490,25 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
         # this step starts from the raw ingredient.
         input_id = (_component_id(conn, tr["input_component"])
                     if tr.get("input_component") else None)
+        # `part` names what the step acts on; absent means the whole ingredient.
+        part_id = (_part_id(conn, ing_id, ing_name, tr["part"], tr["technique"])
+                   if tr.get("part") else None)
         conn.execute(
             "INSERT INTO transformations(ingredient_id, technique_id, "
             "output_component_id, flavour_shift, texture_shift, confidence, "
-            "risks, notes, input_component_id) VALUES (?,?,?,?,?,?,?,?,?)",
+            "risks, notes, input_component_id, part_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
             (ing_id, tech_id, comp_id, tr.get("flavour_shift"),
              tr.get("texture_shift"), conf, tr.get("risks"), tr.get("notes"),
-             input_id),
+             input_id, part_id),
         )
-        # A technique may now appear twice for one ingredient with different
-        # starting states, so the lookup must include the input.
+        # A technique may appear several times for one ingredient, from
+        # different starting states or parts, so the lookup includes both.
         tr_id = conn.execute(
             "SELECT transformation_id FROM transformations "
             "WHERE ingredient_id = ? AND technique_id = ? "
-            "AND COALESCE(input_component_id, 0) = COALESCE(?, 0)",
-            (ing_id, tech_id, input_id),
+            "AND COALESCE(input_component_id, 0) = COALESCE(?, 0) "
+            "AND COALESCE(part_id, 0) = COALESCE(?, 0)",
+            (ing_id, tech_id, input_id, part_id),
         ).fetchone()[0]
 
         # Everything else that comes out of the step, and is also food.
@@ -619,12 +626,26 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
         preparation = vocabulary.require("preparations", journey["preparation"]).id
         correction = vocabulary.require("corrections", journey["correction"]).id
         confidence = vocabulary.require("confidence", journey["confidence"]).id
+        # A journey without `part` follows the whole-ingredient step; with it,
+        # the step on that part (stir-fried stems, not stir-fried florets).
         transformation = conn.execute(
             "SELECT t.transformation_id FROM transformations t "
             "JOIN techniques tech ON tech.technique_id = t.technique_id "
-            "WHERE t.ingredient_id = ? AND tech.name = ?",
-            (ingredient_id, journey["primary_transformation"]),
+            "LEFT JOIN ingredient_parts p ON p.part_id = t.part_id "
+            "WHERE t.ingredient_id = ? AND tech.name = ? "
+            "AND COALESCE(p.name, '') = ? "
+            "ORDER BY t.input_component_id IS NOT NULL, t.transformation_id",
+            (ingredient_id, journey["primary_transformation"], journey.get("part", "")),
         ).fetchone()
+        if transformation is None and not journey.get("part"):
+            # Ingredients whose steps all name a part (broccoli florets).
+            transformation = conn.execute(
+                "SELECT t.transformation_id FROM transformations t "
+                "JOIN techniques tech ON tech.technique_id = t.technique_id "
+                "WHERE t.ingredient_id = ? AND tech.name = ? "
+                "GROUP BY t.ingredient_id HAVING COUNT(*) = 1",
+                (ingredient_id, journey["primary_transformation"]),
+            ).fetchone()
         if transformation is None:
             raise LoadError(
                 "journey primary transformation not found: "
@@ -789,6 +810,53 @@ def populate(conn: sqlite3.Connection, data: dict, vocabulary=None) -> None:
                     protocol["corrections"], protocol["safety_note"],
                 ),
             )
+
+
+EDIBLE_OK = {"yes", "conditional", "no"}
+
+
+def _load_parts(conn: sqlite3.Connection, parts: list[dict]) -> None:
+    """Insert ingredient parts. A part is something a cook can separate."""
+    order: dict[str, int] = {}
+    for p in parts:
+        ing_name = p["ingredient"]
+        ing_id = _ingredient_id(conn, ing_name)
+        edible = p.get("edible", "yes")
+        if edible not in EDIBLE_OK:
+            raise LoadError(f"part {ing_name}.{p['name']}: edible must be one of "
+                            f"{sorted(EDIBLE_OK)}, not {edible!r}")
+        if edible != "yes" and not p.get("not_food_reason"):
+            raise LoadError(f"part {ing_name}.{p['name']} is {edible!r} food "
+                            "and needs a not_food_reason")
+        sep_id = None
+        if p.get("separated_by"):
+            sep_id = _technique_id(conn, p["separated_by"])
+            is_mod = conn.execute("SELECT is_modifier FROM techniques WHERE technique_id = ?",
+                                  (sep_id,)).fetchone()[0]
+            if not is_mod:
+                raise LoadError(f"part {ing_name}.{p['name']}: separated_by "
+                                f"{p['separated_by']!r} is not a prep modifier")
+        for role in _split_list(p.get("provides")):
+            _role_id(conn, role)
+        order[ing_name] = order.get(ing_name, 0) + 1
+        conn.execute(
+            "INSERT INTO ingredient_parts(ingredient_id, name, edible, separated_by, "
+            "provides, description, not_food_reason, sort_order) VALUES (?,?,?,?,?,?,?,?)",
+            (ing_id, p["name"], edible, sep_id, p.get("provides"),
+             p.get("description"), p.get("not_food_reason"), order[ing_name]),
+        )
+
+
+def _part_id(conn: sqlite3.Connection, ing_id: int, ing_name: str,
+             part: str, technique: str) -> int:
+    row = conn.execute(
+        "SELECT part_id, edible FROM ingredient_parts WHERE ingredient_id = ? AND name = ?",
+        (ing_id, part)).fetchone()
+    if row is None:
+        raise LoadError(f"{technique} on {ing_name}: {ing_name} has no part {part!r}")
+    if row[1] == "no":
+        raise LoadError(f"{technique} on {ing_name}: part {part!r} is not food")
+    return row[0]
 
 
 def _as_list(value) -> list[str]:

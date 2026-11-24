@@ -44,23 +44,32 @@ def transformations_for_ingredient(
 
 
 def transformation_by_technique(
-    conn: sqlite3.Connection, technique: str, ingredient: str = "tomato"
+    conn: sqlite3.Connection, technique: str, ingredient: str = "tomato",
+    part: str | None = None,
 ) -> dict[str, Any] | None:
-    """Resolve a single transformation record by technique name."""
+    """Resolve a single transformation record by technique name.
+
+    One technique may act on several parts of an ingredient (ADR 0002):
+    broccoli florets and stems are both stir-fried. With `part` the step on
+    that part is returned; without it the whole-ingredient step wins, then
+    the first authored one, so the answer never depends on row order."""
     row = conn.execute(
         """
         SELECT t.transformation_id, tech.name AS technique,
                c.name AS component, t.flavour_shift, t.texture_shift,
                t.confidence, c.component_id,
-               inp.name AS input_component
+               inp.name AS input_component, p.name AS part
         FROM transformations t
         JOIN ingredients i  ON i.ingredient_id = t.ingredient_id
         JOIN techniques tech ON tech.technique_id = t.technique_id
         JOIN components c   ON c.component_id = t.output_component_id
         LEFT JOIN components inp ON inp.component_id = t.input_component_id
+        LEFT JOIN ingredient_parts p ON p.part_id = t.part_id
         WHERE i.canonical_name = ? AND tech.name = ?
+          AND (? IS NULL OR p.name = ?)
+        ORDER BY t.part_id IS NOT NULL, t.transformation_id
         """,
-        (ingredient, technique),
+        (ingredient, technique, part, part),
     ).fetchone()
     return dict(row) if row else None
 
@@ -2023,7 +2032,8 @@ def techniques_for_ingredient(conn: sqlite3.Connection,
         -_rank(d["confidence"]),
         d["technique"],
     ))
-    return [r["technique"] for r in rows]
+    # A technique that acts on several parts is still one choice here.
+    return list(dict.fromkeys(r["technique"] for r in rows))
 
 
 def branch_card(conn: sqlite3.Connection, ingredient: str,
@@ -2207,3 +2217,126 @@ def render_ingredient_journeys(conn: sqlite3.Connection, ingredient: str,
         return f"No complete journeys modelled for {ingredient!r}."
     return (f"Complete Cook journeys for {ingredient}:\n\n" +
             "\n\n---\n\n".join(render_journey(j) for j in journeys))
+
+
+# ---------------------------------------------------------------------------
+# Decomposition (ADR 0002): ingredient -> parts -> processing -> use as food
+# ---------------------------------------------------------------------------
+
+def _paths(conn: sqlite3.Connection, ingredient_id: int,
+           part_id: int | None) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        SELECT t.transformation_id, tech.name AS technique, c.name AS component,
+               c.component_id, t.flavour_shift, t.texture_shift, t.confidence
+        FROM transformations t
+        JOIN techniques tech ON tech.technique_id = t.technique_id
+        JOIN components c    ON c.component_id = t.output_component_id
+        WHERE t.ingredient_id = ? AND t.input_component_id IS NULL
+          AND t.part_id IS ?
+        ORDER BY t.transformation_id
+        """,
+        (ingredient_id, part_id),
+    ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["uses"] = component_uses(conn, d["component_id"])
+        d["missing"] = [m["role_name"] for m in missing_roles(conn, d["transformation_id"])]
+        out.append(d)
+    return out
+
+
+def decomposition(conn: sqlite3.Connection, ingredient: str) -> dict[str, Any] | None:
+    """What an ingredient holds, how each part is processed, and where it ends up.
+
+    Returns None for an unknown ingredient. `parts` is empty when nobody has
+    decomposed it yet; `whole` holds the steps that act on the whole thing."""
+    name = _match_ingredient(conn, ingredient) or ingredient
+    row = conn.execute("SELECT ingredient_id, canonical_name FROM ingredients "
+                       "WHERE canonical_name = ?", (name,)).fetchone()
+    if row is None:
+        return None
+    ing_id, canonical = row[0], row[1]
+    from . import part_evidence
+    practice = part_evidence.load_evidence()
+    parts = []
+    for p in conn.execute(
+        """
+        SELECT p.part_id, p.name, p.edible, p.provides, p.description,
+               p.not_food_reason, tech.name AS separated_by
+        FROM ingredient_parts p
+        LEFT JOIN techniques tech ON tech.technique_id = p.separated_by
+        WHERE p.ingredient_id = ? ORDER BY p.sort_order
+        """,
+        (ing_id,),
+    ).fetchall():
+        d = dict(p)
+        d["provides"] = _split_list(d["provides"])
+        d["paths"] = _paths(conn, ing_id, d.pop("part_id"))
+        d["practice"] = practice.get((canonical, d["name"]))
+        parts.append(d)
+    return {"ingredient": canonical, "parts": parts, "whole": _paths(conn, ing_id, None)}
+
+
+def _label(name: str) -> str:
+    return name.replace("_", " ")
+
+
+def render_decomposition(d: dict[str, Any] | None, ingredient: str = "") -> str:
+    if d is None:
+        return f"No ingredient called {ingredient!r}."
+    lines = [d["ingredient"].upper()]
+    if not d["parts"]:
+        lines.append("  Not decomposed into parts yet; every step uses the whole ingredient.")
+    for p in d["parts"]:
+        sep = f" (separate by: {_label(p['separated_by'])})" if p["separated_by"] else ""
+        lines.append("")
+        lines.append(f"  {_label(p['name'])}{sep}")
+        if p["edible"] == "no":
+            lines.append(f"    Not food. {p['not_food_reason']}")
+            continue
+        if p["edible"] == "conditional":
+            lines.append(f"    Only sometimes food. {p['not_food_reason']}")
+        if p["provides"]:
+            lines.append(f"    Provides: {', '.join(_label(r) for r in p['provides'])}")
+        if p["description"]:
+            lines.append(f"    {p['description']}")
+        if p.get("practice"):
+            lines.append(f"    {_render_practice(p['practice'])}")
+        if not p["paths"]:
+            lines.append("    No processing recorded yet.")
+        for path in p["paths"]:
+            lines.append(_render_path(path))
+    if d["whole"]:
+        lines.append("")
+        lines.append("  whole ingredient")
+        for path in d["whole"]:
+            lines.append(_render_path(path))
+    return "\n".join(lines)
+
+
+PRACTICE_WORDS = {
+    "default": "What recipes mean by the ingredient",
+    "used": "Cooks keep it",
+    "rarely_used": "Cooks rarely use it",
+    "removed": "Cooks mostly remove it",
+    "not_found": "Recipes never mention it",
+}
+
+
+def _render_practice(pr: dict[str, Any]) -> str:
+    """One line of RecipeNLG practice. Practice, never edibility."""
+    r = pr["recipes"]
+    kept = r["used"] + r["trimmed"]
+    bits = [f"kept in {kept:,}", f"removed in {r['removed']:,}"]
+    if r["canned"]:
+        bits.append(f"bought done in {r['canned']:,}")
+    return (f"{PRACTICE_WORDS[pr['evidence_level']]} "
+            f"(RecipeNLG: {', '.join(bits)} of {pr['recipes_mentioning']:,} recipes naming it).")
+
+
+def _render_path(path: dict[str, Any]) -> str:
+    uses = ", ".join(_label(u) for u in path["uses"]) or "no uses recorded"
+    needs = f"; still needs {', '.join(_label(m) for m in path['missing'])}" if path["missing"] else ""
+    return f"    - {_label(path['technique'])} -> {state_label(path['component'])}: {uses}{needs}"
