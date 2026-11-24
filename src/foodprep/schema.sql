@@ -97,7 +97,26 @@ CREATE TABLE transformations (
     -- Set it to chain a state into another state: boiled potato -> smashed
     -- and roasted. Without it every transformation began at raw, so a second
     -- roast of an already-roasted thing had nowhere to live.
-    input_component_id    INTEGER REFERENCES components(component_id)
+    input_component_id    INTEGER REFERENCES components(component_id),
+    -- Which part of the ingredient this step acts on (ADR 0002). NULL means
+    -- the whole ingredient. Stems and florets of one broccoli are processed
+    -- differently and end up in different dishes.
+    part_id               INTEGER REFERENCES ingredient_parts(part_id)
+);
+
+-- Decomposition (ADR 0002): what an ingredient physically holds. A part is
+-- something a cook can separate; a cut form (slice, dice) is not a part.
+CREATE TABLE ingredient_parts (
+    part_id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    ingredient_id   INTEGER NOT NULL REFERENCES ingredients(ingredient_id),
+    name            TEXT NOT NULL,
+    edible          TEXT NOT NULL,   -- yes | conditional | no
+    separated_by    INTEGER REFERENCES techniques(technique_id),  -- a prep modifier
+    provides        TEXT,            -- newline-separated role names
+    description     TEXT,
+    not_food_reason TEXT,            -- required when edible is no or conditional
+    sort_order      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (ingredient_id, name)
 );
 
 -- One transformation, one primary output — but often something else comes out
@@ -114,9 +133,11 @@ CREATE TABLE transformation_byproducts (
 
 -- Replaces UNIQUE (ingredient_id, technique_id): the same technique may now
 -- apply to different starting states. COALESCE because SQLite treats NULLs as
--- distinct, which would otherwise allow two raw-input duplicates.
+-- distinct, which would otherwise allow two raw-input duplicates. The part is
+-- in the key too: broccoli florets and stems may both be stir-fried.
 CREATE UNIQUE INDEX transformations_unique_step
-    ON transformations (ingredient_id, technique_id, COALESCE(input_component_id, 0));
+    ON transformations (ingredient_id, technique_id, COALESCE(input_component_id, 0),
+                        COALESCE(part_id, 0));
 
 CREATE TABLE transformation_tags (
     transformation_id INTEGER NOT NULL REFERENCES transformations(transformation_id),

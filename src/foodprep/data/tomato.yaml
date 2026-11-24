@@ -169,6 +169,10 @@ techniques:
   - { name: peel,         is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
   - { name: deseed,       is_modifier: 1, heat_type: none,    moisture_change: lose,  preservation_flag: 0 }
   - { name: crush,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  # Separation steps (ADR 0002): they split an ingredient into its parts.
+  - { name: trim,         is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: core,         is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
+  - { name: stone,        is_modifier: 1, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
   - { name: raw_assemble, is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
   - { name: salt_and_drain, is_modifier: 0, heat_type: none,  moisture_change: lose,  preservation_flag: 0 }
   - { name: salsa,        is_modifier: 0, heat_type: none,    moisture_change: none,  preservation_flag: 0 }
@@ -516,6 +520,12 @@ components:
   - { name: roasted_broccoli_component,         kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: high }
   - { name: stir_fried_broccoli_component,       kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
   - { name: broccoli_soup_base,                 kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+  # ---- part components (ADR 0002) ----
+  - { name: broccoli_stem_slaw_component,       kind: fresh,        keeps_well: medium, freezes_well: 0, batch_prep_value: medium }
+  - { name: stir_fried_broccoli_stem_component, kind: cooked,       keeps_well: short,  freezes_well: 0, batch_prep_value: low }
+  - { name: sauteed_broccoli_leaf_component,    kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: low }
+  - { name: tomato_skin_powder_component,       kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: high }
+  - { name: tomato_gel_dressing_base,           kind: fresh,        keeps_well: short,  freezes_well: 1, batch_prep_value: low }
   # ---- rutabaga components (sixth full ingredient) ----
   - { name: raw_rutabaga_slaw_component,        kind: fresh,        keeps_well: short,  freezes_well: 0, batch_prep_value: low }
   - { name: roasted_rutabaga_component,         kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
@@ -541,6 +551,63 @@ components:
   - { name: roasted_apricot_component,          kind: cooked,       keeps_well: short,  freezes_well: 1, batch_prep_value: medium }
   - { name: dried_apricot_component,            kind: preserved,    keeps_well: long,   freezes_well: 0, batch_prep_value: high }
   - { name: apricot_compote_component,          kind: cooked,       keeps_well: medium, freezes_well: 1, batch_prep_value: high }
+
+# ---- Decomposition (ADR 0002) ----------------------------------------------
+# What an ingredient physically holds. A part is something a cook can
+# separate; a cut form (slice, dice) is not a part. Transformations name the
+# part they act on with `part:`; without it they act on the whole ingredient.
+parts:
+  - ingredient: broccoli
+    name: florets
+    separated_by: trim
+    provides: "body\ncrunch"
+    description: "The tight green buds. Quick to cook, they brown at the tips and hold dressing in their crevices."
+  - ingredient: broccoli
+    name: stems
+    separated_by: trim
+    provides: "crunch\nbody"
+    description: "Dense, sweet and mild, like kohlrabi. Peel the tough outer skin, then cut thin: matchsticks raw, coins stir-fried, chunks in soup."
+  - ingredient: broccoli
+    name: leaves
+    separated_by: trim
+    provides: "body"
+    description: "Edible greens, close to kale or collards. Usually thrown away."
+  - ingredient: tomato
+    name: flesh
+    separated_by: deseed
+    provides: "body\nacid"
+    description: "The walls of the fruit. Firm and meaty once the gel is out, so it stays in pieces and does not water down a dish."
+  - ingredient: tomato
+    name: seeds_and_gel
+    separated_by: deseed
+    provides: "acid\numami\nhydration"
+    description: "The jelly around the seeds holds most of the sourness and savouriness. Sieve it into a dressing or a sauce."
+  - ingredient: tomato
+    name: skin
+    separated_by: peel
+    provides: "umami"
+    description: "Thin and tough once cooked, but full of colour and flavour. Dried and ground it becomes a savoury tomato powder."
+  - ingredient: tomato
+    name: core
+    separated_by: core
+    edible: conditional
+    not_food_reason: "Edible but hard and pale; worth it only in a stock or a sieved sauce."
+    description: "The firm white centre under the stem."
+  - ingredient: avocado
+    name: flesh
+    separated_by: stone
+    provides: "fat\ncream"
+    description: "The fat lives here. Buttery when ripe; sliced, mashed or grilled in halves. Browns quickly once cut, so add acid."
+  - ingredient: avocado
+    name: skin
+    separated_by: stone
+    edible: "no"
+    not_food_reason: "Tough and bitter; not eaten."
+  - ingredient: avocado
+    name: stone
+    separated_by: stone
+    edible: "no"
+    not_food_reason: "Hard and bitter, and not established as safe to eat. Leaving it in guacamole does not stop browning."
 
 # ---- Transformations -------------------------------------------------------
 transformations:
@@ -1562,6 +1629,7 @@ transformations:
   # are RISKS and TAGS, never missing roles.
   - ingredient: broccoli
     technique: raw_assemble
+    part: florets
     output_component: raw_broccoli_component
     flavour_shift: "Crunchy, vegetal, mild; faintly sulfurous raw"
     texture_shift: "Firm, crunchy"
@@ -1582,6 +1650,7 @@ transformations:
 
   - ingredient: broccoli
     technique: steam
+    part: florets
     output_component: steamed_broccoli_component
     flavour_shift: "Bright, sweet-nutty, vegetal; raw sharpness mellowed"
     texture_shift: "Tender-crisp, vivid green (brief steam; shock to lock)"
@@ -1614,6 +1683,7 @@ transformations:
 
   - ingredient: broccoli
     technique: roast
+    part: florets
     output_component: roasted_broccoli_component
     flavour_shift: "Nutty, sweet, charred edges; deeper savory"
     texture_shift: "Crisp-charred floret tips, tender stems"
@@ -1646,6 +1716,7 @@ transformations:
 
   - ingredient: broccoli
     technique: stir_fry
+    part: florets
     output_component: stir_fried_broccoli_component
     flavour_shift: "Savory, sweet, vegetal; garlicky if allium added"
     texture_shift: "Crisp-tender with char spots"
@@ -1696,6 +1767,108 @@ transformations:
     uses: [soup, chilled_soup, bowl]
     evidence:
       - { source: recipedb, scope: "cream of broccoli / green soup — vegetal + cream + herb" }
+
+  # ---- broccoli parts (ADR 0002): the stems and leaves cooks throw away ----
+  - ingredient: broccoli
+    part: stems
+    technique: raw_slaw
+    output_component: broccoli_stem_slaw_component
+    flavour_shift: "Sweet, mild, juicy; no sulfur bite"
+    texture_shift: "Crisp matchsticks"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: fresh,  polarity: gain }
+      - { family: flavour, value: sweet,  polarity: gain }
+      - { family: texture, value: crisp,  polarity: gain }
+    notes: "Peel first. Raw stems are sweeter and milder than raw florets."
+    missing_roles:
+      - { role: acid,  priority: high,   note: "vinegar or lemon dressing" }
+      - { role: salt,  priority: high,   note: "seasoning" }
+      - { role: fat,   priority: medium, note: "oil or mayo" }
+      - { role: herb,  priority: low,    note: "dill or parsley" }
+    uses: [slaw, salad, sandwich, taco]
+    evidence:
+      - { source: recipedb, scope: "broccoli slaw from shredded stems" }
+
+  - ingredient: broccoli
+    part: stems
+    technique: stir_fry
+    output_component: stir_fried_broccoli_stem_component
+    flavour_shift: "Sweet, savoury, browned edges"
+    texture_shift: "Crisp-tender coins"
+    confidence: high
+    tags_after:
+      - { family: flavour, value: savory, polarity: gain }
+      - { family: flavour, value: sweet,  polarity: gain }
+      - { family: texture, value: tender_crisp, polarity: gain }
+      - { family: state,   value: cooked, polarity: gain }
+    notes: "Thin coins need a minute longer than florets; start them first."
+    missing_roles:
+      - { role: salt,     priority: high,   note: "soy sauce" }
+      - { role: aromatic, priority: medium, note: "garlic or ginger" }
+      - { role: acid,     priority: medium, note: "rice vinegar" }
+      - { role: carb,     priority: low,    note: "rice or noodles" }
+    uses: [rice, bowl, eggs, grains]
+    evidence:
+      - { source: recipedb, scope: "stir-fried broccoli stems with soy and garlic" }
+
+  - ingredient: broccoli
+    part: leaves
+    technique: saute
+    output_component: sauteed_broccoli_leaf_component
+    flavour_shift: "Mild, green, faintly sweet; like kale"
+    texture_shift: "Wilted, silky"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: vegetal, polarity: gain }
+      - { family: texture, value: soft,    polarity: gain }
+      - { family: state,   value: cooked,  polarity: gain }
+    missing_roles:
+      - { role: fat,      priority: high,   note: "olive oil or butter" }
+      - { role: salt,     priority: high,   note: "seasoning" }
+      - { role: aromatic, priority: medium, note: "garlic" }
+      - { role: acid,     priority: low,    note: "lemon" }
+    uses: [eggs, pasta, grains, toast]
+    evidence:
+      - { source: recipedb, scope: "broccoli leaves cooked like kale or collards" }
+
+  # ---- tomato parts (ADR 0002) ----
+  - ingredient: tomato
+    part: skin
+    technique: dry
+    output_component: tomato_skin_powder_component
+    flavour_shift: "Concentrated, savoury, sweet-sour"
+    texture_shift: "Brittle, then a fine powder"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: concentrated, polarity: gain }
+      - { family: flavour, value: umami,        polarity: gain }
+      - { family: state,   value: shelf_stable, polarity: gain }
+    notes: "Dry peeled skins in a low oven until brittle, then grind. Keeps for months."
+    missing_roles:
+      - { role: salt, priority: medium, note: "mix with salt for a seasoning" }
+    uses: [condiment, pantry_base, eggs, pasta]
+    evidence:
+      - { source: roast_culinary, scope: "dried tomato skins ground as a seasoning" }
+
+  - ingredient: tomato
+    part: seeds_and_gel
+    technique: raw_assemble
+    output_component: tomato_gel_dressing_base
+    flavour_shift: "Bright, sour, savoury"
+    texture_shift: "Loose, slightly jellied liquid"
+    confidence: medium
+    tags_after:
+      - { family: flavour, value: acidic, polarity: gain }
+      - { family: flavour, value: umami,  polarity: gain }
+      - { family: texture, value: liquid, polarity: gain }
+    notes: "Sieve the gel from deseeded tomatoes and whisk with oil: a vinaigrette that needs little or no vinegar."
+    missing_roles:
+      - { role: fat,  priority: high,   note: "olive oil" }
+      - { role: salt, priority: high,   note: "seasoning" }
+    uses: [salad, condiment, panzanella]
+    evidence:
+      - { source: caprese, scope: "tomato juices as the dressing of a tomato salad" }
 
   # ---- rutabaga (sixth full ingredient) ---------------------------------------
   # Rutabaga is a brassica ROOT: mustard-family pungency raw, sweet when cooked.
@@ -2288,6 +2461,7 @@ journeys:
     title: Stir-fried broccoli stems with soy and garlic
     preparation: sliced
     primary_transformation: stir_fry
+    part: stems
     starting_state: raw broccoli stems
     output_state: crisp-tender stir-fried broccoli stems
     why_choose: "Uses the dense stems quickly and keeps their bite; choose it when you want a substantial topping rather than a soft side."

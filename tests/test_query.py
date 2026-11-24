@@ -8,7 +8,7 @@ from foodprep import query
 def test_schema_populated(conn):
     assert conn.execute("SELECT count(*) FROM ingredients").fetchone()[0] >= 30
     # 12 tomato + 4 onion + 9 potato + 8 cabbage + 5 broccoli + 4 rutabaga + 4 cucumber + 4 kale + 4 mango + 4 apricot = 58
-    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 61
+    assert conn.execute("SELECT count(*) FROM transformations").fetchone()[0] == 66
     assert conn.execute("SELECT count(*) FROM roles").fetchone()[0] >= 12
     assert conn.execute("SELECT count(*) FROM pairings").fetchone()[0] >= 30
     assert conn.execute("SELECT count(*) FROM component_profiles").fetchone()[0] >= 5
@@ -588,7 +588,7 @@ def test_no_ontology_rot_round6(conn):
     assert conn.execute(
         "SELECT count(*) FROM pairings WHERE role_id IS NULL").fetchone()[0] == 0
     assert conn.execute(
-        "SELECT count(*) FROM transformations").fetchone()[0] == 61
+        "SELECT count(*) FROM transformations").fetchone()[0] == 66
     # every missing-role row points at a real role id
     assert conn.execute(
         "SELECT count(*) FROM transformation_missing_roles mr "
@@ -712,7 +712,8 @@ def test_cabbage_branch_view_renders_with_risks(conn):
 # doneness cliff is a RISK (sulfurous_if_overcooked / harsh_when_raw), never a
 # missing role — the same brassica guardrail as cabbage.
 
-BROCCOLI_TECHS = {"raw_assemble", "steam", "roast", "stir_fry", "soup"}
+# raw_slaw and saute act on the stems and leaves (ADR 0002).
+BROCCOLI_TECHS = {"raw_assemble", "steam", "roast", "stir_fry", "soup", "raw_slaw", "saute"}
 
 
 def test_broccoli_loaded_as_full(conn):
@@ -736,7 +737,7 @@ def test_broccoli_each_transformation_has_missing_roles(conn):
         "JOIN ingredients i ON i.ingredient_id = t.ingredient_id "
         "WHERE i.canonical_name = 'broccoli' AND tech.technique_id = t.technique_id) "
         "FROM techniques tech WHERE tech.name IN "
-        "('raw_assemble','steam','roast','stir_fry','soup')"
+        "('raw_assemble','steam','roast','stir_fry','soup','raw_slaw','saute')"
     ).fetchall()
     by_tech = {r[0]: r[1] for r in rows}
     for tech in BROCCOLI_TECHS:
