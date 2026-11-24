@@ -206,6 +206,26 @@ def test_parts_show_practice_from_the_committed_counts(conn):
     text = query.render_decomposition(d)
     assert "Cooks mostly remove it (RecipeNLG:" in text
     assert "What recipes mean by the ingredient" in text   # flesh
-    # Avocado has parts but no counts yet: no practice line, no error.
-    avo = query.decomposition(conn, "avocado")
-    assert all(p["practice"] is None for p in avo["parts"])
+    avo = {p["name"]: p for p in query.decomposition(conn, "avocado")["parts"]}
+    assert avo["stone"]["practice"]["evidence_level"] == "removed"
+    assert avo["flesh"]["practice"]["evidence_level"] == "default"
+    # Kale has no parts, so no practice either.
+    assert query.decomposition(conn, "kale")["parts"] == []
+
+
+@pytest.mark.parametrize("part, sentence, kind, expected", [
+    ("flesh", "Scoop the avocado flesh into a food processor.", "direction", "used"),
+    ("flesh", "Halve avocado, discard stone, scoop out flesh.", "direction", "used"),
+    ("skin", "2 ripe avocados, peeled and pitted", "ingredient", "removed"),
+    ("skin", "Skin, halve, and stone avocadoes.", "direction", "removed"),
+    ("skin", "Fill the avocado shells with the mixture.", "direction", "used"),
+    ("skin", "Score the flesh of the avocado down to the skin.", "direction", "cue"),
+    ("skin", "Spoon the beans into the taco shell, then add avocado.", "direction", None),
+    ("skin", "Add avocado (no skin or pit) and lime juice.", "direction", "removed"),
+    ("stone", "Peel, seed and mash avocados.", "direction", "removed"),
+    ("stone", "Leave two avocado seeds in the bottom of your dip.", "direction", "used"),
+    ("stone", "Strike the avocado pit with the knife and pry out the pit.", "direction", "removed"),
+    ("stone", "1 tablespoon grape seed or avocado oil", "ingredient", None),
+])
+def test_avocado(part, sentence, kind, expected):
+    assert cls("avocado", part, sentence, kind) == expected

@@ -101,6 +101,8 @@ _BROCCOLI = rf"(?<!chinese )(?<!chinese-style )broccoli{NOT_BROCCOLI}"
 INGREDIENTS = {
     "tomato": Ingredient("tomato", _rx(r"tomato"), _rx(r"\btomato(e?s)?\b")),
     "broccoli": Ingredient("broccoli", _rx(_BROCCOLI), _rx(rf"\b{_BROCCOLI}\b")),
+    "avocado": Ingredient("avocado", _rx(r"avocado(?!\s+oil)"),
+                          _rx(r"\bavocado(e?s)?\b(?!\s+oil)")),
 }
 
 # A processed tomato product, not the fruit: these never have parts to remove.
@@ -238,6 +240,49 @@ RULES: tuple[PartRule, ...] = (
         implicit_kept=_rx(r"leav\w* (\w+ ){0,3}cores?|through (the )?core|"
                           r"fill\w* (\w+ ){0,2}cores?"),
     ),
+    PartRule(
+        "avocado", "flesh",
+        mention=_rx(r"\b(flesh|pulp|meat)\b"),
+        confusers=_rx(rf"fish|salmon|crab|lobster|shrimp|chicken|beef|pork|turkey|"
+                      rf"\bmeat\b|sausage|mango|melon|papaya|tomato|eggplant|squash|"
+                      rf"pumpkin|potato|coconut|lime|lemon|orange|{SWEET_PEPPER}|{CHILE}"),
+        default_part=True,
+    ),
+    PartRule(
+        "avocado", "skin",
+        mention=_rx(r"\b(skins?|peels?(?!ed)|shells?|rinds?)\b"),
+        confusers=_rx(rf"tomato|potato|{SWEET_PEPPER}|{CHILE}|onion|garlic|chicken|"
+                      r"fish|salmon|lemon|lime|orange|citrus|mango|cucumber|tortilla|"
+                      r"taco|tostad|potsticker|wonton|dumpling|mask|pie|tart|pastry|egg|"
+                      r"shrimp|crab|lobster|nut|almond|"
+                      r"pistachio|peanut|kiwi|banana|apple|pear\b|peach"),
+        implicit_removed=_rx(r"\bpeel(ed|ing)?\b|\bskinned\b|"
+                             r"scoop(ed)? (\w+ ){0,4}(out|from)|"
+                             r"\bspoon(ed)? (\w+ ){0,3}(out|from)|"
+                             r"\b(skin|shell)\b(?=\s*(,|&|and\b|the\b|them\b|avocado|\w+ avocado))|"
+                             r"^\W*(skin|shell)\b|\b(and|,)\s*(skin|shell)\b(?! side)"),
+        implicit_kept=_rx(r"(reserv|sav|keep|use)\w* (\w+ ){0,3}(shells?|skins?)|"
+                          r"\b(into|in|fill|stuff)\w* (\w+ ){0,3}(shells?|skins?)|"
+                          r"(shells?|skins?) (as|for) (\w+ ){0,2}(bowls?|cups?|serving|containers?|boats?)"),
+        cue=_rx(r"(score|cut|slice|cross-?hatch)\w* (\w+ ){0,8}(to|through|thru|until|til|reach)\w* "
+                r"(\w+ ){0,3}skin|not (to )?cut (through|thru) (the )?skin|in (its|the) skin"),
+    ),
+    PartRule(
+        "avocado", "stone",
+        mention=_rx(r"\b(pits?|stones?|seeds?)\b"),
+        confusers=_rx(rf"peach|cherr|olive|date|mango|apricot|plum|nectarine|"
+                      rf"pomegranate|sesame|poppy|mustard|cumin|fennel|coriander|"
+                      rf"caraway|celery|sunflower|pumpkin|chia|flax|tomato|cucumber|"
+                      rf"melon|papaya|grape|{SWEET_PEPPER}|{CHILE}|pepper|bagel|bread|"
+                      r"stone[- ]ground|stoneware|fire|bbq|barbecue|grill"),
+        implicit_removed=_rx(r"\b(pitted|seeded|stoned|de-?pitted|de-?stoned)\b|"
+                             r"(?<!the )(?<!a )(?<!its )(?<!of )"
+                             r"\b(pit|seed|stone)\b(?=\s*(,|&|and\b|the\b|them\b|avocado|\w+ avocado|[.;]|$))|"
+                             r"^\W*(pit|seed|stone)\b|\b(and|,)\s*(pit|seed|stone)\b|"
+                             r"pry\w* (\w+ ){0,2}(pits?|stones?|seeds?)|pops? out"),
+        implicit_kept=_rx(r"(leav|keep|place|put|add|insert|bury|push|set)\w* "
+                          r"(\w+ ){0,3}(pits?|stones?|seeds?) (\w+ ){0,3}(in|into|on|back)"),
+    ),
 )
 
 RULES_BY_KEY = {(r.ingredient, r.part): r for r in RULES}
@@ -245,7 +290,7 @@ RULES_BY_KEY = {(r.ingredient, r.part): r for r in RULES}
 REMOVED = _rx(r"discard|throw (them |it )?(away|out)|\bremov(e|ed|ing)\b|"
               r"(cut|trim|break|snap|pull|pick|slice|tear|rub|slip|pinch|take|"
               r"twist|scrape|strip)(ped|med|ping|ming|ing|s|ed|n)? (\w+ ){0,2}(off|away|out)\b|"
-              r"slides? off|(don.t|do not|never|not) use\b|(spoon|push)\w* (\w+ ){0,3}out|get rid of|\bto loosen|"
+              r"\bno (\w+ )?(skins?|pits?|seeds?|stones?|peel|cores?)\b|slides? off|(don.t|do not|never|not) use\b|(spoon|push)\w* (\w+ ){0,3}out|get rid of|\bto loosen|"
               r"slip(ped|s)? (the |their )?skins?|\bdetach|\beliminat|"
               r"squeeze(d)? (\w+ ){0,3}out|scoop(ed)? (\w+ ){0,3}out|strain(ed)? (\w+ ){0,3}out|"
               r"press(ed)? (\w+ ){0,3}out|shake (\w+ ){0,3}out|"
@@ -253,11 +298,12 @@ REMOVED = _rx(r"discard|throw (them |it )?(away|out)|\bremov(e|ed|ing)\b|"
               r"(use|dish|recipe|purpose)|compost|\bwithout (the |their )?"
               r"(stems?|stalks?|skins?|seeds?|cores?|leaves|peel)")
 # Only these take a default part (florets, flesh) out of the dish.
-_OTHER_OBJECT = r"(?!\w*\s+(\w+\s+){0,2}(stems?|stalks?|leaves|seeds?|skins?|cores?)\b)"
+_OTHER_OBJECT = (r"(?!\w*\s+(\w+\s+){0,2}(stems?|stalks?|leaves|seeds?|skins?|cores?|"
+                 r"pits?|stones?|peels?|shells?|bones?|membranes?|rinds?)\b)")
 DISCARD = _rx(rf"discard{_OTHER_OBJECT}|throw (them |it )?(away|out){_OTHER_OBJECT}|compost|"
               r"for (another|other|a different|later) (use|dish|recipe|purpose)")
 OTHER_PART = _rx(r"\b(stems?|stalks?|leaves|seeds?|skins?|cores?|pulp|water|juices?|"
-                 r"pips|roots|peels|them)\b")
+                 r"pips|roots|peels?|them|pits?|stones?|shells?|bones?|membranes?|rinds?)\b")
 # "Remove from the heat" moves the pot, it does not take the part away.
 NOT_REMOVAL = _rx(r"^\W*(\w+ ){0,4}from (the )?(heat|pan|oven|skillet|pot|water|wok|grill|"
                   r"burner|stove|broiler|bowl|baking|sheet|steamer|microwave|liquid|fire)")
@@ -303,7 +349,7 @@ USED = _rx(r"\b(add|adding|added|cook|chop|chopped|slice|sliced|dice|diced|"
            r"simmer|saut[eé]e?d?|roast|split|quarter|spears?|planks?|slices?|bake|grill|fry|fried|puree|pur[eé]e|blend|mix|"
            r"combine|place|arrange|serve|use|include|reserve|keep|tender|crisp|"
            r"garnish|dry|dried|dehydrat|powder|grind|ground|pulveri[sz]e|coins?|rounds|"
-           r"pieces|cubes?|together|with|wash|rinse|separate|break|divide|spread|lay|"
+           r"pieces|cubes?|together|with|scoop|mash|smash|chuck|wash|rinse|separate|break|divide|spread|lay|"
            r"put|set aside|drain|squeeze|pour|sprinkle|top|season|drizzle|layer|"
            r"transfer|return|reheat|heat|warm|thaw|cool|process|measure|brown)\b")
 CANNED_WORD = _rx(r"\b(cans?|canned|tins?|tinned|jars?|cartons?|pkg|packages?|"
@@ -434,8 +480,13 @@ def classify(rule: PartRule, sentence: str, kind: str,
             return "canned"
         return "removed"
 
+    # "Fill the taco shell": a part word owned by another ingredient cannot
+    # make the sentence keep ours, so blank those words before the keep check.
+    unowned = rule.mention.sub(
+        lambda m: "#" * len(m.group(0)) if _owned(m.string, m.start(), owner) else m.group(0),
+        sentence)
     if rule.implicit_kept and any(
-            _near(rule.implicit_kept, target, sentence, blocker=rule.confusers, owner=owner)
+            _near(rule.implicit_kept, target, unowned, blocker=rule.confusers, owner=owner)
             for target in (rule.mention, ing.named)):
         return "used"
     one_word_removal = rule.implicit_removed is not None and any(
@@ -629,6 +680,7 @@ def build_evidence(csv_path: Path | str, totals: Counter[str],
             "tomato": baselines["tomato"],
             "tomato_fruit": baselines["tomato:fresh"],
             "broccoli": baselines["broccoli"],
+            "avocado": baselines["avocado"],
         },
         "thresholds": {"rare_share": RARE_SHARE, "min_used": MIN_USED},
         "parts": [to_record(tallies[(r.ingredient, r.part)], baselines) for r in RULES],

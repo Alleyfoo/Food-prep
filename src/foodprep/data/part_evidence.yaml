@@ -29,6 +29,7 @@ baselines:
   tomato: 312317
   tomato_fruit: 240796
   broccoli: 49246
+  avocado: 26838
 thresholds:
   rare_share: 0.01
   min_used: 30
@@ -170,12 +171,12 @@ parts:
   evidence_level: default
   recipes_mentioning: 483
   recipes:
-    used: 450
+    used: 456
     trimmed: 0
     removed: 4
     cue: 0
     canned: 0
-    unclear: 29
+    unclear: 23
   by_source:
     Gathered:
       used: 233
@@ -185,23 +186,23 @@ parts:
       canned: 0
       unclear: 11
     Recipes1M:
-      used: 217
+      used: 223
       trimmed: 0
       removed: 3
       cue: 0
       canned: 0
-      unclear: 18
+      unclear: 12
   sentences:
-    used: 508
+    used: 516
     trimmed: 0
     removed: 6
     cue: 0
     canned: 0
-    unclear: 34
+    unclear: 26
   techniques_when_used:
     boil: 23
+    roast: 20
     bake: 19
-    roast: 19
     soup: 17
     grill: 8
     dry: 6
@@ -213,36 +214,36 @@ parts:
   evidence_level: removed
   recipes_mentioning: 16869
   recipes:
-    used: 467
+    used: 473
     trimmed: 0
-    removed: 16356
+    removed: 16355
     cue: 0
     canned: 0
-    unclear: 46
+    unclear: 41
   by_source:
     Gathered:
-      used: 247
+      used: 248
       trimmed: 0
       removed: 9023
       cue: 0
       canned: 0
-      unclear: 27
+      unclear: 26
     Recipes1M:
-      used: 220
+      used: 225
       trimmed: 0
-      removed: 7333
+      removed: 7332
       cue: 0
       canned: 0
-      unclear: 19
+      unclear: 15
   sentences:
-    used: 502
+    used: 508
     trimmed: 0
-    removed: 16817
+    removed: 16818
     cue: 0
     canned: 0
-    unclear: 60
+    unclear: 53
   techniques_when_used:
-    soup: 41
+    soup: 40
     dry: 27
     boil: 14
     roast: 10
@@ -257,17 +258,17 @@ parts:
   evidence_level: removed
   recipes_mentioning: 17232
   recipes:
-    used: 916
+    used: 911
     trimmed: 0
-    removed: 12922
+    removed: 12927
     cue: 313
     canned: 3021
     unclear: 60
   by_source:
     Gathered:
-      used: 502
+      used: 497
       trimmed: 0
-      removed: 7921
+      removed: 7926
       cue: 187
       canned: 2082
       unclear: 32
@@ -279,9 +280,9 @@ parts:
       canned: 939
       unclear: 28
   sentences:
-    used: 961
+    used: 956
     trimmed: 0
-    removed: 13914
+    removed: 13919
     cue: 496
     canned: 3164
     unclear: 111
@@ -291,7 +292,7 @@ parts:
     grill: 52
     boil: 49
     soup: 29
-    dry: 22
+    dry: 21
     saute: 8
     fry: 8
     raw: 3
@@ -302,37 +303,163 @@ parts:
   evidence_level: removed
   recipes_mentioning: 4293
   recipes:
-    used: 44
+    used: 46
     trimmed: 0
     removed: 4242
     cue: 0
     canned: 0
-    unclear: 7
+    unclear: 5
   by_source:
     Gathered:
-      used: 23
+      used: 24
       trimmed: 0
       removed: 2191
       cue: 0
       canned: 0
-      unclear: 3
+      unclear: 2
     Recipes1M:
-      used: 21
+      used: 22
       trimmed: 0
       removed: 2051
       cue: 0
       canned: 0
-      unclear: 4
+      unclear: 3
   sentences:
-    used: 48
+    used: 50
     trimmed: 0
     removed: 4381
     cue: 0
     canned: 0
-    unclear: 7
+    unclear: 5
   techniques_when_used:
     roast: 2
     boil: 2
     dry: 2
     soup: 1
+    bake: 1
+- ingredient: avocado
+  part: flesh
+  evidence_level: default
+  recipes_mentioning: 1440
+  recipes:
+    used: 1402
+    trimmed: 0
+    removed: 1
+    cue: 0
+    canned: 0
+    unclear: 37
+  by_source:
+    Gathered:
+      used: 786
+      trimmed: 0
+      removed: 0
+      cue: 0
+      canned: 0
+      unclear: 21
+    Recipes1M:
+      used: 616
+      trimmed: 0
+      removed: 1
+      cue: 0
+      canned: 0
+      unclear: 16
+  sentences:
+    used: 1518
+    trimmed: 0
+    removed: 1
+    cue: 0
+    canned: 0
+    unclear: 50
+  techniques_when_used:
+    soup: 123
+    grill: 26
+    raw: 14
+    dry: 7
+    roast: 5
+    bake: 4
+    fry: 2
+    saute: 2
+    boil: 2
+- ingredient: avocado
+  part: skin
+  evidence_level: removed
+  recipes_mentioning: 10154
+  recipes:
+    used: 235
+    trimmed: 0
+    removed: 9891
+    cue: 11
+    canned: 0
+    unclear: 17
+  by_source:
+    Gathered:
+      used: 117
+      trimmed: 0
+      removed: 6193
+      cue: 7
+      canned: 0
+      unclear: 7
+    Recipes1M:
+      used: 118
+      trimmed: 0
+      removed: 3698
+      cue: 4
+      canned: 0
+      unclear: 10
+  sentences:
+    used: 269
+    trimmed: 0
+    removed: 10215
+    cue: 20
+    canned: 0
+    unclear: 32
+  techniques_when_used:
+    raw: 15
+    grill: 9
+    bake: 7
+    soup: 3
+    dry: 2
+    saute: 1
+    steam: 1
+- ingredient: avocado
+  part: stone
+  evidence_level: removed
+  recipes_mentioning: 7988
+  recipes:
+    used: 291
+    trimmed: 0
+    removed: 7674
+    cue: 0
+    canned: 0
+    unclear: 23
+  by_source:
+    Gathered:
+      used: 156
+      trimmed: 0
+      removed: 4491
+      cue: 0
+      canned: 0
+      unclear: 10
+    Recipes1M:
+      used: 135
+      trimmed: 0
+      removed: 3183
+      cue: 0
+      canned: 0
+      unclear: 13
+  sentences:
+    used: 330
+    trimmed: 0
+    removed: 7942
+    cue: 0
+    canned: 0
+    unclear: 52
+  techniques_when_used:
+    soup: 10
+    raw: 10
+    dry: 7
+    grill: 2
+    boil: 2
+    fry: 1
+    roast: 1
     bake: 1
