@@ -374,7 +374,7 @@ def test_held_out_dishes_rely_on_nothing_changed_after_the_freeze():
     assert now["code"] == frozen["code"], "constructions.py or operations.py changed after the freeze"
     assert now["catalogue"] == frozen["catalogue"]
     held = c.dish_ids("held_out")
-    assert set(held) <= set(frozen["held_out"])
+    assert set(held) == set(frozen["held_out"]), "the held-out set is the one recorded before design"
     for d in held:
         used = c.used_by(d)
         for op in used["operations"]:
@@ -382,6 +382,34 @@ def test_held_out_dishes_rely_on_nothing_changed_after_the_freeze():
             assert now["operations"][op] == frozen["operations"][op], (d, op, "changed after the freeze")
         new_keys = set(used["property_keys"]) - set(frozen["property_keys"])
         assert not new_keys, (d, new_keys)
+
+
+HELD_OUT_VERDICTS = {
+    "draniki": "fully", "kolokythokeftedes": "fully", "chawanmushi": "partly",
+    "farcis_nicois": "partly", "pierogi_ruskie": "partly", "spanakopita": "partly",
+    "zha_qie_he": "partly", "moi_moi": "partly",
+}
+
+
+def test_held_out_verdicts_are_pinned(reports):
+    """Step 4 results (generalisation.md). A held-out dish that later fits
+    better because the model changed is progress, but it is no longer evidence
+    of generalisation: record why when this table changes."""
+    assert {d: reports[d].verdict for d in HELD_OUT_VERDICTS} == HELD_OUT_VERDICTS
+
+
+def test_held_out_failures_point_at_missing_structure(reports):
+    """Each held-out failure is a specific operation or role that would need a
+    change after the freeze; none is malformed data."""
+    fails = {(d, rid): r.failures for d in HELD_OUT_VERDICTS
+             for rid, r in reports[d].routes.items() if r.failures}
+    assert set(fails) == {("chawanmushi", "steamed_custard"), ("farcis_nicois", "vegetarian"),
+                          ("zha_qie_he", "egg_starch_coat"), ("zha_qie_he", "double_fried"),
+                          ("moi_moi", "steamed")}
+    assert any("cuire_vapeur" in f and "steams a solid" in f
+               for f in fails[("chawanmushi", "steamed_custard")])
+    assert any("cuire_vapeur" in f and "tender enough" in f for f in fails[("moi_moi", "steamed")])
+    assert any("a hollow to fill" in f for f in fails[("zha_qie_he", "double_fried")])
 
 
 # ---- CLI ---------------------------------------------------------------------------------

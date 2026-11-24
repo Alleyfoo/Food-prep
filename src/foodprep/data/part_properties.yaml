@@ -676,3 +676,56 @@ staged_parts:
         piece: fine
         pigment: none
         inner_changes: {}
+
+  # Added after the R3 schema freeze for the held-out dishes: data only,
+  # existing property keys only (tests/test_constructions.py checks this).
+  spinach:
+    leaves:
+      water: very_high
+      fibre: medium
+      toughness: low
+      firmness: low
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: low
+      umami: low
+      raw_ok: true
+      thin: true
+      leafy: true
+      pigment: green
+      flavour: [green, mineral]
+      shape: flat
+      piece: large
+      flexible: true
+      sheetable: true
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      note: "Not in the ingredient catalogue (Lidl gap)."
+
+  bread:
+    crumb:
+      water: low
+      fibre: low
+      toughness: low
+      firmness: low
+      fat: low
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: true
+      pigment: none
+      flavour: [mild]
+      shape: irregular
+      piece: medium
+      flexible: false
+      sheetable: false
+      starch: high
+      pectin: none
+      emulsifies: false
+      holds_shape_cooked: false
+      water_uptake: high
+      note: "Day-old white bread for soaking (farcis). The catalogue's `bread` ingredient."

@@ -115,6 +115,23 @@ additions:
   mortadella: {catalogue: null, props: {fat: high}, note: "outside the vegetable scope"}
   ragu: {catalogue: null, props: {liquid: false, water: medium, fat: medium}, note: "meat sauce cooked down until thick; outside the vegetable scope"}
 
+  # added after the freeze, for the held-out dishes (data only)
+  self_raising_flour: {catalogue: null, props: {piece: powder, water: none, starch: very_high, water_uptake: high}, note: "flour with raising agent; not catalogued"}
+  cornmeal: {catalogue: null, props: {piece: fine, water: none, starch: very_high, water_uptake: high, crisp: true}, note: "not catalogued"}
+  feta: {catalogue: null, props: {fat: high, water: medium}, note: "not catalogued"}
+  hard_cheese: {catalogue: parmesan, props: {fat: high, water: low, umami: high}, note: "a hard grating cheese; parmesan is the catalogue's"}
+  curd_cheese: {catalogue: null, props: {fat: medium, water: medium}, note: "twaróg, bryndza; not catalogued"}
+  sour_cream: {catalogue: null, props: {liquid: true, water: high, fat: high}, note: "not catalogued"}
+  vegetable_oil: {catalogue: null, props: {fat: very_high, liquid: true}, note: "neutral or palm oil; not catalogued"}
+  yufka: {catalogue: null, props: {thin: true, flexible: true, piece: large, starch: high, water: low}, note: "bought pastry sheets; not catalogued"}
+  soy_sauce: {catalogue: soy_sauce, props: {liquid: true, umami: high}}
+  mirin: {catalogue: null, props: {liquid: true, sugar: high}, note: "not catalogued"}
+  shiitake: {catalogue: null, props: {}, note: "not catalogued"}
+  chicken: {catalogue: null, props: {}, note: "outside the vegetable scope"}
+  kamaboko: {catalogue: null, props: {}, note: "fish cake; outside the vegetable scope"}
+  crayfish: {catalogue: null, props: {}, note: "ground dried crayfish; outside the vegetable scope"}
+  sugar: {catalogue: sugar, props: {sugar: very_high}}
+
 dishes:
 
   # ============================== C1 released starch ==============================
@@ -2007,3 +2024,684 @@ dishes:
         final: {state: {cooked: true, browned: true}, recipes: [A9b]}
         gaps:
           - {kind: evidence, note: "reviewers added egg when it would not hold (comments, not the method)"}
+
+  # ============================== held-out set (after the freeze) ==============================
+  # Chosen before schema design (docs/research/r3-construction-modelling/
+  # dish-selection.md), read and represented only after construction_freeze.yaml
+  # was committed, with data only: no operation, schema or code change.
+
+  draniki:
+    name: Draniki / deruny
+    tradition: Belarus, Russia, Ukraine; Russian and Ukrainian sources
+    split: held_out
+    routes:
+      salted_early:
+        recipes: [E5a]
+        patterns: [C1]
+        holds_by: [H1, H5b, H9]
+        water: [W1, W4]
+        why: >
+          Grated potato and onion are salted and rested so the salt draws the
+          juice, which is pressed out; the starch that settles from it is
+          stirred back in, with a little egg and flour kept low so the potato
+          taste dominates. The crust must form before turning.
+        materials:
+          potato:
+            from: potato.tuber
+            recipes: [E5a]
+            steps:
+              - {op: raper, evidence: "grated coarse with the onion"}
+              - {op: degorger, keep: drained, evidence: "salted, covered, rested 5-7 min, then pressed through a colander or cheesecloth, the juice kept; 'Важно хорошо отжать жидкость' so they cook evenly and do not fall apart"}
+          settled:
+            from: {material: potato, step: degorger, output: vegetable_water}
+            recipes: [E5a]
+            water: [W4]
+            steps:
+              - {op: decanter, keep: settled, discard: [clear], evidence: "once a sediment forms, the liquid poured off and the starch stirred into the potato (no reason given)"}
+          onion:
+            from: onion.bulb
+            recipes: [E5a]
+            steps: [eplucher, raper]
+        assemblies:
+          mass:
+            op: melanger
+            recipes: [E5a]
+            roles: {body: potato, starch: settled, coagulant: eggs, dry_phase: wheat_flour, flavour: [onion, salt]}
+            evidence: "1 egg and 1 tbsp flour per 600 g potato; flour kept low so the potato taste dominates"
+            steps:
+              - {op: faconner, evidence: "about 1 tbsp each, pressed lightly"}
+              - {op: rissoler, evidence: "medium heat 4-5 min per side; not turned before the golden crust forms"}
+        result: mass
+        final: {state: {cooked: true, browned: true}, recipes: [E5a]}
+      classic:
+        recipes: [E5b, E5c]
+        patterns: [C1]
+        holds_by: [H1, H9]
+        water: [W2, W4, W7]
+        why: >
+          Fine-grated potato, squeezed; its settled starch returned, which
+          makes flour unnecessary (E5b) and keeps the deruny whole (E5c). Salt
+          only just before frying, so the mass does not run; no lid, so steam
+          does not soften the crust.
+        materials:
+          potato:
+            from: potato.tuber
+            recipes: [E5b, E5c]
+            steps:
+              - {op: raper, evidence: "grated last, on the finest grater (E5b); starchy potatoes, fine (E5c)"}
+              - {op: presser, keep: pulp, evidence: "squeezed quickly through cheesecloth (E5b); some liquid pressed out gently (E5c)"}
+          settled:
+            from: {material: potato, step: presser, output: juice}
+            recipes: [E5b, E5c]
+            water: [W4]
+            steps:
+              - {op: decanter, keep: settled, discard: [clear], evidence: "juice left 5-10 min, liquid poured off, starch returned (E5c)"}
+          onion:
+            from: onion.bulb
+            recipes: [E5b, E5c]
+            steps: [eplucher, {op: raper, evidence: "grated with the potato: onion juice keeps it from darkening (E5b, E5c)"}]
+        assemblies:
+          mass:
+            op: melanger
+            recipes: [E5b, E5c]
+            roles:
+              body: potato
+              starch: settled
+              flavour: [onion, salt]
+              liquid: {use: sour_cream, optional: true, recipes: [E5b], note: "a little milk or sour cream added at once"}
+              coagulant: {use: eggs, optional: true, recipes: [E5b], note: "the classic Belarusian version has none (E5b)"}
+              dry_phase: {use: wheat_flour, optional: true, recipes: [E5b], note: "E5c advises against flour"}
+            expects:
+              - member: settled
+                state: {binder: true}
+                because: "with the starch, flour is not needed (E5b); it helps deruny stay whole when frying (E5c)"
+                recipes: [E5b, E5c]
+              - member: potato
+                state: {salted: false}
+                because: "salt just before frying: salt draws liquid and makes the mass runnier (E5c)"
+                recipes: [E5c]
+            steps:
+              - {op: faconner, evidence: "thin cakes with gaps between them"}
+              - {op: rissoler, evidence: "very well-heated pan, lard or oil (E5b); no lid: trapped steam softens the crust (E5c)"}
+        result: mass
+        final: {state: {cooked: true, browned: true}, recipes: [E5b, E5c]}
+
+  kolokythokeftedes:
+    name: Kolokythokeftedes
+    tradition: Greece, Greek sources
+    split: held_out
+    routes:
+      baked:
+        recipes: [M4a]
+        patterns: [C4, C9]
+        holds_by: [H6a, H5b]
+        water: [W1, W2, W6]
+        why: >
+          Grated courgette is salted and squeezed very well; egg, feta and a
+          little self-raising flour hold it, the flour absorbing the remaining
+          liquid. A dry crumb coat and the oven replace frying.
+        materials:
+          courgette:
+            from: courgette.fruit
+            recipes: [M4a]
+            water: [W1, W2]
+            steps:
+              - {op: raper, evidence: "grated coarse into a colander"}
+              - {op: degorger, keep: drained, discard: [vegetable_water], evidence: "salted lightly, rested 10 min"}
+              - {op: presser, keep: pulp, discard: [juice], evidence: "squeezed very well"}
+          onion:
+            from: onion.bulb
+            recipes: [M4a]
+            steps: [eplucher, hacher]
+        assemblies:
+          mass:
+            op: melanger
+            recipes: [M4a]
+            roles: {body: courgette, coagulant: eggs, dry_phase: self_raising_flour, flavour: [feta, onion, spring_onion, herbs, spices]}
+            evidence: "flour mixed in 2-3 times only; it is there to absorb the remaining liquid (M4a)"
+            expects:
+              - member: courgette
+                state: {water: "<=medium"}
+                because: "salted and squeezed very well before the egg and flour (M4a)"
+                recipes: [M4a]
+            steps:
+              - {op: faconner, evidence: "rounds, flattened"}
+          coated:
+            op: revetir
+            recipes: [M4a]
+            roles: {piece: mass, coat: cornmeal}
+            evidence: "coated in cornmeal or rusk crumbs"
+            steps:
+              - {op: cuire_four, evidence: "on paper, 200 C fan about 20 min; with enough flour or rusk they need no oil (M4a)"}
+        result: coated
+        final: {state: {cooked: true, coated: true}, recipes: [M4a]}
+        gaps:
+          - {kind: ingredient, note: "feta, self-raising flour and cornmeal are not catalogued"}
+      pan_fried:
+        recipes: [M4b]
+        patterns: [C4]
+        holds_by: [H6a, H5b, H9]
+        water: [W2, W6]
+        why: >
+          Squeezed (not salted) courgette with much cheese, egg and
+          self-raising flour, rested 30 min, spooned into a little olive oil at
+          moderate heat so they stay fluffy and fairly dry.
+        materials:
+          courgette:
+            from: courgette.fruit
+            recipes: [M4b]
+            steps:
+              - raper
+              - {op: presser, keep: pulp, discard: [juice], evidence: "excess water squeezed out; no salting stated"}
+        assemblies:
+          mass:
+            op: melanger
+            recipes: [M4b]
+            roles: {body: courgette, coagulant: eggs, dry_phase: self_raising_flour, flavour: [hard_cheese, feta, spring_onion, herbs]}
+            steps:
+              - {op: reposer, evidence: "30 min"}
+              - {op: faconner, evidence: "spooned"}
+              - {op: rissoler, evidence: "heavy pan, olive oil covering the base, medium heat; little oil and low heat keep them fluffy and fairly dry; too hot and they do not cook through (M4b)"}
+        result: mass
+        final: {state: {cooked: true, browned: true}, recipes: [M4b]}
+
+  chawanmushi:
+    name: Chawanmushi
+    tradition: Japan, Japanese source
+    split: held_out
+    routes:
+      steamed_custard:
+        recipes: [A8a]
+        patterns: [C6]
+        holds_by: [H5a]
+        why: >
+          Egg diluted with about three times its volume of cooled dashi sets
+          by itself when steamed gently; it is beaten without foaming and
+          strained so the custard is smooth. Strong heat only until the cups
+          warm, then low.
+        assemblies:
+          custard:
+            op: melanger
+            recipes: [A8a]
+            roles:
+              body: {use: eggs, prep: "beaten gently without foaming"}
+              liquid: {use: dashi, note: "cooled; about 3 times the egg volume"}
+              flavour: [mirin, soy_sauce, salt]
+            state: {water: very_high}
+            because: [dashi]
+            steps:
+              - {op: filtrer, evidence: "strained through a tea strainer to remove unevenness and bubbles"}
+          cups:
+            op: incorporer
+            recipes: [A8a]
+            roles: {matrix: custard, inclusion: [chicken, shiitake, kamaboko]}
+            expects:
+              - member: custard
+                state: {aerated: false, clear: true}
+                because: "beaten without foaming, bubbles strained out (A8a)"
+                recipes: [A8a]
+            steps:
+              - {op: cuire_vapeur, evidence: "a dry cloth under the lid; high heat 1-2 min until the cups warm, then low 15-20 min; done when a skewer brings up clear liquid"}
+        result: cups
+        final: {state: {cooked: true}, recipes: [A8a]}
+        gaps:
+          - {kind: model, note: "the cup is a mould that holds the liquid custard while it sets; it is not an edible container and is not represented"}
+          - {kind: scope, note: "chicken, kamaboko"}
+          - {kind: ingredient, note: "dashi, mirin, shiitake are not catalogued"}
+
+  farcis_nicois:
+    name: Petits farcis niçois
+    tradition: Nice, France; French sources
+    split: held_out
+    routes:
+      meat_baked:
+        recipes: [M16a]
+        patterns: [C7]
+        holds_by: [H7]
+        water: [W5]
+        why: >
+          Courgettes, onions and aubergines are boiled, halved and hollowed;
+          all the scooped flesh is browned and goes back into a filling held by
+          bread soaked in milk, Parmesan and an egg. The shells hold it through
+          a gentle bake that keeps the vegetables' juice.
+        materials:
+          courgette:
+            from: courgette.fruit
+            recipes: [M16a]
+            steps:
+              - {op: blanchir, evidence: "boiled 10 min in salted water"}
+              - {op: fendre, evidence: "halved"}
+              - {op: creuser, keep: shell, evidence: "flesh scooped"}
+          flesh:
+            from: {material: courgette, step: creuser, output: flesh}
+            recipes: [M16a]
+            steps: [hacher, {op: sauter, evidence: "added to the browned onion flesh and garlic; off the heat"}]
+          onion:
+            from: onion.bulb
+            recipes: [M16a]
+            note: "the onion halves are vessels too; an assembly has one container, so only the courgette is shown"
+            steps:
+              - eplucher
+              - {op: blanchir, evidence: "boiled 10 min"}
+              - fendre
+              - {op: creuser, keep: flesh, evidence: "flesh scooped"}
+              - hacher
+              - {op: sauter, evidence: "browned lightly with garlic"}
+          bread:
+            from: bread.crumb
+            recipes: [M16a]
+            steps:
+              - {op: tremper, evidence: "50 g bread soaked in milk"}
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [M16a]
+            roles:
+              body: flesh
+              dry_phase: bread
+              coagulant: eggs
+              flavour: [onion, garlic, minced_meat, ham, parmesan, herbs]
+          stuffed:
+            op: farcir
+            recipes: [M16a]
+            roles: {container: courgette, filling: filling}
+            steps:
+              - {op: cuire_four, evidence: "breadcrumbs on top; at least 30 min until gratinéed; historically in the baker's oven at gentle heat so the vegetables kept their juice"}
+        result: stuffed
+        final: {state: {cooked: true, hollow: true, filled: true}, recipes: [M16a]}
+        gaps:
+          - {kind: model, note: "several vessels (courgette, onion, aubergine, tomato, pepper) share one filling: an assembly has one container"}
+          - {kind: scope, note: "veal and ham"}
+          - {kind: ingredient, note: "aubergine and peppers are not catalogued"}
+      vegetarian:
+        recipes: [M16b]
+        patterns: [C7]
+        holds_by: [H7]
+        why: >
+          Raw mini tomatoes are hollowed and their pulp kept; roasted courgette,
+          cooked rice, egg, Parmesan, the pulp and crumbs are blended into a
+          filling piped into the shells.
+        materials:
+          tomato:
+            from: tomato.flesh
+            recipes: [M16b]
+            steps:
+              - {op: creuser, keep: shell, evidence: "mini tomatoes hollowed raw; pulp kept"}
+          pulp:
+            from: {material: tomato, step: creuser, output: flesh}
+            recipes: [M16b]
+          courgette:
+            from: courgette.fruit
+            recipes: [M16b]
+            steps:
+              - {op: troncons, evidence: "2 kg cut into chunks"}
+              - {op: rotir, evidence: "roasted 160 C 25 min until very tender"}
+          rice:
+            from: rice.grain
+            recipes: [M16b]
+            steps: [{op: cuire_anglaise, evidence: "200 g cooked rice"}]
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [M16b]
+            roles:
+              body: courgette
+              inclusion: rice
+              coagulant: eggs
+              liquid: pulp
+              dry_phase: {use: breadcrumbs, note: "or soaked bread"}
+              flavour: [parmesan, garlic]
+            steps:
+              - {op: mixer, evidence: "blended; into a piping bag"}
+          stuffed:
+            op: farcir
+            recipes: [M16b]
+            roles: {container: tomato, filling: filling}
+            steps:
+              - {op: cuire_four, evidence: "crumbs, Parmesan and oil on top; 160 C 30-40 min"}
+        result: stuffed
+        final: {state: {cooked: true, filled: true}, recipes: [M16b]}
+        gaps:
+          - {kind: model, note: "the tomato vessel is flesh and skin, the part is flesh only (as in gemista); peppers are filled too, one container per assembly"}
+          - {kind: evidence, note: "that egg and crumbs hold the filling is an inference, not the page's statement (R2)"}
+
+  pierogi_ruskie:
+    name: Pierogi ruskie / vareniki with potato
+    tradition: Poland and Russia; Polish and Russian sources
+    split: held_out
+    routes:
+      ruskie:
+        recipes: [E16a]
+        patterns: [C7, C2]
+        holds_by: [H2, H7]
+        why: >
+          A cooled riced potato and curd-cheese filling, no egg, holds by its
+          dry components; a thin oil-and-hot-water dough wraps it and survives
+          boiling because of the oil.
+        materials:
+          potato:
+            from: potato.tuber
+            recipes: [E16a]
+            steps:
+              - eplucher
+              - {op: cuire_anglaise, evidence: "boiled in salted water"}
+              - {op: refroidir, evidence: "cooled (no reason given)"}
+              - {op: ecraser, evidence: "pressed through a ricer"}
+          onion:
+            from: onion.bulb
+            recipes: [E16a]
+            steps:
+              - eplucher
+              - hacher
+              - {op: sauter, evidence: "fried golden in butter with a pinch of salt and a little sugar"}
+              - {op: refroidir, evidence: "cooled"}
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [E16a]
+            roles: {body: potato, flavour: [onion, curd_cheese, spices]}
+            note: "mixed until it holds; no egg"
+          dough:
+            op: melanger
+            recipes: [E16a]
+            roles: {body: wheat_flour, liquid: water, fat: [vegetable_oil, olive_oil], flavour: salt}
+            state: {flexible: true, piece: large, thin: true}
+            because: [water, vegetable_oil]
+            evidence: "half a cup of hot (not boiling) water; kept covered and warm; rolled to 1.5-2 mm; the oil means even thin dough 'nie rozklei się podczas gotowania'"
+          pierogi:
+            op: envelopper
+            recipes: [E16a]
+            roles: {wrapper: dough, filling: filling}
+            evidence: "cut with a glass, about ½ tsp filling each, sealed with fingers then a fork"
+            expects:
+              - member: filling
+                state: {cooled: true}
+                because: "the filling is cooled before filling (E16a gives no reason)"
+                recipes: [E16a]
+            steps:
+              - {op: cuire_anglaise, evidence: "into hot salted water; 2-3 min after they float"}
+        result: pierogi
+        final: {state: {cooked: true, wrapped: true}, recipes: [E16a]}
+        gaps:
+          - {kind: model, note: "a dough is an assembly of additions whose rolled, flexible state is asserted: rolling (abaisser) has no outputs, and doughs are not modelled"}
+          - {kind: model, note: "sealing the edges is not an operation"}
+          - {kind: ingredient, note: "flour and curd cheese are not catalogued"}
+      vareniki:
+        recipes: [E16b]
+        patterns: [C7, C2]
+        holds_by: [H2, H7]
+        why: >
+          A mashed potato filling used cold, in an elastic dough made with
+          boiling water and egg; boiled briefly and lifted out at once, since
+          overcooked they lose shape. Starch in the cooking water helps.
+        materials:
+          potato:
+            from: potato.tuber
+            recipes: [E16b]
+            steps:
+              - eplucher
+              - cuire_anglaise
+              - {op: ecraser, evidence: "mashed with a little cooking water or hot milk, butter and salt"}
+          onion:
+            from: onion.bulb
+            recipes: [E16b]
+            steps: [eplucher, hacher, {op: sauter, evidence: "fried golden"}]
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [E16b]
+            roles: {body: potato, liquid: {use: milk, optional: true}, fat: butter, flavour: [onion, salt]}
+            steps:
+              - {op: refroidir, evidence: "used cooled ('остывшей')"}
+          dough:
+            op: melanger
+            recipes: [E16b]
+            roles: {body: wheat_flour, liquid: water, coagulant: eggs, fat: vegetable_oil, flavour: salt}
+            state: {flexible: true, piece: large, thin: true}
+            because: [water, eggs]
+            evidence: "400 g flour, 160 ml boiling water (makes it elastic), 1 egg, 2 tbsp oil; salt in the dough keeps them from falling apart"
+            steps:
+              - {op: reposer, evidence: "40 min under a towel"}
+          vareniki:
+            op: envelopper
+            recipes: [E16b]
+            roles: {wrapper: dough, filling: filling}
+            evidence: "edges brushed with egg white before sealing"
+            steps:
+              - {op: cuire_anglaise, evidence: "5-7 min after floating, lifted out promptly: overcooked they lose shape and turn sticky; optional rice in the water, whose starch stops them falling apart"}
+        result: vareniki
+        final: {state: {cooked: true, wrapped: true}, recipes: [E16b]}
+        gaps:
+          - {kind: model, note: "the dough's state is asserted (rolling has no outputs; scalding with boiling water, R2 H3, is not an operation)"}
+          - {kind: model, note: "starch put into the cooking water is not a property of the cooking step"}
+
+  spanakopita:
+    name: Spanakopita / ıspanaklı börek
+    tradition: Greece and Turkey; Greek and Turkish sources
+    split: held_out
+    routes:
+      salted_spinach:
+        recipes: [M8a]
+        patterns: [C8, C4]
+        holds_by: [H5b, H7]
+        water: [W1]
+        why: >
+          Spinach is salted and squeezed so the filling is not soggy; egg and
+          feta hold it between two sheets of a homemade dough brushed with fat.
+        materials:
+          spinach:
+            from: spinach.leaves
+            recipes: [M8a]
+            water: [W1]
+            steps:
+              - {op: hacher, evidence: "1 kg chopped fine"}
+              - {op: degorger, keep: drained, discard: [vegetable_water], evidence: "rubbed with a little salt, drained and squeezed well: removing the water prevents a soggy filling"}
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [M8a]
+            roles: {body: spinach, coagulant: eggs, fat: olive_oil, flavour: [feta, herbs, spring_onion]}
+          dough:
+            op: melanger
+            recipes: [M8a]
+            roles: {body: wheat_flour, liquid: water, fat: olive_oil}
+            state: {flexible: true, piece: large, thin: true}
+            because: [water, olive_oil]
+            evidence: "homemade, rolled, brushed with melted fat, folded"
+            steps:
+              - {op: reposer, evidence: "chilled 10 min"}
+          pie:
+            op: superposer
+            recipes: [M8a]
+            roles: {layer: [dough, dough], binding: filling}
+            evidence: "the filling between two sheets"
+            steps:
+              - {op: cuire_four, evidence: "180 C about 30 min"}
+        result: pie
+        final: {state: {cooked: true, layered: true}, recipes: [M8a]}
+        gaps:
+          - {kind: model, note: "the dough's rolled, flexible state is asserted; rolling (abaisser) has no outputs"}
+          - {kind: ingredient, note: "spinach, feta and flour are not catalogued"}
+      raw_spinach:
+        recipes: [M8b]
+        patterns: [C8]
+        holds_by: [H10, H5a]
+        water: [W8]
+        why: >
+          The raw spinach keeps its water, so the yufka sheets are wetted less
+          with the milk, oil and egg sauce: the water is managed in the pastry,
+          not removed from the vegetable. The egg is in the sauce between the
+          sheets, not in the filling.
+        materials:
+          spinach:
+            from: spinach.leaves
+            recipes: [M8b]
+            steps:
+              - {op: hacher, evidence: "chopped, washed in vinegared water, drained completely; raw, not salted or squeezed"}
+          onion:
+            from: onion.bulb
+            recipes: [M8b]
+            steps: [eplucher, hacher]
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [M8b]
+            roles: {body: spinach, flavour: [onion, white_cheese, salt, spices]}
+            note: "no egg in the filling"
+            expects:
+              - member: spinach
+                state: {salted: false, water: very_high}
+                because: "do not over-wet the yufka: the raw spinach brings its own moisture (M8b)"
+                recipes: [M8b]
+          sauce:
+            op: melanger
+            recipes: [M8b]
+            roles: {body: milk, fat: vegetable_oil, coagulant: eggs}
+            state: {sets_on_heat: true}
+            because: [eggs]
+          borek:
+            op: superposer
+            recipes: [M8b]
+            roles: {layer: [yufka, yufka, yufka], binding: [sauce, filling]}
+            evidence: "sheets crumpled rather than laid taut; filling in the middle"
+            steps:
+              - {op: cuire_four, evidence: "180 C about 40 min; the first 20 min it steams in the oven"}
+              - {op: reposer, evidence: "rested under a damp towel"}
+        result: borek
+        final: {state: {cooked: true, layered: true}, recipes: [M8b]}
+        gaps:
+          - {kind: model, note: "washing (in vinegared water) is not an operation, as with rinsing in A1b"}
+          - {kind: ingredient, note: "yufka, spinach, white cheese and milk are not catalogued"}
+
+  zha_qie_he:
+    name: Zha qie he (fried stuffed aubergine boxes)
+    tradition: China; Chinese source and an English second witness
+    split: held_out
+    routes:
+      egg_starch_coat:
+        recipes: [A12a]
+        patterns: [C7, C9]
+        holds_by: [H7, H5c, H9]
+        why: >
+          Pairs of aubergine slices joined at one edge make a pocket; starch
+          dusted inside fixes the meat filling, and an egg-then-starch coat
+          fried at moderate heat closes the box.
+        materials:
+          aubergine:
+            from: aubergine.fruit
+            recipes: [A12a]
+            steps:
+              - {op: emincer, evidence: "cut into pairs of slices joined at one edge (连刀)"}
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [A12a]
+            roles: {body: minced_meat, starch: cornflour, liquid: water, flavour: [spring_onion, spices]}
+            note: "stirred clockwise"
+          box:
+            op: farcir
+            recipes: [A12a]
+            roles: {container: aubergine, filling: filling}
+            evidence: "starch dusted inside each pocket fixes the filling so it does not fall out ('更好固定肉馅，不易脱落')"
+          coated:
+            op: revetir
+            recipes: [A12a]
+            roles: {piece: box, coat: [eggs, cornflour]}
+            steps:
+              - {op: frire, evidence: "medium-low until golden on both sides; too high burns the outside while the inside stays raw"}
+        result: coated
+        final: {state: {cooked: true, crisp: true}, recipes: [A12a]}
+        gaps:
+          - {kind: model, note: "a hinged pair of slices (连刀) is a pocket, but no operation makes it, so the slices are not a hollow container"}
+          - {kind: model, note: "starch dusted inside the pocket as glue has no role in farcir"}
+          - {kind: scope, note: "pork filling"}
+      double_fried:
+        recipes: [A12b]
+        patterns: [C7, C9]
+        holds_by: [H7, H9]
+        why: >
+          Salted, dried aubergine pockets hold a pork filling stirred until
+          sticky; a flour and ice-water batter is fried twice because the
+          aubergine releases moisture that would soften a single crust.
+        materials:
+          aubergine:
+            from: aubergine.fruit
+            recipes: [A12b]
+            steps:
+              - {op: emincer, evidence: "hinged 'slider bun' pockets"}
+              - {op: saumurer, evidence: "soaked 15 min in salt water and dried well: salting draws moisture so it crisps"}
+        assemblies:
+          filling:
+            op: melanger
+            recipes: [A12b]
+            roles: {body: minced_meat, flavour: [garlic, soy_sauce, spices]}
+            note: "stirred one way until sticky: it helps the filling stay together"
+          box:
+            op: farcir
+            recipes: [A12b]
+            roles: {container: aubergine, filling: filling}
+            evidence: "filled without overstuffing"
+          batter:
+            op: melanger
+            recipes: [A12b]
+            roles: {body: ice_water, dry_phase: wheat_flour, flavour: salt}
+            state: {sets_on_heat: true}
+            because: [wheat_flour]
+          coated:
+            op: revetir
+            recipes: [A12b]
+            roles: {piece: box, coat: batter}
+            steps:
+              - {op: frire, evidence: "first fry 176 C until set and pale"}
+              - {op: frire, evidence: "second fry 190 C until golden: double frying is 'the key' and keeps it crisp after cooling"}
+        result: coated
+        final: {state: {cooked: true, crisp: true}, recipes: [A12b]}
+        gaps:
+          - {kind: model, note: "no operation makes a hinged pocket; the container check fails"}
+          - {kind: scope, note: "pork filling"}
+
+  moi_moi:
+    name: Moi moi (moin moin)
+    tradition: Nigeria; English sources by Nigerian authors
+    split: held_out
+    routes:
+      steamed:
+        recipes: [A19a, A19b]
+        patterns: [C3]
+        holds_by: [H4, H7]
+        why: >
+          The same raw skinned bean paste as akara, but not aerated and with
+          oil stirred in, kept pourable but not watery and steam-set in a
+          mould (ramekin, leaf or foil). Too much water and it will not mould;
+          tomato keeps it from setting.
+        materials:
+          beans:
+            from: black_eyed_bean.dried_seed
+            recipes: [A19a, A19b]
+            steps:
+              - {op: tremper, evidence: "about 15 min in room-temperature water: hot water part-cooks the beans and spoils the texture (A19a)"}
+              - {op: decortiquer, keep: inner, discard: [skins], evidence: "pulse-blended in bursts, skins rubbed and floated off, sieved (A19a)"}
+              - {op: mixer, evidence: "very smooth with about 1 cup water (A19a), or stock and no water (A19b); too much water 'wouldn't mold well'"}
+          onion:
+            from: onion.bulb
+            recipes: [A19a, A19b]
+            steps: [eplucher, hacher]
+        assemblies:
+          paste:
+            op: melanger
+            recipes: [A19a, A19b]
+            roles: {body: beans, fat: vegetable_oil, flavour: [onion, spices, crayfish, salt]}
+            evidence: "about ¼ cup oil stirred in (no reason given); like shop-bought yoghurt (A19b)"
+            expects:
+              - member: beans
+                state: {aerated: false, cooked: false}
+                because: "the raw paste of akara, not aerated (A19a, A19b)"
+                recipes: [A19a, A19b]
+            steps:
+              - {op: cuire_vapeur, evidence: "in greased ramekins ¾ full or wrapped in leaf, husk or foil; steamed 45-60 min (A19a), about 30 min (A19b), until firm with no wet residue"}
+        result: paste
+        final: {state: {cooked: true}, recipes: [A19a, A19b]}
+        gaps:
+          - {kind: model, note: "the mould (ramekin, leaf, foil) holds the paste while it sets; it is not represented"}
+          - {kind: ingredient, note: "black-eyed beans are not catalogued"}
+          - {kind: evidence, note: "'tomato makes it difficult to solidify' (A19a) is recorded as evidence only"}
