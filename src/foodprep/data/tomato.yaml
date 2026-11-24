@@ -293,6 +293,20 @@ ingredients:
   - { canonical_name: capers,     base_roles: "acid\numami", default_availability_class: occasional }
   - { canonical_name: olives,     base_roles: "salt\numami", default_availability_class: common }
   - { canonical_name: white_beans, aliases: "cannellini\nharicot", base_roles: "protein\ncarb", default_availability_class: common }
+  # R4 controlled transfers (docs/research/r4-transfers/catalogue.md): the
+  # wrapper that replaces kale, and the dried pulse a pea falafel needs.
+  - canonical_name: napa_cabbage
+    aliases: "kiinankaali\nchinese cabbage\nnapa cabbage\nhakusai"
+    base_roles: "crunch\nhydration"
+    default_availability_class: common
+    availability:
+      - { region_code: FI, availability_class: common, seasonality_note: "Lidl FI: not confirmed; no product page found; a Lidl storage guide and Lidl recipes name it (lidl.fi, checked 2026-11-24; R4 catalogue L24, L25)" }
+  - canonical_name: dried_peas
+    aliases: "kuivatut herneet\nkeltaiset herneet\nhalkaistut herneet\nsplit peas\nyellow peas"
+    base_roles: "protein\ncarb"
+    default_availability_class: occasional
+    availability:
+      - { region_code: FI, availability_class: occasional, seasonality_note: "Lidl FI: split peas seen once, 'Golden Sun Luomulinssit tai -herneet' 500 g in a 'vihreät valinnat' campaign (year not shown); whole dried peas not found on lidl.fi, which lists offers only (checked 2026-11-24; R4 catalogue L1)" }
   - { canonical_name: potato, family: root_tuber,     base_roles: "carb\nmild_base", default_availability_class: very_common, kind: both, aliases: "potatoes\nperuna" }
   # Culinary Operations R1: decomposed into parts, no curated transformations yet.
   - { canonical_name: carrot, family: root_tuber, base_roles: "crunch", default_availability_class: very_common, aliases: "carrots\nporkkana" }
@@ -312,7 +326,7 @@ ingredients:
     default_availability_class: very_common
     kind: full
     availability:
-      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer; imported year-round" }
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown summer; imported year-round. Lidl FI: frozen florets 500 g (Spain) are regular; a fresh head (with its stem) was not found on lidl.fi (checked 2026-11-24; R4 catalogue L4)" }
   - { canonical_name: avocado,    base_roles: "fat",        default_availability_class: common }
   - { canonical_name: greens,     aliases: "lettuce\nspinach\nsalad\nsalaatti", base_roles: "herb\nmild_base", default_availability_class: very_common }
   # ---- Lidl-available catalogue basics (the user's actual shopping list) ----
@@ -325,7 +339,7 @@ ingredients:
     default_availability_class: very_common
     kind: both
     availability:
-      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown, stored year-round; cheapest in autumn-winter" }
+      - { region_code: FI, availability_class: very_common, seasonality_note: "Finnish-grown, stored year-round; cheapest in autumn-winter. Lidl FI: 'Kotimainen lanttu', loose per kg, offers Sept-Dec (lidl.fi, checked 2026-11-24; R4 catalogue L5)" }
   - canonical_name: apple
     aliases: "omena"
     base_roles: "acid\ncrunch"
@@ -345,7 +359,7 @@ ingredients:
     default_availability_class: common
     kind: both
     availability:
-      - { region_code: FI, availability_class: common, seasonality_note: "Finnish season autumn-winter; bagged imports most of the year" }
+      - { region_code: FI, availability_class: common, seasonality_note: "Finnish season autumn-winter; bagged imports most of the year. Lidl FI: only 'Kotimainen lehtikaali' (curly), 100-200 g bags, offers Aug-Oct; no bunch, no cavolo nero (lidl.fi, checked 2026-11-24; R4 catalogue L2)" }
   - canonical_name: mango
     family: sweet_fruit
     base_roles: "acid\nhydration"
