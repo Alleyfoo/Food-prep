@@ -403,8 +403,42 @@ def test_by_function_simplest_first(cat):
 def test_cli(capsys):
     assert main(["applicability", "carrot", "--part", "greens"]) == 0
     assert "chiffonnade" in capsys.readouterr().out
-    assert main(["explore", "tomato", "--part", "skin", "--top", "3"]) == 0
-    assert "hypotheses, not recipes" in capsys.readouterr().out
+    assert main(["explore", "tomato", "--part", "skin", "--global", "--top", "3"]) == 0
+    assert "global ranking" in capsys.readouterr().out
     assert main(["explore", "kale"]) == 1
-    assert main(["explore", "courgette", "--by-function"]) == 0
-    assert "vegetable noodles" in capsys.readouterr().out
+    capsys.readouterr()
+    assert main(["explore", "courgette"]) == 0                     # purpose view is the default
+    default = capsys.readouterr().out
+    assert "by purpose" in default and "vegetable noodles" in default
+    assert main(["explore", "courgette", "--by-function"]) == 0    # explicit flag still works
+    assert capsys.readouterr().out == default
+    with pytest.raises(SystemExit):
+        main(["explore", "courgette", "--by-function", "--global"])
+
+
+def test_both_views_show_the_same_details(cat):
+    """The purpose view must not be less informative than the global one:
+    evidence, equipment, conditions and safety come from one helper."""
+    purpose = o.render_by_function("broccoli", "stems")
+    glob = o.render_explore("broccoli", "stems", top=30)
+    for field in ("evidence:", "conditions:", "safety:"):
+        assert field in purpose, field
+    assert "evidence:" in glob
+    assert "equipment: spice grinder" in purpose
+    # one helper renders every detail, for both views
+    rs, _ = o.ranked("broccoli", "stems", use_established=False, sensory=True)
+    cond = next(x for x in rs if any(s.status == "conditional" for s in x.result.path))
+    assert any(line.strip().startswith("conditions:") for line in o.detail_lines(cond))
+    import inspect
+    assert "detail_lines(" in inspect.getsource(o.render_explore)
+    assert "detail_lines(" in inspect.getsource(o.render_by_function)
+    assert "sensory (from curated transformations)" in purpose
+    courgette = o.render_by_function("courgette")
+    assert "cucurbitacin" in courgette          # the fruit's bitterness warning travels along
+
+
+def test_evidence_label_does_not_depend_on_the_ranking(cat):
+    rs, _ = o.ranked("tomato", "skin", use_established=False)
+    powder = next(x for x in rs if [s.operation for s in x.result.path] == ["deshydrater", "moudre"])
+    assert powder.established == 0.0
+    assert o.evidence_of(powder.result.material) == "established path"

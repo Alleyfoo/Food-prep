@@ -720,6 +720,42 @@ def render_applicability(ingredient: str, part: str | None = None) -> str:
     return "\n".join(out)
 
 
+def evidence_of(m: Material, cat: Catalogue | None = None) -> str:
+    """Display label, independent of how a list was ranked: every step is
+    documented on this material (`established_on`), or the path is inferred."""
+    cat = cat or load()
+    ops = [cat.operations[s.operation] for s in m.path]
+    if ops and all(_origin(m) in (op.get("established_on") or []) for op in ops):
+        return "established path"
+    return "mechanistic inference"
+
+
+def detail_lines(x: Ranked, cat: Catalogue | None = None, indent: str = "       ") -> list[str]:
+    """The information every view shows for a sequence: evidence, effort, special
+    equipment, conditions, safety, sensory effects, alternative paths. Both
+    renders use it, so the views cannot drift apart."""
+    cat = cat or load()
+    m = x.result.material
+    lines = [f"{indent}evidence: {evidence_of(m, cat)}; plausibility {x.plausibility:.2f}; "
+             f"effort {x.effort:.2f}"
+             + (f"; equipment: {', '.join(e.replace('_', ' ') for e in x.equipment)}"
+                if x.equipment else "")]
+    notes = [n for st in x.result.path for n in st.notes]
+    if notes:
+        lines.append(f"{indent}conditions: {'; '.join(dict.fromkeys(notes))}")
+    safety = [cat.operations[st.operation].get("safety") for st in x.result.path]
+    safety += [m.props.get("note")] if m.ingredient == "courgette" and m.props.get("note") else []
+    safety = [t for t in safety if t]
+    if safety:
+        lines.append(f"{indent}safety: {'; '.join(dict.fromkeys(safety))}")
+    if x.sensory:
+        lines.append(f"{indent}sensory (from curated transformations): "
+                     f"{', '.join(g.split(':')[1].replace('_', ' ') for g in x.sensory)}")
+    if x.result.alternates:
+        lines.append(f"{indent}also reached by {len(x.result.alternates)} other path(s)")
+    return lines
+
+
 def render_by_function(ingredient: str, part: str | None = None, k: int = 3,
                        sensory: bool = True) -> str:
     """Purpose-specific view: for each part and culinary function, the simplest
@@ -732,7 +768,9 @@ def render_by_function(ingredient: str, part: str | None = None, k: int = 3,
     rs, _ = ranked(ingredient, part, cat=cat, use_established=False, sensory=sensory)
     lists = by_function(rs, k, "simple")
     out = [f"{ingredient.capitalize()} by purpose: the simplest ways to each culinary function "
-           "(hypotheses, not recipes)", ""]
+           "(hypotheses, not recipes)",
+           "Simplest first: fewest steps, then least effort, special equipment and conditions. "
+           "The global ranking is `foodprep explore --global`.", ""]
     parts = list(dict.fromkeys(p for p, _ in lists))
     fn_order = list(cat.functions) + ["flavour_shift"]
     for p in parts:
@@ -747,12 +785,8 @@ def render_by_function(ingredient: str, part: str | None = None, k: int = 3,
                 line = f"    {describe_path(m)}"
                 if m.fraction:
                     line += f"  ({m.fraction.replace('_', ' ')})"
-                if f == "flavour_shift" and x.sensory:
-                    line += f"  [{', '.join(g.split(':')[1] for g in x.sensory)}]"
-                notes = [n for st in x.result.path for n in st.notes]
-                if notes:
-                    line += f"  - {'; '.join(dict.fromkeys(notes))}"
                 out.append(line)
+                out += detail_lines(x, cat, indent="        ")
         out.append("")
     return "\n".join(out)
 
@@ -763,7 +797,8 @@ def render_explore(ingredient: str, part: str | None = None, top: int = 8) -> st
         return f"No materials for {ingredient!r}. Known: {', '.join(sorted(cat.parts))}.\n"
     rs, ex = ranked(ingredient, part, cat=cat)
     s = ex.stats
-    out = [f"Processing sequences for {ingredient} (depth {MAX_DEPTH}; hypotheses, not recipes)",
+    out = [f"Processing sequences for {ingredient}, global ranking (depth {MAX_DEPTH}; "
+           "hypotheses, not recipes; a research and diagnostic view)",
            f"{len(ex.results)} distinct materials from {s['generated']} generated steps; "
            f"{s['merged: equivalent material']} merged as equivalent; "
            f"{len(ex.results) - len(rs)} with no culinary function (noise).", ""]
@@ -772,16 +807,5 @@ def render_explore(ingredient: str, part: str | None = None, top: int = 8) -> st
         out.append(f"{x.score:5.2f}  {m.name}: {describe_path(m)}")
         out.append(f"       functions: {', '.join(x.functions)}"
                    + ("; uses a usually discarded part" if x.utilisation else ""))
-        out.append(f"       evidence: {x.evidence}; plausibility {x.plausibility:.2f}; "
-                   f"effort {x.effort:.2f}"
-                   + (f"; equipment: {', '.join(x.equipment)}" if x.equipment else ""))
-        notes = [n for st in x.result.path for n in st.notes]
-        if notes:
-            out.append(f"       conditions: {'; '.join(dict.fromkeys(notes))}")
-        safety = [cat.operations[st.operation].get("safety") for st in x.result.path]
-        safety = [t for t in safety if t]
-        if safety:
-            out.append(f"       safety: {'; '.join(dict.fromkeys(safety))}")
-        if x.result.alternates:
-            out.append(f"       also reached by {len(x.result.alternates)} other path(s)")
+        out += detail_lines(x, cat)
     return "\n".join(out) + "\n"

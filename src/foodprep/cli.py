@@ -134,12 +134,15 @@ def cmd_applicability(args: argparse.Namespace) -> int:
 
 
 def cmd_explore(args: argparse.Namespace) -> int:
-    """Bounded operation sequences (depth 3), ranked; hypotheses, not recipes."""
+    """Bounded operation sequences (depth 3); hypotheses, not recipes.
+
+    Default: grouped by culinary function, simplest first (the benchmark's best
+    view). --global gives the global ranking, kept for research and diagnosis."""
     from foodprep import operations
-    if args.by_function:
-        out = operations.render_by_function(args.ingredient, args.part, k=args.top_per_function)
-    else:
+    if args.global_ranking:
         out = operations.render_explore(args.ingredient, args.part, top=args.top)
+    else:
+        out = operations.render_by_function(args.ingredient, args.part, k=args.top_per_function)
     print(out, end="")
     return 1 if out.startswith("No ") else 0
 
@@ -383,14 +386,17 @@ def build_parser() -> argparse.ArgumentParser:
     pap.set_defaults(func=cmd_applicability)
 
     pex = sub.add_parser("explore",
-                         help="Ranked operation sequences (depth 3) for an ingredient")
+                         help="Operation sequences (depth 3) by culinary function, simplest first")
     pex.add_argument("ingredient", nargs="?", default="broccoli")
     pex.add_argument("--part", help="only this part")
-    pex.add_argument("--top", type=int, default=8, help="sequences to show")
-    pex.add_argument("--by-function", action="store_true",
-                     help="group by culinary function, simplest first (with sensory effects)")
+    view = pex.add_mutually_exclusive_group()
+    view.add_argument("--by-function", action="store_true",
+                      help="group by culinary function, simplest first (the default)")
+    view.add_argument("--global", dest="global_ranking", action="store_true",
+                      help="global ranking instead (research and diagnostic view)")
     pex.add_argument("--top-per-function", type=int, default=3,
-                     help="sequences per function with --by-function")
+                     help="sequences per function (default view)")
+    pex.add_argument("--top", type=int, default=8, help="sequences to show with --global")
     pex.set_defaults(func=cmd_explore)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
