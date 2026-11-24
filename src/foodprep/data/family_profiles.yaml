@@ -1,0 +1,856 @@
+# Which families RecipeNLG cooks put with each ingredient, by technique:
+# GENERATED, do not hand-edit.
+#
+# Regenerate: py -3.11 scripts/count_family_pairs.py [path-to-full_dataset.csv]
+#
+# A recipe has a family when its ingredient list names any member of it at
+# level medium or above (families.yaml). `combos` are the most frequent exact
+# sets of families. Read by foodprep.family_profiles. Counts only.
+# RecipeNLG's terms allow non-commercial research and educational use only.
+corpus:
+  corpus_id: recipenlg
+  name: RecipeNLG
+  source_path: data/corpus/recipenlg
+  terms: non-commercial research and educational use only; counts only
+  search_date: '2026-11-24'
+recipes: 2231142
+all_recipes:
+  acid: 943254
+  fat: 1769584
+  salt: 1545614
+  umami: 789404
+  sweet: 1017787
+  protein: 1534704
+  carb: 681442
+targets:
+  tomato:
+    recipes: 312317
+    families:
+      acid: 113421
+      fat: 277998
+      salt: 271514
+      umami: 152024
+      sweet: 63894
+      protein: 249673
+      carb: 171726
+    combos:
+      fat+salt+umami+protein+carb: 46991
+      fat+salt+protein+carb: 38797
+      fat+salt+umami+protein: 22890
+      fat+salt+protein: 22404
+      acid+fat+salt+umami+protein+carb: 16580
+      acid+fat+salt+umami+protein: 11929
+      acid+fat+salt+protein+carb: 10426
+      acid+fat+salt+protein: 8465
+      acid+fat+salt+umami+sweet+protein: 6794
+      acid+fat+salt+umami+sweet+protein+carb: 6473
+      fat+protein+carb: 6229
+      fat+salt+umami+sweet+protein+carb: 5120
+    techniques:
+      stir_fry:
+        recipes: 5043
+        families:
+          acid: 2035
+          fat: 4653
+          salt: 4421
+          umami: 2959
+          sweet: 1491
+          protein: 4048
+          carb: 2585
+        combos:
+          fat+salt+umami+protein+carb: 664
+          fat+salt+protein+carb: 364
+          fat+salt+umami+protein: 362
+          acid+fat+salt+umami+protein+carb: 302
+          acid+fat+salt+umami+sweet+protein: 287
+          fat+salt+protein: 286
+          acid+fat+salt+umami+sweet+protein+carb: 244
+          acid+fat+salt+umami+protein: 226
+          fat+salt: 133
+          fat+salt+umami+sweet+protein+carb: 127
+          fat+salt+umami+sweet+protein: 120
+          acid+fat+salt+protein: 120
+      steam:
+        recipes: 6268
+        families:
+          acid: 2915
+          fat: 5658
+          salt: 5528
+          umami: 3302
+          sweet: 1392
+          protein: 4953
+          carb: 3404
+        combos:
+          fat+salt+umami+protein+carb: 745
+          fat+salt+protein+carb: 528
+          acid+fat+salt+umami+protein+carb: 501
+          fat+salt+umami+protein: 424
+          fat+salt+protein: 328
+          acid+fat+salt+protein+carb: 292
+          acid+fat+salt+umami+protein: 279
+          acid+fat+salt+protein: 272
+          acid+fat+salt+umami+sweet+protein+carb: 201
+          acid+fat+salt+umami+sweet+protein: 171
+          acid+fat+salt+sweet+protein+carb: 116
+          acid+fat+salt: 111
+      roast:
+        recipes: 14198
+        families:
+          acid: 7439
+          fat: 12985
+          salt: 12590
+          umami: 7513
+          sweet: 4012
+          protein: 10356
+          carb: 7045
+        combos:
+          fat+salt+umami+protein+carb: 1471
+          acid+fat+salt+umami+protein+carb: 999
+          fat+salt+protein+carb: 913
+          acid+fat+salt+umami+protein: 797
+          fat+salt+umami+protein: 763
+          acid+fat+salt+umami+sweet+protein: 634
+          fat+salt+protein: 629
+          acid+fat+salt+protein+carb: 607
+          acid+fat+salt+umami+sweet+protein+carb: 511
+          acid+fat+salt+protein: 511
+          acid+fat+salt+sweet+protein: 419
+          fat+salt: 385
+      saute:
+        recipes: 58165
+        families:
+          acid: 21086
+          fat: 55852
+          salt: 51168
+          umami: 35174
+          sweet: 11176
+          protein: 48349
+          carb: 35109
+        combos:
+          fat+salt+umami+protein+carb: 10821
+          fat+salt+protein+carb: 5711
+          acid+fat+salt+umami+protein+carb: 4830
+          fat+salt+umami+protein: 4337
+          fat+salt+protein: 2983
+          acid+fat+salt+umami+protein: 2873
+          acid+fat+salt+protein+carb: 1956
+          acid+fat+salt+umami+sweet+protein+carb: 1623
+          acid+fat+salt+protein: 1413
+          acid+fat+salt+umami+sweet+protein: 1352
+          fat+salt+umami+sweet+protein+carb: 1340
+          fat+salt: 1178
+      boil:
+        recipes: 143824
+        families:
+          acid: 51150
+          fat: 129711
+          salt: 124240
+          umami: 79774
+          sweet: 32331
+          protein: 116603
+          carb: 87848
+        combos:
+          fat+salt+umami+protein+carb: 25126
+          fat+salt+protein+carb: 16657
+          acid+fat+salt+umami+protein+carb: 9935
+          fat+salt+umami+protein: 8518
+          fat+salt+protein: 7094
+          acid+fat+salt+umami+protein: 5572
+          acid+fat+salt+protein+carb: 4302
+          acid+fat+salt+umami+sweet+protein+carb: 3648
+          fat+salt+umami+sweet+protein+carb: 3426
+          acid+fat+salt+umami+sweet+protein: 3205
+          fat+protein+carb: 3163
+          acid+fat+salt+protein: 2892
+      bake:
+        recipes: 89859
+        families:
+          acid: 24034
+          fat: 85540
+          salt: 82998
+          umami: 46136
+          sweet: 16730
+          protein: 80756
+          carb: 54846
+        combos:
+          fat+salt+umami+protein+carb: 17803
+          fat+salt+protein+carb: 15543
+          fat+salt+umami+protein: 8945
+          fat+salt+protein: 7892
+          acid+fat+salt+umami+protein+carb: 4286
+          acid+fat+salt+umami+protein: 2995
+          acid+fat+salt+protein+carb: 2610
+          fat+salt+umami+sweet+protein+carb: 2094
+          acid+fat+salt+protein: 2042
+          acid+fat+salt+umami+sweet+protein+carb: 1936
+          acid+fat+salt+umami+sweet+protein: 1831
+          fat+salt+sweet+protein+carb: 1559
+      grill:
+        recipes: 23524
+        families:
+          acid: 13136
+          fat: 21994
+          salt: 21306
+          umami: 11253
+          sweet: 5814
+          protein: 19853
+          carb: 10886
+        combos:
+          fat+salt+umami+protein+carb: 2339
+          fat+salt+protein+carb: 1857
+          fat+salt+umami+protein: 1771
+          fat+salt+protein: 1635
+          acid+fat+salt+umami+protein+carb: 1608
+          acid+fat+salt+protein: 1523
+          acid+fat+salt+umami+protein: 1513
+          acid+fat+salt+protein+carb: 1457
+          acid+fat+salt+umami+sweet+protein: 1163
+          acid+fat+salt+sweet+protein: 920
+          acid+fat+salt+umami+sweet+protein+carb: 794
+          acid+fat+salt+sweet+protein+carb: 618
+      fry:
+        recipes: 22558
+        families:
+          acid: 7830
+          fat: 21261
+          salt: 20126
+          umami: 11687
+          sweet: 4933
+          protein: 19230
+          carb: 12572
+        combos:
+          fat+salt+umami+protein+carb: 3428
+          fat+salt+protein+carb: 2638
+          fat+salt+umami+protein: 1823
+          fat+salt+protein: 1685
+          acid+fat+salt+umami+protein+carb: 1359
+          acid+fat+salt+umami+protein: 940
+          acid+fat+salt+protein+carb: 841
+          acid+fat+salt+protein: 696
+          acid+fat+salt+umami+sweet+protein: 672
+          acid+fat+salt+umami+sweet+protein+carb: 644
+          fat+salt+umami+sweet+protein+carb: 504
+          fat+salt+umami+sweet+protein: 466
+      soup:
+        recipes: 67997
+        families:
+          acid: 25262
+          fat: 60698
+          salt: 58775
+          umami: 35883
+          sweet: 14182
+          protein: 53401
+          carb: 37976
+        combos:
+          fat+salt+umami+protein+carb: 11368
+          fat+salt+protein+carb: 7422
+          fat+salt+umami+protein: 4635
+          acid+fat+salt+umami+protein+carb: 4091
+          fat+salt+protein: 3980
+          acid+fat+salt+umami+protein: 2391
+          acid+fat+salt+protein+carb: 2114
+          acid+fat+salt+protein: 1744
+          acid+fat+salt+umami+sweet+protein+carb: 1500
+          acid+fat+salt+umami+sweet+protein: 1436
+          fat+protein+carb: 1372
+          fat+salt+umami+sweet+protein+carb: 1103
+      raw:
+        recipes: 24045
+        families:
+          acid: 14349
+          fat: 22174
+          salt: 21008
+          umami: 11272
+          sweet: 6422
+          protein: 19125
+          carb: 12335
+        combos:
+          fat+salt+umami+protein+carb: 2163
+          acid+fat+salt+umami+protein+carb: 1911
+          fat+salt+protein+carb: 1828
+          acid+fat+salt+umami+protein: 1577
+          acid+fat+salt+protein+carb: 1372
+          fat+salt+umami+protein: 1321
+          fat+salt+protein: 1228
+          acid+fat+salt+protein: 1172
+          acid+fat+salt+umami+sweet+protein: 1123
+          acid+fat+salt+umami+sweet+protein+carb: 967
+          acid+fat+salt+sweet+protein: 915
+          acid+fat+salt+sweet+protein+carb: 758
+      dry:
+        recipes: 74996
+        families:
+          acid: 25135
+          fat: 69766
+          salt: 66352
+          umami: 36150
+          sweet: 16102
+          protein: 65081
+          carb: 44924
+        combos:
+          fat+salt+umami+protein+carb: 11705
+          fat+salt+protein+carb: 11271
+          fat+salt+protein: 5622
+          fat+salt+umami+protein: 4913
+          acid+fat+salt+umami+protein+carb: 4311
+          acid+fat+salt+umami+protein: 2750
+          acid+fat+salt+protein+carb: 2632
+          acid+fat+salt+protein: 2110
+          fat+protein+carb: 2068
+          acid+fat+salt+umami+sweet+protein+carb: 1887
+          acid+fat+salt+umami+sweet+protein: 1788
+          fat+salt+umami+sweet+protein+carb: 1734
+  broccoli:
+    recipes: 49247
+    families:
+      acid: 17281
+      fat: 45576
+      salt: 41357
+      umami: 31743
+      sweet: 7221
+      protein: 39673
+      carb: 24940
+    combos:
+      fat+salt+umami+protein+carb: 7742
+      fat+salt+umami+protein: 5884
+      fat+salt+protein: 4563
+      fat+salt+protein+carb: 4501
+      acid+fat+salt+umami+protein+carb: 3410
+      acid+fat+salt+umami+protein: 2782
+      acid+fat+salt+umami+sweet+protein: 2600
+      acid+fat+salt+protein+carb: 1404
+      fat+umami+carb: 1144
+      acid+fat+salt+protein: 818
+      acid+fat+salt+umami+sweet+protein+carb: 817
+      fat+salt+umami: 619
+    techniques:
+      stir_fry:
+        recipes: 3005
+        families:
+          acid: 1329
+          fat: 2767
+          salt: 2553
+          umami: 2563
+          sweet: 1096
+          protein: 2418
+          carb: 1481
+        combos:
+          fat+salt+umami+protein+carb: 377
+          fat+salt+umami+protein: 306
+          acid+fat+salt+umami+sweet+protein+carb: 270
+          acid+fat+salt+umami+sweet+protein: 255
+          acid+fat+salt+umami+protein+carb: 200
+          acid+fat+salt+umami+protein: 191
+          fat+salt+umami+sweet+protein+carb: 125
+          fat+salt+umami+sweet+protein: 119
+          fat+salt+umami: 85
+          fat+protein+carb: 60
+          fat+salt+protein+carb: 56
+          fat+salt+umami+carb: 55
+      steam:
+        recipes: 3315
+        families:
+          acid: 1447
+          fat: 2980
+          salt: 2791
+          umami: 2054
+          sweet: 516
+          protein: 2406
+          carb: 1576
+        combos:
+          fat+salt+umami+protein+carb: 415
+          fat+salt+umami+protein: 315
+          acid+fat+salt+umami+protein+carb: 280
+          fat+salt+protein: 248
+          fat+salt+protein+carb: 232
+          acid+fat+salt+umami+protein: 204
+          acid+fat+salt+umami+sweet+protein: 98
+          acid+fat+salt+umami+sweet+protein+carb: 85
+          acid+fat+salt: 81
+          fat+salt+umami: 76
+          acid+fat+salt+protein: 70
+          acid+fat+salt+protein+carb: 69
+      roast:
+        recipes: 947
+        families:
+          acid: 579
+          fat: 889
+          salt: 853
+          umami: 617
+          sweet: 207
+          protein: 645
+          carb: 465
+        combos:
+          acid+fat+salt+umami+protein+carb: 112
+          acid+fat+salt+umami+protein: 106
+          fat+salt+umami+protein+carb: 90
+          fat+salt: 55
+          fat+salt+umami+protein: 50
+          acid+fat+salt+umami+sweet+protein+carb: 44
+          fat+salt+protein+carb: 39
+          acid+fat+salt+umami: 33
+          fat+salt+protein: 28
+          acid+fat+salt: 28
+          acid+fat+salt+protein+carb: 25
+          acid+fat+salt+protein: 24
+      saute:
+        recipes: 7472
+        families:
+          acid: 2079
+          fat: 7146
+          salt: 5935
+          umami: 5747
+          sweet: 585
+          protein: 5514
+          carb: 4782
+        combos:
+          fat+salt+umami+protein+carb: 1623
+          fat+salt+umami+protein: 1020
+          acid+fat+salt+umami+protein+carb: 762
+          fat+umami+carb: 508
+          fat+salt+protein+carb: 498
+          acid+fat+salt+umami+protein: 326
+          fat+salt+protein: 290
+          fat+carb: 219
+          fat+salt+umami: 171
+          fat+salt+umami+carb: 159
+          acid+fat+salt+umami+sweet+protein+carb: 141
+          acid+fat+salt+umami+sweet+protein: 106
+      boil:
+        recipes: 14721
+        families:
+          acid: 5673
+          fat: 13547
+          salt: 12652
+          umami: 10755
+          sweet: 1755
+          protein: 11771
+          carb: 8819
+        combos:
+          fat+salt+umami+protein+carb: 2810
+          acid+fat+salt+umami+protein+carb: 1716
+          fat+salt+umami+protein: 1634
+          fat+salt+protein+carb: 1084
+          acid+fat+salt+umami+protein: 765
+          fat+salt+protein: 718
+          acid+fat+salt+umami+sweet+protein+carb: 413
+          acid+fat+salt+protein+carb: 356
+          fat+salt+umami: 316
+          acid+fat+salt+umami+sweet+protein: 307
+          fat+salt+umami+carb: 211
+          fat+umami+carb: 203
+      bake:
+        recipes: 23395
+        families:
+          acid: 5310
+          fat: 22117
+          salt: 19850
+          umami: 13171
+          sweet: 686
+          protein: 20198
+          carb: 13396
+        combos:
+          fat+salt+umami+protein+carb: 4406
+          fat+salt+protein: 3314
+          fat+salt+protein+carb: 3267
+          fat+salt+umami+protein: 3123
+          acid+fat+salt+umami+protein: 1425
+          acid+fat+salt+umami+protein+carb: 1227
+          acid+fat+salt+protein+carb: 1099
+          fat+umami+carb: 988
+          acid+fat+salt+protein: 550
+          fat+carb: 435
+          umami+carb: 368
+          fat+protein+carb: 187
+      grill:
+        recipes: 1083
+        families:
+          acid: 542
+          fat: 1003
+          salt: 936
+          umami: 692
+          sweet: 189
+          protein: 954
+          carb: 585
+        combos:
+          fat+salt+umami+protein+carb: 139
+          acid+fat+salt+umami+protein+carb: 126
+          acid+fat+salt+umami+protein: 109
+          fat+salt+protein+carb: 105
+          fat+salt+umami+protein: 96
+          fat+salt+protein: 61
+          acid+fat+salt+umami+sweet+protein+carb: 40
+          acid+fat+salt+protein: 39
+          acid+fat+salt+umami+sweet+protein: 36
+          acid+fat+salt+protein+carb: 30
+          acid+fat+salt+umami+carb: 12
+          fat+protein+carb: 12
+      fry:
+        recipes: 2215
+        families:
+          acid: 834
+          fat: 2069
+          salt: 1949
+          umami: 1620
+          sweet: 522
+          protein: 1918
+          carb: 1022
+        combos:
+          fat+salt+umami+protein: 319
+          fat+salt+umami+protein+carb: 295
+          acid+fat+salt+umami+sweet+protein: 241
+          fat+salt+protein: 177
+          acid+fat+salt+umami+protein+carb: 177
+          fat+salt+protein+carb: 145
+          acid+fat+salt+umami+protein: 106
+          acid+fat+salt+umami+sweet+protein+carb: 76
+          fat+salt+umami+sweet+protein: 54
+          fat+salt+umami+sweet+protein+carb: 31
+          fat+protein+carb: 30
+          fat+umami+carb: 29
+      soup:
+        recipes: 16201
+        families:
+          acid: 4228
+          fat: 14960
+          salt: 13474
+          umami: 10798
+          sweet: 890
+          protein: 13326
+          carb: 9269
+        combos:
+          fat+salt+umami+protein+carb: 3407
+          fat+salt+umami+protein: 2608
+          fat+salt+protein+carb: 1589
+          fat+salt+protein: 1203
+          acid+fat+salt+umami+protein+carb: 956
+          acid+fat+salt+protein+carb: 762
+          acid+fat+salt+umami+protein: 698
+          fat+umami+carb: 557
+          acid+fat+salt+protein: 338
+          acid+fat+salt+umami+sweet+protein: 245
+          fat+carb: 240
+          umami+carb: 218
+      raw:
+        recipes: 3502
+        families:
+          acid: 2405
+          fat: 3245
+          salt: 2881
+          umami: 2401
+          sweet: 1591
+          protein: 2647
+          carb: 1368
+        combos:
+          acid+fat+salt+umami+sweet+protein: 685
+          acid+fat+salt+umami+protein+carb: 259
+          acid+fat+salt+umami+protein: 258
+          fat+salt+umami+protein+carb: 224
+          fat+salt+umami+protein: 177
+          acid+fat+salt+umami+sweet+protein+carb: 145
+          fat+salt+protein: 114
+          fat+salt+protein+carb: 104
+          fat+salt+umami+sweet+protein: 94
+          acid+fat+salt+sweet: 93
+          acid+fat+salt+protein+carb: 70
+          acid+fat+salt+umami+sweet: 70
+      dry:
+        recipes: 5171
+        families:
+          acid: 2533
+          fat: 4871
+          salt: 4607
+          umami: 3329
+          sweet: 756
+          protein: 4393
+          carb: 2863
+        combos:
+          fat+salt+umami+protein+carb: 685
+          acid+fat+salt+umami+protein+carb: 628
+          fat+salt+umami+protein: 483
+          acid+fat+salt+umami+protein: 391
+          acid+fat+salt+protein+carb: 389
+          fat+salt+protein: 359
+          fat+salt+protein+carb: 334
+          acid+fat+salt+umami+sweet+protein: 158
+          acid+fat+salt+umami+sweet+protein+carb: 156
+          acid+fat+salt+protein: 150
+          fat+salt+umami: 70
+          fat+salt+umami+sweet+protein+carb: 61
+  avocado:
+    recipes: 26840
+    families:
+      acid: 22837
+      fat: 21168
+      salt: 22523
+      umami: 16580
+      sweet: 5529
+      protein: 18976
+      carb: 12492
+    combos:
+      acid+fat+salt+umami+protein+carb: 5539
+      acid+fat+salt+umami+protein: 3111
+      acid+fat+salt+protein+carb: 1118
+      acid+salt+umami: 1044
+      acid+fat+salt+protein: 1016
+      acid+fat+salt+umami: 986
+      acid+fat+salt+umami+sweet+protein+carb: 938
+      acid+fat+salt+umami+sweet+protein: 841
+      fat+salt+protein+carb: 804
+      acid+fat+salt: 649
+      acid+salt: 642
+      fat+salt+umami+protein+carb: 510
+    techniques:
+      stir_fry:
+        recipes: 190
+        families:
+          acid: 147
+          fat: 179
+          salt: 159
+          umami: 129
+          sweet: 52
+          protein: 164
+          carb: 125
+        combos:
+          acid+fat+salt+umami+protein+carb: 46
+          acid+fat+salt+umami+protein: 17
+          acid+fat+salt+umami+sweet+protein+carb: 13
+          fat+salt+protein+carb: 12
+          acid+fat+salt+protein+carb: 12
+          acid+fat+salt+umami+sweet+protein: 9
+          fat+salt+umami+protein+carb: 9
+          fat+salt+umami+sweet+protein: 5
+          acid+fat+salt+sweet+protein+carb: 4
+          acid+fat+salt+umami+carb: 4
+          acid+fat+protein+carb: 4
+          fat+salt+protein: 4
+      steam:
+        recipes: 426
+        families:
+          acid: 371
+          fat: 352
+          salt: 368
+          umami: 260
+          sweet: 94
+          protein: 320
+          carb: 237
+        combos:
+          acid+fat+salt+umami+protein+carb: 84
+          acid+fat+salt+umami+protein: 46
+          acid+fat+salt+protein+carb: 32
+          acid+fat+salt+umami+sweet+protein+carb: 28
+          acid+fat+salt+protein: 17
+          fat+salt+protein+carb: 14
+          acid+fat+salt+umami+sweet+protein: 14
+          acid+fat+salt+umami: 12
+          fat+salt+umami+protein+carb: 11
+          acid+fat+salt: 11
+          acid+salt+umami: 10
+          acid+salt: 9
+      roast:
+        recipes: 1127
+        families:
+          acid: 997
+          fat: 1000
+          salt: 1020
+          umami: 663
+          sweet: 329
+          protein: 824
+          carb: 666
+        combos:
+          acid+fat+salt+umami+protein+carb: 247
+          acid+fat+salt+umami+sweet+protein+carb: 87
+          acid+fat+salt+protein+carb: 85
+          acid+fat+salt+umami+protein: 79
+          acid+fat+salt+umami+sweet+protein: 43
+          acid+fat+salt+protein: 43
+          acid+fat+salt+sweet+protein+carb: 42
+          acid+fat+salt+umami: 35
+          fat+salt+protein+carb: 33
+          acid+fat+salt: 32
+          acid+fat+salt+sweet: 30
+          acid+fat+salt+sweet+protein: 29
+      saute:
+        recipes: 2184
+        families:
+          acid: 1846
+          fat: 2105
+          salt: 1966
+          umami: 1635
+          sweet: 401
+          protein: 1969
+          carb: 1519
+        combos:
+          acid+fat+salt+umami+protein+carb: 769
+          acid+fat+salt+umami+protein: 236
+          acid+fat+salt+umami+sweet+protein+carb: 145
+          acid+fat+salt+protein+carb: 129
+          fat+salt+protein+carb: 97
+          fat+salt+umami+protein+carb: 91
+          acid+fat+salt+umami+sweet+protein: 78
+          acid+fat+umami+protein+carb: 65
+          acid+fat+salt+protein: 49
+          fat+salt+umami+protein: 46
+          acid+fat+salt+sweet+protein+carb: 45
+          acid+fat+salt+umami+carb: 34
+      boil:
+        recipes: 5095
+        families:
+          acid: 4509
+          fat: 4470
+          salt: 4479
+          umami: 3768
+          sweet: 1195
+          protein: 4287
+          carb: 3413
+        combos:
+          acid+fat+salt+umami+protein+carb: 1654
+          acid+fat+salt+umami+protein: 464
+          acid+fat+salt+umami+sweet+protein+carb: 349
+          acid+fat+salt+umami+sweet+protein: 213
+          acid+fat+salt+protein+carb: 198
+          acid+fat+salt+protein: 146
+          fat+salt+umami+protein+carb: 138
+          acid+fat+salt+sweet+protein+carb: 122
+          fat+salt+protein+carb: 117
+          acid+fat+umami+protein+carb: 112
+          acid+fat+salt+umami: 93
+          acid+fat+salt+umami+carb: 92
+      bake:
+        recipes: 3946
+        families:
+          acid: 3157
+          fat: 3608
+          salt: 3614
+          umami: 2425
+          sweet: 926
+          protein: 3420
+          carb: 2475
+        combos:
+          acid+fat+salt+umami+protein+carb: 1124
+          acid+fat+salt+umami+protein: 417
+          acid+fat+salt+protein+carb: 266
+          fat+salt+protein+carb: 215
+          acid+fat+salt+umami+sweet+protein+carb: 204
+          acid+fat+salt+protein: 140
+          fat+salt+umami+protein+carb: 137
+          acid+fat+salt+umami+sweet+protein: 122
+          acid+fat+salt+sweet+protein: 101
+          acid+fat+salt+sweet+protein+carb: 100
+          fat+salt+protein: 95
+          fat+salt+umami+protein: 73
+      grill:
+        recipes: 3311
+        families:
+          acid: 2893
+          fat: 3004
+          salt: 2931
+          umami: 2055
+          sweet: 775
+          protein: 2845
+          carb: 1768
+        combos:
+          acid+fat+salt+umami+protein+carb: 715
+          acid+fat+salt+umami+protein: 455
+          acid+fat+salt+protein+carb: 253
+          acid+fat+salt+umami+sweet+protein: 179
+          acid+fat+salt+protein: 174
+          acid+fat+salt+umami+sweet+protein+carb: 170
+          fat+salt+protein+carb: 130
+          acid+fat+salt+sweet+protein: 99
+          acid+fat+salt+sweet+protein+carb: 98
+          fat+salt+protein: 83
+          acid+fat+salt+umami: 68
+          fat+salt+umami+protein+carb: 48
+      fry:
+        recipes: 1846
+        families:
+          acid: 1489
+          fat: 1731
+          salt: 1664
+          umami: 1177
+          sweet: 474
+          protein: 1633
+          carb: 1176
+        combos:
+          acid+fat+salt+umami+protein+carb: 519
+          acid+fat+salt+umami+protein: 183
+          acid+fat+salt+protein+carb: 138
+          acid+fat+salt+umami+sweet+protein+carb: 128
+          fat+salt+protein+carb: 89
+          acid+fat+salt+umami+sweet+protein: 80
+          fat+salt+umami+protein+carb: 61
+          acid+fat+salt+protein: 53
+          acid+fat+salt+sweet+protein: 44
+          fat+salt+protein: 37
+          acid+fat+salt+sweet+protein+carb: 36
+          acid+fat+salt: 26
+      soup:
+        recipes: 7014
+        families:
+          acid: 5903
+          fat: 5198
+          salt: 5630
+          umami: 4121
+          sweet: 1687
+          protein: 4407
+          carb: 2878
+        combos:
+          acid+fat+salt+umami+protein+carb: 1401
+          acid+fat+salt+umami+protein: 640
+          acid+fat+salt+umami: 345
+          acid+fat+salt+protein: 270
+          acid+fat+salt+umami+sweet+protein+carb: 269
+          acid+salt+umami: 239
+          acid+fat+salt+protein+carb: 238
+          acid+fat+salt+umami+sweet+protein: 216
+          acid+fat+salt: 211
+          acid+salt: 198
+          none: 160
+          sweet: 141
+      raw:
+        recipes: 4765
+        families:
+          acid: 4427
+          fat: 4212
+          salt: 3989
+          umami: 2842
+          sweet: 1722
+          protein: 3501
+          carb: 1868
+        combos:
+          acid+fat+salt+umami+protein+carb: 734
+          acid+fat+salt+umami+protein: 634
+          acid+fat+salt+umami+sweet+protein: 339
+          acid+fat+salt+umami+sweet+protein+carb: 261
+          acid+fat+salt+protein: 240
+          acid+fat+salt+sweet: 223
+          acid+fat+salt+sweet+protein: 205
+          acid+fat+salt+protein+carb: 177
+          acid+fat+salt+umami: 160
+          acid+fat+salt: 133
+          acid+fat+salt+sweet+protein+carb: 127
+          acid+fat+salt+umami+sweet: 110
+      dry:
+        recipes: 5269
+        families:
+          acid: 4507
+          fat: 4601
+          salt: 4661
+          umami: 3365
+          sweet: 1323
+          protein: 4290
+          carb: 2961
+        combos:
+          acid+fat+salt+umami+protein+carb: 1451
+          acid+fat+salt+umami+protein: 592
+          acid+fat+salt+protein+carb: 284
+          acid+fat+salt+umami+sweet+protein+carb: 281
+          acid+fat+salt+umami+sweet+protein: 228
+          acid+fat+salt+protein: 199
+          fat+salt+protein+carb: 149
+          acid+fat+salt+sweet+protein+carb: 131
+          acid+fat+salt+sweet+protein: 129
+          fat+salt+umami+protein+carb: 92
+          acid+salt+umami: 91
+          acid+fat+salt+umami: 89

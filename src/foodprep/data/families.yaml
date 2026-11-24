@@ -304,7 +304,7 @@ members:
     families: {fat: very_high}
     forms: [solid_fat]
     character: [dairy, sweet]
-    corpus: "(?<!peanut )(?<!nut )(?<!apple )(?<!cocoa )(?<!shea )\\bbutter\\b(?!\\s*(milk|scotch|nut|cream|beans?|lettuce|flavou?r))"
+    corpus: "(?<!peanut )(?<!nut )(?<!apple )(?<!cocoa )(?<!shea )\\bbutter\\b(?!\\s*(milk|scotch|nut|cream|beans?|lettuce|flavou?r))|margarine|\\boleo\\b"
   brown_butter:
     ingredient: brown_butter
     families: {fat: very_high}
@@ -327,7 +327,7 @@ members:
     families: {fat: high}
     forms: [cream]
     character: [dairy, mild]
-    corpus: "(heavy|whipping|double|light|single|fresh) cream|\\bcream\\b(?! cheese| of | soda)"
+    corpus: "(heavy|whipping|double|light|single|fresh) cream|(?<!sour )(?<!ice )\\bcream\\b(?! cheese| of | soda)"
   tahini:
     ingredient: tahini
     families: {fat: high, umami: medium}
@@ -561,6 +561,132 @@ members:
     takes_sauce: true
     character: [nutty]
     corpus: "barley|farro|bulgur|quinoa|couscous|spelt|freekeh"
+
+  # ---- common members added for family coverage (S3 family analysis) ---------
+  # A family's share of recipes is only as good as its member list, so the
+  # everyday ingredients that bring each family are here even when they make
+  # no Scout idea.
+  orange:
+    families: {acid: medium, sweet: medium}
+    forms: [juice]
+    character: [citrus, sweet]
+    corpus: "orange juice|\\boranges?\\b(?!\\s*(zest|peel|rind|extract|liqueur|marmalade|bell|peppers?|jell|gelatin|soda|flavou?r))"
+  wine:
+    families: {acid: medium}
+    forms: [liquid]
+    character: [fruity, sharp]
+    corpus: "\\bwine\\b(?!\\s*vinegar)|\\bsherry\\b(?!\\s*vinegar)|vermouth"
+  mustard:
+    ingredient: mustard
+    families: {acid: medium, umami: low}
+    forms: [paste]
+    character: [pungent, sharp]
+    corpus: "mustard(?!\\s*(greens?|seeds?|powder|oil))|dijon"
+  pickles:
+    ingredient: pickles
+    families: {acid: high, salt: medium}
+    forms: [whole]
+    texture: crisp
+    character: [sour, crunchy]
+    corpus: "\\bpickles?\\b(?!\\s*juice)|gherkins?|cornichons?|relish"
+  buttermilk:
+    families: {acid: medium, fat: low}
+    forms: [liquid]
+    character: [tangy, dairy]
+    corpus: "buttermilk"
+  sour_cream:
+    families: {fat: high, acid: low}
+    forms: [cream]
+    texture: creamy
+    character: [tangy, dairy]
+    corpus: "sour cream|cr[eè]me fra[iî]che"
+  vegetable_oil:
+    families: {fat: very_high}
+    forms: [oil]
+    character: [neutral]
+    corpus: "(?<!olive )(?<!sesame )(?<!essential )(?<!rapeseed )(?<!canola )(?<!truffle )(?<!avocado )(?<!chili )(?<!coconut )\\boil\\b"
+  mayonnaise:
+    families: {fat: very_high, acid: low}
+    forms: [cream]
+    texture: creamy
+    character: [rich, tangy]
+    corpus: "mayonnaise|\\bmayo\\b|miracle whip|salad dressing"
+  cheese:
+    families: {fat: high, protein: medium, salt: medium, umami: low}
+    forms: [crumble]
+    texture: creamy
+    character: [dairy, salty]
+    corpus: "cheddar|mozzarella|monterey|jack cheese|swiss cheese|american cheese|velveeta|provolone|colby|\\bcheese\\b"
+  beef:
+    families: {protein: very_high, fat: medium}
+    forms: [whole]
+    pan_cooked: true
+    character: [meaty]
+    corpus: "\\bbeef\\b(?!\\s*(broth|stock|bouillon|consomm|gravy))|steak|hamburger|ground chuck|sirloin|brisket"
+  pork:
+    families: {protein: very_high, fat: medium, salt: medium}
+    forms: [whole]
+    pan_cooked: true
+    character: [meaty, salty]
+    corpus: "\\bpork\\b|\\bham\\b|sausage|chorizo|prosciutto|salami|pepperoni|kielbasa"
+  turkey:
+    families: {protein: very_high}
+    forms: [whole]
+    pan_cooked: true
+    character: [mild]
+    corpus: "\\bturkey\\b(?!\\s*(broth|stock|gravy))"
+  shellfish:
+    families: {protein: very_high}
+    forms: [whole]
+    pan_cooked: true
+    character: [sweet, briny]
+    corpus: "shrimp|prawns?|scallops?|\\bcrab|lobster|mussels|clams"
+  fish:
+    families: {protein: very_high}
+    forms: [whole]
+    texture: soft
+    pan_cooked: true
+    character: [mild]
+    corpus: "salmon|tuna|\\bcod\\b|tilapia|halibut|haddock|trout|mackerel|catfish|\\bfish\\b(?!\\s*sauce)"
+  beans:
+    families: {protein: medium, carb: medium}
+    forms: [whole]
+    absorbent: true
+    character: [earthy]
+    corpus: "black beans?|kidney beans?|pinto beans?|lentils?|edamame|refried beans|baked beans"
+  tortilla:
+    ingredient: tortilla
+    families: {carb: very_high}
+    forms: [whole]
+    character: [corn, wheat]
+    corpus: "tortillas?|taco shells?|tostadas?"
+  crackers:
+    families: {carb: high}
+    forms: [crumble]
+    texture: crisp
+    character: [toasted, salty]
+    corpus: "crackers?|saltines?|ritz"
+  mushroom:
+    families: {umami: medium}
+    forms: [whole]
+    character: [earthy]
+    corpus: "(?<!dried )mushrooms?\\b"
+  worcestershire:
+    families: {umami: high, salt: medium, acid: low}
+    forms: [liquid]
+    character: [fermented, dark]
+    corpus: "worcestershire"
+  jam:
+    families: {sweet: very_high, acid: low}
+    forms: [jelly]
+    character: [fruity]
+    corpus: "\\bjam\\b|\\bjelly\\b|preserves|marmalade"
+  dried_fruit:
+    ingredient: dried_cranberries
+    families: {sweet: high, acid: low}
+    forms: [whole]
+    character: [fruity, chewy]
+    corpus: "raisins?|dried cranberr|craisins|dried apricots?|dried cherr|sultanas?"
 
 # Notes the generator adds on top of a mechanism.
 pairing_notes:

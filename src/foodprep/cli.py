@@ -117,6 +117,14 @@ def cmd_families(args: argparse.Namespace) -> int:
     return 1 if out.startswith("No ") else 0
 
 
+def cmd_family_profile(args: argparse.Namespace) -> int:
+    """Which families cooks add to an ingredient, against the curated gaps."""
+    from foodprep import family_profiles
+    out = family_profiles.render_profile(args.ingredient)
+    print(out, end="")
+    return 1 if out.startswith("No ") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -343,6 +351,11 @@ def build_parser() -> argparse.ArgumentParser:
     pfam = sub.add_parser("families", help="Families (acid, fat, protein, ...) and their members")
     pfam.add_argument("family", nargs="?")
     pfam.set_defaults(func=cmd_families)
+
+    pfp = sub.add_parser("family-profile",
+                         help="Families cooks add to an ingredient, against the model's gaps")
+    pfp.add_argument("ingredient", nargs="?", default="broccoli")
+    pfp.set_defaults(func=cmd_family_profile)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

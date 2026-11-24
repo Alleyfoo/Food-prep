@@ -82,16 +82,21 @@ class Counts:
 def count_row(counts: Counts, ingredients: str, directions: str,
               targets: dict[str, re.Pattern[str]],
               sources: dict[str, re.Pattern[str]],
-              any_source: re.Pattern[str]) -> None:
-    """Count one recipe from its raw ingredient and direction fields."""
+              any_source: re.Pattern[str]) -> tuple[set[str], set[str], set[str]]:
+    """Count one recipe from its raw ingredient and direction fields, and return
+    what was found (targets, members, techniques) for other tallies."""
     found_t = {t for t, rx in targets.items() if rx.search(ingredients)}
     found_s = ({s for s, rx in sources.items() if rx.search(ingredients)}
                if any_source.search(ingredients) else set())
     techs = {k for k, rx in pe.TECHNIQUES if rx.search(directions)} if found_t else set()
     counts.add(found_t, found_s, techs)
+    return found_t, found_s, techs
 
 
-def count_csv(path: Path | str, families: dict | None = None) -> Counts:
+def count_csv(path: Path | str, families: dict | None = None,
+              also: Iterable = ()) -> Counts:
+    """One pass over the corpus. Each object in `also` gets
+    add(targets, members, techniques) for every recipe (family_profiles)."""
     sources = source_patterns(families)
     targets = {name: ing.listed for name, ing in pe.INGREDIENTS.items()}
     any_source = re.compile("|".join(f"(?:{rx.pattern})" for rx in sources.values()), re.I)
@@ -102,7 +107,9 @@ def count_csv(path: Path | str, families: dict | None = None) -> Counts:
         header = next(reader)
         i_ing, i_dir = header.index("ingredients"), header.index("directions")
         for row in reader:
-            count_row(counts, row[i_ing], row[i_dir], targets, sources, any_source)
+            found = count_row(counts, row[i_ing], row[i_dir], targets, sources, any_source)
+            for other in also:
+                other.add(*found)
     return counts
 
 
