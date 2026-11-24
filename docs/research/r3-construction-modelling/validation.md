@@ -18,11 +18,7 @@ shown with `foodprep construction <dish>`.
 2. **Recombination and structure recorded.** Each join is one of six assembly
    operations with roles; each role's requirements are checked on the member
    (a container is hollow, a coagulant sets on heat, a dry phase takes up
-   water). A join is food only if every member is: a non-food member makes
-   the whole assembly not food, with R1's reason, so the steps after it are
-   unsafe or inapplicable. Recombination links are derived, not labelled: two
-   materials of the same origin, each entering the dish by its own route (a
-   fraction whose source only feeds it is extraction). Every fraction a
+   water). Recombination links are derived, not labelled. Every fraction a
    step makes is used, discarded in the data, or marked `usually_discarded` by
    the model (peels); anything else is "unaccounted".
 3. **The final state is consistent with documented practice.** Each route's
@@ -35,11 +31,6 @@ shown with `foodprep construction <dish>`.
    `sources.md`). `tests/test_constructions.py` checks all of this.
 
 ## Results
-
-The validator was corrected after the freeze (amendment A1, from the PR #7
-review: recombination needed two routes, and edibility is now checked at
-every join). Rerunning both sets with the corrected validator changed no
-verdict and no recombination link; the numbers below hold before and after.
 
 - **27 dishes, 43 routes.** 13 dishes fully represented, 14 partly, 0 not.
   By route: 26 fully, 17 partly, 0 not.
@@ -121,3 +112,36 @@ partial verdicts come from five kinds of missing understanding, which
 - Quantities and conditions appear only in `evidence` strings on the step or
   relation they support (for example "135-140 C about 15 min to dehydrate
   (M12c)" on the tortilla's oil step). There is no quantity field.
+
+## After the post-freeze validator amendment A1 (PR #7 review, 2026-11-24)
+
+*Added after R3; the results above are the original R3 record and are not
+changed.*
+
+Review of PR #7 found two faults in the validator by static inspection, and
+both were reproduced with tests that failed on the frozen code:
+- **Recombination** was counted whenever a fraction reached the result,
+  because reachability follows a fraction back to its source, so extraction
+  alone would have counted. It now needs two materials of the same origin,
+  each entering the dish by its own route.
+- **Edibility at joins**: an assembly took only its carrier's edibility. A
+  join is now not food if any member is not food, with R1's reason (unsafe or
+  inapplicable).
+
+The design set rerun on the corrected validator
+(`validation-tables-a1.md`, compared route by route with the original
+`validation-tables.md`):
+
+| | Original R3 | After A1 |
+| --- | --- | --- |
+| dishes fully / partly / not | 13 / 14 / 0 | 13 / 14 / 0 |
+| routes fully / partly / not | 26 / 17 / 0 | 26 / 17 / 0 |
+| recombination links | 9 | 9 |
+| dishes whose verdict changed | | none |
+| dishes that gained or lost a recombination link | | none |
+
+Per dish: no change for any of the 27. All 9 links already joined two
+materials entering the dish by their own routes (for example the potato pulp
+and its settled starch in latkes), and no design dish has a non-food member.
+The amendment record is
+`src/foodprep/data/construction_freeze_amendments.yaml`.

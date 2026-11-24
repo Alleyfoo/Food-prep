@@ -26,34 +26,6 @@ So a "fit" below means the dish was expressed in the vocabulary that existed
 before the dish was seen. Where it does not fit, the change it would need is
 named and **not made**.
 
-### Post-freeze amendment A1 (validator correction, PR #7 review)
-
-After the held-out step, review of PR #7 found two faults in the validator
-(`constructions.py`) by static inspection. Both were reproduced with tests
-that failed on the frozen code before it was changed:
-- **Recombination** was counted whenever a fraction reached the result,
-  because reachability follows a fraction back to its source; extraction alone
-  (potato pressed, only its juice used) would have counted. It now needs two
-  materials of the same origin, each entering the dish by its own route.
-- **Edibility at joins**: an assembly took only its carrier's edibility, so an
-  edible shell could hide a non-food filling. A join is now not food if any
-  member is not food, with R1's reason (unsafe or inapplicable).
-
-The original manifest `construction_freeze.yaml` is unchanged and its bytes
-are pinned by a test. The correction is recorded as amendment A1 in
-`src/foodprep/data/construction_freeze_amendments.yaml` (date, reason, what
-changed, effect, the new hash of `constructions.py`). The freeze test accepts
-exactly the original manifest plus documented amendments and still fails on
-any undocumented change; `run.py --freeze` refuses to overwrite the original.
-
-**Effect: none on the results.** Rerun with the corrected validator, every
-verdict and every recombination link is the same for all 35 dishes: design 13
-fully / 14 partly, held-out 2 fully / 6 partly, 13 links (9 design, 4
-held-out). Every link already joined two materials entering by their own
-routes, and no documented dish has a non-food member. The amendment touches
-the checker, not the vocabulary the held-out dishes were expressed in:
-operations, schema, property keys and `operations.py` are as frozen.
-
 ## Results
 
 8 held-out dishes, 14 routes: 2 dishes fully represented, 6 partly, 0 not.
@@ -138,3 +110,58 @@ The drop from design to held-out is the honest size of the accommodation:
 the design-set fit overstates how far the model reaches. Measured on dishes
 it had not seen, a quarter fit fully and every one is at least partly
 described, with each shortfall named.
+
+## After the post-freeze validator amendment A1 (PR #7 review, 2026-11-24)
+
+*Added after R3; the held-out results above are the original R3 record and
+are not changed.*
+
+**What changed.** After the held-out step, review of PR #7 found two faults
+in the validator (`constructions.py`) by static inspection. Both were
+reproduced with tests that failed on the frozen code before it was changed:
+- **Recombination** was counted whenever a fraction reached the result,
+  because reachability follows a fraction back to its source; extraction
+  alone (potato pressed, only its juice used) would have counted. It now
+  needs two materials of the same origin, each entering the dish by its own
+  route; intermediates that never enter the dish are walked through.
+- **Edibility at joins.** An assembly took only its carrier's edibility, so
+  an edible shell could hide a non-food filling. A join is now not food if any
+  member is not food, with R1's reason, so the steps after it are unsafe or
+  inapplicable.
+
+**How the freeze was kept.** The original manifest `construction_freeze.yaml`
+is unchanged and a test pins its bytes. The correction is recorded as
+amendment A1 in `src/foodprep/data/construction_freeze_amendments.yaml`
+(date, reason, what changed, effect, the new hash of `constructions.py`). The
+freeze test accepts exactly the original manifest plus documented amendments
+and fails on any undocumented change; `run.py --freeze` refuses to overwrite
+the original. A1 changed only the checker: operations, schema, property keys
+and `operations.py` are as frozen, so the held-out dishes are still expressed
+in the vocabulary that existed before they were seen.
+
+**Results on the corrected validator** (`generalisation-tables-a1.md`,
+compared route by route with the original `generalisation-tables.md`):
+
+| | Original R3 | After A1 |
+| --- | --- | --- |
+| held-out dishes fully / partly / not | 2 / 6 / 0 | 2 / 6 / 0 |
+| held-out routes fully / partly / not | 4 / 10 / 0 | 4 / 10 / 0 |
+| held-out recombination links | 4 | 4 |
+| design dishes fully / partly / not | 13 / 14 / 0 | 13 / 14 / 0 |
+| all recombination links (design + held-out) | 13 | 13 |
+
+| Held-out dish | Original R3 | After A1 | Change |
+| --- | --- | --- | --- |
+| draniki | fully | fully | none |
+| kolokythokeftedes | fully | fully | none |
+| chawanmushi | partly | partly | none |
+| farcis niçois | partly | partly | none |
+| pierogi ruskie / vareniki | partly | partly | none |
+| spanakopita / börek | partly | partly | none |
+| zha qie he | partly | partly | none |
+| moi moi | partly | partly | none |
+
+No dish gained or lost a recombination link: the four held-out links
+(draniki twice, farcis twice) already joined two materials entering the dish
+by their own routes, and no held-out dish has a non-food member. The
+conclusion about reusability above is unaffected.

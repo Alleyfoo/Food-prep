@@ -453,6 +453,18 @@ def test_the_original_freeze_manifest_is_preserved():
     assert hashlib.sha256(raw).hexdigest() == _amendments()["original_manifest_sha256"]
 
 
+def test_the_original_result_tables_are_preserved():
+    """The original R3 tables are historical evidence (2 fully / 6 partly
+    held-out; 13 / 14 design); results under an amended validator are written
+    to separate *-a1.md files by run.py, never over these."""
+    import hashlib
+    r3 = ROOT / "docs/research/r3-construction-modelling"
+    for name, sha in _amendments()["original_tables_sha256"].items():
+        raw = (r3 / name).read_bytes().replace(b"\r\n", b"\n")
+        assert hashlib.sha256(raw).hexdigest() == sha, name
+        assert (r3 / name.replace(".md", "-a1.md")).exists(), name
+
+
 def test_freeze_amendments_are_documented():
     ids = []
     for a in _amendments()["amendments"]:

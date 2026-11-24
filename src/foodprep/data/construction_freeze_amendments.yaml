@@ -14,6 +14,13 @@
 original_manifest_sha256: 741c285b2c05cc44c37732f0cd693cec3fa1c568b7d1cbe6891bd4ac51aa557b
 original_commit: e8a2e54
 
+# The original R3 result tables (docs/research/r3-construction-modelling/),
+# kept unchanged as historical evidence. Results under an amended validator go
+# to separately named files (validation-tables-a1.md, generalisation-tables-a1.md).
+original_tables_sha256:
+  validation-tables.md: 8c9a41e185985600073b901df328ac9443c2969b08ca05085893680e9bf80c51        # e8a2e54
+  generalisation-tables.md: 736cbbe556d36a1cfafd939237b12afc6e4e1778ca0cb0585411466c4f616baa    # 6beda68
+
 amendments:
   - id: A1
     date: 2026-11-24
