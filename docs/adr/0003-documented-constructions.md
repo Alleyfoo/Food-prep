@@ -151,7 +151,8 @@ inapplicable (amendment A1). Every fraction a step produces must be used, or lis
   the operation definitions and property keys at the freeze, and
   `tests/test_constructions.py` fails if a held-out dish depends on
   anything changed after it. The manifest is never rewritten: corrections
-  are documented amendments (`construction_freeze_amendments.yaml`; A1 is the
+  are documented amendments (`construction_freeze_amendments.yaml`; A2, R4,
+  adds `cooks_slowly` and a gratin-layer requirement with no effect on R3; A1 is the
   PR #7 validator correction). A later round that changes the schema on
   purpose records a new freeze and keeps R3's results as history.
 - Existing behaviour is unchanged: the new operations are outside the
