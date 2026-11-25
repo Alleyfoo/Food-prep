@@ -156,6 +156,15 @@ def cmd_construction(args: argparse.Namespace) -> int:
     return 1 if out.startswith("No ") else 0
 
 
+def cmd_transfer(args: argparse.Namespace) -> int:
+    """A documented construction carried over to another ingredient (R4): the
+    derived route checked by the R3 validator, the evidence and the verdict."""
+    from foodprep import transfers
+    out = transfers.render(args.candidate) if args.candidate else transfers.render_list()
+    print(out.rstrip("\n"))
+    return 1 if out.startswith("No ") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -412,6 +421,11 @@ def build_parser() -> argparse.ArgumentParser:
                           help="A documented dish: materials, operations, relations, why it holds")
     pcon.add_argument("dish", nargs="?", help="dish id; omit to list them")
     pcon.set_defaults(func=cmd_construction)
+
+    ptr = sub.add_parser("transfer",
+                         help="A documented construction carried to another ingredient (R4)")
+    ptr.add_argument("candidate", nargs="?", help="candidate id; omit to list them")
+    ptr.set_defaults(func=cmd_transfer)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")
