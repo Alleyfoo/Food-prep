@@ -197,6 +197,7 @@ class Overview:
     finish: list = field(default_factory=list)        # (stage, [Cited times], [Cited done])
     gaps: list = field(default_factory=list)          # str: where the evidence stops
     keeping: list = field(default_factory=list)       # (intermediate name, [Cited], note)
+    alternatives: list = field(default_factory=list)  # Cited "name: says": R5, as recorded
     has_sequence: bool = False
     # a swap
     base: str = ""                                    # base route key
@@ -472,6 +473,9 @@ def overview(key: str, held: tuple[str, int] | None = None) -> Overview | None:
                           [_time_cited(e) for e in f.get("elapsed") or []],
                           _cited(f.get("completion")), _words(f.get("note"))))
     ov.gaps = [_words(g) for g in seq.get("gaps") or []]
+    ov.alternatives = [Cited(f"{_words(a.get('name'))}: {_words(a.get('says'))}",
+                             list(a.get("sources") or []))
+                       for a in seq.get("alternatives") or []]
     for _, it in intermediates_on(key):
         ov.keeping.append((it.get("name"), keeping_lines(it), _words(it.get("note"))))
     return ov

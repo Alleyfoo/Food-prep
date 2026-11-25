@@ -225,6 +225,11 @@ def overview_html(ov: d.Overview, hide_done: bool = False) -> str:
             body += _line("Note", _esc(note))
         out.append(f'<div class="dn-join"><div class="dn-join-head"><span class="dn-arrow">'
                    f'&#x2193;</span> then: {_esc(stage)}</div>{body}</div>')
+    if ov.alternatives:
+        out.append('<div class="dn-footer">' + _line(
+            "Other documented ways", _list(ov.alternatives)
+            + '<div class="dn-quiet">Each is its own documented route: compare them under '
+              'Routes side by side. Mixing their steps is not documented.</div>') + "</div>")
     if ov.gaps:
         out.append('<div class="dn-footer">' + _line("Evidence stops", _list([d.Cited(g) for g in ov.gaps]), "dn-gap") + "</div>")
     for name, lines, note in ov.keeping:

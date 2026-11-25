@@ -136,6 +136,13 @@ def test_conflicting_times_stay_separate_versions():
     assert " · or " in dnr._choices(cf.versions)
 
 
+def test_overview_lists_documented_alternatives_as_cited_text():
+    ov = d.overview("transfer:rutabaga_gratin")
+    assert len(ov.alternatives) == 5
+    assert ov.alternatives[0].text.startswith("raw slices and a long covered bake:")
+    assert "Other documented ways" in dnr.overview_html(ov)
+
+
 def test_done_when_is_never_called_a_safety_limit():
     html = dnr.overview_html(d.overview("transfer:rutabaga_gratin"))
     assert html_escape(d.NOT_A_SAFETY_LIMIT) in html
