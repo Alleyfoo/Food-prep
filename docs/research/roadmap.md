@@ -28,7 +28,7 @@ The method, unchanged since R1:
 | 6 | **Representing complete constructions.** Can the model describe a real dish from raw parts to its finished structure, and show why it works? | answered, implemented (R3, PR #7) | 35 dishes; structure yes, what happens inside an assembly partly |
 | 7 | **Discovering useful unfamiliar preparations.** Can a documented construction be carried over to another Lidl ingredient with a physical reason, and does it work? | answered, R4 (not cooked) | `r4-transfers/`: five transfers worth cooking, one not; the search finds them, the model checks structure, the kitchen judges quality |
 | 8 | **Executing a documented step.** What do you actually need to do for a step to work: conditions, elapsed and active time, how you know it is done or failed, readiness against doneness, through the whole sequence; and what can you do from a state you already have? | answered, R5 (not cooked) | `r5-processing-conditions/`: 25 pairs, 10 whole sequences, 17 intermediate states, from documented practice only |
-| 9 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations, constructions and conditions answer "what can I make with this tonight"? | open, R7 (planned as R6 until R6 became the academic round) | `r6-academic-foundations/r7-recommendation.md` |
+| 9 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations, constructions and conditions answer "what can I make with this tonight"? | built, R7 (not yet used to cook; the IE checks decide) | `r7-interface/`: a Dinner section over the R3-R5 records; spec `r6-academic-foundations/r7-recommendation.md` |
 | 10 | **Academic foundations.** How do established academic and industrial approaches represent transformations, whole processes, substitutions and alternative routes, and is there something better than R1-R5? | answered, R6 (literature only) | `r6-academic-foundations/`: no replacement found; eight concepts to adopt or extend; the app reads none of R3-R5 yet |
 
 ### What each finished round established
@@ -190,6 +190,29 @@ cooked.
   - 7 interface evaluations.
 
 ### R7: integrate into the interface
+
+**Done 2026-11-25 (`r7-interface/`), not yet used to cook.** All eight items
+of R6's recommendation are built as views over the existing records:
+- the app gained a **Dinner** section: What can I make, Dish (overview,
+  routes side by side, the control-record form), and Start from what I have;
+- the Map gained an Outcomes view, with the table as default above 20 links;
+- the Taste Circle is labelled "documented pairings, not predicted taste".
+
+No documented data or frozen module changed. The user's own records (control
+records, shelf checks) live in `records/`, beside the documented data and
+never merged into it. Kitchen-test results do not flow back into
+`transfers.yaml` (this supersedes the older note below).
+
+What R7 found:
+- R3 holds no pea-soup dish, so the familiar uses of dried peas are empty
+  and pea soup shows only in the R5 soaking record;
+- 54 of 64 routes have no R5 sequence and say "endpoint not recorded".
+
+Next: cook KT1 with the overview (IE2), then IE4, IE1, IE3 and IE5
+(`r7-interface/ie-checks.md`). After that, a data round chooses which of R6's
+data extensions the cook actually needed.
+
+The planning text from before the round follows, unchanged.
 
 Planned as R6 and moved to R7 when R6 became the academic round. The text
 below is kept as it was written before that change. "R6" in it means this
