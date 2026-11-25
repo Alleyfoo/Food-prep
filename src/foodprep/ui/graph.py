@@ -682,3 +682,42 @@ def graph_data(net: Network) -> dict[str, Any]:
     # pyvis turns on vis's physics-configurator panel; the map never shows it.
     options.pop("configure", None)
     return {"nodes": list(net.nodes), "edges": list(net.edges), "options": options}
+
+
+def build_outcome_graph(ingredient: str, edges: list[tuple[str, str, str]],
+                        labels: dict[str, str] | None = None) -> Network:
+    """R7: the mindmap with outcomes as its second ring.
+
+    ``edges`` come from ``foodprep.dinner.outcome_edges``: the ingredient to each
+    documented dish (familiar use) or transfer (less usual use), then each of those
+    to the other raw ingredients it needs. Techniques live inside the dish view,
+    not here. Above about 20 edges the app shows the table instead (R4.1).
+    """
+    labels = labels or {}
+    net = Network(height="600px", width="100%", bgcolor=_BG,
+                  font_color=False, directed=True)
+    net.barnes_hut(gravity=-3000, central_gravity=0.3, spring_length=140,
+                   spring_strength=0.05, damping=0.09, overlap=0)
+    root = f"ing:{ingredient}"
+    _add_node(net, root, ingredient.replace("_", " "), "ingredient", size=35,
+              title=f"Ingredient: {ingredient}")
+    seen = {root}
+    for src, dst, label in edges:
+        for node in (src, dst):
+            if node in seen:
+                continue
+            seen.add(node)
+            kind, _, rest = node.partition(":")
+            name = labels.get(node) or rest.replace("_", " ")
+            if kind == "out":
+                familiar = any(e[1] == node and e[2] == "familiar use" for e in edges)
+                _add_node(net, node, name, "component" if familiar else "route", size=22,
+                          title=("A documented dish" if familiar else
+                                 "A documented dish carried over (R4 transfer)") + f": {name}")
+            else:
+                _add_node(net, node, name, "ingredient", size=14,
+                          title=f"Ingredient: {name}")
+        color = _EDGE_COLORS["component"] if label == "familiar use" else \
+            _EDGE_COLORS["filler"] if label == "less usual use" else _LINE
+        _add_edge(net, src, dst, label, color=color, dashes=label == "also needs")
+    return net

@@ -1,6 +1,8 @@
 """Food-prep — ingredient transformation graph UI (Streamlit).
 
 Navigation is two levels — a section, then a tab inside it (see SECTIONS):
+  Dinner      What can I make · Dish (overview | routes side by side, with the
+              kitchen-record form) · Start from what I have   [R7]
   Cook        Ingredient Explorer · Component Explorer · Plate Balance ·
               Taste Circle (Circle | Cards views, one shared dish)
   Explore     Map (Cook paths | Scout ideas) · Journeys · Filler Profiles
@@ -21,7 +23,8 @@ from typing import Any
 import streamlit as st
 
 from foodprep.loader import build
-from foodprep import export, query, tasting
+from foodprep import dinner, export, kitchen_records, query, tasting
+from foodprep.ui import dinner_render as dnr
 from foodprep.ui.answer import answer_html, card_anchor, explorer_answer
 from foodprep.ui.render import (
     _esc, _readable, chip, chips, conf_pill, debug_block, tag_class,
@@ -30,7 +33,7 @@ from foodprep.ui.render import (
     route_card_html, smallest_test_html, trial_history_html,
 )
 from foodprep.ui.graph import (
-    TASTE_DIMENSIONS, build_ingredient_graph, build_scout_graph,
+    TASTE_DIMENSIONS, build_ingredient_graph, build_outcome_graph, build_scout_graph,
     graph_data, random_dish_selections, taste_circle_graph_data,
 )
 from foodprep.ui.taste_circle import network_graph, taste_circle_map
@@ -457,7 +460,10 @@ def tab_map() -> None:
             label_visibility="collapsed",
             on_change=_picked_ingredient, args=("map_ing",))
     with view_col:
-        view = pill_radio("View", ["Cook paths", "Scout ideas"], "map_view")
+        view = pill_radio("View", ["Outcomes", "Cook paths", "Scout ideas"], "map_view")
+    if view == "Outcomes":
+        _map_outcomes(ingredient)
+        return
     if view == "Scout ideas":
         _md('<div class="hint">Generated hypotheses for each prepared ingredient. '
             'Diamonds have three lines of compatibility evidence; dots are '
@@ -489,6 +495,31 @@ def tab_map() -> None:
             f'that is a gap in the rules, not evidence that nothing pairs.</div>')
     network_graph(data, height=620,
                   key=f"map_graph_{view}_{ingredient}_{state}")
+
+
+def _map_outcomes(ingredient: str) -> None:
+    """R7: the mindmap's second ring is what the ingredient becomes (documented
+    dishes and transfers). Above about 20 edges the table is the default (R4.1)."""
+    edges = dinner.outcome_edges(ingredient)
+    if not edges:
+        _md(f'<div class="hint">No documented dish or transfer starts from '
+            f'<b>{_esc(_pretty(ingredient))}</b>. That is a gap in the records, not a '
+            f'sign it cannot be cooked; Cook paths shows its techniques.</div>')
+        return
+    default = dinner.map_default_view(len(edges))
+    flip = st.toggle("Show as a graph" if default == "table" else "Show as a table",
+                     key="map_outcome_flip")
+    shown = default if not flip else ("graph" if default == "table" else "table")
+    _md(f'<div class="hint">What {_esc(_pretty(ingredient))} becomes: familiar uses '
+        f'(documented dishes) and less usual uses (a documented dish carried over), then '
+        f'what else each needs. An exploration view: open a dish under Dinner to cook it. '
+        f'{len(edges)} links; above {dinner.MAP_TABLE_ABOVE} the table is the default.</div>')
+    if shown == "table":
+        _md(dnr.outcome_table_html(edges))
+        return
+    labels = {b: dnr._node_label(b) for _a, b, _l in edges if b.startswith("out:")}
+    net = build_outcome_graph(ingredient, edges, labels)
+    network_graph(graph_data(net), height=560, key=f"map_outcomes_{ingredient}")
 
 
 def tab_journeys() -> None:
@@ -1217,6 +1248,10 @@ def tab_taste_circle(available_items: list[str] | None = None) -> None:
             _explain_unrepresentable("Taste Circle", state_comps)
         return
     view = pill_radio("View", ["Circle", "Cards"], "tc_view")
+    _md('<div class="hint tc-label"><b>Documented pairings, not predicted taste.</b> '
+        'The circle shows which fillers the catalogue records with this prepared '
+        'ingredient, by taste role. It does not predict how the dish will taste: '
+        'only cooking it tells you that.</div>')
     if view == "Cards":
         _taste_circle_cards()
     else:
@@ -1605,9 +1640,203 @@ def _tcm_surprise(component: str) -> None:
     st.session_state.tcm_page = 0
 
 
+# ---- Dinner (R7): the R3-R5 records where the cook looks ---------------------
+#
+# Every view is a projection of foodprep.dinner (read-only, tested there); the
+# HTML comes from ui/dinner_render.py. Only the two forms write, and only to the
+# user's own records (foodprep.kitchen_records), never to the documented data.
+
+def _dinner_open(key: str) -> None:
+    st.session_state["dinner_dish"] = key
+    st.session_state["active_section"] = "Dinner"
+    st.session_state["active_tab"] = "Dish"
+
+
+def _dinner_picked() -> None:
+    """The shared context follows this picker only for an ingredient the other
+    views know (the older catalogue does not hold dried peas or rutabaga parts).
+    Otherwise the pick is kept here, for as long as the context is not changed
+    elsewhere."""
+    ing = st.session_state.get("dinner_ing")
+    if ing in query.tree_ingredients(CONN):
+        set_ctx_ingredient(ing)
+        st.session_state.pop("_dinner_own", None)
+    else:
+        st.session_state["_dinner_own"] = (ing, ctx_ingredient())
+
+
+def tab_what_can_i_make() -> None:
+    ings = dinner.ingredient_choices()
+    own, seen_ctx = st.session_state.get("_dinner_own") or (None, None)
+    want = own if own in ings and seen_ctx == ctx_ingredient() else ctx_ingredient()
+    pick, _pad = st.columns(_SUBJECT_RATIO, gap="large")
+    with pick:
+        _md('<div class="eyebrow">What can I make with</div>')
+        _sync_picker("dinner_ing", ings, want)
+        ingredient = st.selectbox(
+            "Ingredient", ings, key="dinner_ing", format_func=_pretty,
+            label_visibility="collapsed", placeholder="Choose an ingredient",
+            on_change=_dinner_picked)
+    if not ingredient:
+        _md(f'<div class="hint">No documented dish or transfer starts from '
+            f'<b>{_esc(_pretty(ctx_ingredient()))}</b>. Choose one of the '
+            f'{len(ings)} ingredients the records cover.</div>')
+        return
+    res = dinner.outcomes(ingredient)
+    for group, title, hint, items in (
+            ("familiar", "Familiar uses",
+             "Documented dishes that start from this ingredient (R3).", res.familiar),
+            ("less_usual", "Less usual uses",
+             "A documented dish carried over to this ingredient, with its verdict (R4). "
+             "Refused swaps stay here with their reasons.", res.less_usual)):
+        _md(f'<div class="section-title">{title}</div><div class="hint">{hint}</div>')
+        if not items:
+            _md(f'<div class="hint">None recorded for {_esc(_pretty(ingredient))}: no '
+                f'{"documented dish (R3)" if group == "familiar" else "transfer (R4)"} starts '
+                f'from it. Uses that appear only in the processing records are listed '
+                f'below them.</div>')
+        for i, oc in enumerate(items):
+            _md(dnr.outcome_card_html(oc))
+            st.button(f"Open {oc.name}", key=f"dn_open_{group}_{i}",
+                      on_click=_dinner_open, args=(oc.key,))
+    _md(dnr.part_records_html(res.part_records))
+    with st.expander("Record a shelf check (your own availability record)"):
+        _shelf_form(ingredient)
+
+
+def _shelf_form(ingredient: str) -> None:
+    _md('<div class="hint">Availability in this app comes only from what you saw on a '
+        'shelf. lidl.fi lists offers only, so "not found there" means "not known".</div>')
+    _seed("shelf_seen_answer", ["seen", "not seen"], "seen")
+    with st.form("shelf_form"):
+        st.date_input("Checked on", key="shelf_date")
+        st.text_input("Shop", key="shelf_shop", placeholder="Lidl")
+        st.radio("On the shelf?", ["seen", "not seen"], key="shelf_seen_answer",
+                 horizontal=True)
+        st.text_input("Note (form, size, price)", key="shelf_note")
+        saved = st.form_submit_button(f"Save a shelf check for {_pretty(ingredient)}")
+    if saved:
+        try:
+            kitchen_records.record_shelf_check(
+                ingredient, checked_on=str(st.session_state.get("shelf_date") or date.today()),
+                seen=st.session_state.get("shelf_seen_answer") == "seen",
+                shop=st.session_state.get("shelf_shop") or "Lidl",
+                note=st.session_state.get("shelf_note") or "")
+            st.success("Saved to your shelf checks.")
+        except tasting.TastingError as exc:
+            st.error(str(exc))
+
+
+def tab_dish() -> None:
+    choices = dinner.dish_choices()
+    keys, labels = [k for k, _ in choices], dict(choices)
+    pick, view_col = st.columns([1, 1.4], gap="large")
+    with pick:
+        _seed("dinner_dish", keys, "transfer:rutabaga_gratin")
+        key = st.selectbox("Dish", keys, key="dinner_dish", format_func=labels.get,
+                           label_visibility="collapsed")
+    with view_col:
+        view = pill_radio("View", ["Overview", "Routes side by side"], "dish_view")
+    ov = dinner.overview(key)
+    if ov is None:
+        _md('<div class="hint">Not found.</div>')
+        return
+    if ov.kind == "transfer":
+        cols = st.columns([1, 1, 2])
+        cols[0].button("Open the base dish", key="dn_base", on_click=_dinner_open,
+                       args=(ov.base,))
+        if ov.replaced_by:
+            cols[1].button("Open the replacement", key="dn_replacement",
+                           on_click=_dinner_open, args=(f"transfer:{ov.replaced_by}",))
+    if view == "Routes side by side":
+        _md('<div class="hint">Each documented way to this dish is a column; the same '
+            'member through the same operation shares a row, and "none" means that route '
+            'has no such step. Columns are in the order recorded, not ranked.</div>')
+        _md(dnr.aligned_html(dinner.aligned(key)))
+    else:
+        _md('<div class="hint">One branch per member you prepare on its own; they join '
+            'below. After the join each member keeps its own line.</div>')
+        _md(dnr.overview_html(ov))
+    with st.expander("Record what you cooked (a control record, kept apart from the "
+                     "documented values)"):
+        _record_form(key, ov)
+
+
+def _record_form(key: str, ov: "dinner.Overview") -> None:
+    kts = kitchen_records.kitchen_tests()
+    kt_ids = ["none"] + [k for k, _ in kts]
+    kt_words = {"none": "not a kitchen test", **{k: f"{k}: {q[:90]}" for k, q in kts}}
+    alts = ["this route"] + [a.get("name") for a in
+                             (dinner.cd.sequence(key) or {}).get("alternatives") or []]
+    verdicts = list(kitchen_records.VERDICTS)
+    _seed("dinner_rec_kt", kt_ids, "none")
+    _seed("dinner_rec_alt", alts, "this route")
+    _seed("dinner_rec_verdict", verdicts, "works")
+    steps = [s for b in ov.branches for s in b.steps] + [s for j in ov.joins for s in j.steps]
+    with st.form("dinner_record_form"):
+        a, b, c3 = st.columns(3)
+        with a:
+            st.date_input("Cooked on", key="dinner_rec_date")
+        with b:
+            st.selectbox("Kitchen test", kt_ids, key="dinner_rec_kt", format_func=kt_words.get)
+        with c3:
+            st.selectbox("Route followed", alts, key="dinner_rec_alt")
+        _md('<div class="eyebrow">What each step actually took (leave blank if not timed)</div>')
+        for sv in steps:
+            st.text_input(f"{sv.owner.replace('_', ' ')} {sv.index}: {sv.name}",
+                          key=f"dinner_rec_t_{sv.address}")
+        _md('<div class="eyebrow">Where each member ended up</div>')
+        for br in ov.branches:
+            st.text_input(f"{br.member.replace('_', ' ')}: endpoint reached",
+                          key=f"dinner_rec_e_{br.member}")
+        st.selectbox("Verdict", verdicts, key="dinner_rec_verdict",
+                     format_func=kitchen_records.VERDICTS.get)
+        st.text_area("Notes", key="dinner_rec_notes")
+        saved = st.form_submit_button("Save the control record")
+    if saved:
+        ss = st.session_state
+        try:
+            rec = kitchen_records.record_cooking(
+                key, cooked_on=str(ss.get("dinner_rec_date") or date.today()),
+                verdict=ss.get("dinner_rec_verdict"),
+                kitchen_test=None if ss.get("dinner_rec_kt") == "none" else ss.get("dinner_rec_kt"),
+                alternative=(None if ss.get("dinner_rec_alt") == "this route"
+                             else ss.get("dinner_rec_alt")),
+                step_times={sv.address: ss.get(f"dinner_rec_t_{sv.address}") for sv in steps},
+                endpoints={br.member: ss.get(f"dinner_rec_e_{br.member}") for br in ov.branches},
+                notes=ss.get("dinner_rec_notes") or "")
+            st.success(f"Saved to {kitchen_records.control_path().name}: "
+                       f"{rec['cooked_on']}, {kitchen_records.VERDICTS[rec['verdict']]}.")
+        except tasting.TastingError as exc:
+            st.error(str(exc))
+
+
+def tab_start_from() -> None:
+    states = dinner.held_states()
+    ids, names = [i for i, _ in states], dict(states)
+    pick, _pad = st.columns(_SUBJECT_RATIO, gap="large")
+    with pick:
+        _md('<div class="eyebrow">I already have</div>')
+        _seed("dinner_have", ids, "soaked_dried_peas")
+        iid = st.selectbox("I have", ids, key="dinner_have", format_func=names.get,
+                           label_visibility="collapsed")
+    sf = dinner.start_from(iid)
+    _md(dnr.start_from_html(sf))
+    for i, h in enumerate(sf.routes):
+        with st.expander(f"{h.name}: {h.owner.replace('_', ' ')} done to step {h.at}",
+                         expanded=i == 0):
+            _md(dnr.held_route_head_html(h))
+            _md(dnr.overview_html(h.overview, hide_done=True))
+            st.button(f"Open {h.name} in full", key=f"dn_from_open_{i}",
+                      on_click=_dinner_open, args=(h.route,))
+
+
 #: Tab label -> renderer. Renderers taking the availability list are called
 #: with it; the rest take nothing.
 TABS: dict[str, Any] = {
+    "What can I make": tab_what_can_i_make,
+    "Dish": tab_dish,
+    "Start from what I have": tab_start_from,
     "Ingredient Explorer": tab_ingredient_explorer,
     "Component Explorer": tab_component_explorer,
     "Plate Balance": tab_plate_balance,
@@ -1621,6 +1850,8 @@ TABS: dict[str, Any] = {
 #: Explore is reference, Experiment is untested ideas — kept apart on purpose
 #: so a Scout hypothesis never sits next to a Cook suggestion.
 SECTIONS: dict[str, list[str]] = {
+    # R7: the documented dishes, routes and states, where the cook looks first.
+    "Dinner": ["What can I make", "Dish", "Start from what I have"],
     "Cook": ["Ingredient Explorer", "Component Explorer", "Plate Balance",
              "Taste Circle"],
     "Explore": ["Map", "Journeys", "Filler Profiles"],
@@ -1642,7 +1873,12 @@ _STICKY_WIDGETS = frozenset({
     "available_items",
     "active_section",
     "explorer_ing", "explorer_mode", "explorer_tech", "explorer_state",
-    "map_ing", "map_view", "journey_ing", "tc_view",
+    "map_ing", "map_view", "map_outcome_flip", "journey_ing", "tc_view",
+    # R7 Dinner
+    "dinner_ing", "dinner_dish", "dish_view", "dinner_have",
+    "shelf_date", "shelf_shop", "shelf_seen_answer", "shelf_note",
+    "dinner_rec_date", "dinner_rec_kt", "dinner_rec_alt", "dinner_rec_verdict",
+    "dinner_rec_notes",
     "component_explorer_comp",
     "plate_items",
     "filler_profile_name",
@@ -1657,7 +1893,7 @@ _STICKY_WIDGETS = frozenset({
 #: Widgets keyed dynamically (one per flavour dimension in Taste Circle)
 #: cannot be listed by name, so they are persisted by prefix instead.
 #: No button key may start with one of these.
-_STICKY_PREFIXES = ("taste_circle_",)
+_STICKY_PREFIXES = ("taste_circle_", "dinner_rec_")
 
 
 def _persist_widget_state() -> None:
