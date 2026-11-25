@@ -27,7 +27,8 @@ The method, unchanged since R1:
 | 5 | **Construction patterns and holding mechanisms.** How do cooks build a dish from separately processed materials, and what holds it together? | answered within scope | R2: nine patterns C1-C9, mechanisms H1-H11, water routes W1-W9, recombination is ordinary practice |
 | 6 | **Representing complete constructions.** Can the model describe a real dish from raw parts to its finished structure, and show why it works? | answered, implemented (R3, PR #7) | 35 dishes; structure yes, what happens inside an assembly partly |
 | 7 | **Discovering useful unfamiliar preparations.** Can a documented construction be carried over to another Lidl ingredient with a physical reason, and does it work? | answered, R4 (not cooked) | `r4-transfers/`: five transfers worth cooking, one not; the search finds them, the model checks structure, the kitchen judges quality |
-| 8 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations and constructions answer "what can I make with this tonight"? | open, R5 | |
+| 8 | **Executing a documented step.** What do you actually need to do for a step to work: conditions, elapsed and active time, how you know it is done or failed, readiness against doneness, through the whole sequence; and what can you do from a state you already have? | answered, R5 (not cooked) | `r5-processing-conditions/`: 25 pairs, 10 whole sequences, 17 intermediate states, from documented practice only |
+| 9 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations, constructions and conditions answer "what can I make with this tonight"? | open, R6 | |
 
 ### What each finished round established
 
@@ -107,7 +108,37 @@ found in practice or cooked.
   gratin exposed; A2 changed nothing in R3. It explains structure, not
   quality; every verdict ends in a kitchen test (`kitchen-tests.md`).
 
-### R5: integrate into the interface
+### R5: documented processing conditions
+
+Renamed by the user after R4: every R4 "one thing to get right" was a
+processing condition (blanch the rutabaga, don't overboil the onion, bake the
+napa rolls covered, soak but never cook the peas), and R4 listed time and
+temperature as its largest gap. During the round the user widened the unit
+from the isolated operation to the **whole processing sequence**: each
+component from raw part to plate, readiness (ready for the next operation)
+kept apart from doneness (ready to eat), each member's endpoint in the heat
+after a join, and the documented reasons one stage exists for a later one.
+
+**Status after R5 (2026-11-25, `r5-processing-conditions/`).** Done, nothing
+cooked.
+- `processing_conditions.yaml` and `conditions.py`: 25 (part, operation) pairs
+  and 10 whole sequences (the five R4 dishes worth cooking and their
+  kitchen-test bases, 54 steps). Each step has an endpoint kind, observable
+  done-when and failed-if checks, and each source's own times, with active
+  work kept apart from elapsed time. There are 23 dependency links and 31
+  alternative sequences, and 17 intermediate states with keeping times, 10
+  of them from food-safety bodies. `foodprep conditions` and `foodprep from`
+  ("from this state, what next", with "not ready to eat" for a readiness
+  state).
+- Nothing is derived, simulated or ranked; 43 conflicts kept as versions; no
+  change to R3 or R4 results, no amendment.
+- The evidence stops inside some assemblies (the onion in a falafel, the
+  cream in a rutabaga gratin, a farci filling), at pea-specific checks, at
+  Lidl packet text, and at keeping times for raw intermediates. The kitchen
+  tests (`r5-processing-conditions/kitchen-tests.md`) now carry concrete
+  checks for every step.
+
+### R6: integrate into the interface
 
 Make it useful in the app: the Taste Circle, ingredient families, operations
 and constructions working together, so the app can answer:
@@ -119,12 +150,19 @@ and constructions working together, so the app can answer:
 
 The sensory and pairing system complements constructions; it is not replaced.
 
-What R4 suggests for R5: the useful unit is a documented construction paired
+What R4 suggests for R6: the useful unit is a documented construction paired
 with what is in season and in the shop, carrying its one known failure
 ("rutabaga is in season; it goes into a gratin if you blanch it first").
 Availability should come from the user's own shelf checks, not lidl.fi, and
 kitchen-test results should flow back into `transfers.yaml` and the tasting
 record.
 
-The split into R3-R5 is a proposal; rounds may merge if the work shows they
+What R5 adds for R6: show a sequence with the member the cook has highlighted:
+what is done, what remains, the next step's done-when and failed-if checks,
+and the one dependency that explains it. `foodprep from` is the "cook now or
+prepare for tomorrow" primitive (remaining steps, kinds of work, how long the
+state keeps and on whose authority). Conflicts appear as choices, "not found"
+as itself.
+
+The split into R3-R6 is a proposal; rounds may merge if the work shows they
 should.

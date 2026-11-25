@@ -1,0 +1,1826 @@
+# Documented processing conditions (R5, docs/research/r5-processing-conditions/).
+#
+# What documented practice says you have to *do* for a step of a documented dish
+# to work, read by foodprep.conditions. Nothing here is derived, predicted or
+# simulated: every value is a field some source states, with its evidence ids
+# (R2 E/M/A ids, R4 one-letter ids, R5 Q ids in evidence-*.md). A field that is
+# absent is unknown. Nothing is ranked.
+#
+# pairs: (part, operation) as used by documented steps. `default` holds only what
+#   the pair's sources agree on; `at: {step: fields}` what one step's sources say.
+#   Conflicting instructions are `conflicts` with versions, never averaged.
+# sequences: a whole documented route (R3 dish/route or R4 transfer:<id>), raw to
+#   plate. Every step has an `endpoint`: readiness (ready for the next operation)
+#   or doneness (ready to eat), with the sources that say so (or by: route_order
+#   when only the route's own order does). `members`: for each heat step after a
+#   join, each member's own endpoint there. `depends`: a stage that exists because
+#   of a later one. `misses`: what fails when a stage is skipped, underdone or
+#   overdone. `finish`: documented stages after the last route step (rest).
+#   `alternatives`: sources that split the work differently, kept apart.
+# intermediates: a state you may already have (a part plus R1 operations, or the
+#   state after a documented step) and how long it keeps, from a food-safety body,
+#   a home-economics association or a cook.
+#
+# Step address: dish/route/owner/n or transfer:<id>/owner/n (owner = material or
+# assembly, n = its 1-based step).
+# Fields: start {particle, moisture}, medium [{medium, temp_c, cover}], elapsed
+# [{min, max, unit, label}], active {kind}, shifts [{factor, effect}], completion
+# [{check}], failure [{check, cause}]; every entry carries `sources`.
+
+vocabulary:
+  particle: [whole, halved, split, sliced, grated, leaves, head, grain, ground_coarse, paste, formed, layered, filled, rolled]
+  moisture: [dry, soaked, wet, submerged]
+  medium: [air_room, water_cold, water_room, water_warm, water_boiling, water_simmering, milk_cream, oil_deep, oil_shallow, oven, steam, microwave, pressure_cooker, fridge, freezer, knife, food_processor, grinder]
+  cover: [covered, uncovered, covered_then_uncovered]
+  active: [continuous, regular, occasional, none]
+  endpoint: [readiness, doneness]
+  miss: [skipped, underdone, overdone]
+  confidence: [established, documented, conflicting, unknown]
+
+pairs:
+
+  # ---- pulses ----------------------------------------------------------------
+
+  soak_dried_peas:
+    name: Soaking dried peas
+    part: dried_peas.dried_seed
+    op: tremper
+    steps: [transfer:pea_falafel/pea/1]
+    default:
+      start: {particle: [whole, split], moisture: [dry], sources: [P4, P15, Q105]}
+      medium:
+        - {medium: water_cold, note: "three times their volume (P4); 1:3 by weight (P15)", sources: [P4, P15]}
+      active: {kind: none, sources: [Q103, Q105], note: "waiting"}
+      shifts:
+        - {factor: soak time, effect: "drives water uptake and softness (measured for lentils, 10-13 h best); yellow pea took up the least water of ten pulses", sources: [P15]}
+        - {factor: whole or split, effect: "whole peas are soaked overnight even for soup; split peas are not", sources: [Q104, Q105, Q106]}
+    at:
+      transfer:pea_falafel/pea/1:
+        role: raw paste for falafel (the peas are ground raw and never cooked before frying)
+        elapsed:
+          - {min: 6, max: 6, unit: h, sources: [P1]}
+          - {label: "8 h or overnight", sources: [P6]}
+          - {label: overnight, sources: [P2, P4, P5]}
+          - {min: 12, unit: h, label: "at least 12 h", sources: [P3, Q102]}
+          - {min: 12, max: 12, unit: h, label: "about 12 h", sources: [P15]}
+        failure:
+          - {check: "falafel dry and hard", cause: "linked by the only controlled test to low water uptake of yellow pea; not shown for soak time", sources: [P15]}
+    conflicts:
+      - topic: soak length for falafel
+        versions:
+          - {says: "6 h", sources: [P1]}
+          - {says: "overnight", sources: [P2, P4, P5]}
+          - {says: "at least 12 h", sources: [P3, Q102]}
+      - topic: whether split peas are soaked at all
+        versions:
+          - {says: "no soak for soup: split peas cook without it", sources: [Q104, Q105, Q106]}
+          - {says: "always soaked for a raw falafel paste", sources: [P1, P3, P4, P5]}
+        note: "a difference of role, not a disagreement: the soak exists for the raw grind"
+    confidence: documented
+    gaps:
+      - "an observable 'soaked enough' test for dried peas (doubling, bite, knife): not found"
+      - "an over-soak failure for peas"
+      - "Finnish packet instructions (Pirkka, Myllyn Paras, Rainbow, Lidl): not reachable"
+      - "a Finnish or Swedish pea-falafel recipe"
+
+  soak_chickpeas:
+    name: Soaking dried chickpeas for falafel
+    part: chickpea.dried_seed
+    op: tremper
+    steps: [falafel/raw_soaked/chickpea/1]
+    default:
+      start: {particle: [whole], moisture: [dry], sources: [Q108, Q110]}
+      medium:
+        - {medium: water_cold, note: "plenty: about 10 cm over (Q109), 1.5 l per 125 g (Q110)", sources: [Q108, Q116, Q118, Q109, Q110]}
+        - {medium: water_room, sources: [Q110, Q111]}
+        - {medium: water_warm, note: "water changed", sources: [M2c]}
+      active: {kind: occasional, sources: [M2c, Q111, Q109], note: "change or top up the water once; otherwise covered and left (Q110)"}
+      shifts:
+        - {factor: fridge soak, effect: "much slower", sources: [Q111]}
+        - {factor: age and size, effect: "older and larger chickpeas need longer", sources: [Q111]}
+        - {factor: a hot kitchen, effect: "shorten the soak", sources: [Q111]}
+      completion:
+        - {check: "about doubled (or tripled) in size", sources: [Q109, Q117]}
+        - {check: "swollen but not cooked", sources: [Q108]}
+        - {check: "soft enough to chop easily with a knife, still firm and mealy, hydrated through", sources: [Q111]}
+        - {check: "a slight sprout is the best sign", sources: [Q111]}
+      failure:
+        - {check: "still hard and dry inside", cause: "too short; soak longer", sources: [Q111]}
+        - {check: "the falafel falls apart or turns mushy", cause: "cooked or canned chickpeas used instead of soaked raw ones", sources: [Q108, Q109, Q114, Q115, Q117, Q107]}
+    at:
+      falafel/raw_soaked/chickpea/1:
+        role: raw paste for falafel
+        elapsed:
+          - {min: 4, unit: h, label: "at least 4 h", sources: [Q118]}
+          - {min: 8, unit: h, label: "at least 8 h", sources: [Q110, Q109]}
+          - {min: 12, max: 12, unit: h, label: "warm water, changed", sources: [M2c]}
+          - {label: overnight, sources: [M2a, Q113, Q114, Q116, Q120]}
+          - {min: 16, max: 24, unit: h, label: "at least 16, ideally 24", sources: [Q111]}
+          - {min: 24, max: 24, unit: h, sources: [M2b, Q107]}
+    conflicts:
+      - topic: soak length
+        versions:
+          - {says: "at least 4 h", sources: [Q118]}
+          - {says: "overnight or 8-12 h", sources: [M2a, M2c, Q110, Q116]}
+          - {says: "24 h", sources: [M2b, Q107, Q111]}
+        note: "Q109 says 8 h in the text and 24 h on its recipe card"
+      - topic: may they be heated
+        versions:
+          - {says: "quick soak: boiled 5 min, then stand 1 h", sources: [Q109]}
+          - {says: "never boiled after the soak; swollen, not cooked", sources: [Q114, Q108]}
+    confidence: established
+    note: "Soaked raw and never cooked is established (6+ sources); the duration conflicts."
+    gaps:
+      - "an over-soak failure for chickpeas"
+      - "a 'splits in half' check"
+
+  soak_urad_dal:
+    name: Soaking urad dal for medu vada
+    part: urad_dal.dried_seed
+    op: tremper
+    steps: [medu_vada/beaten_paste/dal/1]
+    default:
+      start: {particle: [split], moisture: [dry], sources: [Q122, Q124], note: "skinless; whole skinless preferred (Q124)"}
+      medium:
+        - {medium: water_room, note: "fresh water after washing and rubbing", sources: [Q122]}
+      active: {kind: none, sources: [Q122, Q124]}
+      shifts:
+        - {factor: grinder, effect: "a wet grinder wants a shorter soak than a mixie", sources: [Q123, Q122]}
+        - {factor: organic or old dal, effect: "organic dal tolerates longer; old yellowish dal goes flat and dense", sources: [Q122]}
+      completion:
+        - {check: "judged on the next stage: a drop of the ground batter floats in water and holds a stiff peak", sources: [Q122, Q123]}
+      failure:
+        - {check: "the vada soaks up oil; batter watery or runny and breaks apart", cause: "over-soaked", sources: [A3a, Q122]}
+        - {check: "hard, dense vada", cause: "under-soaked", sources: [Q122]}
+    at:
+      medu_vada/beaten_paste/dal/1:
+        elapsed:
+          - {min: 3, max: 3, unit: h, label: "not longer", sources: [A3a]}
+          - {min: 2, max: 3, unit: h, label: "at most", sources: [Q124]}
+          - {min: 4, max: 5, unit: h, label: "3 h possible, up to 8 h for organic dal", sources: [Q122]}
+          - {label: overnight, sources: [A3b]}
+    conflicts:
+      - topic: how long
+        versions:
+          - {says: "overnight", sources: [A3b]}
+          - {says: "an upper limit of 3 h", sources: [A3a, Q124]}
+          - {says: "an upper limit of 4 h (method) or 45-60 min (tips, wet grinder)", sources: [Q123]}
+          - {says: "4-5 h, up to 8 h", sources: [Q122]}
+    confidence: conflicting
+    note: "Over-soaking gives oily vada (established); the limit itself conflicts."
+    gaps:
+      - "an observable soaked-enough sign on the dal itself"
+
+  soak_black_eyed_beans:
+    name: Soaking black-eyed beans to skin them
+    part: black_eyed_bean.dried_seed
+    op: tremper
+    steps: [akara/aerated_paste/beans/1, moi_moi/steamed/beans/1]
+    default:
+      start: {particle: [whole], moisture: [dry], sources: [A18c, Q130], note: "sometimes cracked first"}
+      active: {kind: none, sources: [Q127, A18c], note: "the soak is waiting; the skinning after it is continuous hands-on work, about 10 min (Q127)"}
+      shifts:
+        - {factor: variety, effect: "oloyin beans need a shorter soak", sources: [Q126]}
+        - {factor: grinder, effect: "a market grinder needs no long soak; a home blender about 2 h", sources: [Q128]}
+      completion:
+        - {check: "the skins swell or start to wrinkle", sources: [A18b, Q129]}
+        - {check: "the skins come off easily when rubbed and float off on rinsing", sources: [Q126, Q129, Q130, A18b]}
+      failure:
+        - {check: "the texture is spoiled", cause: "hot water part-cooks the beans", sources: [A19a]}
+        - {check: "the skins stay on", cause: "over-soaked: skin and bean bond", sources: [Q126]}
+        - {check: "thicker, harder-to-digest moi moi", cause: "skins left on", sources: [Q130]}
+    at:
+      moi_moi/steamed/beans/1:
+        medium:
+          - {medium: water_room, note: "not hot", sources: [A19a]}
+        elapsed:
+          - {min: 15, max: 15, unit: min, sources: [A19a]}
+          - {min: 3, max: 3, unit: min, label: "then a second soak of at least 4 h or overnight after skinning", sources: [Q129]}
+          - {min: 1, max: 1, unit: h, sources: [Q130]}
+      akara/aerated_paste/beans/1:
+        elapsed:
+          - {min: 15, max: 30, unit: min, sources: [A18b]}
+          - {min: 1.5, max: 1.5, unit: h, sources: [A18c]}
+          - {min: 5, max: 10, unit: min, label: "under 5 for oloyin", sources: [Q126]}
+    conflicts:
+      - topic: water temperature
+        versions:
+          - {says: "room temperature, not hot", sources: [A19a]}
+          - {says: "warm or hot water", sources: [Q125, Q132]}
+      - topic: length
+        versions:
+          - {says: "minutes (3-10)", sources: [Q129, Q125, Q126]}
+          - {says: "15 min to 1.5 h", sources: [A19a, A18b, Q130, A18c]}
+          - {says: "overnight", sources: [Q132]}
+    confidence: established
+    note: "The endpoint (skins come off easily) is established; time and temperature conflict."
+
+  grind_soaked_peas:
+    name: Grinding soaked raw peas
+    part: dried_peas.dried_seed
+    op: broyer
+    steps: [transfer:pea_falafel/pea/2]
+    default:
+      start: {particle: [whole, split], moisture: [soaked], sources: [P4, P15], note: "drained"}
+      medium:
+        - {medium: food_processor, sources: [P1, P4, P5, P15]}
+        - {medium: grinder, note: "the fine disc of a meat grinder", sources: [P3]}
+      active: {kind: continuous, sources: [P4, P15], note: "pulse and scrape; not timed"}
+      completion:
+        - {check: "a mouldable batter", sources: [P15]}
+      failure:
+        - {check: "dense falafel", cause: "ground too fine", sources: [P4]}
+        - {check: "the paste can only be pressed, not rolled; sticky", cause: "texture of pea paste", sources: [P2, P6]}
+    conflicts:
+      - topic: how fine
+        versions:
+          - {says: "coarse: a coarse pea 'flour', like breadcrumbs, not a puree", sources: [P4, P10, P5, P9]}
+          - {says: "fine couscous to as fine as possible", sources: [P1, P2, P3]}
+    confidence: conflicting
+    gaps:
+      - "a pea-specific grinding source in Finnish, Swedish or German"
+
+  grind_soaked_chickpeas:
+    name: Grinding soaked raw chickpeas
+    part: chickpea.dried_seed
+    op: mixer
+    steps: [falafel/raw_soaked/chickpea/2]
+    default:
+      start: {particle: [whole], moisture: [soaked], sources: [Q108, Q113, Q121], note: "drained and patted dry, with raw onion and herbs"}
+      medium:
+        - {medium: food_processor, note: "short pulses, scraping down", sources: [Q108, Q110, Q109]}
+        - {medium: grinder, note: "fine plate, twice", sources: [M2b]}
+      active: {kind: continuous, sources: [Q108, Q110]}
+      elapsed:
+        - {min: 3, max: 4, unit: min, sources: [Q118]}
+      shifts:
+        - {factor: processing time, effect: "over-processing makes the mix wetter", sources: [Q116]}
+      completion:
+        - {check: "the mixture holds together when squeezed or pressed in the hand", sources: [Q109, Q111, Q120]}
+      failure:
+        - {check: "it will not hold its shape", cause: "too coarse, or under-processed", sources: [Q110, Q109]}
+        - {check: "it falls apart", cause: "too smooth", sources: [Q108]}
+        - {check: "wet and hard to handle; moves around easily", cause: "over-processed or too wet", sources: [Q116, Q113]}
+    conflicts:
+      - topic: how fine
+        versions:
+          - {says: "very fine, fine couscous, very smooth", sources: [Q109, Q111, Q113, M2b]}
+          - {says: "coarse but formable, grainy, coarse breadcrumbs", sources: [Q108, Q121, Q116, M2b]}
+        note: "M2b gives both, in two recipes on one page"
+    confidence: established
+    note: "The squeeze test is established (3 sources); fineness conflicts."
+
+  rest_pulse_paste:
+    name: Resting and chilling a raw pulse paste
+    part: falafel paste
+    op: reposer
+    steps: [falafel/raw_soaked/paste/1, transfer:pea_falafel/paste/1]
+    default:
+      start: {particle: [paste], moisture: [soaked], sources: [Q110, P4]}
+      medium:
+        - {medium: fridge, cover: covered, sources: [Q107, Q114, Q121]}
+      active: {kind: none, sources: [Q110], note: "mix again after resting (Q110)"}
+      shifts:
+        - {factor: onion and herb water, effect: "makes the rest more necessary", sources: [Q115]}
+      completion:
+        - {check: "firmer, binds and shapes easily", sources: [Q108, Q113, Q114, Q116]}
+      failure:
+        - {check: "falls apart in hot oil, or spreads and cracks in the oven", cause: "rest skipped", sources: [Q114, Q115]}
+    at:
+      falafel/raw_soaked/paste/1:
+        elapsed:
+          - {label: "none needed", sources: [Q109, M2a]}
+          - {min: 20, max: 30, unit: min, sources: [Q108]}
+          - {min: 30, unit: min, label: "at least 30 min", sources: [Q113, Q114, Q116]}
+          - {min: 1, max: 2, unit: h, sources: [Q110, M2c, Q107]}
+          - {label: "1 h to overnight", sources: [M2b]}
+      transfer:pea_falafel/paste/1:
+        elapsed:
+          - {min: 15, unit: min, label: "at least 15 min", sources: [P4]}
+          - {min: 10, max: 10, unit: min, sources: [P15]}
+    conflicts:
+      - topic: is a rest needed
+        versions:
+          - {says: "no rest", sources: [Q109, M2a]}
+          - {says: "required, or the paste falls apart", sources: [Q114, Q115]}
+      - topic: why rest
+        versions:
+          - {says: "to shape and hold", sources: [Q108, Q114, Q116]}
+          - {says: "so the soda can work", sources: [Q113]}
+          - {says: "so the flavours blend", sources: [Q121]}
+    confidence: established
+    note: "A chill helps holding (5+ sources); whether it is needed conflicts."
+
+  fry_pulse_paste:
+    name: Deep-frying a raw pulse paste
+    part: falafel paste
+    op: frire
+    steps: [falafel/raw_soaked/paste/3, transfer:pea_falafel/paste/3]
+    default:
+      start: {particle: [formed], moisture: [soaked], sources: [Q111, Q110, P4], note: "balls of about 1 tbsp, walnut size, 30 g"}
+      medium:
+        - {medium: oil_deep, temp_c: [170, 190], note: "test: bubbles at a wooden spoon, a bread cube browns in about 15 s, or fry one test ball", sources: [P4, Q110, Q108, P15, Q113, Q116, Q121, Q111, Q114, P2, Q107]}
+      elapsed:
+        - {min: 2, max: 5, unit: min, sources: [P15, Q110, Q116, Q120, P4, Q111, P2, Q109]}
+      active: {kind: regular, sources: [Q111, Q116, Q121, Q109], note: "batches of 5-6, turned once"}
+      shifts:
+        - {factor: crowding, effect: "drops the oil temperature", sources: [Q113, Q120, Q121, P4]}
+        - {factor: ball size, effect: "large balls cook unevenly", sources: [Q108, Q113]}
+        - {factor: frozen balls, effect: "need extra time", sources: [Q109]}
+      completion:
+        - {check: "golden to deep brown", sources: [Q109, Q111, Q120, Q110]}
+        - {check: "crisp outside, soft and fluffy inside, cooked through", sources: [Q108, Q111, Q116]}
+        - {check: "the balls float", sources: [Q118]}
+      failure:
+        - {check: "falls apart in the oil", cause: "canned or cooked chickpeas; too wet; too coarse or too smooth; not chilled; loosely packed; crowded", sources: [Q108, Q109, Q113, Q114, Q115, Q110, P4]}
+        - {check: "greasy and soft", cause: "oil too cool or crowded", sources: [Q108, Q113, Q120]}
+        - {check: "charred outside, raw centre", cause: "oil too hot", sources: [Q113]}
+        - {check: "dense and dry", cause: "starch added as binder (chickpea); yellow pea itself", sources: [Q115, P15]}
+        - {check: "mealy, raw taste", cause: "no soda", sources: [Q111]}
+    conflicts:
+      - topic: oil temperature
+        versions:
+          - {says: "170 C", sources: [P4, Q110]}
+          - {says: "180-190 C", sources: [Q121, Q116, P15]}
+      - topic: medium
+        versions:
+          - {says: "deep oil", sources: [Q108, Q110, Q111]}
+          - {says: "a quarter inch of oil, medium heat", sources: [Q109]}
+    confidence: established
+    gaps:
+      - "an internal temperature"
+
+  steam_bean_paste:
+    name: Steaming black-eyed bean paste (moi moi)
+    part: moi moi paste
+    op: cuire_vapeur
+    steps: [moi_moi/steamed/paste/1]
+    default:
+      start: {particle: [paste], moisture: [soaked], sources: [Q129, A19b], note: "like a light cake batter or yoghurt; in oiled ramekins, bowls, leaves or a loaf pan"}
+      medium:
+        - {medium: steam, cover: covered, note: "shallow water, not over halfway up the ramekins", sources: [Q129, Q131, Q132]}
+      active: {kind: occasional, sources: [A19a, Q131, Q132], note: "top up the water"}
+      shifts:
+        - {factor: container size and material, effect: "large pans and foil bowls take much longer", sources: [Q129, Q131, Q132]}
+        - {factor: position in the steamer, effect: "the top row takes longer", sources: [Q131]}
+      completion:
+        - {check: "a knife or skewer comes out clean or with only an oily smear; moist but firm", sources: [A19a, Q129, Q131]}
+        - {check: "firm to the touch with no wet residue", sources: [A19b, Q130]}
+      failure:
+        - {check: "paste on the knife", cause: "not cooked yet", sources: [Q131]}
+        - {check: "watery, soft, will not mould", cause: "too much water in the paste", sources: [Q132, A19a]}
+        - {check: "hard to set", cause: "tomato in the paste", sources: [A19a]}
+        - {check: "denser and drier", cause: "baked instead of steamed", sources: [Q130, Q132]}
+    at:
+      moi_moi/steamed/paste/1:
+        elapsed:
+          - {min: 30, max: 30, unit: min, sources: [A19b, Q130]}
+          - {min: 45, max: 60, unit: min, sources: [A19a, Q132]}
+          - {min: 105, max: 120, unit: min, label: "one large pan", sources: [Q132]}
+    conflicts:
+      - topic: heat
+        versions:
+          - {says: "low", sources: [Q129]}
+          - {says: "medium", sources: [A19a, Q132]}
+      - topic: time
+        versions:
+          - {says: "about 30 min", sources: [A19b]}
+          - {says: "45-60 min", sources: [A19a, Q132]}
+    confidence: established
+    note: "The knife or skewer endpoint is established (5 sources)."
+    gaps:
+      - "how long cooked moi moi or the raw batter keeps"
+
+  # ---- gratin ----------------------------------------------------------------
+
+  blanch_rutabaga:
+    name: Blanching rutabaga slices for a gratin
+    part: rutabaga.root
+    op: blanchir
+    steps: [transfer:rutabaga_gratin/rutabaga/3]
+    default:
+      start: {particle: [sliced], moisture: [dry], sources: [Q231, Q232, G1], note: "peeled; 2-3 mm (Q231), 4 mm (Q232)"}
+      medium:
+        - {medium: water_boiling, note: "lightly salted; then rinsed cold and patted dry (Q231), or drained really well (Q233)", sources: [Q231, Q233, G1]}
+        - {medium: water_simmering, sources: [Q232]}
+      active: {kind: occasional, sources: [Q231], note: "time it, then drain, rinse and dry"}
+      shifts:
+        - {factor: slice thickness, effect: "thicker slices get a longer pre-cook", sources: [Q232]}
+        - {factor: size and age of the root, effect: "large or old roots are tougher and slower", sources: [Q208, Q229]}
+      failure:
+        - {check: "the rutabaga is still crunchy or firm when the gratin is otherwise done", cause: "blanch skipped (raw thin slices)", sources: [G20, G21]}
+    at:
+      transfer:rutabaga_gratin/rutabaga/3:
+        role: a gratin layer that the bake finishes (readiness, not doneness)
+        elapsed:
+          - {min: 3, max: 3, unit: min, label: "2-3 min more for a softer result", sources: [Q231, G1]}
+          - {min: 4, max: 4, unit: min, sources: [Q233]}
+          - {min: 5, max: 5, unit: min, sources: [Q232]}
+          - {min: 10, max: 10, unit: min, label: "almost tender", sources: [G16, G18]}
+        completion:
+          - {check: "crisp-tender: softened slightly, not fully cooked", sources: [Q231, Q232]}
+          - {check: "almost tender (after about 10 min)", sources: [G18]}
+    conflicts:
+      - topic: how long before the gratin bake
+        versions:
+          - {says: "3-5 min", sources: [G1, Q231, Q232, Q233]}
+          - {says: "about 10 min, almost tender", sources: [G16, G18]}
+    confidence: established
+    note: "In mash and casserole dishes (lanttulaatikko, rotmos) the same part and operation runs to fully soft (Q210, Q211, Q216, Q218); whole lanttu that is grilled later stops at 'almost cooked' (Q213). In the gratin it stops at a partial, still-firm state."
+    gaps:
+      - "a Finnish or Swedish source that blanches lanttu or kalrot slices for a gratin"
+      - "a test on the blanched slice itself (knife, bend)"
+      - "the over-blanch failure (slices breaking or mushy in the bake)"
+
+  bake_gratin:
+    name: Baking a layered potato or root gratin
+    part: gratin (layered)
+    op: cuire_four
+    steps:
+      - gratin_dauphinois/raw_long_bake/gratin/1
+      - transfer:rutabaga_gratin/gratin/1
+      - transfer:rutabaga_gratin_raw/gratin/1
+    default:
+      start: {particle: [layered], moisture: [submerged], sources: [M15a, Q228, G7], note: "slices in milk and/or cream"}
+      active: {kind: occasional, sources: [Q225, Q231, Q234, Q235, Q201], note: "waiting, apart from taking the foil off once; cover if the top browns early (Q237, Q239)"}
+      shifts:
+        - {factor: slice thickness and number of layers, effect: "longer for thicker", sources: [Q225, Q203]}
+        - {factor: dish size, effect: "individual dishes cook faster", sources: [Q239, Q203]}
+        - {factor: oven type, effect: "convection is much faster", sources: [Q237]}
+        - {factor: pre-simmering, effect: "shortens the bake", sources: [Q202, Q238, M15b]}
+        - {factor: rutabaga, effect: "denser, needs longer than potato", sources: [Q231, Q234]}
+        - {factor: new potatoes, effect: "stay hard", sources: [Q238]}
+      completion:
+        - {check: "a knife or fork goes into the potato with no resistance", sources: [Q203, Q225, Q227, Q238, Q234, Q232, Q201]}
+        - {check: "the top is golden and bubbling", sources: [Q202, Q201, Q231, Q232, Q233]}
+      failure:
+        - {check: "burnt top over a raw inside", cause: "baked uncovered or too hot", sources: [Q201, Q237]}
+        - {check: "potato still raw, not creamy", cause: "too little oven time", sources: [Q202, Q201]}
+        - {check: "grainy, watery, curdled liquid", cause: "raw slices with milk only and no parboil; single cream; cream that is not heat-stable", sources: [Q219, Q238]}
+        - {check: "watery", cause: "potatoes that are not firm, or slices rinsed", sources: [Q202]}
+        - {check: "dry, mushy potato", cause: "too little cream; overbaked", sources: [Q201, Q238]}
+    at:
+      gratin_dauphinois/raw_long_bake/gratin/1:
+        medium:
+          - {medium: oven, temp_c: [160, 160], sources: [M15a]}
+          - {medium: oven, temp_c: [165, 165], sources: [Q228]}
+          - {medium: oven, temp_c: [180, 180], cover: covered_then_uncovered, note: "about 45 min under foil, about 20 uncovered", sources: [Q225]}
+          - {medium: oven, temp_c: [200, 200], cover: covered_then_uncovered, note: "40 min under foil, 10 uncovered", sources: [Q201]}
+        elapsed:
+          - {min: 1.5, max: 2, unit: h, sources: [M15a]}
+          - {min: 1, max: 1, unit: h, sources: [Q228]}
+          - {min: 1.5, max: 2.5, unit: h, sources: [Q203]}
+          - {min: 50, max: 65, unit: min, sources: [Q225, Q201]}
+      transfer:rutabaga_gratin/gratin/1:
+        medium:
+          - {medium: oven, temp_c: [190, 200], cover: covered_then_uncovered, note: "covered 30 min at 190 C, then 25-30 min uncovered at 200 C", sources: [Q231]}
+          - {medium: oven, temp_c: [180, 180], note: "boiled swede", sources: [Q233]}
+          - {medium: oven, temp_c: [180, 180], note: "pre-simmered swede and potato, in a bain-marie", sources: [Q232]}
+        elapsed:
+          - {min: 55, max: 60, unit: min, sources: [Q231]}
+          - {min: 40, max: 50, unit: min, sources: [Q233]}
+          - {min: 60, max: 80, unit: min, sources: [Q232]}
+      transfer:rutabaga_gratin_raw/gratin/1:
+        role: the rejected control (raw rutabaga slices, no blanch)
+        elapsed:
+          - {min: 45, max: 45, unit: min, label: "still crunchy", sources: [G20]}
+          - {min: 1, unit: h, label: "over an hour, still firm", sources: [G21]}
+        failure:
+          - {check: "the rutabaga stays crunchy or firm when the potato is done", cause: "raw rutabaga in a bake timed for potato", sources: [G20, G21]}
+    conflicts:
+      - topic: covered or not
+        versions:
+          - {says: "covered first, then uncovered", sources: [Q201, Q225, Q235, Q231, Q234, Q200]}
+          - {says: "uncovered throughout, covered only if the top browns", sources: [Q237, Q230]}
+      - topic: a raw-potato bake
+        versions:
+          - {says: "40-50 min at 200 C", sources: [Q201, Q200]}
+          - {says: "1.5-2.5 h at lower heat", sources: [M15a, Q203, Q219]}
+      - topic: how soft the rutabaga ends up
+        versions:
+          - {says: "some give, al dente", sources: [Q231]}
+          - {says: "no resistance, completely tender", sources: [Q232, Q233, Q234]}
+    confidence: established
+    note: "The knife-without-resistance endpoint is established; covering and time conflict."
+    gaps:
+      - "the thickness of the cream as a separate endpoint"
+      - "curdling in the oven (forum evidence only)"
+
+  simmer_potato_in_milk:
+    name: Simmering potato slices in milk and cream
+    part: potato.tuber
+    op: mijoter
+    steps: [gratin_dauphinois/simmered_then_baked/potato/3]
+    default:
+      start: {particle: [sliced], moisture: [dry], sources: [M15b, Q202, Q225], note: "3-4 mm, not rinsed after slicing"}
+      medium:
+        - {medium: milk_cream, note: "with garlic and butter; brought to the boil, then a gentle simmer", sources: [Q227, M15b, Q235]}
+      elapsed:
+        - {min: 8, max: 8, unit: min, sources: [M15b]}
+        - {min: 10, max: 10, unit: min, sources: [Q227, Q235]}
+        - {min: 5, max: 10, unit: min, sources: [Q225]}
+        - {min: 15, max: 15, unit: min, sources: [Q238]}
+      active: {kind: regular, sources: [Q225, Q235, Q227], note: "stir now and then, watch for boil-over; Q238 stirs constantly against scorching"}
+      shifts:
+        - {factor: the bake that follows, effect: "pre-cooking shortens the bake", sources: [Q202, Q238]}
+      failure:
+        - {check: "boils over", cause: "too high heat", sources: [Q227, Q202]}
+        - {check: "scorched or stuck on the bottom", cause: "not stirred", sources: [Q238, Q235]}
+    at:
+      gratin_dauphinois/simmered_then_baked/potato/3:
+        completion:
+          - {check: "the slices have just become tender and are easily pierced", sources: [M15b, Q227, Q235]}
+          - {check: "the cream has thickened slightly", sources: [Q225, Q238]}
+    conflicts:
+      - topic: how far
+        versions:
+          - {says: "until tender", sources: [M15b, Q227, Q235]}
+          - {says: "softened a little (the bake then runs at least an hour)", sources: [Q238]}
+      - topic: stop after the simmer and bake the next day
+        versions:
+          - {says: "yes, simmer the day before", sources: [Q225]}
+          - {says: "no: cooking and cooling twice overcooks", sources: [Q235]}
+    confidence: established
+    gaps:
+      - "a test on the slices (breaks when pressed)"
+      - "a failure from over-simmering"
+
+  rest_gratin:
+    name: Resting or chilling a baked gratin
+    part: gratin (baked)
+    op: refroidir
+    steps: [gratin_dauphinois/simmered_then_baked/gratin/2]
+    default:
+      active: {kind: none, sources: [Q202, Q235]}
+      completion:
+        - {check: "the cream has set", sources: [Q202, Q200]}
+        - {check: "chilled, it cuts cleanly", sources: [M15b, Q202, Q235]}
+      failure:
+        - {check: "dry after baking (fix: a little hot cream on top, covered a few minutes)", cause: "not stated", sources: [Q202]}
+    at:
+      gratin_dauphinois/simmered_then_baked/gratin/2:
+        medium:
+          - {medium: fridge, sources: [M15b, Q235]}
+        elapsed:
+          - {label: overnight, sources: [M15b]}
+          - {min: 6, max: 24, unit: h, sources: [Q202]}
+          - {min: 2, unit: h, label: "at least 2 h, ideally overnight", sources: [Q235]}
+    conflicts:
+      - topic: rest before serving
+        versions:
+          - {says: "a few minutes", sources: [Q231]}
+          - {says: "5-10 min", sources: [Q225, Q202]}
+          - {says: "15-25 min", sources: [Q235, Q200, Q234]}
+          - {says: "about 1 h held at 50 C", sources: [Q232]}
+    confidence: established
+    gaps:
+      - "why the rest helps cutting, beyond 'the cream sets'"
+
+  boil_potato_for_rosti:
+    name: Boiling whole potatoes for rosti, korokke or tikki
+    part: potato.tuber
+    op: cuire_anglaise
+    steps: [rosti/boiled/potato/1, korokke/breaded_mash/potato/1, aloo_tikki/cornflour/potato/1]
+    default:
+      start: {particle: [whole], moisture: [dry], sources: [Q204, Q220, Q224], note: "unpeeled; waxy for rosti, old (not new) for tikki"}
+      active: {kind: none, sources: [A2a, Q214], note: "waiting; drain promptly and thoroughly"}
+      shifts:
+        - {factor: size, effect: "larger takes longer", sources: [Q205, Q215]}
+        - {factor: age, effect: "older potatoes boil apart more easily", sources: [Q220]}
+        - {factor: variety, effect: "floury potatoes go towards mash", sources: [Q221]}
+      failure:
+        - {check: "watery, falls apart", cause: "peeled or cut before boiling; a hot-water start", sources: [Q220, Q214]}
+    at:
+      rosti/boiled/potato/1:
+        role: rosti (grated after chilling)
+        medium:
+          - {medium: water_boiling, note: "salted", sources: [Q204, Q221, E1a]}
+        elapsed:
+          - {min: 15, max: 20, unit: min, sources: [Q204]}
+          - {min: 12, max: 18, unit: min, label: "by size", sources: [Q205]}
+          - {min: 20, max: 25, unit: min, sources: [Q221]}
+          - {min: 25, max: 25, unit: min, sources: [Q223]}
+        failure:
+          - {check: "a mashed-potato pancake", cause: "overcooked floury potato", sources: [Q221]}
+      korokke/breaded_mash/potato/1:
+        role: korokke (mashed hot)
+        medium:
+          - {medium: water_cold, note: "cold start, to the boil on medium, then low with a lid", sources: [Q220, Q214]}
+        elapsed:
+          - {min: 25, max: 30, unit: min, sources: [Q220]}
+          - {min: 15, max: 15, unit: min, sources: [Q214]}
+        completion:
+          - {check: "a bamboo skewer slides straight in", sources: [Q220, Q214]}
+      aloo_tikki/cornflour/potato/1:
+        role: aloo tikki (grated or mashed when cool)
+        medium:
+          - {medium: pressure_cooker, note: "3-5 whistles, or 7-8 min in an electric pressure cooker", sources: [Q224, A2a]}
+        completion:
+          - {check: "just fork tender, not mushy", sources: [Q224]}
+        failure:
+          - {check: "mushy, pasty, sticky mix; soggy tikkis that break in the oil", cause: "overcooked or waterlogged potato", sources: [Q224, A2a]}
+    conflicts:
+      - topic: how far for rosti
+        versions:
+          - {says: "just firm to the bite, a firm core left", sources: [Q204, Q205, Q221]}
+          - {says: "until just soft", sources: [Q223, E1a]}
+    confidence: conflicting
+    gaps:
+      - "what an undercooked potato does to a rosti"
+      - "a knife or fork test for the firm rosti endpoint"
+
+  chill_cooked_potato:
+    name: Cooling boiled potatoes before grating
+    part: potato.tuber
+    op: refroidir
+    steps: [rosti/boiled/potato/2, aloo_tikki/cornflour/potato/2]
+    default:
+      start: {particle: [whole], moisture: [wet], sources: [Q221, Q223], note: "boiled, drained, in the skin"}
+      medium:
+        - {medium: fridge, note: "cooled completely first, then refrigerated", sources: [Q221, Q223, Q206]}
+      active: {kind: none, sources: [Q221, Q223]}
+      completion:
+        - {check: "completely cool", sources: [Q204, Q205, Q224]}
+        - {check: "grates easily after a night in the fridge", sources: [Q221]}
+      failure:
+        - {check: "a pasty, sticky tikki mix", cause: "binder added while the potato is hot", sources: [Q224]}
+    at:
+      rosti/boiled/potato/2:
+        elapsed:
+          - {label: overnight, sources: [Q204, Q205, E1a, Q223]}
+          - {label: "the day before", sources: [Q206, Q207]}
+          - {label: "at least a day", sources: [Q221]}
+          - {min: 2, max: 2, unit: days, label: "unpeeled, left to dry", sources: [Q236]}
+        failure:
+          - {check: "a mushy rosti", cause: "storage skipped ('decisive', no single cause named)", sources: [Q236]}
+    conflicts:
+      - topic: how long
+        versions:
+          - {says: overnight, sources: [Q204, Q205, Q223]}
+          - {says: "one day", sources: [Q206, Q221]}
+          - {says: "two days, unpeeled and uncovered", sources: [Q236]}
+    confidence: established
+    note: "Korokke and Japanese mash are not chilled first: peeled and mashed hot, because the skin sticks once cool (Q214, Q215, A6a)."
+    gaps:
+      - "a cooking source naming the mechanism (starch firming)"
+      - "a rosti statement that warm potato is sticky to grate"
+
+  # ---- vessels ---------------------------------------------------------------
+
+  blanch_onion_vessel:
+    name: Blanching onions for vessels
+    part: onion.bulb
+    op: blanchir
+    steps: [transfer:onion_vessel/vessel/2, farcis_nicois/meat_baked/onion/2]
+    default:
+      start: {particle: [whole, halved], moisture: [dry], sources: [O5, O4, Q328], note: "peeled; halved across before (O5) or whole and halved after (Q328, O4)"}
+      medium:
+        - {medium: water_boiling, note: "salted", sources: [O5, Q325, Q326, Q327, Q328, Q336]}
+      active: {kind: none, sources: [Q325, Q324], note: "waiting during the boil; the layers are separated by hand after a short rest"}
+      shifts:
+        - {factor: whole or halved, effect: "whole bulbs get the longest boils (15-20 min)", sources: [O4, O8, Q328]}
+      failure:
+        - {check: "the layers fall apart or tear", cause: "overboiled", sources: [O12, O15]}
+        - {check: "the onion is slippery to handle as a bowl", cause: "cooked onion", sources: [O10]}
+        - {check: "the onion is still undercooked after the bake", cause: "too short a pre-cook for the bake that follows", sources: [Q325]}
+    at:
+      transfer:onion_vessel/vessel/2:
+        role: a halved shell that the bake finishes
+        elapsed:
+          - {min: 10, max: 10, unit: min, label: halved, sources: [O5, M16a, Q336]}
+          - {min: 5, max: 5, unit: min, label: halved, sources: [O2]}
+          - {min: 15, max: 20, unit: min, label: "whole, halved after", sources: [Q328, O4, O8]}
+        completion:
+          - {check: "the onion is still firm, lightly crisp", sources: [Q326, Q335]}
+      farcis_nicois/meat_baked/onion/2:
+        elapsed:
+          - {min: 10, max: 10, unit: min, sources: [M16a]}
+    conflicts:
+      - topic: blanch at all
+        versions:
+          - {says: "no blanch: raw onions, with a long braise of 2.5-3 h to compensate", sources: [O1, O11, O6, O7]}
+          - {says: "blanched 5-20 min", sources: [O2, O4, O5, O8, Q327, Q328]}
+      - topic: how far for a shell
+        versions:
+          - {says: "still firm, lightly crisp", sources: [Q326, Q335]}
+          - {says: "cooked through at this stage, then a slow bake", sources: [Q335]}
+    confidence: established
+    note: "For rolled onion layers (dolma) the same operation runs to 'soft, easy to shape' or translucent (Q329, O15), because the layer must roll; for a shell it stops at still firm."
+    gaps:
+      - "an observable test for a halved shell other than 'firm'"
+      - "how onion size changes the time"
+
+  blanch_courgette_vessel:
+    name: Blanching courgettes for vessels
+    part: courgette.fruit
+    op: blanchir
+    steps: [zucchine_ripiene/cooked_flesh/courgette/1, zucchine_ripiene/blanched_flesh/courgette/1, farcis_nicois/meat_baked/courgette/1]
+    default:
+      start: {particle: [whole], moisture: [wet], sources: [M17a, Q330, O5]}
+      medium:
+        - {medium: water_boiling, note: "lightly salted; drained upside down on a cloth (Q331)", sources: [Q330, Q331, O5]}
+      active: {kind: none, sources: [Q331]}
+      shifts:
+        - {factor: whole or cut, effect: "hollowed or cut pieces get shorter times", sources: [Q331, Q332]}
+      completion:
+        - {check: "drained while still firm: only half-cooked", sources: [M17a, Q330]}
+      failure:
+        - {check: "water soaks and boils the filling; courgette boiled, not browned", cause: "raw courgette releases water in the bake", sources: [Q333, Q334]}
+    at:
+      zucchine_ripiene/blanched_flesh/courgette/1:
+        elapsed:
+          - {min: 5, max: 6, unit: min, sources: [M17b]}
+      zucchine_ripiene/cooked_flesh/courgette/1:
+        elapsed:
+          - {min: 10, max: 10, unit: min, sources: [M17a, Q330]}
+      farcis_nicois/meat_baked/courgette/1:
+        elapsed:
+          - {min: 10, max: 10, unit: min, sources: [M16a]}
+          - {min: 15, max: 15, unit: min, sources: [O5]}
+    conflicts:
+      - topic: water or oven
+        versions:
+          - {says: "blanched in boiling water", sources: [Q330, Q331, M17a]}
+          - {says: "no water: oiled, salted empty shells part-baked", sources: [Q333]}
+      - topic: time
+        versions:
+          - {says: "5-6 min", sources: [M17b, Q331]}
+          - {says: "10 min", sources: [M17a, Q330, M16a]}
+          - {says: "15 min", sources: [O5]}
+    confidence: established
+    gaps:
+      - "a touch test for the blanched courgette"
+      - "collapse from over-blanching, in a page actually read"
+
+  bake_stuffed_vegetables:
+    name: Baking stuffed vegetables
+    part: stuffed vessel
+    op: cuire_four
+    steps:
+      - transfer:onion_vessel/stuffed/1
+      - farcis_nicois/meat_baked/stuffed/1
+      - farcis_nicois/vegetarian/stuffed/1
+      - zucchine_ripiene/cooked_flesh/stuffed/1
+      - zucchine_ripiene/blanched_flesh/stuffed/1
+    default:
+      start: {particle: [filled], moisture: [wet], sources: [M16a, Q327, Q330], note: "blanched hollowed shells, filled, crumbs or cheese on top"}
+      medium:
+        - {medium: oven, temp_c: [180, 180], note: "30-50 min", sources: [O5, O2, Q330, Q331, Q327, Q336]}
+      active: {kind: occasional, sources: [Q327, Q336], note: "check at 30-35 min and cover with foil if the tops brown"}
+      shifts:
+        - {factor: a slow low oven, effect: "a confit result over an hour or more", sources: [Q335]}
+      completion:
+        - {check: "the vessel is pierced easily with a knife and is tender without collapsing", sources: [Q336, Q335]}
+        - {check: "the top is gratinated or browned", sources: [M16a, Q330]}
+      failure:
+        - {check: "the tops brown too fast", cause: "cover with foil", sources: [Q327, Q335, Q336]}
+        - {check: "vegetable raw or mushy", cause: "the filling and the vessel need different times", sources: [Q334]}
+        - {check: "a hard, dry filling", cause: "raw meat in the filling", sources: [Q333]}
+        - {check: "a soggy, boiled filling", cause: "water from the courgette", sources: [Q333, Q334]}
+    at:
+      transfer:onion_vessel/stuffed/1:
+        elapsed:
+          - {min: 30, max: 30, unit: min, label: "180 C", sources: [O5]}
+          - {min: 20, max: 20, unit: min, label: "200 C fan", sources: [O1]}
+          - {min: 45, max: 50, unit: min, label: "180 C", sources: [Q327, Q336]}
+      zucchine_ripiene/blanched_flesh/stuffed/1:
+        elapsed:
+          - {min: 25, max: 25, unit: min, label: "180-200 C", sources: [M17b]}
+          - {min: 40, max: 40, unit: min, label: "180 C fan, 35 min plus 5 under the grill", sources: [Q330]}
+      zucchine_ripiene/cooked_flesh/stuffed/1:
+        elapsed:
+          - {min: 30, max: 30, unit: min, label: "200 C", sources: [M17a]}
+      farcis_nicois/meat_baked/stuffed/1:
+        elapsed:
+          - {min: 30, unit: min, label: "at least 30 min, until gratinated", sources: [M16a]}
+    conflicts:
+      - topic: time at about 180 C
+        versions:
+          - {says: "about 20 min", sources: [Q328, O1]}
+          - {says: "30 min", sources: [O5, O2]}
+          - {says: "45-50 min", sources: [Q327, Q336]}
+      - topic: the filling
+        versions:
+          - {says: "pre-cooked before stuffing", sources: [Q327, Q335, Q333]}
+          - {says: "raw meat in the shell", sources: [Q331, Q336, M16a]}
+    confidence: established
+    gaps:
+      - "a doneness test for the filling (egg set, core temperature)"
+
+  blanch_cabbage_head:
+    name: Boiling a cored cabbage head to free the leaves
+    part: cabbage.head
+    op: blanchir
+    steps: [kaalikaaryleet/inner_leaves/cabbage/1, kaalikaaryleet/trimmed_rib/cabbage/1]
+    default:
+      start: {particle: [head], moisture: [wet], sources: [Q300, Q302, E12a], note: "whole, core cut out; a flattish loose head is best (Q300)"}
+      medium:
+        - {medium: water_boiling, note: "salted", sources: [Q300, Q301, Q302, Q303, E12b]}
+      active: {kind: regular, sources: [Q300, Q302, Q303, Q307, Q311, Q313], note: "lift the head, peel off the softened outer leaves, return it, repeat"}
+      shifts:
+        - {factor: leaf thickness, effect: "thicker leaves need longer", sources: [Q313]}
+        - {factor: variety, effect: "savoy is softer than white cabbage", sources: [Q310]}
+      completion:
+        - {check: "the outer leaves soften and come away easily", sources: [Q301, Q302, Q304, Q308]}
+        - {check: "the leaf is soft and pliable: it bends without falling apart", sources: [Q310, Q313]}
+      failure:
+        - {check: "too soft, the leaves tear", cause: "boiled too long", sources: [Q308]}
+        - {check: "too stiff to roll, hard to separate", cause: "too short; dip again", sources: [Q313, Q310, Q311]}
+    at:
+      kaalikaaryleet/inner_leaves/cabbage/1:
+        elapsed:
+          - {min: 10, max: 10, unit: min, sources: [E12a, Q307, Q312]}
+      kaalikaaryleet/trimmed_rib/cabbage/1:
+        elapsed:
+          - {label: "no time: as the leaves soften", sources: [Q300, Q301, Q305]}
+          - {min: 15, max: 20, unit: min, sources: [Q302]}
+          - {min: 1, max: 1, unit: h, sources: [Q303]}
+    conflicts:
+      - topic: how long
+        versions:
+          - {says: "about 5 min, then repeated dips", sources: [Q310, Q311]}
+          - {says: "10-20 min", sources: [E12a, Q307, Q302, Q306]}
+          - {says: "about 1 h", sources: [Q303]}
+      - topic: boil or freeze
+        versions:
+          - {says: "boil the head", sources: [Q300, Q302, Q303, E12a]}
+          - {says: "freeze the whole head, thaw, and the leaves come off soft", sources: [Q304, Q309, Q315, Q510]}
+    confidence: established
+    gaps:
+      - "a Finnish over-boil failure"
+      - "a Finnish freezing time for the head"
+
+  blanch_napa_leaves:
+    name: Softening napa cabbage leaves
+    part: napa_cabbage.head
+    op: blanchir
+    steps: [transfer:napa_cabbage_rolls/napa/2]
+    default:
+      start: {particle: [leaves], moisture: [wet], sources: [Q317, Q313], note: "pulled off raw one at a time"}
+      medium:
+        - {medium: water_boiling, note: "salted", sources: [Q317, N5, N6]}
+        - {medium: microwave, note: "600 W, about 1 min per 100 g (N4)", sources: [N1, N3, N4, Q318]}
+      active: {kind: continuous, sources: [Q317, Q322], note: "leaf by leaf, one or two at a time"}
+      shifts:
+        - {factor: leaf thickness, effect: "thicker leaves longer", sources: [Q313]}
+      completion:
+        - {check: "flexible but not cooked", sources: [Q317]}
+        - {check: "the rib turns translucent; the leaf is wilted", sources: [Q318, Q321, Q322]}
+      failure:
+        - {check: "too soft, falls apart when rolled; mushy", cause: "blanched too long", sources: [Q317, Q322, N12]}
+        - {check: "the rib stays tough", cause: "rib not shaved", sources: [N2, N1, N3]}
+    at:
+      transfer:napa_cabbage_rolls/napa/2:
+        elapsed:
+          - {min: 1, max: 2, unit: min, label: "boiling water", sources: [N6, Q313, Q317]}
+          - {min: 3, max: 5, unit: min, label: microwave, sources: [N1, N4, N3, N10]}
+          - {min: 7, max: 8, unit: min, label: "microwave, whole head wrapped", sources: [Q318]}
+    conflicts:
+      - topic: how
+        versions:
+          - {says: "1-2 min in boiling water", sources: [Q313, Q317, N6]}
+          - {says: "microwave 3-8 min", sources: [N1, N4, Q318]}
+          - {says: "not softened (a layered dish, not rolled)", sources: [Q319]}
+    confidence: established
+    note: "For a Korean roll eaten raw the leaf gets 30 s and ice (Q322); for a baked or simmered roll 1.5-2 min (Q317)."
+    gaps:
+      - "a 'rib bends without snapping' check, in a page actually read"
+
+  bake_cabbage_rolls:
+    name: Baking cabbage rolls
+    part: rolls
+    op: cuire_four
+    steps: [kaalikaaryleet/inner_leaves/rolls/1, kaalikaaryleet/trimmed_rib/rolls/1, transfer:napa_cabbage_rolls/rolls/1]
+    default:
+      start: {particle: [rolled], moisture: [wet], sources: [Q301, Q302, Q305], note: "seam side down, packed side by side"}
+      active: {kind: regular, sources: [Q300, Q301, Q302, Q303, Q306], note: "basted several times; turned once (Q305); water added if needed"}
+      shifts:
+        - {factor: young cabbage, effect: "cooks faster", sources: [Q313]}
+      completion:
+        - {check: "the rolls have coloured on top", sources: [Q302, Q303, Q305, Q306]}
+        - {check: "the leaf is soft", sources: [Q312, Q313, Q314]}
+      failure:
+        - {check: "the cabbage is still hard", cause: "too little steam or liquid; simmer longer rather than raising the heat", sources: [Q313]}
+        - {check: "the top browns too fast", cause: "lower the heat or cover", sources: [Q313]}
+        - {check: "dry rolls", cause: "too little liquid; rolled too tight", sources: [Q317, Q316]}
+        - {check: "dry filling and split leaves", cause: "raw rice in the filling", sources: [Q313]}
+    at:
+      kaalikaaryleet/inner_leaves/rolls/1:
+        medium:
+          - {medium: oven, temp_c: [170, 170], note: "dark syrup over, a splash of water", sources: [E12a]}
+        elapsed:
+          - {min: 40, max: 40, unit: min, sources: [E12a]}
+      kaalikaaryleet/trimmed_rib/rolls/1:
+        medium:
+          - {medium: oven, temp_c: [200, 200], note: "syrup over, water in the bottom", sources: [E12b]}
+          - {medium: oven, temp_c: [150, 250], note: "hot start 225-250 C for 10-30 min to colour, then 150-175 C, basted; syrup", sources: [Q300, Q301, Q302, Q303]}
+        elapsed:
+          - {min: 1.5, max: 1.5, unit: h, sources: [E12b]}
+          - {min: 1, max: 2, unit: h, sources: [Q300, Q301, Q302, Q303]}
+      transfer:napa_cabbage_rolls/rolls/1:
+        medium:
+          - {medium: oven, temp_c: [180, 180], cover: covered, note: "broth to cover", sources: [Q317]}
+          - {medium: oven, temp_c: [200, 200], note: "packed tightly in sauce with 200 ml water", sources: [N10]}
+          - {medium: oven, cover: covered_then_uncovered, note: "foil 1 h, then 15 min", sources: [N9]}
+        elapsed:
+          - {min: 60, max: 60, unit: min, sources: [Q317]}
+          - {min: 40, max: 45, unit: min, sources: [N10]}
+          - {min: 75, max: 75, unit: min, sources: [N9]}
+        completion:
+          - {check: "the leaf softens pleasantly without overcooking", sources: [Q317]}
+    conflicts:
+      - topic: covering
+        versions:
+          - {says: "not stated by any Finnish source (uncovered, basted)", sources: [Q300, Q301, Q302, Q303, Q305, E12a]}
+          - {says: "covered, with broth", sources: [Q313, Q317, N9]}
+      - topic: heat
+        versions:
+          - {says: "hot start, then low", sources: [Q300, Q301, Q302, Q303]}
+          - {says: "one temperature, 170 C", sources: [E12a]}
+          - {says: "low throughout, 150 C", sources: [Q304]}
+    confidence: established
+    note: "Established for the Finnish 'brown hot, then lower, baste, syrup'; covering conflicts between Finland and elsewhere."
+    gaps:
+      - "a Finnish scorch or dry-edge failure"
+      - "a fork test on the leaf"
+      - "a check that the rice is done after the bake"
+
+  cook_rice_for_filling:
+    name: Cooking rice for a filling
+    part: rice.grain
+    op: cuire_anglaise
+    steps: [kaalikaaryleet/inner_leaves/rice/1, kaalikaaryleet/trimmed_rib/rice/1, transfer:napa_cabbage_rolls/rice/1, arancini/arancini/rice/1]
+    default:
+      start: {particle: [grain], moisture: [dry], sources: [Q301, Q305]}
+      medium:
+        - {medium: water_boiling, note: "or in the cabbage water (Q302, Q303, Q305)", sources: [Q301, Q312]}
+      active: {kind: none, sources: [Q337], note: "absorption; porridge rice is stirred now and then (Q338)"}
+      completion:
+        - {check: "the liquid is absorbed (packet)", sources: [Q337]}
+      failure:
+        - {check: "dry filling and split leaves", cause: "raw rice swells in the roll", sources: [Q313]}
+    at:
+      kaalikaaryleet/trimmed_rib/rice/1:
+        elapsed:
+          - {min: 10, max: 10, unit: min, label: "porridge rice half-cooked, drained", sources: [Q301]}
+          - {min: 15, max: 15, unit: min, label: "fully", sources: [Q312]}
+        completion:
+          - {check: "half-cooked, because it finishes in the oven", sources: [Q301, Q311]}
+      transfer:napa_cabbage_rolls/rice/1:
+        completion:
+          - {check: "slightly al dente, because it softens in the oven", sources: [Q317]}
+      arancini/arancini/rice/1:
+        completion:
+          - {check: "drained without overcooking, or it falls apart", sources: [M11a]}
+    conflicts:
+      - topic: how far for a cabbage roll
+        versions:
+          - {says: "half-cooked or slightly al dente", sources: [Q301, Q311, N10, Q317]}
+          - {says: "fully cooked", sources: [Q312, E12a, E12b, Q302, Q313, Q314]}
+    confidence: conflicting
+    gaps:
+      - "Lidl Finland rice packet text (two lidl.fi rice pages are 404)"
+
+  # ---- patties ---------------------------------------------------------------
+
+  salt_grated_courgette:
+    name: Salting and squeezing grated courgette
+    part: courgette.fruit
+    op: [degorger, presser]
+    steps:
+      - kolokythokeftedes/baked/courgette/2
+      - kolokythokeftedes/baked/courgette/3
+      - kolokythokeftedes/pan_fried/courgette/2
+      - mucver/squeezed/courgette/2
+      - carrot_patties/courgette_dewatered/courgette/3
+    default:
+      start: {particle: [grated], moisture: [wet], sources: [Q402, Q405, Q407, M4a], note: "coarse in most; leave out the seedy core (Q400)"}
+      medium:
+        - {medium: air_room, note: "salt, then squeeze by hand or in a cloth", sources: [M4a, Q405, Q407]}
+      active: {kind: continuous, sources: [Q400, Q401, Q402], note: "the salting rest is waiting; the squeeze is hands-on, repeated in handfuls; no source times it"}
+      shifts:
+        - {factor: age of the courgette, effect: "an older one releases more liquid and may need more flour", sources: [Q407]}
+        - {factor: standing after mixing, effect: "the mixture turns wetter the longer it stands", sources: [Q411, Q403]}
+      completion:
+        - {check: "no more water comes out when a handful is squeezed", sources: [Q400, Q402, Q401]}
+        - {check: "the mixed batter is paste-like, holds on a spoon, sticks to the hands but does not run", sources: [Q400, Q402, M3b]}
+      failure:
+        - {check: "the fritters fall apart in the pan", cause: "the courgette's own water left in the mass", sources: [M3b, Q402, Q401]}
+        - {check: "the fritters soak up oil", cause: "water not squeezed out", sources: [Q400, Q401, Q402]}
+        - {check: "a raw, soft centre", cause: "courgette water thins the batter", sources: [Q402, Q403]}
+        - {check: "the mixture goes watery while it waits", cause: "courgette keeps releasing water; salted mix kept overnight", sources: [Q411, Q403]}
+    at:
+      kolokythokeftedes/baked/courgette/2:
+        elapsed:
+          - {min: 10, max: 10, unit: min, label: "salted, rested", sources: [M4a, Q405, Q407, Q409]}
+          - {min: 30, max: 30, unit: min, label: "1-2 tsp salt per kg", sources: [Q429]}
+        active: {kind: none, sources: [M4a, Q409], note: "waiting while the salt draws water"}
+    conflicts:
+      - topic: salt before squeezing, or squeeze only
+        versions:
+          - {says: "salt, rest, then squeeze", sources: [M4a, E19b, Q401, Q405, Q407, Q409, Q429]}
+          - {says: "squeeze without salting", sources: [M3a, M3b, M4b, Q400, Q402, Q403, Q404, Q410]}
+          - {says: "no dewatering at all: mixed straight in, or the drawn water becomes the batter liquid", sources: [Q408, Q412, Q418, A9b]}
+      - topic: how long the salt rests
+        versions:
+          - {says: "10 min", sources: [M4a, Q405, Q407, Q409, Q411]}
+          - {says: "at least 15 min", sources: [E19b, Q401]}
+          - {says: "30 min", sources: [Q429]}
+    confidence: established
+    note: "Squeezing the water out before binding is established; salting it first is common but conflicting, and no source compares the two."
+    gaps:
+      - "how much water comes out (ml per kg or weight loss)"
+      - "a side-by-side test of salted against unsalted courgette"
+      - "a failure from over-squeezing"
+      - "a Finnish major-site courgette patty recipe"
+
+  peel_broccoli_stem:
+    name: Peeling the broccoli stem
+    part: broccoli.stems
+    op: eplucher
+    steps: [transfer:broccoli_stem_patties/stem/1]
+    default:
+      start: {particle: [whole], moisture: [dry], sources: [Q426, Q427], note: "trim the dry base first: 1 cm (Q427), 1-2 cm (B1), about 1 inch (Q426), about 5 cm (Q425)"}
+      medium:
+        - {medium: knife, note: "peeler or paring knife; or pull the skin from the cut end; or katsuramuki about 5 mm thick", sources: [Q425, Q426, Q427, Q428]}
+      active: {kind: continuous, sources: [Q426, Q428], note: "knife work; no source gives a time"}
+      completion:
+        - {check: "whitish flesh is exposed all the way round", sources: [Q428]}
+        - {check: "the fibrous ring under the skin is cut away", sources: [Q424]}
+      failure:
+        - {check: "the cooked stem is tough, rubbery or fibrous", cause: "not peeled", sources: [Q426, Q427, Q428, B13, B21]}
+        - {check: "stringy fibres in the grated stem", cause: "unpeeled stem through a grater", sources: [B1]}
+    conflicts:
+      - topic: always peel, or only when needed
+        versions:
+          - {says: "always peel", sources: [Q424, Q426, Q427, Q428, B13, B21, B24]}
+          - {says: "optional when fresh and soft, cut thin across, or chopped finely", sources: [B19, B22, B23, Q423]}
+      - topic: how deep
+        versions:
+          - {says: "thick, about 5 mm", sources: [Q428, B24]}
+          - {says: "the skin only", sources: [Q426, Q427]}
+    confidence: documented
+    note: "Peeling is established; its observable endpoint rests on two Japanese sources."
+    gaps:
+      - "Finnish or Swedish stem-peeling guidance"
+      - "a peeling time"
+      - "whether a peeled, grated raw stem stays stringy inside a patty (the kitchen test's question)"
+
+  cook_vegetable_patty:
+    name: Pan-frying or baking a grated-vegetable patty
+    part: grated-vegetable patty
+    op: [cuire_four, rissoler]
+    steps:
+      - carrot_patties/crumbs/patty/1
+      - transfer:broccoli_stem_patties/patty/1
+      - kolokythokeftedes/pan_fried/mass/3
+      - mucver/squeezed/mass/3
+    default:
+      start: {particle: [formed], moisture: [wet], sources: [Q402, Q405, E18a], note: "grated vegetable bound with egg and flour, crumbs or cheese; spoonfuls about 1 tbsp to 1 dl"}
+      shifts:
+        - {factor: thickness, effect: "thinner cooks faster and crisper; too thick does not cook through", sources: [Q407, Q412]}
+        - {factor: wetness of the mass, effect: "wetter gives a raw centre and more oil", sources: [Q402, Q403]}
+        - {factor: binder, effect: "one egg holds in the oven but is harder in a pan; two hold much better", sources: [E18b]}
+      completion:
+        - {check: "turn only when the underside is firm and golden", sources: [Q411, M3b, Q400, Q408]}
+        - {check: "golden brown on both sides", sources: [Q402, Q405, Q410, Q412, Q415, Q418]}
+      failure:
+        - {check: "it falls apart when turned", cause: "turned before the underside set; batter too loose", sources: [Q411, M3b, Q414]}
+        - {check: "greasy, soaked with oil", cause: "oil or pan not hot enough; wet batter", sources: [Q401, Q402, M3b, E19a, Q431]}
+        - {check: "burnt outside, raw inside", cause: "heat too high", sources: [Q401, M4b, Q431]}
+        - {check: "raw centre", cause: "patty too thick, or wet batter", sources: [Q412, Q402, Q403]}
+        - {check: "stays soft with no crust", cause: "cold pan", sources: [Q411]}
+    at:
+      mucver/squeezed/mass/3:
+        medium:
+          - {medium: oil_shallow, note: "oil well heated first, then medium", sources: [M3b, Q401]}
+        elapsed:
+          - {min: 3, max: 4, unit: min, label: "per side", sources: [Q405, Q410, Q411]}
+        active: {kind: regular, sources: [Q408, Q417, Q400], note: "a few at a time, each turned once, drained on paper"}
+      kolokythokeftedes/pan_fried/mass/3:
+        medium:
+          - {medium: oil_shallow, note: "olive oil covering the base, medium heat; little oil and low heat keep them fluffy", sources: [M4b]}
+        active: {kind: regular, sources: [M4b], note: "turned once"}
+    conflicts:
+      - topic: pan heat
+        versions:
+          - {says: "medium", sources: [Q401, Q410, E18a]}
+          - {says: "medium-high so a crust forms fast", sources: [Q411]}
+          - {says: "relatively low", sources: [M4b]}
+          - {says: "very hot oil", sources: [Q402]}
+      - topic: oven temperature and time
+        versions:
+          - {says: "180-185 C for 30-45 min", sources: [Q403, Q404, Q429]}
+          - {says: "200 C fan about 20 min", sources: [M4a, Q409]}
+          - {says: "225-250 C for 10-20 min", sources: [Q416, E18a, E18b]}
+      - topic: turn in the oven
+        versions:
+          - {says: "not turned", sources: [M4a, Q409, Q429, E18a]}
+          - {says: "turned once, oiled", sources: [E18b, B18]}
+    confidence: established
+    note: "An assembly, not a part: the same endpoints are stated for carrot, courgette and broccoli-stem patties."
+    gaps:
+      - "an internal doneness test (knife, press, temperature) for a vegetable patty"
+      - "a check that the grated carrot or stem inside is cooked"
+
+sequences:
+
+  # ---- pulses ----------------------------------------------------------------
+
+  falafel/raw_soaked:
+    name: Falafel from raw soaked chickpeas
+    steps:
+      falafel/raw_soaked/chickpea/1:
+        endpoint: {kind: readiness, sources: [Q117, Q108]}
+        completion:
+          - {check: "swollen but not cooked; reaches a blendable consistency", sources: [Q108, Q117]}
+      falafel/raw_soaked/chickpea/2:
+        endpoint: {kind: readiness, sources: [Q109, Q111]}
+      falafel/raw_soaked/onion/1:
+        endpoint: {kind: readiness, by: route_order}
+      falafel/raw_soaked/onion/2:
+        endpoint: {kind: readiness, sources: [Q116]}
+        completion:
+          - {check: "roughly chopped and added raw to the processor", sources: [Q116]}
+        failure:
+          - {check: "a delicate mix that falls apart", cause: "excess water from the onion", sources: [Q115]}
+      falafel/raw_soaked/paste/1:
+        endpoint: {kind: readiness, sources: [Q108, Q114]}
+      falafel/raw_soaked/paste/2:
+        endpoint: {kind: readiness, sources: [Q109, Q113]}
+        completion:
+          - {check: "small, firmly compacted balls", sources: [Q109, Q113, Q108]}
+        failure:
+          - {check: "breaks or cooks unevenly", cause: "loosely packed or large", sources: [Q108, Q113]}
+      falafel/raw_soaked/paste/3:
+        endpoint: {kind: doneness, sources: [Q108, Q111, Q116]}
+    members:
+      falafel/raw_soaked/paste/3:
+        chickpea:
+          completion:
+            - {check: "cooked through and fluffy inside; with soda it loses the mealy raw taste", sources: [Q111, Q116]}
+          failure:
+            - {check: "raw centre", cause: "oil too hot", sources: [Q113]}
+        onion:
+          note: "no source states the onion's own endpoint inside the ball"
+    depends:
+      - {step: falafel/raw_soaked/chickpea/1, because: falafel/raw_soaked/chickpea/2, says: "the soak exists so the raw seed can be ground", sources: [Q117]}
+      - {step: falafel/raw_soaked/chickpea/1, because: falafel/raw_soaked/paste/3, says: "kept raw, never cooked or canned, because the raw paste must set and hold in the oil", sources: [Q108, Q109, Q114, Q115, Q117]}
+      - {step: falafel/raw_soaked/chickpea/2, because: falafel/raw_soaked/paste/3, says: "the grind is for holding: too coarse will not hold, too smooth falls apart", sources: [Q110, Q108]}
+      - {step: falafel/raw_soaked/paste/1, because: falafel/raw_soaked/paste/3, says: "the chill exists because the paste has to hold in the oil", sources: [Q114, Q115]}
+      - {step: falafel/raw_soaked/paste/2, because: falafel/raw_soaked/paste/3, says: "firm compaction is for frying", sources: [Q113]}
+    misses:
+      - {step: falafel/raw_soaked/chickpea/1, when: overdone, failure: "cooked or canned chickpeas instead of soaked raw ones: the balls fall apart or turn mushy", sources: [Q108, Q109, Q114, Q115]}
+      - {step: falafel/raw_soaked/chickpea/1, when: underdone, failure: "hard inside, less fluffy falafel", sources: [Q111]}
+      - {step: falafel/raw_soaked/chickpea/2, when: overdone, failure: "wet and smooth, hard to handle, falls apart", sources: [Q116, Q108]}
+      - {step: falafel/raw_soaked/paste/1, when: skipped, failure: "falls apart in hot oil", sources: [Q114, Q115]}
+    alternatives:
+      - {name: baked, says: "the raw paste baked at 185-225 C for 20-30 min, or air-fried; without the chill it spreads and cracks; less crisp", sources: [Q107, Q121, Q108, Q114]}
+      - {name: cooked chickpeas, says: "chickpeas cooked about 30 min to tender, bound with flour, fried about 10 min", sources: [Q119]}
+      - {name: quick soak, says: "boiled 5 min and left 1 h, then the raw route (conflicts with never boiling)", sources: [Q109, Q114]}
+      - {name: frozen balls, says: "shaped balls frozen, fried from frozen, or thawed in the fridge first", sources: [Q109, Q112, Q114, Q115]}
+
+  transfer:pea_falafel:
+    name: Falafel from Finnish dried peas (R4 transfer)
+    steps:
+      transfer:pea_falafel/onion/1:
+        endpoint: {kind: readiness, by: route_order}
+      transfer:pea_falafel/onion/2:
+        endpoint: {kind: readiness, sources: [P2, P4]}
+        completion:
+          - {check: "chopped and ground with the peas or mixed in", sources: [P2, P4]}
+      transfer:pea_falafel/pea/1:
+        endpoint: {kind: readiness, sources: [P4, P15]}
+        note: "no observable soaked-enough test is documented for peas; time is the only guide"
+      transfer:pea_falafel/pea/2:
+        endpoint: {kind: readiness, sources: [P15, P4]}
+      transfer:pea_falafel/paste/1:
+        endpoint: {kind: readiness, sources: [P4]}
+      transfer:pea_falafel/paste/2:
+        endpoint: {kind: readiness, sources: [P2]}
+        completion:
+          - {check: "pressed into shape rather than rolled", sources: [P2]}
+      transfer:pea_falafel/paste/3:
+        endpoint: {kind: doneness, sources: [P4, P15]}
+        completion:
+          - {check: "a test ball is golden in about 2 min; about 4 min at 170 C", sources: [P4]}
+        failure:
+          - {check: "might fall apart", cause: "crowding the pan", sources: [P4]}
+          - {check: "too dry and hard", cause: "yellow pea (the only controlled test)", sources: [P15]}
+    members:
+      transfer:pea_falafel/paste/3:
+        pea:
+          failure:
+            - {check: "hard and dry in the mouth", cause: "yellow pea's low water uptake", sources: [P15]}
+          note: "no pea-specific 'cooked through inside' endpoint was found"
+        onion:
+          note: "no source states the onion's own endpoint inside the ball"
+    depends:
+      - {step: transfer:pea_falafel/pea/1, because: transfer:pea_falafel/pea/2, says: "split peas need no soak to be cooked in soup, but are soaked for falafel: the soak exists for the raw grind", sources: [Q104, Q105, Q106, P1, P3, P4, P5]}
+      - {step: transfer:pea_falafel/pea/2, because: transfer:pea_falafel/paste/3, says: "a coarse grind, because a fine one makes the fried falafel dense", sources: [P4]}
+      - {step: transfer:pea_falafel/paste/1, because: transfer:pea_falafel/paste/2, says: "chilled so it shapes", sources: [P4]}
+    misses:
+      - {step: transfer:pea_falafel/pea/2, when: overdone, failure: "dense falafel", sources: [P4]}
+    alternatives:
+      - {name: par-cooked and baked, says: "a 30 min hot soak, boiled 4-6 min, baked at 190 C for 25-30 min", sources: [P7]}
+      - {name: raw and baked, says: "baked at 180 C for 20 min", sources: [P8, P9]}
+      - {name: shallow-fried, says: "about 2 min per side", sources: [P1, P5]}
+    gaps:
+      - "a soaked-enough test for peas"
+      - "a 'cooked through' check for the pea interior"
+      - "whether frying counts as the treatment a pea packet requires before eating (Q102 says dried peas must not be eaten untreated)"
+
+  # ---- gratin ----------------------------------------------------------------
+
+  transfer:rutabaga_gratin:
+    name: Potato and rutabaga gratin, rutabaga blanched (R4 transfer)
+    steps:
+      transfer:rutabaga_gratin/potato/1:
+        endpoint: {kind: readiness, by: route_order}
+      transfer:rutabaga_gratin/potato/2:
+        endpoint: {kind: readiness, sources: [Q231]}
+        start: {particle: [sliced], moisture: [dry], sources: [Q231, Q225, Q232], note: "2-3 mm (Q231, Q225), 3 mm (Q232, G7)"}
+        completion:
+          - {check: "sliced 2-3 mm, last, and not rinsed afterwards", sources: [Q231, Q235, Q225]}
+        note: "the potato goes into the gratin raw (Q231) or gets 1 min (Q232)"
+      transfer:rutabaga_gratin/rutabaga/1:
+        endpoint: {kind: readiness, by: route_order}
+      transfer:rutabaga_gratin/rutabaga/2:
+        endpoint: {kind: readiness, sources: [Q231, Q232]}
+        completion:
+          - {check: "sliced 2-3 mm (4 mm with a longer pre-cook)", sources: [Q231, Q232]}
+      transfer:rutabaga_gratin/rutabaga/3:
+        endpoint: {kind: readiness, sources: [Q231, Q232, G18]}
+        note: "'crisp tender', 'will not be fully cooked': the bake finishes it"
+      transfer:rutabaga_gratin/gratin/1:
+        endpoint: {kind: doneness, sources: [Q231, Q234, Q232]}
+    members:
+      transfer:rutabaga_gratin/gratin/1:
+        potato:
+          completion:
+            - {check: "tender: a knife meets no resistance", sources: [Q234, Q232]}
+        rutabaga:
+          completion:
+            - {check: "some give, al dente; if still firm, 5 min more under foil", sources: [Q231]}
+            - {check: "no resistance, completely tender", sources: [Q232, Q233, Q234]}
+          failure:
+            - {check: "still crunchy when the potato is done", cause: "not blanched", sources: [G20, G21]}
+        cream:
+          note: "no source states a thickened-cream endpoint for a rutabaga gratin; flour (Q231, G7) and potato starch (Q235) are the stated thickeners"
+    depends:
+      - {step: transfer:rutabaga_gratin/rutabaga/3, because: transfer:rutabaga_gratin/gratin/1, says: "rutabaga is a very dense root and needs longer than potato; denser roots cook through more slowly in the same bake", sources: [Q231, Q234]}
+      - {step: transfer:rutabaga_gratin/potato/2, because: transfer:rutabaga_gratin/gratin/1, says: "not rinsed after slicing, so the potato starch thickens the sauce in the bake", sources: [Q235, Q225, Q202]}
+    misses:
+      - {step: transfer:rutabaga_gratin/rutabaga/3, when: skipped, failure: "raw thin slices stay crunchy after 45 min and after over an hour", sources: [G20, G21]}
+      - {step: transfer:rutabaga_gratin/gratin/1, when: underdone, failure: "potato raw, not creamy", sources: [Q202, Q201]}
+      - {step: transfer:rutabaga_gratin/gratin/1, when: overdone, failure: "mushy potato, a dried-out dish", sources: [Q238]}
+    finish:
+      - stage: rest before cutting
+        elapsed:
+          - {label: "a few minutes", sources: [Q231]}
+          - {min: 25, max: 25, unit: min, sources: [Q234]}
+          - {min: 1, max: 1, unit: h, label: "held at 50 C", sources: [Q232]}
+        active: {kind: none, sources: [Q234]}
+        note: "for the rutabaga versions the only reason given is heat retention (Q234); setting and clean cutting are stated for potato gratins (Q202, M15b)"
+    alternatives:
+      - {name: raw slices and a long covered bake, says: "raw rutabaga slices under foil about 50 min, then uncovered: about 90 min or more in all", sources: [G7, Q234, G8]}
+      - {name: blanch the rutabaga only, says: "this route: blanched 3-5 min, then 55-60 min covered then uncovered (Q231) or 40-50 min (Q233, G1)", sources: [Q231, Q233, G1]}
+      - {name: simmer in the gratin liquid, says: "rutabaga simmered about 10 min in the gratin's cream and broth, then 25-40 min of baking", sources: [G5, G9, Q229]}
+      - {name: pre-cook both, says: "swede 5 min and potato 1 min, then 60-80 min in a bain-marie", sources: [Q232]}
+      - {name: "raw rutabaga, short bake (rejected)", route: "transfer:rutabaga_gratin_raw", says: "raw thin slices with potato in an ordinary bake: still crunchy", sources: [G20, G21]}
+    gaps:
+      - "a Finnish or Swedish lanttu-potato gratin"
+      - "the over-blanch failure of a rutabaga slice"
+      - "a thickened-cream endpoint for a rutabaga gratin"
+
+  gratin_dauphinois/raw_long_bake:
+    name: Gratin dauphinois, raw slices and one long bake
+    steps:
+      gratin_dauphinois/raw_long_bake/potato/1:
+        endpoint: {kind: readiness, by: route_order}
+        completion:
+          - {check: "peeled and rinsed quickly before slicing", sources: [M15a, Q228]}
+      gratin_dauphinois/raw_long_bake/potato/2:
+        endpoint: {kind: readiness, sources: [M15a, Q225]}
+        completion:
+          - {check: "about 2 mm (2-3 mm, 3 mm); not rinsed after slicing", sources: [M15a, Q225, Q203]}
+      gratin_dauphinois/raw_long_bake/gratin/1:
+        endpoint: {kind: doneness, sources: [Q203, Q228, Q225]}
+        note: "the only cooking step, so it runs to doneness"
+    members:
+      gratin_dauphinois/raw_long_bake/gratin/1:
+        potato:
+          completion:
+            - {check: "a knife meets no resistance; very tender", sources: [Q203, Q228, Q225]}
+          failure:
+            - {check: "raw inside under a burnt top", cause: "uncovered or too hot", sources: [Q201]}
+        cream:
+          completion:
+            - {check: "creamy, not split; unrinsed potato starch binds it", sources: [Q219, Q235]}
+          failure:
+            - {check: "grainy, watery liquid", cause: "raw slices with milk only", sources: [Q219]}
+    depends:
+      - {step: gratin_dauphinois/raw_long_bake/potato/2, because: gratin_dauphinois/raw_long_bake/gratin/1, says: "slices not rinsed so their starch binds the cream in the bake", sources: [Q219, Q235]}
+    misses:
+      - {step: gratin_dauphinois/raw_long_bake/gratin/1, when: underdone, failure: "raw, not creamy", sources: [Q202, Q201]}
+      - {step: gratin_dauphinois/raw_long_bake/gratin/1, when: overdone, failure: "mushy and dried out", sources: [Q238]}
+    finish:
+      - stage: rest
+        elapsed:
+          - {min: 5, max: 25, unit: min, sources: [Q225, Q202, Q235, Q200, Q234]}
+        active: {kind: none, sources: [Q202]}
+        completion:
+          - {check: "the cream has set", sources: [Q202, Q200]}
+    alternatives:
+      - {name: simmered then baked, route: "gratin_dauphinois/simmered_then_baked", says: "slices simmered 8-10 min in the milk and cream until just tender, then a short bake of 15-20 min; chilled overnight to cut cleanly", sources: [M15b, Q227, Q235]}
+      - {name: Finnish kermaperunat, says: "200 C, 40-75 min, under foil or uncovered", sources: [Q200, Q237, Q238, Q239]}
+
+  # ---- vessels ---------------------------------------------------------------
+
+  transfer:onion_vessel:
+    name: Hollowed onion halves as vessels (R4 transfer)
+    steps:
+      transfer:onion_vessel/vessel/1:
+        endpoint: {kind: readiness, by: route_order}
+      transfer:onion_vessel/vessel/2:
+        endpoint: {kind: readiness, sources: [Q326, Q335]}
+        note: "still firm: the bake finishes the onion"
+      transfer:onion_vessel/vessel/3:
+        endpoint: {kind: readiness, sources: [O5]}
+        completion:
+          - {check: "halved across the equator", sources: [O5]}
+      transfer:onion_vessel/vessel/4:
+        endpoint: {kind: readiness, sources: [O5, Q327, Q336]}
+        completion:
+          - {check: "two or three outer layers kept as the shell, about 1 cm wall", sources: [O5, Q327, Q336]}
+        failure:
+          - {check: "the filling leaks", cause: "a hole in the base (patch it with a leaf)", sources: [Q327]}
+      transfer:onion_vessel/flesh/1:
+        endpoint: {kind: readiness, sources: [O5, Q327]}
+        completion:
+          - {check: "chopped finely", sources: [O5, Q327, Q328]}
+      transfer:onion_vessel/flesh/2:
+        endpoint: {kind: readiness, sources: [Q336, O9]}
+        elapsed:
+          - {min: 3, max: 4, unit: min, sources: [Q336]}
+        completion:
+          - {check: "softened in the pan, then cooled before mixing", sources: [Q336]}
+      transfer:onion_vessel/stuffed/1:
+        endpoint: {kind: doneness, sources: [Q336, M16a]}
+    members:
+      transfer:onion_vessel/stuffed/1:
+        vessel:
+          completion:
+            - {check: "pierced with a knife: tender without collapsing", sources: [Q336]}
+          failure:
+            - {check: "the onion is still undercooked when the filling is done", cause: "too short a pre-cook", sources: [Q325]}
+        flesh:
+          note: "already softened in the pan; no source states its endpoint inside the filling"
+        filling:
+          completion:
+            - {check: "the top is gratinated", sources: [M16a]}
+          note: "no read source gives an egg-set or hot-through test for the filling"
+    depends:
+      - {step: transfer:onion_vessel/vessel/2, because: transfer:onion_vessel/vessel/4, says: "blanching softens the shell and makes hollowing easier", sources: [Q336]}
+      - {step: transfer:onion_vessel/vessel/2, because: transfer:onion_vessel/stuffed/1, says: "the vessel and the filling need different times, so the vessel is pre-cooked", sources: [Q334]}
+    misses:
+      - {step: transfer:onion_vessel/vessel/2, when: overdone, failure: "the layers tear or fall apart; slippery to handle", sources: [O12, O15, O10]}
+      - {step: transfer:onion_vessel/vessel/2, when: skipped, failure: "raw hollowed onions need a long braise of 2.5-3 h", sources: [O6, O7]}
+      - {step: transfer:onion_vessel/stuffed/1, when: overdone, failure: "the tops brown too fast (cover with foil)", sources: [Q327, Q336]}
+    alternatives:
+      - {name: no blanch, says: "raw onion halves baked 20 min at 200 C fan", sources: [O1, O11]}
+      - {name: slow confit, says: "onions cooked through first, then 210 C 15 min and 130 C for an hour or more", sources: [Q335]}
+      - {name: rolled layers, says: "layers boiled until soft and translucent, rolled round a filling and baked in liquid", sources: [Q325, Q329, O15]}
+      - {name: one tray with courgettes, says: "onion and courgette halves with the same filling in one tray, 180 C 30 min", sources: [O5, O3]}
+    gaps:
+      - "a filling doneness test"
+      - "a halved-shell test other than 'still firm'"
+
+  zucchine_ripiene/blanched_flesh:
+    name: Zucchine ripiene, blanched shells with raw chopped flesh
+    steps:
+      zucchine_ripiene/blanched_flesh/courgette/1:
+        endpoint: {kind: readiness, sources: [Q330, M17a]}
+        completion:
+          - {check: "only half-cooked, drained while still firm", sources: [Q330, M17a]}
+      zucchine_ripiene/blanched_flesh/courgette/2:
+        endpoint: {kind: readiness, by: route_order}
+      zucchine_ripiene/blanched_flesh/courgette/3:
+        endpoint: {kind: readiness, sources: [Q333, Q334]}
+        completion:
+          - {check: "a wall of 5-8 mm left", sources: [Q333, Q334]}
+        failure:
+          - {check: "too thin breaks; too thick stays raw", cause: "wall thickness", sources: [Q333]}
+      zucchine_ripiene/blanched_flesh/flesh/1:
+        endpoint: {kind: readiness, sources: [M17b]}
+        completion:
+          - {check: "chopped or coarsely blended, not squeezed", sources: [M17b]}
+      zucchine_ripiene/blanched_flesh/stuffed/1:
+        endpoint: {kind: doneness, sources: [Q330, M17b]}
+        completion:
+          - {check: "the top browned under the grill", sources: [Q330]}
+    members:
+      zucchine_ripiene/blanched_flesh/stuffed/1:
+        courgette:
+          completion:
+            - {check: "tender without collapsing (stated for Nicois stuffed vegetables)", sources: [Q336]}
+        flesh:
+          failure:
+            - {check: "a soggy, boiled filling", cause: "courgette water", sources: [Q333, Q334]}
+        filling:
+          note: "no read source gives an egg-set test for the filling"
+    depends:
+      - {step: zucchine_ripiene/blanched_flesh/courgette/1, because: zucchine_ripiene/blanched_flesh/stuffed/1, says: "half-cooked first, because a raw shell releases water that soaks and boils the filling", sources: [Q330, Q333]}
+    misses:
+      - {step: zucchine_ripiene/blanched_flesh/courgette/1, when: skipped, failure: "water soaks and boils the filling", sources: [Q333]}
+    alternatives:
+      - {name: part-baked shells, says: "oiled, salted empty shells part-baked instead of blanched", sources: [Q333]}
+      - {name: cooked flesh, route: "zucchine_ripiene/cooked_flesh", says: "the scooped flesh cooked about 10 min with onion before filling", sources: [Q330, M17a]}
+
+  transfer:napa_cabbage_rolls:
+    name: Cabbage rolls with napa cabbage leaves (R4 transfer)
+    steps:
+      transfer:napa_cabbage_rolls/rice/1:
+        endpoint: {kind: readiness, sources: [Q317, Q301]}
+        completion:
+          - {check: "slightly al dente, because it softens in the oven; then cooled", sources: [Q317, Q311, Q313]}
+      transfer:napa_cabbage_rolls/napa/1:
+        endpoint: {kind: readiness, sources: [Q317]}
+        completion:
+          - {check: "outer leaves pulled off raw, one at a time so they do not tear", sources: [Q317, N6]}
+      transfer:napa_cabbage_rolls/napa/2:
+        endpoint: {kind: readiness, sources: [Q317, Q318]}
+        note: "flexible but not cooked; wipe off the water (N1, Q318)"
+      transfer:napa_cabbage_rolls/napa/3:
+        endpoint: {kind: readiness, sources: [N3, N4]}
+        completion:
+          - {check: "the thick rib shaved flat", sources: [N3, N10]}
+        failure:
+          - {check: "tough fibres in the roll", cause: "rib not shaved", sources: [N2]}
+      transfer:napa_cabbage_rolls/rib/1:
+        endpoint: {kind: readiness, sources: [N3, Q320]}
+        completion:
+          - {check: "the shavings minced into the filling", sources: [N3, N4, Q320]}
+      transfer:napa_cabbage_rolls/rolls/1:
+        endpoint: {kind: doneness, sources: [Q317]}
+    members:
+      transfer:napa_cabbage_rolls/rolls/1:
+        napa:
+          completion:
+            - {check: "the leaf softens pleasantly without overcooking", sources: [Q317]}
+          failure:
+            - {check: "dry rolls", cause: "too little broth", sources: [Q317]}
+        rice:
+          failure:
+            - {check: "dry filling and split leaves", cause: "raw rice in the roll", sources: [Q313]}
+          note: "no read source gives a rice check after the bake"
+        rib:
+          note: "minced into the filling; no endpoint of its own stated"
+        filling:
+          completion:
+            - {check: "the core of a pork filling reaches at least 71 C (white-cabbage gołąbki)", sources: [Q313]}
+    depends:
+      - {step: transfer:napa_cabbage_rolls/napa/2, because: transfer:napa_cabbage_rolls/rolls/1, says: "softening makes the leaves easy to roll", sources: [Q318]}
+      - {step: transfer:napa_cabbage_rolls/rice/1, because: transfer:napa_cabbage_rolls/rolls/1, says: "rice cooked first, slightly al dente, because it finishes in the oven; raw rice dries the filling and splits the leaves", sources: [Q317, Q313]}
+    misses:
+      - {step: transfer:napa_cabbage_rolls/napa/2, when: overdone, failure: "too soft, falls apart when rolled; mushy", sources: [Q317, N12]}
+      - {step: transfer:napa_cabbage_rolls/napa/3, when: skipped, failure: "the rib stays tough", sources: [N2, N1]}
+      - {step: transfer:napa_cabbage_rolls/rice/1, when: skipped, failure: "dry filling, split leaves", sources: [Q313]}
+    alternatives:
+      - {name: simmered, says: "simmered on the hob in broth 20-30 min", sources: [Q318, Q320, Q321, N1]}
+      - {name: layered, says: "not rolled: leaves and filling layered", sources: [Q319]}
+      - {name: microwave leaves, says: "the leaves softened in the microwave 3-8 min instead of boiled", sources: [N1, N4, Q318]}
+    gaps:
+      - "a napa roll baked the Finnish way (syrup, uncovered): nobody does it"
+      - "a scorch or dry-edge failure for napa in the oven"
+
+  kaalikaaryleet/trimmed_rib:
+    name: Kaalikaaryleet, white cabbage with the rib trimmed
+    steps:
+      kaalikaaryleet/trimmed_rib/cabbage/1:
+        endpoint: {kind: readiness, sources: [Q301, Q302, Q304]}
+        note: "leaves soft enough to come away and roll; the bake finishes them"
+      kaalikaaryleet/trimmed_rib/cabbage/2:
+        endpoint: {kind: readiness, sources: [Q302, E12b]}
+        completion:
+          - {check: "leaves removed as they soften, drained", sources: [E12b, Q302]}
+      kaalikaaryleet/trimmed_rib/cabbage/3:
+        endpoint: {kind: readiness, sources: [Q302, E12b]}
+        completion:
+          - {check: "the thick rib thinned, not removed, so the leaf rolls easily", sources: [Q302, Q300, E12b]}
+      kaalikaaryleet/trimmed_rib/rice/1:
+        endpoint: {kind: readiness, sources: [Q301, Q311]}
+      kaalikaaryleet/trimmed_rib/rolls/1:
+        endpoint: {kind: doneness, sources: [Q302, Q303]}
+    members:
+      kaalikaaryleet/trimmed_rib/rolls/1:
+        cabbage:
+          completion:
+            - {check: "the leaf is soft", sources: [Q312, Q313, Q314]}
+          failure:
+            - {check: "the cabbage is still hard", cause: "too little steam or liquid", sources: [Q313]}
+          note: "no Finnish source gives a leaf check"
+        rice:
+          failure:
+            - {check: "dry filling and split leaves", cause: "raw rice", sources: [Q313]}
+        filling:
+          completion:
+            - {check: "the core of a pork filling reaches at least 71 C (gołąbki)", sources: [Q313]}
+    depends:
+      - {step: kaalikaaryleet/trimmed_rib/cabbage/1, because: kaalikaaryleet/trimmed_rib/cabbage/2, says: "the head is boiled so the leaves come off", sources: [Q312, Q307]}
+      - {step: kaalikaaryleet/trimmed_rib/cabbage/3, because: kaalikaaryleet/trimmed_rib/rolls/1, says: "the rib is trimmed so the leaves roll more easily", sources: [E12b, Q302]}
+      - {step: kaalikaaryleet/trimmed_rib/rice/1, because: kaalikaaryleet/trimmed_rib/rolls/1, says: "half-cooked rice finishes in the oven", sources: [Q301, Q311]}
+    misses:
+      - {step: kaalikaaryleet/trimmed_rib/cabbage/1, when: overdone, failure: "too soft, the leaves tear (torn ones line the dish)", sources: [Q308, Q313]}
+      - {step: kaalikaaryleet/trimmed_rib/cabbage/1, when: underdone, failure: "too stiff to roll, hard to separate", sources: [Q313, Q310, Q311]}
+    finish:
+      - stage: reheat the next day
+        completion:
+          - {check: "better reheated; some frozen", sources: [Q300, Q301, Q302]}
+    alternatives:
+      - {name: frozen head, says: "the whole head frozen and thawed instead of boiled", sources: [Q304, Q309, Q315, Q510]}
+      - {name: braised on the hob, says: "browned seam-down in butter and braised covered about 30 min, or a covered pot 40-90 min", sources: [E12b, Q311, Q312, Q313]}
+      - {name: one oven temperature, route: "kaalikaaryleet/inner_leaves", says: "170 C about 40 min with syrup and a splash of water", sources: [E12a]}
+
+  # ---- patties ---------------------------------------------------------------
+
+  carrot_patties/crumbs:
+    name: Carrot patties (morotsbiffar), crumb-coated, baked or fried
+    steps:
+      carrot_patties/crumbs/carrot/1:
+        endpoint: {kind: readiness, by: route_order}
+        start: {particle: [grated], moisture: [wet], sources: [E18a, E18b], note: "fine (E18a, Q413, Q415) or coarse (E18b, Q417, Q431); not squeezed in most"}
+        completion:
+          - {check: "grated to the size the recipe names; nothing ties the size to whether the carrot cooks through", sources: [E18a, E18b, Q413]}
+        failure:
+          - {check: "the mass is too dry to hold", cause: "a dry carrot; add 1-2 tsp water", sources: [Q415]}
+      carrot_patties/crumbs/mass/1:
+        endpoint: {kind: readiness, sources: [Q431, E18a]}
+        completion:
+          - {check: "the mixed mass is thick, slightly sticky and firm enough to shape with oiled hands", sources: [Q431, E18a]}
+        failure:
+          - {check: "loose mass that is hard to turn later", cause: "too wet, or too little binder", sources: [Q414, Q431]}
+      carrot_patties/crumbs/patty/1:
+        endpoint: {kind: doneness, sources: [E18a, Q430, Q431]}
+        medium:
+          - {medium: oven, temp_c: [250, 250], note: "brushed with oil on both sides", sources: [E18a]}
+          - {medium: oven, temp_c: [250, 250], note: "10 min, oiled and turned, 10 min", sources: [E18b]}
+          - {medium: oil_shallow, note: "medium heat, small spaced batches", sources: [Q430, Q431]}
+        elapsed:
+          - {min: 15, max: 20, unit: min, label: "oven", sources: [E18a]}
+          - {min: 20, max: 20, unit: min, label: "oven, turned halfway", sources: [E18b]}
+          - {min: 2, max: 2, unit: min, label: "per side in the pan", sources: [Q417, Q431]}
+        active: {kind: none, sources: [E18a], note: "oven: waiting; one turn in E18b; pan frying is regular attention (Q431)"}
+        completion:
+          - {check: "a good colour on both sides", sources: [E18a, Q430]}
+          - {check: "crisp outside, tender inside", sources: [Q431]}
+        failure:
+          - {check: "greasy", cause: "oil too cool", sources: [Q431, Q401]}
+          - {check: "burnt outside, raw inside", cause: "too hot", sources: [Q431, M4b]}
+          - {check: "falls apart when turned", cause: "underside not set", sources: [Q411, M3b]}
+    members:
+      carrot_patties/crumbs/patty/1:
+        carrot:
+          completion:
+            - {check: "tender on the inside (the only inside wording; no check that the carrot is cooked)", sources: [Q431]}
+        mass:
+          completion:
+            - {check: "the egg-crumb binder has set: the underside is firm before turning", sources: [Q408, Q411, M3b]}
+        breadcrumbs:
+          completion:
+            - {check: "the crumb coat has a good colour, golden", sources: [Q430, Q409, Q429]}
+    depends:
+      - {step: carrot_patties/crumbs/mass/1, because: carrot_patties/crumbs/patty/1, says: "thin patties so the inside cooks through", sources: [Q412, Q407]}
+      - {step: carrot_patties/crumbs/mass/1, because: carrot_patties/crumbs/patty/1, says: "the binder is set by the later heat: one egg holds in the oven but is harder in a pan; two hold better", sources: [E18b]}
+    misses:
+      - {step: carrot_patties/crumbs/patty/1, when: underdone, failure: "turned too early, the patty falls apart", sources: [Q411, M3b]}
+      - {step: carrot_patties/crumbs/mass/1, when: skipped, failure: "a wet mass that is not given time or binder falls apart and goes soggy", sources: [Q431]}
+    alternatives:
+      - {name: fried, says: "pan-fried in oil about 2 min per side instead of baked", sources: [Q430, Q431]}
+      - {name: precooked carrot, says: "carrot boiled and mashed, or simmered in milk, before mixing: a looser batter firmed with potato or flour", sources: [Q414, Q416]}
+      - {name: salted carrot, says: "grated carrot salted a few minutes and squeezed", sources: [Q431]}
+    gaps:
+      - "a check that the grated carrot inside the patty is cooked (knife, bite)"
+      - "why the crumb coat and oil are there (no dependency stated)"
+
+  transfer:broccoli_stem_patties:
+    name: Broccoli-stem and carrot patties (R4 transfer)
+    steps:
+      transfer:broccoli_stem_patties/carrot/1:
+        endpoint: {kind: readiness, by: route_order}
+        start: {particle: [grated], moisture: [wet], sources: [E18a, B1]}
+        completion:
+          - {check: "grated, not squeezed", sources: [E18a, B1]}
+      transfer:broccoli_stem_patties/stem/1:
+        endpoint: {kind: readiness, sources: [Q428, Q426]}
+        completion:
+          - {check: "whitish flesh exposed all the way round", sources: [Q428]}
+          - {check: "the fibrous ring under the skin is cut away", sources: [Q424]}
+        failure:
+          - {check: "tough, fibrous stem after cooking", cause: "not peeled", sources: [Q426, Q427, B13]}
+      transfer:broccoli_stem_patties/stem/2:
+        endpoint: {kind: readiness, sources: [B1, B20]}
+        start: {particle: [grated], moisture: [wet], sources: [B1, B20]}
+        completion:
+          - {check: "coarsely grated raw, not squeezed", sources: [B1, B20]}
+        failure:
+          - {check: "stringy fibres in the grated stem", cause: "unpeeled stem", sources: [B1]}
+          - {check: "the patty crumbles", cause: "large stem pieces", sources: [B6]}
+      transfer:broccoli_stem_patties/mass/1:
+        endpoint: {kind: readiness, sources: [B1]}
+        completion:
+          - {check: "thin patties, about 1 tbsp each", sources: [B1]}
+      transfer:broccoli_stem_patties/patty/1:
+        endpoint: {kind: doneness, sources: [B1, B21, E18a]}
+        medium:
+          - {medium: oil_shallow, sources: [B1, B21]}
+          - {medium: oven, temp_c: [250, 250], note: "the base dish's bake", sources: [E18a]}
+        elapsed:
+          - {min: 1, max: 2, unit: min, label: "per side in the pan", sources: [B1]}
+          - {min: 4, max: 5, unit: min, label: "per side in the pan", sources: [B21]}
+          - {min: 15, max: 20, unit: min, label: "oven, base dish", sources: [E18a]}
+        active: {kind: regular, sources: [B1, B21], note: "pan: turned once; oven: waiting (E18a)"}
+        completion:
+          - {check: "golden on both sides", sources: [B1, E18a]}
+        failure:
+          - {check: "falls apart when turned", cause: "underside not set", sources: [Q411, M3b]}
+    members:
+      transfer:broccoli_stem_patties/patty/1:
+        stem:
+          completion:
+            - {check: "raw grated stem stays crisp after about 8 min covered, which the writer liked; one recipe calls the inside soft", sources: [B7, B20]}
+          note: "no source checks that the stem is cooked through or reports it stringy inside a done patty"
+        carrot:
+          completion:
+            - {check: "tender on the inside (carrot patties)", sources: [Q431]}
+        mass:
+          completion:
+            - {check: "the binder has set: underside firm before turning", sources: [Q408, Q411]}
+    depends:
+      - {step: transfer:broccoli_stem_patties/stem/1, because: transfer:broccoli_stem_patties/patty/1, says: "peel because the skin stays tough after cooking", sources: [Q426, Q427, Q428]}
+      - {step: transfer:broccoli_stem_patties/mass/1, because: transfer:broccoli_stem_patties/patty/1, says: "thin patties so the stem cooks through", sources: [B1]}
+    misses:
+      - {step: transfer:broccoli_stem_patties/stem/1, when: skipped, failure: "stringy fibres after grating, picked out by hand", sources: [B1]}
+    alternatives:
+      - {name: precooked stem, says: "stem boiled 8-10 min or steamed, then blended into the mass", sources: [B4, B11, B16, B17, B18]}
+      - {name: baked, says: "baked as the base carrot patties are", sources: [E18a, B18]}
+    gaps:
+      - "whether a peeled, grated raw stem is cooked through and not stringy in a patty that is otherwise done (the kitchen test's question)"
+      - "any reported failure of a broccoli-stem patty"
+
+intermediates:
+  soaked_dried_peas:
+    name: Soaked dried peas
+    part: dried_peas.dried_seed
+    after: [tremper]
+    keeps:
+      - {where: fridge, how: "during the soak, when soaking longer than 4 h (beans)", basis: food_safety, sources: [Q526]}
+      - {where: fridge, how: "during the soak, when soaking longer than 12 h (beans)", basis: food_safety, sources: [Q525]}
+      - {where: "-", how: "soak water discarded and the pulses rinsed (beans, legumes)", basis: food_safety, sources: [Q524, Q525, Q526]}
+    note: "How long soaked, uncooked pulses keep: not found in any source. The two soak-temperature thresholds conflict and are kept apart. Ruokavirasto says beans must never be eaten only soaked (Q505); no body read addresses soaked peas or chickpeas that are then deep-fried."
+
+  soaked_chickpeas:
+    name: Soaked dried chickpeas
+    part: chickpea.dried_seed
+    after: [tremper]
+    keeps:
+      - {where: fridge, how: "a soak extended to 48 h, after a few hours at room temperature first", max: 48, unit: h, basis: cooking, sources: [Q111]}
+      - {where: fridge, how: "during the soak, when soaking longer than 4 h (beans)", basis: food_safety, sources: [Q526]}
+      - {where: fridge, how: "during the soak, when soaking longer than 12 h (beans)", basis: food_safety, sources: [Q525]}
+    note: "The chickpea packet says they must not be eaten unprocessed (Q543)."
+
+  skinned_black_eyed_beans:
+    name: Soaked and skinned black-eyed beans
+    part: black_eyed_bean.dried_seed
+    after: [tremper, decortiquer]
+    keeps:
+      - {where: freezer, max: 6, unit: months, basis: cooking, sources: [Q125]}
+      - {where: "a couple of days ahead, then frozen", basis: cooking, sources: [Q126]}
+    note: "One cook warns that refrigerated or frozen skinned beans spatter when fried (Q128)."
+
+  soaked_urad_dal:
+    name: Soaked urad dal
+    part: urad_dal.dried_seed
+    after: [tremper]
+    keeps:
+      - {where: fridge, how: "if the grinding is delayed; no time given", basis: cooking, sources: [Q123, Q124]}
+    note: "The ground batter keeps about 2 days (Q122), at most 3 days (Q124) in the fridge."
+
+  rested_falafel_paste:
+    name: Rested raw falafel paste
+    at: falafel/raw_soaked/paste/1
+    keeps:
+      - {where: fridge, how: "raw mix, tightly sealed", max: 2, unit: days, basis: cooking, sources: [Q110]}
+      - {where: fridge, how: "dough", max: 3, unit: days, basis: cooking, sources: [Q107]}
+      - {where: fridge, how: "shaped balls on a lined tray", max: 1, unit: days, basis: cooking, sources: [Q109, Q527]}
+      - {where: freezer, how: "shaped balls frozen on a tray, then bagged; fried from frozen", max: 3, unit: months, basis: cooking, sources: [Q109, Q527]}
+      - {where: freezer, how: "mix or balls; best within 2-3 months", max: 6, unit: months, basis: cooking, sources: [Q112]}
+      - {where: fridge, how: "a meal with raw components (general, not pulse-specific)", max: 1, unit: days, basis: food_safety, sources: [Q522]}
+    note: "No food-safety body read says anything about raw pulse paste. Thawing conflicts: thawed in the fridge (Q112, Q115) against fried from frozen (Q109, Q112, Q114)."
+
+  rested_pea_paste:
+    name: Rested raw pea paste
+    at: transfer:pea_falafel/paste/1
+    keeps:
+      - {where: fridge, how: "a meal with raw components (general, not pulse-specific)", max: 1, unit: days, basis: food_safety, sources: [Q522]}
+    note: "Pea paste keeping: not found; the chickpea paste times are not carried over."
+
+  blanched_rutabaga_slices:
+    name: Blanched rutabaga slices
+    part: rutabaga.root
+    after: [eplucher, emincer, blanchir]
+    keeps:
+      - {where: fridge, how: "the whole assembled gratin, overnight before baking", basis: cooking, sources: [Q231]}
+      - {where: freezer, how: "blanched before freezing (cubes 2-3 min, a different role), cooled in running water", min: 10, max: 12, unit: months, basis: home_economics, sources: [Q510, Q514]}
+    note: "How long blanched, unfrozen slices keep in the fridge: not found. Not ready to eat: the bake finishes them."
+
+  boiled_whole_potatoes:
+    name: Boiled whole potatoes in their skins
+    part: potato.tuber
+    after: [cuire_anglaise]
+    keeps:
+      - {where: fridge, how: "overnight to two days before grating for rosti", min: 1, max: 2, unit: days, basis: cooking, sources: [E1a, Q206, Q221, Q236]}
+      - {where: fridge, how: "cooked food in general, well packed", min: 2, max: 3, unit: days, basis: home_economics, sources: [Q512]}
+      - {where: fridge, how: "heated meals in general", min: 2, max: 3, unit: days, basis: food_safety, sources: [Q522]}
+      - {where: fridge, how: "cooled to +6 C within 4 h (cooked food in general)", basis: food_safety, sources: [Q503, Q507]}
+    note: "No authority gives fridge days for boiled potatoes specifically."
+
+  cooled_boiled_potatoes:
+    name: Boiled potatoes, cooled
+    part: potato.tuber
+    after: [cuire_anglaise, refroidir]
+    keeps:
+      - {where: fridge, how: "overnight to two days; storage is decisive for rosti", min: 1, max: 2, unit: days, basis: cooking, sources: [E1a, E1c, Q236]}
+      - {where: fridge, how: "heated meals in general", min: 2, max: 3, unit: days, basis: food_safety, sources: [Q522]}
+
+  simmered_potato_slices:
+    name: Potato slices simmered in milk and cream
+    part: potato.tuber
+    after: [eplucher, emincer, mijoter]
+    keeps:
+      - {where: fridge, how: "simmered the day before, baked the next day", max: 1, unit: days, basis: cooking, sources: [Q225]}
+    note: "Contradicted by Q235: do not stop halfway, cooking and cooling twice overcooks."
+
+  cooked_rice:
+    name: Cooked rice
+    part: rice.grain
+    after: [cuire_anglaise]
+    keeps:
+      - {where: fridge, how: "cooled within 1 h; eaten within 24 h; reheated once, steaming hot", max: 24, unit: h, basis: food_safety, sources: [Q519, Q520, Q521]}
+      - {where: fridge, how: "cooled to +6 C within 4 h; reheated above +70 C (no day count given)", basis: food_safety, sources: [Q504, Q507, Q340]}
+      - {where: room, how: "not kept above 10 C", basis: food_safety, sources: [Q518]}
+      - {where: freezer, how: "frozen within an hour of cooking after quick cooling; thawed in the fridge", basis: food_safety, sources: [Q519]}
+      - {where: fridge, how: "raw cabbage rolls with cooled rice, overnight; cooked rolls with rice eaten within 24 h", max: 24, unit: h, basis: cooking, sources: [Q313]}
+    note: "UK bodies say cool within 1 h and keep at most 24 h; Ruokavirasto gives +6 C within 4 h and no day count. Kept apart."
+
+  salted_grated_courgette:
+    name: Grated courgette, salted and drained
+    part: courgette.fruit
+    after: [raper, degorger]
+    keeps:
+      - {where: "-", how: "use the batter at once; a salted mixture kept overnight turned watery", basis: cooking, sources: [Q411, Q403]}
+      - {where: fridge, how: "a meal with raw components (general)", max: 1, unit: days, basis: food_safety, sources: [Q522]}
+    note: "No source gives a fridge time for salted, squeezed courgette on its own."
+
+  peeled_grated_broccoli_stem:
+    name: Peeled, grated broccoli stem
+    part: broccoli.stems
+    after: [eplucher, raper]
+    keeps:
+      - {where: fridge, how: "cut vegetables are easily perishable: coldest part of the fridge (no days)", basis: food_safety, sources: [Q500]}
+    note: "No source states how long a peeled or grated stem keeps."
+
+  blanched_onion:
+    name: Peeled, blanched onion
+    part: onion.bulb
+    after: [eplucher, blanchir]
+    keeps:
+      - {where: fridge, how: "kept chilled until the next day before assembly (no time)", basis: cooking, sources: [Q335]}
+
+  softened_cabbage_head:
+    name: Boiled cabbage head (leaves soft)
+    part: cabbage.head
+    after: [blanchir]
+    keeps:
+      - {where: freezer, how: "instead of boiling: the whole head frozen and thawed, the leaves come off soft", basis: home_economics, sources: [Q510, Q304]}
+    note: "How long blanched leaves keep: not found."
+
+  baked_gratin:
+    name: Baked gratin
+    at: gratin_dauphinois/simmered_then_baked/gratin/1
+    keeps:
+      - {where: fridge, how: "chilled overnight, then cut and reheated", max: 1, unit: days, basis: cooking, sources: [M15b, Q202, Q235]}
+      - {where: fridge, how: "leftovers, airtight", max: 5, unit: days, basis: cooking, sources: [Q231]}
+      - {where: fridge, how: "cooked food in general, well packed", min: 2, max: 3, unit: days, basis: home_economics, sources: [Q512]}
+      - {where: fridge, how: "heated meals in general; reheated above 70 C for at least 2 min", min: 2, max: 3, unit: days, basis: food_safety, sources: [Q522]}
+      - {where: freezer, how: "not recommended: the cream may separate", basis: cooking, sources: [Q202, Q235]}
+
+  baked_cabbage_rolls:
+    name: Baked cabbage rolls
+    at: kaalikaaryleet/trimmed_rib/rolls/1
+    keeps:
+      - {where: fridge, how: "with rice: within 24 h; without rice: 3 days", max: 24, unit: h, basis: cooking, sources: [Q313]}
+      - {where: freezer, min: 2, max: 3, unit: months, basis: cooking, sources: [Q313]}
+      - {where: freezer, how: "home-made casseroles", min: 1, max: 3, unit: months, basis: home_economics, sources: [Q514]}
+      - {where: fridge, how: "cooked food in general, well packed", min: 2, max: 3, unit: days, basis: home_economics, sources: [Q512]}
+    note: "Finnish cooks say they are better reheated (Q300, Q301)."
