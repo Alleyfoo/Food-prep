@@ -42,6 +42,54 @@ def tastings_path() -> Path:
     return Path(override) if override else Path(TASTINGS_PATH)
 
 
+def append_record_yaml(path: Path | str, list_key: str, record: dict[str, Any],
+                       key_fields: tuple[str, ...], noun: str = "record",
+                       header: str = "") -> None:
+    """Append one record to the `list_key:` list of an append-only YAML file.
+
+    Never rewrites what is there. The new block is checked first: the whole
+    file plus the block must parse with the loader's strict YAML (no duplicate
+    keys), the block must come back as exactly this record, and a record with
+    the same `key_fields` must not already exist. Only then is the file opened,
+    in append mode. The list must be the file's last top-level key. A missing
+    file is started with `header` (comments) and the list key.
+
+    Shared by the Scout tastings (tastings.yaml) and the R7 kitchen records
+    (foodprep.kitchen_records), so both stores keep one set of guarantees.
+    """
+    from .loader import load_yaml  # strict loader; local import avoids a cycle
+
+    path = Path(path)
+    existing = (path.read_text(encoding="utf-8") if path.exists()
+                else header + f"{list_key}:\n")
+    if f"{list_key}:" not in existing:
+        raise TastingError(f"{path} has no `{list_key}:` list to append to")
+    body = yaml.safe_dump([record], sort_keys=False, allow_unicode=True, width=78)
+    block = "\n" + "".join("  " + line if line.strip() else line
+                           for line in body.splitlines(keepends=True))
+    prefix = "" if existing.endswith("\n") else "\n"
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    probe = path.with_name(path.name + ".probe")
+    try:
+        probe.write_text(existing + prefix + block, encoding="utf-8")
+        parsed = (load_yaml(probe) or {}).get(list_key) or []
+    except Exception as exc:  # noqa: BLE001 - any parse failure blocks the write
+        raise TastingError(f"the new {noun} would not parse cleanly: {exc}") from exc
+    finally:
+        probe.unlink(missing_ok=True)
+    if not parsed or parsed[-1] != record:
+        raise TastingError(f"the new {noun} did not round-trip; nothing was written")
+    key = tuple(record.get(k) for k in key_fields)
+    if any(tuple(t.get(k) for k in key_fields) == key for t in parsed[:-1]):
+        raise TastingError(f"this {noun} is already recorded")
+
+    if not path.exists():
+        path.write_text(existing, encoding="utf-8", newline="\n")
+    with open(path, "a", encoding="utf-8", newline="\n") as fh:
+        fh.write(prefix + block)
+
+
 def append_trial_yaml(path: Path | str, trial: dict[str, Any]) -> None:
     """Append one trial to tastings.yaml. Never rewrites what is there.
 
@@ -50,34 +98,8 @@ def append_trial_yaml(path: Path | str, trial: dict[str, Any]) -> None:
     as exactly this trial, and an identical (hypothesis, state, time) trial
     must not already exist. Only then is the file opened, in append mode.
     """
-    from .loader import load_yaml  # strict loader; local import avoids a cycle
-
-    path = Path(path)
-    existing = path.read_text(encoding="utf-8") if path.exists() else "tastings:\n"
-    if "tastings:" not in existing:
-        raise TastingError(f"{path} has no `tastings:` list to append to")
-    body = yaml.safe_dump([trial], sort_keys=False, allow_unicode=True, width=78)
-    block = "\n" + "".join("  " + line if line.strip() else line
-                           for line in body.splitlines(keepends=True))
-    prefix = "" if existing.endswith("\n") else "\n"
-
-    probe = path.with_name(path.name + ".probe")
-    try:
-        probe.write_text(existing + prefix + block, encoding="utf-8")
-        parsed = (load_yaml(probe) or {}).get("tastings") or []
-    except Exception as exc:  # noqa: BLE001 - any parse failure blocks the write
-        raise TastingError(f"the new trial would not parse cleanly: {exc}") from exc
-    finally:
-        probe.unlink(missing_ok=True)
-    if not parsed or parsed[-1] != trial:
-        raise TastingError("the new trial did not round-trip; nothing was written")
-    key = (trial["analogy_id"], trial["component"], trial["tested_at"])
-    if any((t.get("analogy_id"), t.get("component"), t.get("tested_at")) == key
-           for t in parsed[:-1]):
-        raise TastingError("this trial is already recorded")
-
-    with open(path, "a", encoding="utf-8", newline="\n") as fh:
-        fh.write(prefix + block)
+    append_record_yaml(path, "tastings", trial,
+                       ("analogy_id", "component", "tested_at"), noun="trial")
 
 
 def _hypothesis(conn: sqlite3.Connection, component_name: str,
