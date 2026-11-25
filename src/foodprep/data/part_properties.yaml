@@ -409,6 +409,10 @@ parts:
 #   sets_on_heat   raw, it sets into a solid in hot fat, oven or steam
 #                  (raw pulse protein and starch, R2 H4; egg, H5)
 #   headed         leaves wrapped into a head (cabbage)
+# Added in R4 (amendment A2, construction_freeze_amendments.yaml):
+#   cooks_slowly   softens more slowly than potato at the same thickness, so it
+#                  stays hard in a shared bake unless blanched or cooked first
+#                  (rutabaga in a gratin: G20, G21; recorded only when true)
 staged_parts:
   potato:
     tuber:
@@ -755,6 +759,7 @@ staged_parts:
       pectin: medium
       emulsifies: false
       holds_shape_cooked: true
+      cooks_slowly: true
       note: "Swede, lanttu. Denser and slower to soften than potato at the same thickness: thin raw slices stayed crunchy in two gratins (G20, G21). Little starch, so it does not thicken a dairy binding the way potato does (G7, G22). Lidl FI: Finnish, loose, offers Sept-Dec (L5)."
       outer_layer:
         name: rutabaga_peel

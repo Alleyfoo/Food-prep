@@ -48,3 +48,34 @@ amendments:
       held-out 2 fully / 6 partly, 13 recombination links, before and after.
     code:
       constructions.py: 7460afb887cda037
+
+  - id: A2
+    date: 2026-11-25
+    reason: >
+      R4 controlled transfers (docs/research/r4-transfers/limitations.md). The
+      potato-rutabaga gratin, a transfer judged worth cooking, exposed one
+      limitation: the model accepted raw thin rutabaga slices in a gratin,
+      which two cooks report staying crunchy (G20, G21), while documented
+      recipes blanch the rutabaga only (G1, G10, G11, G22). An assembly takes
+      its first layer's state, and nothing said that a dense root softens
+      more slowly than potato in the same bake.
+    changed:
+      - >
+        operations.yaml: a property `cooks_slowly`, recorded only when true
+        (so every material that does not state it is not slow), and one
+        requirement on the `superposer` role `layer`: not `cooks_slowly`,
+        waived when the layer is blanched or cooked. Data only; no code
+        changed (constructions.py and operations.py hashes unchanged).
+      - >
+        part_properties.yaml: rutabaga.root `cooks_slowly: true` (staged in
+        R4). No R3 part states it.
+    effect: >
+      None on R3. All 57 routes of the 35 documented dishes give the same
+      verdict, failures, unknowns, claims, step statuses and recombination
+      links before and after (compared route by route). Design 13 fully / 14
+      partly, held-out 2 fully / 6 partly, 13 recombination links. In R4 the
+      control transfer rutabaga_gratin_raw now fails on the layer requirement
+      (the documented failure); every other transfer is unchanged.
+    catalogue: e224ed88f37c5f8d
+    operations:
+      superposer: 23c0719778a864f0

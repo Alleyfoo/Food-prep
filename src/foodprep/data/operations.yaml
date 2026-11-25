@@ -57,7 +57,10 @@ recorded_only_when_true: [thin, leafy, liquid, browns_when_cut, crisp, smooth, c
                           # states and properties of documented constructions (R3, ADR 0003);
                           # only the construction operations set them, so the generator never sees them
                           soaked, cooled, rested, halved, formed, assembled, cohesive, aerated,
-                          sets_on_heat, headed, mixed, filled, wrapped, layered]
+                          sets_on_heat, headed, mixed, filled, wrapped, layered,
+                          # R4 amendment A2 (construction_freeze_amendments.yaml): a dense
+                          # root that softens more slowly than potato at the same thickness
+                          cooks_slowly]
 
 ordinary_equipment: [knife, peeler, grater, pot, pan, oven, sieve, bowl, colander,
                      baking_tray, whisk, towel, jar, cloth, ladle, blender, spoon, fork]
@@ -2346,7 +2349,9 @@ operations:
       relation: layers
       carrier: layer
       roles:
-        layer: {min: 1, requires: {liquid: [false, "a layer is a solid piece"]}}
+        layer: {min: 1, requires: {liquid: [false, "a layer is a solid piece"],
+                                   # R4 amendment A2: rutabaga in a gratin (G20, G21 failed raw; G1, G10, G11, G22 blanch it)
+                                   cooks_slowly: [false, "softens more slowly than the other layers in the same bake: blanch or cook it first", [{blanched: true}, {cooked: true}]]}}
         binding: {}
     equipment: [baking_tray]
     effort: 1

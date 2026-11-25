@@ -441,7 +441,9 @@ def _effective_freeze() -> dict:
     frozen = copy.deepcopy(pc.load_yaml(c.FREEZE_PATH))
     for a in _amendments()["amendments"]:
         for key in set(a) & AMENDMENT_KEYS:
-            frozen[key] = {**frozen[key], **a[key]}
+            # mappings (code, operations, ...) are updated entry by entry; the
+            # catalogue is one hash and is replaced (amendment A2, R4)
+            frozen[key] = {**frozen[key], **a[key]} if isinstance(a[key], dict) else a[key]
     return frozen
 
 
