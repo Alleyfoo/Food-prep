@@ -409,6 +409,10 @@ parts:
 #   sets_on_heat   raw, it sets into a solid in hot fat, oven or steam
 #                  (raw pulse protein and starch, R2 H4; egg, H5)
 #   headed         leaves wrapped into a head (cabbage)
+# Added in R4 (amendment A2, construction_freeze_amendments.yaml):
+#   cooks_slowly   softens more slowly than potato at the same thickness, so it
+#                  stays hard in a shared bake unless blanched or cooked first
+#                  (rutabaga in a gratin: G20, G21; recorded only when true)
 staged_parts:
   potato:
     tuber:
@@ -729,3 +733,124 @@ staged_parts:
       holds_shape_cooked: false
       water_uptake: high
       note: "Day-old white bread for soaking (farcis). The catalogue's `bread` ingredient."
+
+  # Added for R4 controlled transfers (docs/research/r4-transfers/): the
+  # transfer targets, data only, existing property keys only. Evidence ids
+  # (P, K, G) are in docs/research/r4-transfers/sources.md.
+  rutabaga:
+    root:
+      water: high
+      fibre: medium
+      toughness: high
+      firmness: very_high
+      fat: none
+      sugar: medium
+      acidity: low
+      bitterness: low
+      umami: none
+      raw_ok: true
+      pigment: orange
+      flavour: [sweet, earthy, sulfurous]
+      shape: round
+      piece: whole
+      flexible: false
+      sheetable: true
+      starch: low
+      pectin: medium
+      emulsifies: false
+      holds_shape_cooked: true
+      cooks_slowly: true
+      note: "Swede, lanttu. Denser and slower to soften than potato at the same thickness: thin raw slices stayed crunchy in two gratins (G20, G21). Little starch, so it does not thicken a dairy binding the way potato does (G7, G22). Lidl FI: Finnish, loose, offers Sept-Dec (L5)."
+      outer_layer:
+        name: rutabaga_peel
+        edible: "yes"
+        usually_discarded: true
+        water: medium
+        fibre: high
+        toughness: high
+        firmness: high
+        thin: true
+        flexible: false
+        shape: flat
+        piece: small
+        pigment: none
+        flavour: [earthy, bitter]
+        inner_changes: {}
+
+  kale:
+    leaves:
+      water: high
+      fibre: high
+      toughness: high
+      firmness: low
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: medium
+      umami: low
+      raw_ok: true
+      thin: true
+      leafy: true
+      pigment: green
+      flavour: [green, bitter, cabbage]
+      shape: flat
+      piece: medium
+      flexible: false
+      sheetable: false
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: true
+      note: "Curly kale (lehtikaali), the form Lidl FI sells: 100-200 g bags of loose leaves, Finnish, offers Aug-Oct (L2). Stiff and frilled raw, with a tough rib. `piece: medium` is this round's reading of the bagged leaves (inference): every kale-roll recipe read uses large flat-leaved types (karalahana, collard, lacinato) and asks for large leaves (K11, K12, K16, K17). Flat kale would be `piece: large`."
+
+  dried_peas:
+    dried_seed:
+      water: none
+      fibre: medium
+      toughness: very_high
+      firmness: very_high
+      fat: low
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: false
+      pigment: none
+      flavour: [earthy, sweet]
+      shape: round
+      piece: small
+      flexible: false
+      sheetable: false
+      starch: high
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      water_uptake: medium
+      sets_on_heat: true
+      note: "Dried yellow or green peas, split or whole (Pisum sativum; kuivatut herneet). A raw soaked, ground pea paste forms and fries without a binder (P2, P4, P15). Takes up less water on soaking than chickpea (about 72 % against 97.5 % of dry weight, P15), so `water_uptake: medium`; the fried result is harder and drier (P15). Split peas are dehulled; whole peas keep their seed coats (P11 skins them). Lidl FI: split peas seen once, in a campaign (L1)."
+
+  napa_cabbage:
+    head:
+      water: very_high
+      fibre: low
+      toughness: low
+      firmness: medium
+      fat: none
+      sugar: low
+      acidity: low
+      bitterness: none
+      umami: low
+      raw_ok: true
+      leafy: true
+      headed: true
+      pigment: none
+      flavour: [mild, sweet]
+      shape: cylindrical
+      piece: whole
+      flexible: true
+      sheetable: true
+      starch: none
+      pectin: low
+      emulsifies: false
+      holds_shape_cooked: false
+      note: "Napa or Chinese cabbage (kiinankaali). A loose head: the leaves peel off whole raw, so `flexible: true` (N1, N10); the thick white rib stays tough and stringy unless shaved or cooked long (N1, N2, N3). Goes soft and mushy with long cooking (N12). Lidl FI: not confirmed; only a storage guide and Lidl recipes name it (L24, L25)."

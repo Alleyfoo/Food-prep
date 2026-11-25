@@ -412,7 +412,7 @@ def test_cli(capsys):
     assert "chiffonnade" in capsys.readouterr().out
     assert main(["explore", "tomato", "--part", "skin", "--global", "--top", "3"]) == 0
     assert "global ranking" in capsys.readouterr().out
-    assert main(["explore", "kale"]) == 1
+    assert main(["explore", "mango"]) == 1               # no part properties (kale has staged parts since R4)
     capsys.readouterr()
     assert main(["explore", "courgette"]) == 0                     # purpose view is the default
     default = capsys.readouterr().out

@@ -25,8 +25,8 @@ The method, unchanged since R1:
 | 3 | **Materials and secondary outputs.** Which operations give a second useful material (peel, juice and pulp, vegetable water, core)? | answered, implemented | R1: multi-output separations in `operations.py` |
 | 4 | **Bounded sequences.** What can two or three operations in a row make, and how should it be shown? | answered | R1 benchmark: per-function, simplest-first lists recover about 40% of established preparations; a global score recovers almost none, so scoring stopped |
 | 5 | **Construction patterns and holding mechanisms.** How do cooks build a dish from separately processed materials, and what holds it together? | answered within scope | R2: nine patterns C1-C9, mechanisms H1-H11, water routes W1-W9, recombination is ordinary practice |
-| 6 | **Representing complete constructions.** Can the model describe a real dish from raw parts to its finished structure, and show why it works? | partial, R3 | R2 recommended Option D; R3 implements and tests it |
-| 7 | **Discovering useful unfamiliar preparations.** Can a documented construction be carried over to another Lidl ingredient with a physical reason, and does it work? | open, R4 | |
+| 6 | **Representing complete constructions.** Can the model describe a real dish from raw parts to its finished structure, and show why it works? | answered, implemented (R3, PR #7) | 35 dishes; structure yes, what happens inside an assembly partly |
+| 7 | **Discovering useful unfamiliar preparations.** Can a documented construction be carried over to another Lidl ingredient with a physical reason, and does it work? | answered, R4 (not cooked) | `r4-transfers/`: five transfers worth cooking, one not; the search finds them, the model checks structure, the kitchen judges quality |
 | 8 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations and constructions answer "what can I make with this tonight"? | open, R5 | |
 
 ### What each finished round established
@@ -92,6 +92,21 @@ this order:
 Novelty comes last, and every transfer stays marked as inference until it is
 found in practice or cooked.
 
+**Status after R4 (2026-11-25, `r4-transfers/`).** Done, nothing cooked.
+- Lidl FI's website lists offers only, so the ingredient boundary is
+  recorded per item as regular, seasonal, campaign or not found
+  (`catalogue.md`); dried peas, fresh broccoli and napa cabbage need a shelf
+  check.
+- Worth cooking: potato and rutabaga gratin (blanch the rutabaga), onion
+  halves as vessels beside courgettes, napa-cabbage rolls (replacing curly
+  kale), pea falafel as a comparison with chickpea, broccoli stems with
+  carrot in patties. Not worth it: curly kale as a wrapper. None is new to
+  cooking; four are new to the Finnish table.
+- The model agreed with the evidence on every comparable transfer once one
+  data-only amendment (A2, `cooks_slowly` on a gratin layer) fixed the gap the
+  gratin exposed; A2 changed nothing in R3. It explains structure, not
+  quality; every verdict ends in a kitchen test (`kitchen-tests.md`).
+
 ### R5: integrate into the interface
 
 Make it useful in the app: the Taste Circle, ingredient families, operations
@@ -103,6 +118,13 @@ and constructions working together, so the app can answer:
 - how to improve the flavour.
 
 The sensory and pairing system complements constructions; it is not replaced.
+
+What R4 suggests for R5: the useful unit is a documented construction paired
+with what is in season and in the shop, carrying its one known failure
+("rutabaga is in season; it goes into a gratin if you blanch it first").
+Availability should come from the user's own shelf checks, not lidl.fi, and
+kitchen-test results should flow back into `transfers.yaml` and the tasting
+record.
 
 The split into R3-R5 is a proposal; rounds may merge if the work shows they
 should.

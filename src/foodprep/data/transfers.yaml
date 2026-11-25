@@ -1,0 +1,610 @@
+# Controlled transfers (R4, docs/research/r4-transfers/).
+#
+# Each candidate carries one documented construction (a route in
+# constructions.yaml, R3) over to another ingredient. It is NOT a documented
+# dish: `transfer` lists only what changes, and foodprep.transfers builds the
+# derived route and runs R3's validator on it, next to the base route.
+#
+# Candidate: name, question, base {dish, route}, proposed (the brief's wording),
+#   replaced_by, lidl (availability of what the transfer needs, with catalogue
+#   ids L1-L18), status (documented | inference: is the transfer itself found
+#   in practice?), evidence (R4 ids, docs/research/r4-transfers/sources.md),
+#   evidence_says (works | works_with_conditions | poor | fails | unknown),
+#   verdict (worth_cooking | not_worth_it | rejected), reasons, transfer,
+#   model {explains, cannot, agrees}, kitchen_test {compare, judge, taste,
+#   stop_if}, note.
+# Transfer: swap {old id: new id} renames a material everywhere it is used;
+#   drop removes materials or assemblies (and their role entries); materials
+#   and assemblies add or replace whole specs (same fields as constructions.yaml);
+#   result, final, why, patterns, holds_by, water, gaps replace the route's.
+# A replaced spec cites R4 evidence ids; what is inherited unchanged keeps the
+# R2 recipe ids it was documented with.
+
+candidates:
+
+  # ------------------------------------------------------------------ T1
+  pea_falafel:
+    name: Falafel from Finnish dried peas
+    question: Can an inexpensive local staple provide the same structure?
+    proposed: "Falafel -> Finnish dried peas"
+    base: {dish: falafel, route: raw_soaked}
+    lidl:
+      dried_peas: "split peas seen once, in a campaign (L1); whole dried peas not found on lidl.fi (L1)"
+      onion: "regular, mixed bag (L8)"
+      herbs: "potted herbs in an old offer only"
+    status: documented
+    evidence: [P2, P3, P4, P10, P12, P15, P16]
+    evidence_says: works_with_conditions
+    verdict: worth_cooking
+    reasons:
+      - >
+        Documented, with the same mechanism: soaked raw split or whole dried
+        peas, ground and fried, hold with no egg or flour (German publisher
+        recipes P2-P3, a pulse seller P4, a Swedish product of 82 % yellow peas
+        P16) and as Indian vatana / pattani masala vada (P10, P12).
+      - >
+        The quality risk is real and specific: the only controlled test (P15)
+        found yellow-pea falafel the hardest and driest of ten pulses, with
+        texture liked least (4.6/9); overall liking 5.4 against 6.0 for
+        chickpea (not significant) and 6.6 for lentil. That test used no onion
+        or herbs. Cooks' levers: a coarse grind (P4), moist aromatics,
+        leavening, a long soak.
+      - >
+        Worth one comparison against chickpea falafel, because if it works it
+        turns the cheapest Finnish pulse into a weeknight dish. It is not worth
+        it if the dryness holds with onion and herbs in the paste.
+      - >
+        Lidl availability is unconfirmed (L1): the test starts with a shelf
+        check.
+    transfer:
+      swap: {chickpea: pea}
+      materials:
+        pea:
+          from: dried_peas.dried_seed
+          recipes: [P2, P4, P15]
+          steps:
+            - {op: tremper, evidence: "overnight in three times their volume of water (P4); about 12 h, 1:3 (P15); at least 12 h (P3)"}
+            - {op: broyer, or: [mixer], recipes: [P4, P3], evidence: "pulsed to a coarse pea 'flour' (P4); a fine grind makes them dense (P4); or the fine disc of a meat grinder (P3)"}
+      assemblies:
+        paste:
+          op: melanger
+          recipes: [P2, P4, P15]
+          roles:
+            body: pea
+            flavour: [onion, herbs, garlic, spices]
+            leavening: {use: baking_powder, recipes: [P2, P15], note: "bicarbonate in the paste (P2, P15)"}
+          expects:
+            - member: pea
+              state: {soaked: true, cooked: false}
+              because: "soaked and ground raw, never boiled, in every falafel read (P2, P4, P15)"
+              recipes: [P2, P4, P15]
+          steps:
+            - {op: reposer, optional: true, recipes: [P4], evidence: "chilled at least 15 min (P4)"}
+            - {op: faconner, evidence: "pressed into shape rather than rolled (P2)"}
+            - {op: frire, recipes: [P4, P15], evidence: "about 170-180 C, small batches, or they may fall apart (P4); 2 min at 180 C (P15)"}
+      final: {state: {cooked: true, crisp: true}, recipes: [P4]}
+      gaps:
+        - {kind: model, note: "dryness and hardness (P15) are not computed: water_uptake is recorded as medium against chickpea's high, but no operation reads it for a fried paste"}
+        - {kind: ingredient, note: "dried peas are only occasionally at Lidl FI (L1)"}
+    model:
+      explains:
+        - >
+          Why it holds without a binder: the soaked raw pea is `sets_on_heat`,
+          so frying a soft paste is applicable (R2 H4), exactly as for
+          chickpea; why it must not be boiled first (the claim
+          `cooked: false` holds).
+      cannot:
+        - >
+          It cannot derive `sets_on_heat` for peas: the property is stated
+          from the evidence (P2, P4, P15), so the model's agreement here is not
+          independent support.
+        - >
+          It cannot predict the documented weakness. Lower water uptake (P15)
+          is recorded, but the dryness and hardness it causes are not computed;
+          grind coarseness and the moisture added by onion are not properties.
+      agrees: "yes: it holds, as documented; the quality difference is outside the model"
+    kitchen_test:
+      compare: >
+        One batch of split-pea falafel and one of chickpea falafel, same day,
+        same onion, parsley, garlic, cumin and bicarbonate, both soaked 12-16 h
+        and pulsed coarse; same oil at 175 C. If dried chickpeas are not at
+        Lidl either, a pea batch soaked 12 h against one soaked 24 h.
+      judge: >
+        Shaping: does the pea paste press into balls without falling apart in
+        the oil? Cut one open: cooked through, interior moist or crumbly-dry?
+        Crust colour and crunch after 5 minutes.
+      taste: >
+        Blind, warm, with yogurt or tahini sauce: which is more pleasant to eat;
+        any raw-pea or pea-soup taste; is the pea version dry in the mouth?
+      stop_if: >
+        The pea falafel is clearly drier and harder than the chickpea batch
+        with aromatics in it (P15 confirmed in a home kitchen): record it and
+        stop.
+
+  # ------------------------------------------------------------------ T2
+  kale_rolls:
+    name: Cabbage rolls with Lidl kale leaves
+    question: Can another leafy vegetable serve as a wrapper?
+    proposed: "Cabbage rolls -> kale leaves"
+    base: {dish: kaalikaaryleet, route: trimmed_rib}
+    lidl:
+      kale: "curly only, 100-200 g bags, offers Aug-Oct; no bunch, no flat kale (L2, L18)"
+      rice: "long-grain and porridge rice (snippets, `lidl-pages.md`)"
+    replaced_by: napa_cabbage_rolls
+    status: inference
+    evidence: [K1, K6, K11, K12, K13, K16, K17]
+    evidence_says: unknown
+    verdict: not_worth_it
+    reasons:
+      - >
+        Kale as a wrapper is documented, but only with large flat-leaved types:
+        Turkish karalahana sarması (K1, K6), Brazilian charuto de couve,
+        collard and lacinato rolls (K11, K16). No readable page wraps single
+        curly-kale leaves; a test kitchen chose lacinato because curly kale is
+        firmer with tougher stems (K16), and a recipe asks for non-curly kale
+        (K17).
+      - >
+        Lidl FI sells only curly kale in small bags, and only in August to
+        October (L2). Making rolls from it means stacking several small frilled
+        leaves per roll (K13), which is more work than the cabbage it replaces
+        for no documented gain.
+      - >
+        Not rejected outright (nothing shows it fails), but not worth a
+        kitchen test while white cabbage is the cheaper, documented wrapper.
+        See napa_cabbage_rolls for the same-kind replacement.
+    transfer:
+      swap: {cabbage: kale}
+      materials:
+        kale:
+          from: kale.leaves
+          recipes: [K1, K6, K16]
+          steps:
+            - {op: blanchir, evidence: "3-4 min (K1); 5 min (K6); 30 s-1 min for lacinato (K16)"}
+            - {op: equeuter, keep: blades, discard: [ribs], evidence: "thick veins cut out (K1); halved lengthwise to remove the rib (K6)"}
+      assemblies:
+        rolls:
+          op: envelopper
+          recipes: [K1, K12, K16]
+          roles: {wrapper: kale, filling: filling}
+          expects:
+            - member: kale
+              state: {flexible: true}
+              because: "blanched until pliable (K1, K16)"
+              recipes: [K1, K16]
+          steps:
+            - {op: cuire_four, or: [braiser], recipes: [K12, K1], evidence: "covered in the oven about 90 min (K12); or simmered under a plate (K1)"}
+      gaps:
+        - {kind: model, note: "stacking several small leaves into one wrapper (K13) cannot be expressed: a wrapper is one material"}
+        - {kind: evidence, note: "no readable source uses curly kale as single wrappers; `piece: medium` for bagged curly kale is this round's inference"}
+        - {kind: scope, note: "minced meat"}
+    model:
+      explains:
+        - >
+          It names the requirement that decides the question: a wrapper must
+          bend (blanching makes kale flexible, as for cabbage) and be large
+          enough to close around the filling.
+      cannot:
+        - >
+          Its verdict on curly kale follows from one value this round set by
+          reading the evidence (`piece: medium`): with `large` (flat kale) the
+          same route passes. So the model restates the evidence; it does not
+          test it.
+        - >
+          Frilled edges, leaf stiffness after blanching, and several leaves
+          overlapped as one wrapper are not expressible.
+      agrees: "not comparable: the evidence on curly kale is indirect"
+    note: "Out of season at Lidl in November (L2)."
+
+  napa_cabbage_rolls:
+    name: Cabbage rolls with napa cabbage leaves (replaces kale_rolls)
+    question: Can another leafy vegetable serve as a wrapper?
+    proposed: "replacement for kale_rolls: a leafy wrapper of the same kind that fits a Finnish shop better"
+    base: {dish: kaalikaaryleet, route: trimmed_rib}
+    lidl:
+      napa_cabbage: "not confirmed: no product page; a Lidl storage guide and a Lidl recipe name kiinankaali (L24, L25)"
+      rice: "long-grain and porridge rice (snippets, `lidl-pages.md`)"
+    status: documented
+    evidence: [N1, N2, N3, N6, N9, N10, N12]
+    evidence_says: works_with_conditions
+    verdict: worth_cooking
+    reasons:
+      - >
+        Why replace kale: the Lidl kale is curly, small-leaved and seasonal
+        (kale_rolls). Napa cabbage is a year-round Finnish supermarket
+        vegetable whose leaves come off the head raw, whole and large.
+      - >
+        Documented widely, though not in Finland or Sweden: Japanese ロール白菜
+        (N1: 4.5/5 from 123 ratings; reviewers found it easier to roll than
+        cabbage, one prefers it), Chinakohlrouladen (N6), Russian golubtsy in
+        Peking cabbage with mince and rice baked in the oven, "otherwise
+        identical" to the white-cabbage dish (N10).
+      - >
+        Two conditions from the evidence: shave or cut the thick rib, or it
+        stays stringy and hard to bite (N2, N3); bake in liquid and covered
+        for part of the time, as every baked version does (N6, N9, N10).
+        Nobody bakes them the Finnish dry way with syrup; that variant is
+        untested.
+      - >
+        Less work than white cabbage: no whole-head boil, 1-3 min blanch or a
+        few minutes in the microwave (N1, N6, N10).
+    transfer:
+      swap: {cabbage: napa}
+      materials:
+        napa:
+          from: napa_cabbage.head
+          recipes: [N1, N6, N10]
+          steps:
+            - {op: detacher_feuilles, keep: leaves, discard: [heart], evidence: "outer leaves peeled off raw (N6: 12 outer leaves)"}
+            - {op: blanchir, evidence: "1-2 min in salted water (N6); or microwave 3-5 min (N1, N10)"}
+            - {op: equeuter, keep: blades, evidence: "thick rib shaved off (N3) or cut out (N10)"}
+        rib:
+          from: {material: napa, step: equeuter, output: ribs}
+          recipes: [N3]
+          steps:
+            - {op: hacher, evidence: "the shaved core minced into the filling (N3)"}
+      assemblies:
+        filling:
+          op: melanger
+          recipes: [N10, N6]
+          roles:
+            body: rice
+            coagulant: {use: eggs, recipes: [N10]}
+            flavour: [rib, {use: minced_meat, prep: "raw (N10) or browned (N6)"}, spices]
+          note: "mince with half-cooked round rice and egg (N10); browned mince with rice cooked in broth (N6)"
+        rolls:
+          op: envelopper
+          recipes: [N10, N6]
+          roles: {wrapper: napa, filling: filling}
+          expects:
+            - member: napa
+              state: {flexible: true, piece: large}
+              because: "blanched or microwaved leaves wrap without tearing (N10)"
+              recipes: [N10]
+          steps:
+            - {op: cuire_four, or: [mijoter], recipes: [N10, N1], evidence: "packed tightly in sauce with 200 ml water, 200 C 40-45 min (N10); or simmered covered 30 min in consommé (N1)"}
+      gaps:
+        - {kind: model, note: "rib toughness after cooking (N2) and leaves going mushy (N12) are matters of time, not computed"}
+        - {kind: evidence, note: "no source bakes napa rolls the Finnish way (syrup, uncovered)"}
+        - {kind: scope, note: "minced meat"}
+    model:
+      explains:
+        - >
+          Why it needs no whole-head boil: the head is loose, so its leaves
+          come off raw (`detacher_feuilles` needs a pliable head; cabbage must
+          be blanched first, napa need not).
+        - >
+          The shaved rib returning to the filling is derived as
+          recombination (napa -> equeuter [ribs] -> rib -> filling), as N3 does.
+      cannot:
+        - >
+          That an unshaved rib stays stringy (N2): `equeuter` is applicable
+          but the model cannot say it is necessary. Nor that the thin leaf may
+          dry out uncovered.
+      agrees: "yes"
+    kitchen_test:
+      compare: >
+        One dish of kaalikääryleet with white cabbage (the base) and one with
+        napa leaves, same rice-and-mince filling, ribs shaved on the napa
+        leaves; both packed tightly with a little water, covered for the first
+        half of the bake, syrup over at the end.
+      judge: >
+        Prep time for the leaves; do the napa rolls hold when lifted; are the
+        edges dried or scorched; can you cut through the leaf with a fork?
+      taste: >
+        Is the napa wrapper sweet and tender or watery and limp next to the
+        cabbage? Which would you make on a weeknight?
+      stop_if: "the napa leaves turn to mush or the edges burn in the Finnish bake even when covered"
+
+  # ------------------------------------------------------------------ T3
+  rutabaga_gratin:
+    name: Potato and rutabaga gratin
+    question: Can another root come in without losing cohesion?
+    proposed: "Potato gratin -> potato and rutabaga"
+    base: {dish: gratin_dauphinois, route: raw_long_bake}
+    lidl:
+      rutabaga: "Finnish, loose, offers Sept-Dec: in season now (L5)"
+      potato: "regular, floury and all-purpose 2 kg (L6)"
+      cream_milk_butter: "regular, Pohjolan Meijeri (L7)"
+    status: documented
+    evidence: [G1, G2, G7, G8, G10, G11, G20, G21, G22]
+    evidence_says: works_with_conditions
+    verdict: worth_cooking
+    reasons:
+      - >
+        Documented in the UK and Ireland (swede dauphinoise; a 1:1
+        swede-potato gratin by Rory O'Connell, G11), Germany and Switzerland
+        (Kartoffel-Steckrüben-Gratin, G2) and North America (G7, G22). Not a
+        Finnish dish (Finland mashes lanttu into lanttulaatikko), so new to
+        the Finnish table, not new to cooking.
+      - >
+        One documented failure mode, and its fix: thin raw rutabaga stayed
+        crunchy (G20, G21); recipes blanch the rutabaga only, 3-5 min (G1,
+        G10, G11, G22), or simmer it in the cream (G5, G9), or bake raw
+        slices covered for about 90 min (G7, G8).
+      - >
+        Cohesion comes from the potato: recipes keep potato at least half of
+        the roots or add a little flour (G7, G22); no page reports a watery
+        result. Flavour: mild to slightly bitter or pungent, balanced by cream
+        and often by mustard or apple (G7, G10, G22).
+      - >
+        Cheap, Finnish and in season at Lidl now (L5, L6, L7).
+    transfer:
+      materials:
+        rutabaga:
+          from: rutabaga.root
+          recipes: [G1, G10, G11, G22]
+          steps:
+            - {op: eplucher, discard: [peel]}
+            - {op: emincer, evidence: "2-3 mm (G7, G22); 4 mm against potato's 3 mm, blanched longer (G11)"}
+            - {op: blanchir, evidence: "rutabaga only, 3-5 min (G1, G10, G11, G22); the potato goes in raw or gets 1 min (G11)"}
+      assemblies:
+        gratin:
+          op: superposer
+          recipes: [M15a, G7, G11, G22]
+          roles: {layer: [potato, rutabaga], binding: [cream, milk, garlic, butter]}
+          evidence: "1:1 (G11) to potato-led about 3:2 (G2, G22); potato top and bottom (G7); 2 tsp to 3 tbsp flour in some (G7, G22)"
+          expects:
+            - member: potato
+              state: {starch: ">=high"}
+              because: "the potato's starch thickens the dairy that holds the layers; rutabaga's does not, so recipes keep potato at least half or add flour (G7, G22)"
+              recipes: [G7, G22]
+          steps:
+            - {op: cuire_four, recipes: [G11, G7], evidence: "covered then uncovered; rest 25 min before cutting (G7)"}
+      why: >
+        Potato slices layered with blanched rutabaga slices in cream and milk.
+        The potato's starch still thickens the dairy that holds the layers;
+        the rutabaga brings sweetness and a little bite, but it softens more
+        slowly than potato, so it is blanched first.
+      final: {state: {cooked: true, layered: true}, recipes: [G11]}
+      gaps:
+        - {kind: model, note: "the binding phase thickening around the layers is recorded, not computed (as in the base route)"}
+        - {kind: model, note: "the covered 90-minute bake that also softens raw rutabaga (G7, G8) is a matter of time, which the model does not have"}
+    model:
+      explains:
+        - >
+          Where cohesion comes from: the claim that the potato layer supplies
+          starch holds (potato `starch: high`, rutabaga `low`).
+        - >
+          After amendment A2: why the rutabaga is blanched. A layer that
+          `cooks_slowly` must be blanched or cooked before the bake; the
+          control `rutabaga_gratin_raw` (raw thin rutabaga, G20, G21) now fails
+          on that requirement, as it failed in the kitchen.
+      cannot:
+        - >
+          It does not compute the dairy thickening or the rutabaga's softening
+          in the oven; the requirement is a single-member check at the join,
+          not a simulation. The long covered bake (G7, G8) cannot be expressed.
+      agrees: "yes (after A2)"
+    kitchen_test:
+      compare: >
+        Two small dishes, same oven: potato-rutabaga 1:1 with the rutabaga
+        blanched 4 min, against all-potato gratin (the base); same 2-3 mm
+        slices, same cream and milk, 160-170 C until a knife meets no
+        resistance. Optional third: the same mix with raw rutabaga, to see the
+        failure the model now predicts.
+      judge: >
+        Knife test on both roots at the same time point; does it hold a clean
+        square after a 20-25 min rest, or slump and weep?
+      taste: >
+        Is the rutabaga pleasant (sweet, nutty) or sharp/sulphurous next to the
+        cream? Would you make it instead of plain potato gratin? Try a little
+        mustard in the cream if it tastes flat.
+      stop_if: "the rutabaga is still firm when the potato is done, or the flavour is unpleasant even with mustard"
+
+  rutabaga_gratin_raw:
+    name: Potato and rutabaga gratin, rutabaga raw (control)
+    question: What happens if the rutabaga goes into the gratin raw, like the potato?
+    proposed: "control for rutabaga_gratin: its documented failure mode"
+    base: {dish: gratin_dauphinois, route: raw_long_bake}
+    lidl:
+      rutabaga: "as rutabaga_gratin (L5)"
+    status: documented
+    evidence: [G20, G21]
+    evidence_says: fails
+    verdict: rejected
+    reasons:
+      - >
+        Two independent reports: thin raw swede stayed crunchy after 45 min
+        (G20) and after more than an hour with stock (G21). Cooks blanch it
+        instead (rutabaga_gratin).
+    transfer:
+      materials:
+        rutabaga:
+          from: rutabaga.root
+          recipes: [G20, G21]
+          steps:
+            - {op: eplucher, discard: [peel]}
+            - {op: emincer, evidence: "3 mm (G20); 1/8 inch or less (G21)"}
+      assemblies:
+        gratin:
+          op: superposer
+          recipes: [G20, G21]
+          roles: {layer: [potato, rutabaga], binding: [cream, milk, garlic, butter]}
+          steps:
+            - {op: cuire_four, evidence: "45 min (G20); over an hour (G21)"}
+      final: {state: {cooked: true, layered: true}, recipes: [G20]}
+    model:
+      explains:
+        - "After A2, the layer requirement fails for raw rutabaga, as the reports did."
+      cannot:
+        - "Before A2 the model accepted this route: an assembly took its first layer's state, and nothing said a dense root softens slowly."
+      agrees: "yes (after A2); no before"
+    note: "Recorded as the control that exposed the limitation (limitations.md); not a candidate to cook."
+
+  # ------------------------------------------------------------------ T4
+  broccoli_stem_patties:
+    name: Broccoli-stem patties (with carrot)
+    question: Can an overlooked ingredient part become useful?
+    proposed: "Carrot patties -> broccoli stems"
+    base: {dish: carrot_patties, route: crumbs}
+    lidl:
+      broccoli: "frozen florets regular (no stems); a fresh head was not found on lidl.fi (L4)"
+      carrot: "regular, 1 kg (L15)"
+      eggs: "regular (L10)"
+      breadcrumbs: "not found on lidl.fi (pantry staple)"
+    status: documented
+    evidence: [B1, B4, B9, B13, B20, B21]
+    evidence_says: works_with_conditions
+    verdict: worth_cooking
+    reasons:
+      - >
+        Documented, narrowly and recently: stem-only fritters grated raw
+        (B1), stem with carrot, egg and flour (B20), stem and potato latkes
+        (B21), boiled stems blended with egg (B4). Zero-waste pieces from
+        Australia, Brazil, the US and Ukraine; no Nordic version found.
+      - >
+        No failure report, but the quality evidence is the publishers' own
+        claims (crisp outside, stem not noticeable). The stem is mild,
+        slightly sweet, like kohlrabi or asparagus (B9, B13); it is firm and
+        not watery, like carrot, so the carrot-patty mechanism fits.
+      - >
+        Useful only as a use for a part already bought: one stem is about
+        100-150 g, so it joins carrot in the patty rather than replacing it.
+        It needs a fresh head, which lidl.fi does not show (L4); frozen
+        broccoli has no stems.
+    transfer:
+      materials:
+        stem:
+          from: broccoli.stems
+          recipes: [B1, B13, B21]
+          steps:
+            - {op: eplucher, discard: [peel], evidence: "peeled: the skin is fibrous (B13, B21)"}
+            - {op: raper, evidence: "coarsely grated raw (B1, B20); not squeezed except in B21"}
+      assemblies:
+        mass:
+          op: melanger
+          recipes: [E18a, B1, B20]
+          roles:
+            body: [stem, {use: carrot, optional: true, recipes: [B20], note: "stem and carrot (B20); carrot makes up the weight one stem lacks"}]
+            coagulant: {use: eggs, recipes: [B20, E18a]}
+            dry_phase: {use: breadcrumbs, recipes: [E18a], note: "or flour (B1, B20)"}
+            flavour: [hard_cheese, spices]
+          steps:
+            - {op: faconner, evidence: "thin patties cook through (B1)"}
+      gaps:
+        - {kind: model, note: "how much stem one head gives is not modelled (amounts are evidence, not properties)"}
+        - {kind: evidence, note: "no independent quality report; no comparison of squeezed and unsqueezed stem"}
+    model:
+      explains:
+        - >
+          Why no squeezing: the peeled stem is firm (`firmness: high`) and
+          only `water: medium`, so it grates like carrot and needs no water
+          route (R2 C4: carrot is not squeezed either).
+        - >
+          Why peeling comes first: grating is conditional on a tough outer
+          layer ("peel first: the tough layer shreds into strings"), and the
+          peel is a fraction cooks discard.
+      cannot:
+        - >
+          Yield per head, and whether a thin patty cooks the grated stem
+          enough for sensitive stomachs (B15) are outside it.
+      agrees: "yes"
+    kitchen_test:
+      compare: >
+        Carrot patties (the base, E18a) against patties of half peeled grated
+        broccoli stem, half carrot; same egg, crumbs and cheese, same pan.
+      judge: >
+        Do they hold when turned? Is the stem cooked through in a 1 cm patty,
+        or stringy?
+      taste: >
+        Is the stem noticeable, and is it pleasant (sweet, kohlrabi-like) or
+        cabbagey? Would you save stems for this?
+      stop_if: "the stem stays stringy or raw-tasting in a patty that is otherwise done"
+
+  # ------------------------------------------------------------------ T5
+  onion_vessel:
+    name: Hollowed onion as the vessel (in place of courgette)
+    question: Can the construction transfer to a different vegetable?
+    proposed: "Stuffed courgette -> hollowed onion"
+    base: {dish: zucchine_ripiene, route: cooked_flesh}
+    lidl:
+      onion: "regular as a mixed 1 kg bag (L8); large onions not found"
+      eggs: "regular (L10)"
+    status: documented
+    evidence: [O1, O2, O3, O4, O5, O7, O10, O11, O12]
+    evidence_says: works_with_conditions
+    verdict: worth_cooking
+    reasons:
+      - >
+        Not new: R2 already met it (M16a, M17b), and the City of Nice's
+        farcis recipe (O5) and Ligurian cipolle ripiene (O1-O3) treat the
+        onion exactly like the courgette: halve, blanch about 10 min, keep two
+        outer layers, chop the rest into the filling, bake 180 C 30 min.
+      - >
+        Liked where rated (4.96/5 from 25 ratings for hollowed cups, O11; about
+        4/5 from 16 at ATK, O10). The failures are handling: overboiled layers
+        tear or slip (O10, O12), and a minority call it laborious (O7, O12).
+      - >
+        Practical at Lidl as halves of ordinary onions, cooked in the same tray
+        as courgettes with one filling (O3, O5): it adds a sweet vessel for
+        almost no extra work.
+    transfer:
+      swap: {courgette: vessel}
+      drop: [onion]
+      materials:
+        vessel:
+          from: onion.bulb
+          recipes: [O5, O2]
+          steps:
+            - {op: eplucher, discard: [peel]}
+            - {op: blanchir, evidence: "10 min in salted water (O5); 5 min (O2)"}
+            - {op: fendre, evidence: "halved across the equator (O5)"}
+            - {op: creuser, keep: shell, evidence: "outer layers kept two by two as shells (O5)"}
+        flesh:
+          from: {material: vessel, step: creuser, output: flesh}
+          recipes: [O5, O4]
+          steps:
+            - {op: hacher, evidence: "the rest of the onion chopped finely into the farce (O5, O4)"}
+            - {op: suer, optional: true, recipes: [O9], evidence: "fried before mixing (O9)"}
+      assemblies:
+        filling:
+          op: melanger
+          recipes: [O5, O2]
+          roles:
+            body: flesh
+            coagulant: eggs
+            dry_phase: {use: breadcrumbs, recipes: [O5], note: "milk-soaked bread in O2 and O5"}
+            flavour: [parmesan, garlic, herbs]
+        stuffed:
+          op: farcir
+          recipes: [O5, O1]
+          roles: {container: vessel, filling: filling}
+          expects:
+            - member: vessel
+              state: {hollow: true, piece: large}
+              because: "blanched halves with two outer layers are the vessel (O5)"
+              recipes: [O5]
+          steps:
+            - {op: cuire_four, evidence: "breadcrumbs and oil on top; 180 C 30 min (O5); 200 C about 20 min (O1)"}
+      why: >
+        The onion is peeled, blanched, halved and hollowed to two outer layers;
+        the inner layers are chopped into an egg, cheese and bread filling and
+        go back into the shells (recombination), which hold it through the
+        bake, as the courgette does.
+      final: {state: {cooked: true, hollow: true, filled: true}, recipes: [O5]}
+      gaps:
+        - {kind: model, note: "one filling for onion and courgette vessels in one tray (O3, O5) needs several containers per assembly (R3's gap)"}
+        - {kind: model, note: "the onion's layers are not modelled: `creuser` stands for lifting out inner layers; slipping or tearing layers (O10, O12) is not expressible"}
+    model:
+      explains:
+        - >
+          The same requirements as the courgette, met the same way: the
+          blanched half is large enough to stand although onion pieces do not
+          hold their shape cooked; the scooped inside returns to the filling
+          (recombination is derived, onion -> creuser [flesh] -> filling).
+      cannot:
+        - >
+          That an onion is layers rather than flesh, and why overboiling makes
+          the layers slip apart (O10, O12); timing is not in the model.
+      agrees: "yes"
+    kitchen_test:
+      compare: >
+        One tray: two onion halves and two courgette halves with the same
+        filling, as in Nice (O5); onion blanched 8-10 min.
+      judge: >
+        Do the onion shells stay in one piece when lifted out of the water and
+        out of the tray? Is the onion tender at 30 min?
+      taste: >
+        Is the onion vessel sweet and soft, or sharp and chewy? Which vessel
+        would you eat again?
+      stop_if: "the onion layers slip apart in handling, or are still crunchy when the filling is done"
