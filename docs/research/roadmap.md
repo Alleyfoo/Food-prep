@@ -28,7 +28,8 @@ The method, unchanged since R1:
 | 6 | **Representing complete constructions.** Can the model describe a real dish from raw parts to its finished structure, and show why it works? | answered, implemented (R3, PR #7) | 35 dishes; structure yes, what happens inside an assembly partly |
 | 7 | **Discovering useful unfamiliar preparations.** Can a documented construction be carried over to another Lidl ingredient with a physical reason, and does it work? | answered, R4 (not cooked) | `r4-transfers/`: five transfers worth cooking, one not; the search finds them, the model checks structure, the kitchen judges quality |
 | 8 | **Executing a documented step.** What do you actually need to do for a step to work: conditions, elapsed and active time, how you know it is done or failed, readiness against doneness, through the whole sequence; and what can you do from a state you already have? | answered, R5 (not cooked) | `r5-processing-conditions/`: 25 pairs, 10 whole sequences, 17 intermediate states, from documented practice only |
-| 9 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations, constructions and conditions answer "what can I make with this tonight"? | open, R6 | |
+| 9 | **Helping someone decide what to cook.** Can the Taste Circle, families, operations, constructions and conditions answer "what can I make with this tonight"? | open, R7 (planned as R6 until R6 became the academic round) | `r6-academic-foundations/r7-recommendation.md` |
+| 10 | **Academic foundations.** How do established academic and industrial approaches represent transformations, whole processes, substitutions and alternative routes, and is there something better than R1-R5? | answered, R6 (literature only) | `r6-academic-foundations/`: no replacement found; eight concepts to adopt or extend; the app reads none of R3-R5 yet |
 
 ### What each finished round established
 
@@ -138,7 +139,71 @@ cooked.
   tests (`r5-processing-conditions/kitchen-tests.md`) now carry concrete
   checks for every step.
 
-### R6: integrate into the interface
+### R6: academic foundations of culinary process modelling and recipe adaptation
+
+Added by the user after R5, in place of the interface round, which moved to
+R7. It is a comparative literature round with no implementation. It looked
+at seven areas:
+- food process ontologies;
+- FOON and robotics;
+- case-based workflow adaptation;
+- substitution;
+- recipe flow graphs;
+- industrial batch processes;
+- visualisation.
+
+It compared each against R1-R5 on nine fixed cases (K1-K9), chosen before
+reading.
+
+**Status after R6 (2026-11-25, `r6-academic-foundations/`).** Done, nothing
+cooked.
+- **No approach read replaces any layer of Food-prep.** The literature uses
+  R1's unit (a step with typed input and output materials).
+- Food-prep is ahead on several points:
+  - structural roles;
+  - three-valued applicability;
+  - readiness against doneness;
+  - failure checks;
+  - keeping documented routes apart from combinations of their steps.
+- **Nobody models what a member undergoes after assembly.** R5's
+  documented endpoints go furthest of anything found.
+- **Concepts to adopt or extend** (data, in a later round, not R7):
+  - ISA-88's general, master and control recipe levels (the kitchen test
+    is the control record);
+  - substitution as a violation with documented repairs (Y402);
+  - step correspondence between routes, with a documented
+    `compensated_by` (closes K8's false negative without a simulator);
+  - storage class and maximum wait for intermediates;
+  - history only where a source ties a rule to it;
+  - objective against mechanism;
+  - naming the member a check observes.
+- **Every approach that composes steps from several sources** (FOON
+  retrieval, Trier streams and generalisation, alignment aggregation)
+  would produce unverified combinations unmarked. Food-prep's rule stands.
+- **The app reads none of R3-R5.** R7's first job is to put those records
+  where the cook looks.
+- A consolidated register of 54 open questions:
+  - 12 kitchen tests;
+  - 5 supermarket checks;
+  - 8 food-safety questions;
+  - 22 academic or representation questions;
+  - 7 interface evaluations.
+
+### R7: integrate into the interface
+
+Planned as R6 and moved to R7 when R6 became the academic round. The text
+below is kept as it was written before that change. "R6" in it means this
+interface round. R6's recommendation for it is
+`r6-academic-foundations/r7-recommendation.md`:
+- outcome first, per ingredient;
+- a dish as a component-branch overview with R5's checks;
+- routes as aligned columns, with no column for a combination;
+- a swap as a changed branch, refusals included;
+- an entry from a held state (`from_state`);
+- a form that records kitchen tests;
+- the mindmap demoted to exploration;
+- no schema change, composed route, similarity substitute, schedule or
+  score.
 
 Make it useful in the app: the Taste Circle, ingredient families, operations
 and constructions working together, so the app can answer:
@@ -164,5 +229,5 @@ prepare for tomorrow" primitive (remaining steps, kinds of work, how long the
 state keeps and on whose authority). Conflicts appear as choices, "not found"
 as itself.
 
-The split into R3-R6 is a proposal; rounds may merge if the work shows they
+The split into R3-R7 is a proposal (it was R3-R6 before R6 became the academic round); rounds may merge if the work shows they
 should.
