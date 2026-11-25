@@ -165,6 +165,24 @@ def cmd_transfer(args: argparse.Namespace) -> int:
     return 1 if out.startswith("No ") else 0
 
 
+def cmd_conditions(args: argparse.Namespace) -> int:
+    """Documented processing conditions (R5): what to do for a step to work,
+    for how long (elapsed and active), how you know it is done or failed."""
+    from foodprep import conditions
+    out = conditions.render(args.query)
+    print(out.rstrip("\n"))
+    return 1 if out.startswith("No ") else 0
+
+
+def cmd_from(args: argparse.Namespace) -> int:
+    """From a state you already have (a part plus R1 operations or state flags):
+    the documented routes that pass through it and the steps that remain (R5)."""
+    from foodprep import conditions
+    out = conditions.render_from(args.part, args.state)
+    print(out.rstrip("\n"))
+    return 1 if out.startswith("No ") else 0
+
+
 def cmd_hypotheses(args: argparse.Namespace) -> int:
     """Generate structured Scout hypotheses for a transformed state."""
     conn = connect(args.db)
@@ -426,6 +444,20 @@ def build_parser() -> argparse.ArgumentParser:
                          help="A documented construction carried to another ingredient (R4)")
     ptr.add_argument("candidate", nargs="?", help="candidate id; omit to list them")
     ptr.set_defaults(func=cmd_transfer)
+
+    pcond = sub.add_parser("conditions",
+                           help="Documented conditions, time and endpoints of a step (R5)")
+    pcond.add_argument("query", nargs="?",
+                       help="pair id, ingredient[.part], dish[/route], transfer:<id> or a "
+                            "step address; omit to list the pairs")
+    pcond.set_defaults(func=cmd_conditions)
+
+    pfrom = sub.add_parser("from",
+                           help="From a state you have: documented routes and remaining steps (R5)")
+    pfrom.add_argument("part", help="ingredient.part, e.g. dried_peas.dried_seed")
+    pfrom.add_argument("state", nargs="*",
+                       help="R1 operations done so far (tremper, blanchir ...) or flags (soaked)")
+    pfrom.set_defaults(func=cmd_from)
 
     phyp = sub.add_parser("hypotheses", help="Generate Scout hypotheses for a state")
     phyp.add_argument("component", help="e.g. roasted_broccoli_component")

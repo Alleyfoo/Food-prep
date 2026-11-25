@@ -74,3 +74,49 @@ croquetas (béchamel); tempura and kakiage frying (batter, not in an R4
 test); latkes and draniki frying (covered by pair 23's failure kinds, can be
 added later); rice for porkkanalaatikko (porridge, the same part as 20 in a
 different role, kept out to stay within 25).
+
+## Scope change (2026-11-25, from the user, after the pairs above were fixed)
+
+The user changed the unit of R5 from the pair to the **complete processing
+sequence**: each component's chain from raw part to plate, including what it
+goes through after it is joined. In the user's words, the 3-5 min blanch "isn't
+intended to make the rutabaga edible. It's intended to make it ready for the
+next operation", and a record that misses the bake is "half a cooking process".
+Four requirements:
+
+1. A condition belongs to a step within the whole route. The pairs above stay,
+   as defaults that hang off route steps.
+2. Every step's endpoint says whether it is **readiness** (ready for the next
+   operation) or **doneness** (ready to eat), with the source that says so.
+3. Every member of an assembly gets its own endpoint for the heat after the
+   join (the gratin's layers, a roll's leaf and filling, a vessel and its
+   filling, a patty's parts). This is R3's gap (an assembly takes its carrier's
+   state), recorded as data; nothing is computed and `constructions.py` is not
+   touched.
+4. Documented dependencies between stages (this stage exists because of that
+   later one), and documented failures when a stage is skipped or overdone.
+   Sources that split the work differently are **alternative sequences**, kept
+   apart.
+
+### Sequences selected
+
+Chosen by the same rules as the pairs: every R4 worth-cooking transfer, whole,
+and the base route its kitchen test compares it with, whole.
+
+| Sequence | Steps | Why |
+| --- | --- | --- |
+| `transfer:rutabaga_gratin` | 6 | R4 worth cooking; the user's example |
+| `gratin_dauphinois/raw_long_bake` | 3 | its kitchen-test base; `gratin_dauphinois/simmered_then_baked` and `transfer:rutabaga_gratin_raw` are recorded as alternative sequences |
+| `transfer:onion_vessel` | 7 | R4 worth cooking |
+| `zucchine_ripiene/blanched_flesh` | 5 | the courgette vessel in the onion test |
+| `transfer:napa_cabbage_rolls` | 6 | R4 worth cooking |
+| `kaalikaaryleet/trimmed_rib` | 5 | its kitchen-test base, Finnish |
+| `transfer:pea_falafel` | 7 | R4 worth cooking |
+| `falafel/raw_soaked` | 7 | its kitchen-test base |
+| `transfer:broccoli_stem_patties` | 5 | R4 worth cooking |
+| `carrot_patties/crumbs` | 3 | its kitchen-test base |
+
+Ten sequences, 54 route steps. Pairs 3, 4, 9, 21, 24 and 25 (urad dal,
+black-eyed beans, moi moi, salted courgette, rösti potato) belong to R3 routes
+outside these sequences; they stay attached to their steps as pair data, and
+their routes are not claimed to be documented end to end.
